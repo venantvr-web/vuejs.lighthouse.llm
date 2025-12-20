@@ -13,9 +13,12 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 {% if perceivable %}
 **Conformite:** {{ perceivable.score | score }}
-
+{% if perceivable.issues %}
 **Problemes identifies:**
-{{ perceivable.issues | list }}
+{% for issue in perceivable.issues %}{% if issue.title or issue %}
+- {% if issue.title %}{{ issue.title }}{% else %}{{ issue }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
 {% endif %}
 
 **Criteres concernes:**
@@ -28,9 +31,12 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 {% if operable %}
 **Conformite:** {{ operable.score | score }}
-
+{% if operable.issues %}
 **Problemes identifies:**
-{{ operable.issues | list }}
+{% for issue in operable.issues %}{% if issue.title or issue %}
+- {% if issue.title %}{{ issue.title }}{% else %}{{ issue }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
 {% endif %}
 
 **Criteres concernes:**
@@ -43,9 +49,12 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 {% if understandable %}
 **Conformite:** {{ understandable.score | score }}
-
+{% if understandable.issues %}
 **Problemes identifies:**
-{{ understandable.issues | list }}
+{% for issue in understandable.issues %}{% if issue.title or issue %}
+- {% if issue.title %}{{ issue.title }}{% else %}{{ issue }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
 {% endif %}
 
 **Criteres concernes:**
@@ -57,9 +66,12 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 {% if robust %}
 **Conformite:** {{ robust.score | score }}
-
+{% if robust.issues %}
 **Problemes identifies:**
-{{ robust.issues | list }}
+{% for issue in robust.issues %}{% if issue.title or issue %}
+- {% if issue.title %}{{ issue.title }}{% else %}{{ issue }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
 {% endif %}
 
 **Criteres concernes:**
@@ -67,12 +79,12 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 ## Audits Echoues Detailles
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 ### {{ loop.index }}. {{ audit.title }}
-**Score:** {{ audit.score | round(2) }}
-{{ audit.description | truncate(300) }}
+{% if audit.score is defined %}**Score:** {{ audit.score | round(2) }}{% endif %}
+{% if audit.description %}{{ audit.description | truncate(300) }}{% endif %}
 
-{% endfor %}
+{% endif %}{% endfor %}
 
 ## Demande
 

@@ -40,16 +40,18 @@ Tu es un Expert SEO Technique avec une specialisation dans les applications Java
 ### 5. Donnees Structurees (Schema.org)
 {% if structured %}
 ✅ **Presentes**
-{{ structured | list }}
+{% for item in structured %}{% if item %}
+- {{ item }}
+{% endif %}{% endfor %}
 {% else %}
 ⚠️ **Absentes:** Impact sur rich snippets Google
 {% endif %}
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
-- **{{ audit.title }}** ({{ audit.score | round(2) }})
-{% endfor %}
+{% for audit in failedAudits %}{% if audit.title %}
+- **{{ audit.title }}**{% if audit.score is defined %} ({{ audit.score | round(2) }}){% endif %}
+{% endif %}{% endfor %}
 
 ## Demande
 

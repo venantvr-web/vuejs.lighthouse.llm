@@ -2,6 +2,11 @@
 # Vue.js + Vite + Tailwind CSS v4
 
 .PHONY: help install dev start stop build preview clean lint test test-coverage test-watch
+.PHONY: lighthouse-install lighthouse-start lighthouse-stop lighthouse-status lighthouse-restart
+.PHONY: start-all stop-all status-all
+
+# Variables
+LIGHTHOUSE_PORT ?= 3001
 
 # Default target
 help:
@@ -18,6 +23,18 @@ help:
 	@echo "  make test       - Run tests"
 	@echo "  make test-coverage - Run tests with coverage"
 	@echo "  make test-watch - Run tests in watch mode"
+	@echo ""
+	@echo "Lighthouse Local Server:"
+	@echo "  make lighthouse-install - Install Lighthouse server dependencies"
+	@echo "  make lighthouse-start   - Start Lighthouse server"
+	@echo "  make lighthouse-stop    - Stop Lighthouse server"
+	@echo "  make lighthouse-status  - Check Lighthouse server status"
+	@echo "  make lighthouse-restart - Restart Lighthouse server"
+	@echo ""
+	@echo "All Services:"
+	@echo "  make start-all  - Start dev server + Lighthouse server"
+	@echo "  make stop-all   - Stop all servers"
+	@echo "  make status-all - Check all servers status"
 	@echo ""
 
 # Install dependencies
@@ -112,3 +129,72 @@ status:
 
 # Restart development server
 restart: stop dev
+
+# ===== Lighthouse Local Server =====
+
+# Install Lighthouse server dependencies
+lighthouse-install:
+	@echo "Installing Lighthouse server dependencies..."
+	cd server && npm install
+	@echo "Lighthouse server dependencies installed."
+
+# Start Lighthouse server
+lighthouse-start:
+	@echo "Starting Lighthouse server on port $(LIGHTHOUSE_PORT)..."
+	@cd server && LIGHTHOUSE_PORT=$(LIGHTHOUSE_PORT) npm start & echo $$! > ../.lighthouse.pid
+	@sleep 2
+	@echo "Lighthouse server started (PID: $$(cat .lighthouse.pid))"
+	@echo "Access: http://localhost:$(LIGHTHOUSE_PORT)"
+	@echo "Health: http://localhost:$(LIGHTHOUSE_PORT)/health"
+
+# Stop Lighthouse server
+lighthouse-stop:
+	@if [ -f .lighthouse.pid ]; then \
+		PID=$$(cat .lighthouse.pid); \
+		if ps -p $$PID > /dev/null 2>&1; then \
+			echo "Stopping Lighthouse server (PID: $$PID)..."; \
+			kill $$PID 2>/dev/null || true; \
+			rm -f .lighthouse.pid; \
+			echo "Lighthouse server stopped."; \
+		else \
+			echo "Lighthouse server not running (stale PID file)."; \
+			rm -f .lighthouse.pid; \
+		fi \
+	else \
+		echo "No Lighthouse server PID file found."; \
+		pkill -f "server/index.js" 2>/dev/null || echo "No server process found."; \
+	fi
+
+# Check Lighthouse server status
+lighthouse-status:
+	@if [ -f .lighthouse.pid ]; then \
+		PID=$$(cat .lighthouse.pid); \
+		if ps -p $$PID > /dev/null 2>&1; then \
+			echo "Lighthouse server is running (PID: $$PID)"; \
+			echo "Checking health..."; \
+			curl -s http://localhost:$(LIGHTHOUSE_PORT)/health || echo "Health check failed"; \
+		else \
+			echo "Lighthouse server is not running (stale PID file)"; \
+		fi \
+	else \
+		echo "Lighthouse server is not running"; \
+	fi
+
+# Restart Lighthouse server
+lighthouse-restart: lighthouse-stop lighthouse-start
+
+# ===== All Services =====
+
+# Start all servers (dev + lighthouse)
+start-all: dev lighthouse-start
+	@echo ""
+	@echo "All services started!"
+	@echo "  Frontend: http://localhost:5173"
+	@echo "  Lighthouse: http://localhost:$(LIGHTHOUSE_PORT)"
+
+# Stop all servers
+stop-all: stop lighthouse-stop
+	@echo "All services stopped."
+
+# Check all servers status
+status-all: status lighthouse-status

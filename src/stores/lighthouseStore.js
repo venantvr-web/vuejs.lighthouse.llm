@@ -7,7 +7,8 @@ import { useLighthouseParser } from '@/composables/useLighthouseParser'
  */
 export const REPORT_SOURCES = {
   FILE: 'file',
-  PAGESPEED: 'pagespeed'
+  PAGESPEED: 'pagespeed',
+  LOCAL: 'local'
 }
 
 /**
@@ -95,6 +96,10 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
     return source.value === REPORT_SOURCES.FILE
   })
 
+  const isFromLocal = computed(() => {
+    return source.value === REPORT_SOURCES.LOCAL
+  })
+
   // Actions
   /**
    * Load a Lighthouse report from file or JSON object
@@ -169,6 +174,21 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
    */
   async function loadFromPageSpeed(json, inputUrl, inputStrategy = 'mobile') {
     source.value = REPORT_SOURCES.PAGESPEED
+    analyzedUrl.value = inputUrl
+    strategy.value = inputStrategy
+    fileName.value = null
+    return loadReport(json)
+  }
+
+  /**
+   * Load a Lighthouse report from local Chromium server
+   * @param {object} json - JSON object from local Lighthouse server
+   * @param {string} inputUrl - URL that was analyzed
+   * @param {string} inputStrategy - Strategy used ('mobile' or 'desktop')
+   * @returns {Promise<boolean>} True if successful
+   */
+  async function loadFromLocal(json, inputUrl, inputStrategy = 'mobile') {
+    source.value = REPORT_SOURCES.LOCAL
     analyzedUrl.value = inputUrl
     strategy.value = inputStrategy
     fileName.value = null
@@ -267,11 +287,13 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
     isLoaded,
     isFromPageSpeed,
     isFromFile,
+    isFromLocal,
 
     // Actions
     loadReport,
     loadFromFile,
     loadFromPageSpeed,
+    loadFromLocal,
     clearReport,
     getFailedAudits,
     getAudit,

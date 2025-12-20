@@ -11,8 +11,10 @@ Tu es un Expert Google Core Web Vitals, specialise dans l'optimisation LCP, CLS 
 **Statut:** {% if lcpStatus == 'good' %}✅ Bon{% elif lcpStatus == 'medium' %}⚠️ A ameliorer{% else %}❌ Faible{% endif %}
 **Cible Google:** < 2.5s
 
-{% if lcpElement %}
-**Element LCP:** {{ lcpElement }}
+{% if lcpElement and (lcpElement.snippet or lcpElement.selector or lcpElement.nodeLabel) %}
+**Element LCP:**
+{% if lcpElement.snippet %}`{{ lcpElement.snippet | truncate(100) }}`{% endif %}
+{% if lcpElement.selector %}Selecteur: `{{ lcpElement.selector }}`{% endif %}
 {% endif %}
 
 ### 2. Cumulative Layout Shift (CLS)
@@ -22,7 +24,9 @@ Tu es un Expert Google Core Web Vitals, specialise dans l'optimisation LCP, CLS 
 
 {% if clsElements %}
 **Elements causant le shift:**
-{{ clsElements | list }}
+{% for element in clsElements %}{% if element.snippet or element.nodeLabel or element.selector %}
+- {% if element.nodeLabel %}**{{ element.nodeLabel }}**{% endif %}{% if element.snippet %} `{{ element.snippet | truncate(80) }}`{% endif %}{% if element.selector and not element.snippet %} `{{ element.selector }}`{% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 ### 3. Interaction to Next Paint (INP) / Total Blocking Time (TBT)

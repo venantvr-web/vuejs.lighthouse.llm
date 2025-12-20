@@ -39,10 +39,10 @@ Tu es un Expert Progressive Web Apps, specialise dans la creation d'applications
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
-   {{ audit.description | truncate(150) }}
-{% endfor %}
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
 
 ## Demande
 

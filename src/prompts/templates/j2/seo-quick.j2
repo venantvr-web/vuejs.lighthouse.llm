@@ -29,7 +29,9 @@ Tu es un Consultant SEO Technique specialise dans l'optimisation des application
 
 {% if headings %}
 ### Hierarchie des Titres
-{{ headings | list }}
+{% for heading in headings %}{% if heading %}
+- {{ heading }}
+{% endif %}{% endfor %}
 {% endif %}
 
 ## Indexabilite
@@ -38,10 +40,10 @@ Tu es un Consultant SEO Technique specialise dans l'optimisation des application
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
-   {{ audit.description | truncate(150) }}
-{% endfor %}
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
 
 ## Demande
 

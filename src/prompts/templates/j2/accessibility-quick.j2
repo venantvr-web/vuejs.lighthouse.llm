@@ -11,25 +11,31 @@ Tu es un Expert Accessibilite Numerique, specialise RGAA (Referentiel General d'
 
 {% if violations %}
 ### Problemes Prioritaires
-{{ violations | prioritize }}
+{% for v in violations %}{% if v.title %}
+- **{{ v.title }}**{% if v.score is defined %} ({{ v.score | round(2) }}){% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 {% if ariaIssues %}
 ### Problemes ARIA
-{{ ariaIssues | list }}
+{% for issue in ariaIssues %}{% if issue.title %}
+- {{ issue.title }}{% if issue.description %}: {{ issue.description | truncate(80) }}{% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 {% if colorContrast %}
 ### Contraste des Couleurs
-{{ colorContrast | list }}
+{% for issue in colorContrast %}{% if issue.title %}
+- {{ issue.title }}{% if issue.description %}: {{ issue.description | truncate(80) }}{% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
-   {{ audit.description | truncate(150) }}
-{% endfor %}
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
 
 ## Demande
 

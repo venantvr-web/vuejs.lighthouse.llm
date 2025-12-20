@@ -25,7 +25,9 @@ Tu es un Expert en Securite Web et Standards Modernes, specialise dans les appli
 
 ### Vulnerabilites
 {% if vulnerabilities %}
-{{ vulnerabilities | list }}
+{% for vuln in vulnerabilities %}{% if vuln.title or vuln.name or vuln %}
+- {% if vuln.title %}{{ vuln.title }}{% elif vuln.name %}{{ vuln.name }}{% else %}{{ vuln }}{% endif %}{% if vuln.severity %} ({{ vuln.severity }}){% endif %}
+{% endif %}{% endfor %}
 {% else %}
 ✅ Aucune vulnerabilite connue detectee
 {% endif %}
@@ -34,17 +36,19 @@ Tu es un Expert en Securite Web et Standards Modernes, specialise dans les appli
 
 ### APIs Depreciees
 {% if deprecations %}
-{{ deprecations | list }}
+{% for dep in deprecations %}{% if dep %}
+- {{ dep }}
+{% endif %}{% endfor %}
 {% else %}
 ✅ Aucune API deprecie utilisee
 {% endif %}
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
-   {{ audit.description | truncate(150) }}
-{% endfor %}
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
 
 ## Demande
 

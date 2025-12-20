@@ -1,0 +1,19 @@
+{
+  "name": "lighthouse-local-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Local Lighthouse analysis server with Chromium",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "lighthouse": "^12.2.1",
+    "chrome-launcher": "^1.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

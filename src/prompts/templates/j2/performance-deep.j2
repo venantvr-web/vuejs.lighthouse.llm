@@ -10,19 +10,19 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vu
 ## Opportunites d'Optimisation
 
 {% if opportunities %}
-{% for opp in opportunities %}
+{% for opp in opportunities %}{% if opp.title %}
 - **{{ opp.title }}**
-  - Impact: {{ opp.numericValue | metric }} economises
-  - Score: {{ opp.score | score }}
-{% endfor %}
+  {% if opp.numericValue %}- Impact: {{ opp.numericValue | metric }} economises{% endif %}
+  {% if opp.score is defined %}- Score: {{ opp.score | score }}{% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 ## Diagnostics
 
 {% if diagnostics %}
-{% for diag in diagnostics %}
-- {{ diag.title }}: {{ diag.displayValue }}
-{% endfor %}
+{% for diag in diagnostics %}{% if diag.title %}
+- {{ diag.title }}{% if diag.displayValue %}: {{ diag.displayValue }}{% endif %}
+{% endif %}{% endfor %}
 {% endif %}
 
 ## Metriques Detaillees
@@ -39,12 +39,12 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vu
 
 ## Audits Echoues
 
-{% for audit in failedAudits %}
+{% for audit in failedAudits %}{% if audit.title %}
 ### {{ loop.index }}. {{ audit.title }}
-**Score:** {{ audit.score | round(2) }}
-{{ audit.description | truncate(250) }}
+{% if audit.score is defined %}**Score:** {{ audit.score | round(2) }}{% endif %}
+{% if audit.description %}{{ audit.description | truncate(250) }}{% endif %}
 
-{% endfor %}
+{% endif %}{% endfor %}
 
 ## Demande
 

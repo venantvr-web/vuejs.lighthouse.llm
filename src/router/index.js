@@ -17,6 +17,11 @@ const routes = [
     component: () => import('@/views/UploadView.vue')
   },
   {
+    path: '/local',
+    name: 'local-lighthouse',
+    component: () => import('@/views/LocalLighthouseView.vue')
+  },
+  {
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('@/views/DashboardView.vue'),

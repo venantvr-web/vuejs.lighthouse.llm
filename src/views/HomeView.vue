@@ -52,7 +52,7 @@
         </div>
 
         <!-- Choice cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Live analysis -->
           <router-link
             to="/lighthouse"
@@ -63,12 +63,34 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
             </div>
-            <h3 class="card-title">Analyse en temps réel</h3>
+            <h3 class="card-title">PageSpeed Insights</h3>
             <p class="card-description">
-              Entrez l'URL de votre site pour lancer une analyse Lighthouse instantanée via l'API PageSpeed Insights.
+              Analyse via l'API Google PageSpeed Insights. Rapide, sans installation requise.
             </p>
             <div class="card-cta">
               <span>Analyser une URL</span>
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </router-link>
+
+          <!-- Local Lighthouse -->
+          <router-link
+            to="/local"
+            class="choice-card choice-card-local group"
+          >
+            <div class="card-icon bg-gradient-to-br from-green-500 to-green-700">
+              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+              </svg>
+            </div>
+            <h3 class="card-title">Chromium Local</h3>
+            <p class="card-description">
+              Analyse locale via Chromium. Illimitée, confidentielle, fonctionne avec l'intranet.
+            </p>
+            <div class="card-cta card-cta-local">
+              <span>Lancer localement</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -80,14 +102,14 @@
             to="/upload"
             class="choice-card group"
           >
-            <div class="card-icon bg-gradient-to-br from-lighthouse-green to-green-700">
+            <div class="card-icon bg-gradient-to-br from-lighthouse-orange to-orange-700">
               <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <h3 class="card-title">Importer un rapport</h3>
             <p class="card-description">
-              Glissez-déposez un fichier JSON Lighthouse exporté depuis Chrome DevTools pour l'analyser.
+              Importez un fichier JSON Lighthouse exporté depuis Chrome DevTools.
             </p>
             <div class="card-cta">
               <span>Importer un fichier</span>
@@ -203,5 +225,14 @@
   color: var(--info);
   font-weight: 600;
   font-size: 0.875rem;
+}
+
+.choice-card-local:hover {
+  border-color: #22c55e;
+  box-shadow: 0 10px 40px -10px color-mix(in srgb, #22c55e 30%, transparent);
+}
+
+.card-cta-local {
+  color: #22c55e;
 }
 </style>

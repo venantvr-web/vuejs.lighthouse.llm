@@ -1,0 +1,243 @@
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  scores: {
+    type: Array,
+    required: true
+  }
+})
+
+const emit = defineEmits(['delete', 'view'])
+
+const sortedScores = computed(() => {
+  return [...props.scores].sort((a, b) => b.timestamp - a.timestamp)
+})
+
+const categories = [
+  { key: 'performance', label: 'Perf' },
+  { key: 'accessibility', label: 'A11y' },
+  { key: 'best-practices', label: 'BP' },
+  { key: 'seo', label: 'SEO' },
+  { key: 'pwa', label: 'PWA' }
+]
+
+function formatDateTime(timestamp) {
+  return new Date(timestamp).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+function formatScore(score) {
+  if (score === null || score === undefined) return '-'
+  return Math.round(score * 100)
+}
+
+function getScoreClass(score) {
+  if (score === null || score === undefined) return ''
+  if (score >= 0.9) return 'score-good'
+  if (score >= 0.5) return 'score-average'
+  return 'score-poor'
+}
+
+function getSourceLabel(source) {
+  const labels = {
+    pagespeed: 'PageSpeed',
+    local: 'Local',
+    file: 'Fichier'
+  }
+  return labels[source] || source || '-'
+}
+
+function getStrategyLabel(strategy) {
+  return strategy === 'desktop' ? 'Desktop' : 'Mobile'
+}
+</script>
+
+<template>
+  <div class="analysis-table-container">
+    <table class="analysis-table">
+      <thead>
+        <tr>
+          <th class="col-date">Date</th>
+          <th class="col-source">Source</th>
+          <th class="col-strategy">Mode</th>
+          <th v-for="cat in categories" :key="cat.key" class="col-score">
+            {{ cat.label }}
+          </th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="score in sortedScores" :key="score.id">
+          <td class="col-date">
+            <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
+          </td>
+          <td class="col-source">
+            <span class="source-badge" :class="score.source">
+              {{ getSourceLabel(score.source) }}
+            </span>
+          </td>
+          <td class="col-strategy">
+            <span class="strategy-badge" :class="score.strategy">
+              {{ getStrategyLabel(score.strategy) }}
+            </span>
+          </td>
+          <td
+            v-for="cat in categories"
+            :key="cat.key"
+            class="col-score"
+            :class="getScoreClass(score.scores?.[cat.key])"
+          >
+            {{ formatScore(score.scores?.[cat.key]) }}
+          </td>
+          <td class="col-actions">
+            <button
+              class="action-btn delete"
+              title="Supprimer"
+              @click="emit('delete', score.id)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div v-if="scores.length === 0" class="empty-state">
+      Aucune analyse pour ce domaine.
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.analysis-table-container {
+  overflow-x: auto;
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.analysis-table th,
+.analysis-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.analysis-table th {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-tertiary);
+  white-space: nowrap;
+}
+
+.analysis-table tbody tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.col-date {
+  min-width: 150px;
+}
+
+.col-source,
+.col-strategy {
+  min-width: 80px;
+}
+
+.col-score {
+  min-width: 50px;
+  text-align: center !important;
+  font-weight: 600;
+}
+
+.col-actions {
+  width: 60px;
+  text-align: center !important;
+}
+
+.date-value {
+  color: var(--color-text);
+}
+
+.source-badge,
+.strategy-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.source-badge.pagespeed {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.source-badge.local {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.source-badge.file {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.strategy-badge.mobile {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.strategy-badge.desktop {
+  background-color: var(--color-secondary-light);
+  color: var(--color-secondary);
+}
+
+.score-good {
+  color: var(--color-score-good);
+}
+
+.score-average {
+  color: var(--color-score-average);
+}
+
+.score-poor {
+  color: var(--color-score-poor);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+</style>

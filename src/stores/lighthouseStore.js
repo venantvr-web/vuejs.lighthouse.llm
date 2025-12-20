@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useLighthouseParser } from '@/composables/useLighthouseParser'
+import { useScoreHistoryStore } from '@/stores/scoreHistoryStore'
 
 /**
  * Report source types
@@ -143,6 +144,11 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
       }
       loadedAt.value = new Date().toISOString()
 
+      // Auto-save to history (non-blocking)
+      saveToHistory().catch(err => {
+        console.warn('Failed to save to history:', err)
+      })
+
       loading.value = false
       return true
     } catch (err) {
@@ -242,6 +248,32 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
   }
 
   /**
+   * Save current report to history (IndexedDB)
+   * @returns {Promise<string|null>} Entry ID or null if failed
+   */
+  async function saveToHistory() {
+    if (!currentReport.value || !url.value) return null
+
+    try {
+      const historyStore = useScoreHistoryStore()
+
+      const entryId = await historyStore.addScore(url.value, {
+        scores: scores.value,
+        coreWebVitals: coreWebVitals.value
+      }, {
+        source: source.value,
+        strategy: strategy.value,
+        lighthouseVersion: lighthouseVersion.value
+      })
+
+      return entryId
+    } catch (err) {
+      console.error('Failed to save to history:', err)
+      return null
+    }
+  }
+
+  /**
    * Get report summary for export/history
    * @returns {object} Report summary
    */
@@ -298,6 +330,7 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
     getFailedAudits,
     getAudit,
     getCategory,
-    getSummary
+    getSummary,
+    saveToHistory
   }
 })

@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Primary color palette */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+
+  /* Lighthouse colors */
+  --color-lighthouse-green: #0cce6b;
+  --color-lighthouse-orange: #ffa400;
+  --color-lighthouse-red: #ff4e42;
+}
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+
+  .dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .score-badge {
+    @apply inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full;
+  }
+
+  .score-badge-green {
+    background-color: color-mix(in srgb, var(--color-lighthouse-green) 20%, transparent);
+    color: var(--color-lighthouse-green);
+  }
+
+  .score-badge-orange {
+    background-color: color-mix(in srgb, var(--color-lighthouse-orange) 20%, transparent);
+    color: var(--color-lighthouse-orange);
+  }
+
+  .score-badge-red {
+    background-color: color-mix(in srgb, var(--color-lighthouse-red) 20%, transparent);
+    color: var(--color-lighthouse-red);
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-200;
+  }
+
+  .dark .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium rounded-lg transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+    @apply focus:ring-gray-500;
+  }
+
+  .dark .btn-secondary {
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
+
+  .btn-ghost {
+    @apply text-gray-600 hover:bg-gray-100;
+  }
+
+  .dark .btn-ghost {
+    @apply text-gray-300 hover:bg-gray-800;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border border-gray-300;
+    @apply bg-white text-gray-900;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply placeholder:text-gray-400;
+  }
+
+  .dark .input {
+    @apply border-gray-600 bg-gray-800 text-gray-100;
+    @apply placeholder:text-gray-500;
+  }
+}
+
+/* Animations */
+@layer utilities {
+  .animate-in {
+    animation: animate-in 0.3s ease-out;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .streaming-cursor::after {
+    content: '';
+    @apply inline-block w-2 h-5 bg-primary-500 ml-1 animate-pulse;
+  }
+}
+
+/* Markdown content styling */
+.prose pre {
+  @apply bg-gray-900 rounded-lg overflow-x-auto;
+}
+
+.dark .prose pre {
+  @apply bg-gray-950;
+}
+
+.prose code {
+  @apply text-sm;
+}
+
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-gray-600;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}

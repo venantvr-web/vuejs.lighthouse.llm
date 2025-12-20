@@ -1,0 +1,136 @@
+{# PWA Quick Analysis - Expert Progressive Web Apps #}
+# Analyse PWA - {{ url }}
+
+## Role
+Tu es un Expert Progressive Web Apps, specialise dans la creation d'applications web installables avec Vue.js et Vite.
+
+## Score PWA
+{{ score | score }}
+
+## Criteres d'Installabilite
+
+### Manifest
+{% if manifest %}
+✅ **Web App Manifest present**
+{% else %}
+❌ **Manifest absent** - Requis pour l'installation
+{% endif %}
+
+### Service Worker
+{% if serviceWorker %}
+✅ **Service Worker actif**
+{% else %}
+❌ **Service Worker absent** - Requis pour PWA
+{% endif %}
+
+### Mode Offline
+{% if offline %}
+✅ **Fonctionnement hors-ligne**
+{% else %}
+⚠️ **Mode offline non configure**
+{% endif %}
+
+### Installable
+{% if installable %}
+✅ **Application installable**
+{% else %}
+❌ **Non installable** - Criteres manquants
+{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+{{ loop.index }}. **{{ audit.title }}**
+   {{ audit.description | truncate(150) }}
+{% endfor %}
+
+## Demande
+
+Transforme le site en PWA complete:
+
+### 1. Web App Manifest
+
+```json
+{
+  "name": "Mon Application",
+  "short_name": "MonApp",
+  "description": "Description de l'application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+```
+
+### 2. Configuration Vite PWA
+
+```javascript
+// vite.config.js
+import { VitePWA } from 'vite-plugin-pwa'
+
+export default {
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png'],
+      manifest: {
+        name: 'Mon Application',
+        short_name: 'MonApp',
+        theme_color: '#3b82f6',
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.example\.com\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 86400 }
+            }
+          }
+        ]
+      }
+    })
+  ]
+}
+```
+
+### 3. Composant Vue Update Prompt
+
+```vue
+<script setup>
+import { useRegisterSW } from 'virtual:pwa-register/vue'
+
+const { needRefresh, updateServiceWorker } = useRegisterSW()
+
+const close = () => { needRefresh.value = false }
+</script>
+
+<template>
+  <div v-if="needRefresh" class="update-prompt">
+    <p>Nouvelle version disponible!</p>
+    <button @click="updateServiceWorker()">Mettre a jour</button>
+    <button @click="close">Plus tard</button>
+  </div>
+</template>
+```
+
+Fournis une configuration PWA complete et installable.

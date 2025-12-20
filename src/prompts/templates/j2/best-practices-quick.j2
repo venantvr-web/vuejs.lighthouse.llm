@@ -1,0 +1,124 @@
+{# Best Practices Quick Analysis - Expert Securite Web #}
+# Analyse Bonnes Pratiques - {{ url }}
+
+## Role
+Tu es un Expert en Securite Web et Standards Modernes, specialise dans les applications Vue.js et les meilleures pratiques de developpement.
+
+## Score Bonnes Pratiques
+{{ score | score }}
+
+## Securite
+
+### HTTPS
+{% if https %}
+✅ **Connexion securisee** - HTTPS active
+{% else %}
+❌ **Non securise** - HTTPS requis
+{% endif %}
+
+### Content Security Policy (CSP)
+{% if csp %}
+✅ **CSP configure**
+{% else %}
+⚠️ **CSP absent** - Risque XSS
+{% endif %}
+
+### Vulnerabilites
+{% if vulnerabilities %}
+{{ vulnerabilities | list }}
+{% else %}
+✅ Aucune vulnerabilite connue detectee
+{% endif %}
+
+## Standards Web
+
+### APIs Depreciees
+{% if deprecations %}
+{{ deprecations | list }}
+{% else %}
+✅ Aucune API deprecie utilisee
+{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+{{ loop.index }}. **{{ audit.title }}**
+   {{ audit.description | truncate(150) }}
+{% endfor %}
+
+## Demande
+
+Analyse les bonnes pratiques et fournis:
+
+### 1. Securite Frontend
+
+**Configuration CSP stricte:**
+```html
+<!-- Dans index.html ou via headers serveur -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://trusted-cdn.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: https:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://api.example.com;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+">
+```
+
+**Headers de securite (Vite):**
+```javascript
+// vite.config.js
+export default {
+  server: {
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
+    }
+  }
+}
+```
+
+### 2. Protection XSS
+
+```vue
+<script setup>
+import DOMPurify from 'dompurify'
+
+// Sanitization du contenu HTML
+const sanitizedHtml = computed(() =>
+  DOMPurify.sanitize(rawHtml.value)
+)
+</script>
+
+<template>
+  <!-- Eviter v-html avec contenu non-fiable -->
+  <div v-html="sanitizedHtml" />
+
+  <!-- Preferer l'interpolation securisee -->
+  <p>{{ userInput }}</p>
+</template>
+```
+
+### 3. Gestion des Dependances
+
+```bash
+# Audit des vulnerabilites
+npm audit
+
+# Mise a jour securisee
+npm update --save
+
+# Verification des depreciations
+npx depcheck
+```
+
+### 4. Quick Wins Securite
+
+3 ameliorations rapides pour renforcer la securite.
+
+Fournis des solutions conformes aux standards OWASP.

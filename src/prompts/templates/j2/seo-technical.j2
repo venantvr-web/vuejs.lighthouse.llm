@@ -1,0 +1,123 @@
+{# SEO Technical Deep Audit - Expert SEO Technique #}
+# Audit SEO Technique Avance - {{ url }}
+
+## Role
+Tu es un Expert SEO Technique avec une specialisation dans les applications JavaScript modernes (Vue.js, SPA).
+
+## Score SEO Technique
+{{ score | score }}
+
+## Elements Techniques
+
+### 1. Canonical URL
+{% if canonical %}
+✅ **Present:** `{{ canonical }}`
+{% else %}
+⚠️ **Absent:** Risque de contenu duplique
+{% endif %}
+
+### 2. Robots.txt
+{% if robots %}
+✅ **Present et accessible**
+{% else %}
+❌ **Non detecte**
+{% endif %}
+
+### 3. Sitemap XML
+{% if sitemap %}
+✅ **Present:** {{ sitemap }}
+{% else %}
+❌ **Non detecte**
+{% endif %}
+
+### 4. Hreflang
+{% if hreflang %}
+✅ **Implemente** pour internationalisation
+{% else %}
+⚠️ **Absent** (si site multilingue, a implementer)
+{% endif %}
+
+### 5. Donnees Structurees (Schema.org)
+{% if structured %}
+✅ **Presentes**
+{{ structured | list }}
+{% else %}
+⚠️ **Absentes:** Impact sur rich snippets Google
+{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+- **{{ audit.title }}** ({{ audit.score | round(2) }})
+{% endfor %}
+
+## Demande
+
+Audit technique complet avec solutions:
+
+### 1. Configuration Robots & Sitemap
+
+**robots.txt optimise:**
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://{{ url }}/sitemap.xml
+```
+
+**Generation sitemap dynamique:**
+```javascript
+// scripts/generate-sitemap.js
+import { SitemapStream, streamToPromise } from 'sitemap'
+import { createWriteStream } from 'fs'
+
+const sitemap = new SitemapStream({ hostname: 'https://{{ url }}' })
+
+const pages = [
+  { url: '/', changefreq: 'daily', priority: 1.0 },
+  { url: '/about', changefreq: 'monthly', priority: 0.8 }
+]
+
+pages.forEach(page => sitemap.write(page))
+sitemap.end()
+```
+
+### 2. Implementation Schema.org
+
+```vue
+<script setup>
+import { useSchemaOrg } from '@unhead/schema-org'
+
+useSchemaOrg([
+  {
+    '@type': 'Organization',
+    name: 'Nom de l\'entreprise',
+    logo: 'https://example.com/logo.png',
+    url: 'https://example.com'
+  },
+  {
+    '@type': 'WebSite',
+    name: 'Nom du site',
+    url: 'https://example.com'
+  }
+])
+</script>
+```
+
+### 3. SEO pour SPA
+
+**Configuration Nuxt 3 pour SSR:**
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  ssr: true,
+  routeRules: {
+    '/': { prerender: true },
+    '/blog/**': { isr: 3600 }
+  }
+})
+```
+
+Fournis des solutions techniques completes et directement implementables.

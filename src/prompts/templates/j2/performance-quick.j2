@@ -1,0 +1,193 @@
+{# Performance Quick Analysis - Expert WPO Vue.js/Vite #}
+# Analyse Performance - {{ url }}
+
+## Role
+Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vue.js 3 et Vite.
+
+## Score Global
+Performance: {{ score | score }}
+
+## Core Web Vitals
+
+### Largest Contentful Paint (LCP)
+**Valeur:** {{ lcpDisplay | default(lcp | metric) }} - Status: {{ lcpStatus | default('unknown') }}
+**Cible:** < 2.5s
+{% if lcpElement %}
+**Element LCP:**
+- Snippet: `{{ lcpElement.snippet | truncate(120) }}`
+{% if lcpElement.selector %}- Selecteur CSS: `{{ lcpElement.selector }}`{% endif %}
+{% if lcpElement.nodeLabel %}- Label: {{ lcpElement.nodeLabel }}{% endif %}
+{% if lcpElement.phases %}
+**Phases LCP:**
+  - TTFB: {{ lcpElement.phases.ttfb | metric }}
+  - Delai chargement: {{ lcpElement.phases.loadDelay | metric }}
+  - Temps chargement: {{ lcpElement.phases.loadTime | metric }}
+  - Delai rendu: {{ lcpElement.phases.renderDelay | metric }}
+{% endif %}
+{% endif %}
+
+### Cumulative Layout Shift (CLS)
+**Valeur:** {{ cls }} - Status: {{ clsStatus | default('unknown') }}
+**Cible:** < 0.1
+{% if clsElements %}
+**Elements responsables du Layout Shift:**
+{% for element in clsElements %}
+- {% if element.nodeLabel %}**{{ element.nodeLabel }}**{% endif %} `{{ element.snippet | truncate(80) }}`
+  {% if element.selector %}- Selecteur: `{{ element.selector }}`{% endif %}
+  {% if element.score %}- Score CLS: {{ element.score | round(4) }}{% endif %}
+{% endfor %}
+{% endif %}
+
+### Total Blocking Time (TBT)
+**Valeur:** {{ tbtDisplay | default(tbt | metric) }}
+**Cible:** < 200ms
+
+{% if inp %}
+### Interaction to Next Paint (INP)
+**Valeur:** {{ inp | metric }}
+**Cible:** < 200ms
+{% endif %}
+
+## Autres Metriques
+
+| Metrique | Valeur | Cible |
+|----------|--------|-------|
+| First Contentful Paint (FCP) | {{ fcpDisplay | default(fcp | metric) }} | < 1.8s |
+| Speed Index (SI) | {{ siDisplay | default(si | metric) }} | < 3.4s |
+| Time to Interactive (TTI) | {{ ttiDisplay | default(tti | metric) }} | < 3.8s |
+| Server Response Time | {{ serverResponseTimeDisplay | default('N/A') }} | < 200ms |
+| Taille totale | {{ totalSizeDisplay | default('N/A') }} | < 1.5 MB |
+| Requetes | {{ requests }} | < 50 |
+
+## Diagnostics Detailles
+
+{% if mainThreadWork %}
+### Thread Principal
+**Temps total:** {{ mainThreadWork }}
+{% if mainThreadBreakdown %}
+| Categorie | Duree |
+|-----------|-------|
+{% for task in mainThreadBreakdown %}| {{ task.group }} | {{ task.duration | round(0) }}ms |
+{% endfor %}{% endif %}
+{% endif %}
+
+{% if bootupTime %}
+### Temps d'Execution JavaScript
+**Total:** {{ bootupTime }}
+{% if bootupBreakdown %}
+| Script | Total | Execution | Compilation |
+|--------|-------|-----------|-------------|
+{% for script in bootupBreakdown %}| `{{ script.url | truncate(50) }}` | {{ script.total | round(0) }}ms | {{ script.scripting | round(0) }}ms | {{ script.scriptParseCompile | round(0) }}ms |
+{% endfor %}{% endif %}
+{% endif %}
+
+{% if renderBlockingResources %}
+### Ressources Bloquant le Rendu ({{ renderBlocking }} fichiers)
+{% if renderBlockingSavings %}**Gain potentiel:** {{ renderBlockingSavings | round(0) }}ms{% endif %}
+
+| Fichier | Taille | Gain |
+|---------|--------|------|
+{% for res in renderBlockingResources %}| `{{ res.url | truncate(60) }}` | {{ res.totalBytes | size }} | {{ res.wastedMs | round(0) }}ms |
+{% endfor %}
+{% endif %}
+
+{% if unusedJsResources %}
+### JavaScript Non Utilise
+**Gain potentiel:** {{ unusedJs | size }}
+
+| Fichier | Taille totale | Gaspillage |
+|---------|---------------|------------|
+{% for res in unusedJsResources %}| `{{ res.url | truncate(55) }}` | {{ res.totalBytes | size }} | {{ res.wastedBytes | size }} |
+{% endfor %}
+{% endif %}
+
+{% if unusedCssResources %}
+### CSS Non Utilise
+**Gain potentiel:** {{ unusedCss | size }}
+
+| Fichier | Taille totale | Gaspillage |
+|---------|---------------|------------|
+{% for res in unusedCssResources %}| `{{ res.url | truncate(55) }}` | {{ res.totalBytes | size }} | {{ res.wastedBytes | size }} |
+{% endfor %}
+{% endif %}
+
+{% if thirdPartyResources %}
+### Scripts Tiers ({{ thirdParty }} providers)
+| Provider | Thread Principal | Temps Blocage | Taille |
+|----------|------------------|---------------|--------|
+{% for tp in thirdPartyResources %}| {{ tp.entity }} | {{ tp.mainThreadTime | round(0) }}ms | {{ tp.blockingTime | round(0) }}ms | {{ tp.transferSize | size }} |
+{% endfor %}
+{% endif %}
+
+{% if longTasks %}
+### Taches Longues (Long Tasks)
+| Script | Duree | Debut |
+|--------|-------|-------|
+{% for task in longTasks %}| `{{ task.url | truncate(50) }}` | {{ task.duration | round(0) }}ms | {{ task.startTime | round(0) }}ms |
+{% endfor %}
+{% endif %}
+
+## Audits Echoues ({{ totalFailedAudits }} total)
+
+{% for audit in failedAudits %}
+### {{ loop.index }}. {{ audit.title }}
+**Score:** {{ audit.score | round(2) }} | **Poids:** {{ audit.weight | default('N/A') }}
+{% if audit.displayValue %}**Mesure:** {{ audit.displayValue }}{% endif %}
+{% if audit.savings.ms > 0 or audit.savings.bytes > 0 %}
+**Gains potentiels:** {% if audit.savings.ms > 0 %}{{ audit.savings.ms | round(0) }}ms{% endif %}{% if audit.savings.bytes > 0 %} {{ audit.savings.bytes | size }}{% endif %}
+{% endif %}
+
+{{ audit.description | truncate(250) }}
+{% if audit.explanation %}
+> {{ audit.explanation | truncate(150) }}
+{% endif %}
+
+{% if audit.items %}
+**Ressources concernees:**
+{% for item in audit.items %}
+- {% if item.url %}`{{ item.url | truncate(70) }}`{% endif %}
+  {% if item.location %}- **Source:** `{{ item.location }}`{% endif %}
+  {% if item.originalLocation %}- **Fichier original:** `{{ item.originalLocation }}`{% endif %}
+  {% if item.element %}- **Element:** `{{ item.element | truncate(60) }}`{% endif %}
+  {% if item.node and item.node.selector %}- **Selecteur:** `{{ item.node.selector }}`{% endif %}
+  {% if item.wastedMs or item.wastedBytes %}- **Perte:** {% if item.wastedMs %}{{ item.wastedMs | round(0) }}ms{% endif %}{% if item.wastedBytes %} / {{ item.wastedBytes | size }}{% endif %}{% endif %}
+  {% if item.totalBytes %}- **Taille:** {{ item.totalBytes | size }}{% endif %}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+
+## Opportunites d'Optimisation
+
+{% for opp in opportunities %}
+{% if opp.savingsMs > 100 or opp.savingsBytes > 10000 %}
+### {{ opp.title }}
+**Gains:** {% if opp.savingsMs > 0 %}{{ opp.savingsMs | round(0) }}ms{% endif %}{% if opp.savingsBytes > 0 %} / {{ opp.savingsBytes | size }}{% endif %}
+
+{{ opp.description | truncate(200) }}
+
+{% if opp.items %}
+**Fichiers concernes:**
+{% for item in opp.items %}
+- `{{ item.url | truncate(65) }}`{% if item.wastedBytes %} (gaspillage: {{ item.wastedBytes | size }}){% endif %}{% if item.wastedMs %} (-{{ item.wastedMs | round(0) }}ms){% endif %}
+  {% if item.location %}- Source: `{{ item.location }}`{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+## Demande
+
+Analyse ces donnees et fournis:
+
+1. **Diagnostic Prioritaire:** Identifie les 3 problemes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
+
+2. **Plan d'Action:** Pour chaque probleme:
+   - Fichier(s) exact(s) a modifier avec le chemin
+   - Code Vue.js 3 (Composition API) optimise
+   - Configuration Vite specifique si necessaire
+   - Commandes npm/pnpm a executer
+
+3. **Quick Wins:** 3 optimisations implementables en moins de 30 minutes avec les fichiers cibles
+
+Structure ta reponse en Markdown avec des exemples de code concrets et fonctionnels.

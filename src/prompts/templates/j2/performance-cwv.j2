@@ -1,0 +1,113 @@
+{# Core Web Vitals Focus - Expert Google CWV #}
+# Analyse Core Web Vitals - {{ url }}
+
+## Role
+Tu es un Expert Google Core Web Vitals, specialise dans l'optimisation LCP, CLS et INP pour Vue.js 3.
+
+## Metriques Core Web Vitals
+
+### 1. Largest Contentful Paint (LCP)
+**Valeur actuelle:** {{ lcp | metric }}
+**Statut:** {% if lcpStatus == 'good' %}✅ Bon{% elif lcpStatus == 'medium' %}⚠️ A ameliorer{% else %}❌ Faible{% endif %}
+**Cible Google:** < 2.5s
+
+{% if lcpElement %}
+**Element LCP:** {{ lcpElement }}
+{% endif %}
+
+### 2. Cumulative Layout Shift (CLS)
+**Valeur actuelle:** {{ cls }}
+**Statut:** {% if clsStatus == 'good' %}✅ Bon{% elif clsStatus == 'medium' %}⚠️ A ameliorer{% else %}❌ Faible{% endif %}
+**Cible Google:** < 0.1
+
+{% if clsElements %}
+**Elements causant le shift:**
+{{ clsElements | list }}
+{% endif %}
+
+### 3. Interaction to Next Paint (INP) / Total Blocking Time (TBT)
+**INP:** {{ inp | metric }}
+**TBT:** {{ tbt | metric }}
+**Cible INP:** < 200ms
+**Cible TBT:** < 200ms
+
+## Demande
+
+Analyse approfondie de chaque Core Web Vital:
+
+### Pour LCP (Largest Contentful Paint)
+
+**Causes courantes:**
+- Temps de reponse serveur (TTFB eleve)
+- Ressources CSS/JS bloquant le rendu
+- Temps de chargement des images
+- Rendu cote client (Client-Side Rendering)
+
+**Solutions Vue.js/Vite:**
+```vue
+<script setup>
+// Prechargement de l'image LCP
+</script>
+
+<template>
+  <img
+    fetchpriority="high"
+    :src="heroImage"
+    alt="Hero"
+  />
+</template>
+```
+
+```html
+<!-- Dans index.html -->
+<link rel="preload" as="image" href="/hero.webp" />
+```
+
+### Pour CLS (Cumulative Layout Shift)
+
+**Solutions concretes:**
+```vue
+<template>
+  <!-- Reserver l'espace pour les images -->
+  <div class="aspect-video relative">
+    <img
+      class="absolute inset-0 w-full h-full object-cover"
+      :src="image"
+      width="1920"
+      height="1080"
+      alt=""
+    />
+  </div>
+</template>
+
+<style>
+/* Fonts avec font-display: swap */
+@font-face {
+  font-family: 'CustomFont';
+  font-display: swap;
+}
+</style>
+```
+
+### Pour INP/TBT
+
+**Solutions d'optimisation:**
+```javascript
+// vite.config.js - Code splitting agressif
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Plan d'Action CWV
+Fournis une roadmap priorisee pour passer tous les CWV en "Bon" (vert).

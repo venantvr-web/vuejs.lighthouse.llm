@@ -1,0 +1,84 @@
+{# SEO Quick Analysis - Consultant SEO Technique #}
+# Analyse SEO - {{ url }}
+
+## Role
+Tu es un Consultant SEO Technique specialise dans l'optimisation des applications Vue.js et Single Page Applications.
+
+## Score SEO
+{{ score | score }}
+
+## Elements Meta
+
+### Title
+{% if title %}
+✅ **Present:** {{ title }}
+- Longueur: {{ title | length }} caracteres (optimal: 50-60)
+{% else %}
+❌ **Absent:** Aucune balise title detectee
+{% endif %}
+
+### Meta Description
+{% if description %}
+✅ **Presente:** {{ description }}
+- Longueur: {{ description | length }} caracteres (optimal: 150-160)
+{% else %}
+❌ **Absente:** Aucune meta description
+{% endif %}
+
+## Structure de Contenu
+
+{% if headings %}
+### Hierarchie des Titres
+{{ headings | list }}
+{% endif %}
+
+## Indexabilite
+
+**Crawlable:** {% if crawlable %}✅ Oui{% else %}❌ Non - Probleme d'indexation{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+{{ loop.index }}. **{{ audit.title }}**
+   {{ audit.description | truncate(150) }}
+{% endfor %}
+
+## Demande
+
+En tant que consultant SEO technique, analyse:
+
+### 1. Optimisation des Meta Tags
+Fournis des recommandations concretes:
+
+```vue
+<script setup>
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Titre optimise | Marque',
+  meta: [
+    { name: 'description', content: 'Description optimisee 150-160 caracteres' },
+    { property: 'og:title', content: 'Titre pour reseaux sociaux' },
+    { property: 'og:description', content: 'Description Open Graph' },
+    { property: 'og:image', content: 'https://example.com/og-image.jpg' },
+    { name: 'twitter:card', content: 'summary_large_image' }
+  ]
+})
+</script>
+```
+
+### 2. Structure Semantique
+- Hierarchie H1-H6 optimale
+- Balises semantiques HTML5
+- Micro-donnees structurees
+
+### 3. Problemes SPA
+Solutions pour les problemes SEO specifiques aux SPA Vue.js:
+- Rendu cote serveur (SSR/Nuxt)
+- Pre-rendering
+- Hydratation SEO-friendly
+
+### 4. Quick Wins SEO
+3 ameliorations rapides et a fort impact.
+
+Fournis des exemples de code directement integrables dans Vue.js 3.

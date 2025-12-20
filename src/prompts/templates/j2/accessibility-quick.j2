@@ -1,0 +1,124 @@
+{# Accessibility Quick Analysis - Expert WCAG/RGAA #}
+# Analyse Accessibilite - {{ url }}
+
+## Role
+Tu es un Expert Accessibilite Numerique, specialise RGAA (Referentiel General d'Amelioration de l'Accessibilite) et WCAG 2.1 niveau AA.
+
+## Score Accessibilite
+{{ score | score }}
+
+## Violations Detectees
+
+{% if violations %}
+### Problemes Prioritaires
+{{ violations | prioritize }}
+{% endif %}
+
+{% if ariaIssues %}
+### Problemes ARIA
+{{ ariaIssues | list }}
+{% endif %}
+
+{% if colorContrast %}
+### Contraste des Couleurs
+{{ colorContrast | list }}
+{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+{{ loop.index }}. **{{ audit.title }}**
+   {{ audit.description | truncate(150) }}
+{% endfor %}
+
+## Demande
+
+En tant qu'expert accessibilite, analyse:
+
+### 1. Violations WCAG 2.1 AA
+
+Pour chaque violation:
+- Critere WCAG concerne
+- Impact utilisateur (lecteurs d'ecran, navigation clavier, etc.)
+- Niveau de conformite (A, AA, AAA)
+
+### 2. Solutions de Code
+
+**HTML Semantique:**
+```vue
+<template>
+  <!-- Structure accessible avec landmarks -->
+  <header role="banner">
+    <nav role="navigation" aria-label="Navigation principale">
+      <ul>
+        <li><router-link to="/">Accueil</router-link></li>
+        <li><router-link to="/about">A propos</router-link></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main role="main" id="main-content">
+    <h1>Titre de la page</h1>
+    <!-- Contenu principal -->
+  </main>
+
+  <footer role="contentinfo">
+    <!-- Pied de page -->
+  </footer>
+</template>
+```
+
+**ARIA Attributes:**
+```vue
+<template>
+  <!-- Boutons accessibles -->
+  <button
+    :aria-label="isOpen ? 'Fermer le menu' : 'Ouvrir le menu'"
+    :aria-expanded="isOpen"
+    @click="toggle"
+  >
+    <MenuIcon aria-hidden="true" />
+  </button>
+
+  <!-- Messages live pour lecteurs d'ecran -->
+  <div role="status" aria-live="polite" class="sr-only">
+    {{ statusMessage }}
+  </div>
+</template>
+```
+
+**Navigation Clavier:**
+```vue
+<script setup>
+const handleKeydown = (event) => {
+  if (event.key === 'Escape') {
+    closeModal()
+  }
+  if (event.key === 'Tab') {
+    trapFocus(event)
+  }
+}
+</script>
+```
+
+### 3. Contraste et Lisibilite
+
+```css
+/* Contrastes WCAG AA: 4.5:1 pour texte, 3:1 pour grands textes */
+:root {
+  --text-primary: #1a1a1a;   /* 21:1 sur blanc */
+  --text-secondary: #4a4a4a; /* 9:1 sur blanc */
+  --link-color: #0066cc;     /* 7:1 sur blanc */
+}
+
+/* Focus visible obligatoire */
+:focus-visible {
+  outline: 3px solid var(--link-color);
+  outline-offset: 2px;
+}
+```
+
+### 4. Quick Wins A11y
+3 corrections rapides et a fort impact pour ameliorer immediatement l'accessibilite.
+
+Fournis des solutions conformes WCAG 2.1 AA et RGAA.

@@ -1,0 +1,98 @@
+{# Performance Deep Dive Analysis - Expert WPO Vue.js/Vite #}
+# Analyse Approfondie Performance - {{ url }}
+
+## Role
+Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vue.js 3, Vite, et les optimisations avancees.
+
+## Score Performance
+{{ score | score }}
+
+## Opportunites d'Optimisation
+
+{% if opportunities %}
+{% for opp in opportunities %}
+- **{{ opp.title }}**
+  - Impact: {{ opp.numericValue | metric }} economises
+  - Score: {{ opp.score | score }}
+{% endfor %}
+{% endif %}
+
+## Diagnostics
+
+{% if diagnostics %}
+{% for diag in diagnostics %}
+- {{ diag.title }}: {{ diag.displayValue }}
+{% endfor %}
+{% endif %}
+
+## Metriques Detaillees
+
+{% if metrics %}
+| Metrique | Valeur | Cible |
+|----------|--------|-------|
+| LCP | {{ metrics.lcp | metric }} | < 2.5s |
+| FCP | {{ metrics.fcp | metric }} | < 1.8s |
+| TBT | {{ metrics.tbt | metric }} | < 200ms |
+| CLS | {{ metrics.cls }} | < 0.1 |
+| Speed Index | {{ metrics.si | metric }} | < 3.4s |
+{% endif %}
+
+## Audits Echoues
+
+{% for audit in failedAudits %}
+### {{ loop.index }}. {{ audit.title }}
+**Score:** {{ audit.score | round(2) }}
+{{ audit.description | truncate(250) }}
+
+{% endfor %}
+
+## Demande
+
+En tant qu'expert WPO Vue.js/Vite, analyse en profondeur:
+
+### 1. Analyse des Opportunites
+Pour chaque opportunite majeure:
+- Explication technique du probleme
+- Impact precis sur les Core Web Vitals
+- Priorite d'implementation (P0/P1/P2)
+
+### 2. Solutions de Code
+Fournis des exemples concrets:
+
+**a) Optimisations Vue.js 3:**
+```vue
+<script setup>
+// Composant optimise avec lazy-loading
+import { defineAsyncComponent } from 'vue'
+
+const HeavyComponent = defineAsyncComponent(() =>
+  import('./HeavyComponent.vue')
+)
+</script>
+```
+
+**b) Configuration Vite:**
+```javascript
+// vite.config.js
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Code-splitting optimise
+        }
+      }
+    }
+  }
+}
+```
+
+**c) Techniques Avancees:**
+- Resource hints (preload, prefetch, preconnect)
+- Dynamic imports strategiques
+- Optimisation des images (formats modernes)
+
+### 3. Plan d'Action
+Roadmap priorisee avec Quick wins et optimisations avancees.
+
+Reponds en Markdown avec des blocs de code detailles et commentes.

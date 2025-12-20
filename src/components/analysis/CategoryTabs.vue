@@ -1,0 +1,80 @@
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  categories: {
+    type: Array,
+    required: true
+    // [{ id, label, icon, score }]
+  },
+  modelValue: { type: String, default: null }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const activeCategory = computed({
+  get: () => props.modelValue || props.categories[0]?.id,
+  set: (value) => emit('update:modelValue', value)
+})
+
+const selectCategory = (id) => {
+  activeCategory.value = id
+}
+
+const getScoreColor = (score) => {
+  const percentage = score * 100
+  if (percentage >= 90) return 'bg-lighthouse-green text-white'
+  if (percentage >= 50) return 'bg-lighthouse-orange text-white'
+  return 'bg-lighthouse-red text-white'
+}
+
+const getCategoryIcon = (id) => {
+  const icons = {
+    performance: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+    accessibility: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`,
+    seo: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>`,
+    'best-practices': `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>`,
+    pwa: `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>`
+  }
+  return icons[id] || icons.performance
+}
+</script>
+
+<template>
+  <div>
+    <!-- Tabs navigation -->
+    <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 overflow-x-auto">
+      <button
+        v-for="category in categories"
+        :key="category.id"
+        class="relative flex-1 min-w-[120px] py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+        :class="{
+          'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50': activeCategory !== category.id,
+          'text-gray-900 dark:text-white bg-white dark:bg-gray-700 shadow-sm': activeCategory === category.id
+        }"
+        @click="selectCategory(category.id)"
+      >
+        <span class="relative flex items-center justify-center gap-2">
+          <!-- Icon -->
+          <span v-html="getCategoryIcon(category.id)" />
+
+          <!-- Label -->
+          <span class="hidden sm:inline">{{ category.label }}</span>
+
+          <!-- Score badge -->
+          <span
+            class="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full"
+            :class="getScoreColor(category.score)"
+          >
+            {{ Math.round(category.score * 100) }}
+          </span>
+        </span>
+      </button>
+    </nav>
+
+    <!-- Tab content slot -->
+    <div class="mt-6">
+      <slot :active-category="activeCategory" />
+    </div>
+  </div>
+</template>

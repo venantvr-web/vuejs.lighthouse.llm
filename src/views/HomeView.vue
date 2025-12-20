@@ -1,0 +1,232 @@
+<script setup>
+</script>
+
+<template>
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-gray-200 dark:border-gray-800">
+      <div class="max-w-5xl mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                Lighthouse AI Analyzer
+              </h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Analyse intelligente de vos rapports Lighthouse
+              </p>
+            </div>
+          </div>
+
+          <!-- Settings link -->
+          <router-link
+            to="/settings"
+            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </router-link>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 flex items-center justify-center p-4">
+      <div class="w-full max-w-3xl">
+        <!-- Title -->
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Analysez et optimisez votre site web
+          </h2>
+          <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+            Obtenez des recommandations personnalisees generees par IA pour ameliorer
+            les performances, l'accessibilite et le SEO de votre site.
+          </p>
+        </div>
+
+        <!-- Choice cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Live analysis -->
+          <router-link
+            to="/lighthouse"
+            class="choice-card group"
+          >
+            <div class="card-icon bg-gradient-to-br from-primary-500 to-primary-700">
+              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <h3 class="card-title">Analyse en temps reel</h3>
+            <p class="card-description">
+              Entrez l'URL de votre site pour lancer une analyse Lighthouse instantanee via l'API PageSpeed Insights.
+            </p>
+            <div class="card-cta">
+              <span>Analyser une URL</span>
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </router-link>
+
+          <!-- Import file -->
+          <router-link
+            to="/upload"
+            class="choice-card group"
+          >
+            <div class="card-icon bg-gradient-to-br from-lighthouse-green to-green-700">
+              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 class="card-title">Importer un rapport</h3>
+            <p class="card-description">
+              Glissez-deposez un fichier JSON Lighthouse exporte depuis Chrome DevTools pour l'analyser.
+            </p>
+            <div class="card-cta">
+              <span>Importer un fichier</span>
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </router-link>
+        </div>
+
+        <!-- Features -->
+        <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="text-center">
+            <div class="w-12 h-12 mx-auto bg-lighthouse-green/10 rounded-xl flex items-center justify-center mb-3">
+              <svg class="w-6 h-6 text-lighthouse-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-white">Performance</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Optimisez vos Core Web Vitals
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 mx-auto bg-lighthouse-orange/10 rounded-xl flex items-center justify-center mb-3">
+              <svg class="w-6 h-6 text-lighthouse-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-white">SEO</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Ameliorez votre referencement
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-12 h-12 mx-auto bg-primary-500/10 rounded-xl flex items-center justify-center mb-3">
+              <svg class="w-6 h-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 class="font-semibold text-gray-900 dark:text-white">Accessibilite</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Rendez votre site inclusif
+            </p>
+          </div>
+        </div>
+
+        <!-- AI Badge -->
+        <div class="mt-12 text-center">
+          <span class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500/10 to-purple-500/10 rounded-full text-sm">
+            <svg class="w-4 h-4 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span class="text-gray-600 dark:text-gray-300">
+              Propulse par <strong class="text-primary-600 dark:text-primary-400">Gemini</strong> / OpenAI / Claude / Ollama
+            </span>
+          </span>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
+<style scoped>
+.choice-card {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.choice-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.card-description {
+  flex: 1;
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.card-cta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .choice-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .choice-card:hover {
+    border-color: #60a5fa;
+    box-shadow: 0 10px 40px -10px rgba(96, 165, 250, 0.2);
+  }
+
+  .card-title {
+    color: white;
+  }
+
+  .card-description {
+    color: #9ca3af;
+  }
+
+  .card-cta {
+    color: #60a5fa;
+  }
+}
+</style>

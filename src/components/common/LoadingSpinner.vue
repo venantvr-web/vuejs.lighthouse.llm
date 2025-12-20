@@ -100,7 +100,7 @@ const sizeClasses = {
 
 .spinner {
   animation: spin 1s linear infinite;
-  color: #3b82f6;
+  color: var(--info);
 }
 
 @keyframes spin {
@@ -124,11 +124,11 @@ const sizeClasses = {
 }
 
 .progress-bg {
-  stroke: #e5e7eb;
+  stroke: var(--border-primary);
 }
 
 .progress-fill {
-  stroke: #3b82f6;
+  stroke: var(--info);
   transition: stroke-dasharray 0.3s ease;
 }
 
@@ -136,36 +136,13 @@ const sizeClasses = {
   position: absolute;
   font-size: 0.625rem;
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .loading-text {
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
   text-align: center;
   margin: 0;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .spinner {
-    color: #60a5fa;
-  }
-
-  .progress-bg {
-    stroke: #374151;
-  }
-
-  .progress-fill {
-    stroke: #60a5fa;
-  }
-
-  .progress-text {
-    color: #60a5fa;
-  }
-
-  .loading-text {
-    color: #9ca3af;
-  }
 }
 </style>

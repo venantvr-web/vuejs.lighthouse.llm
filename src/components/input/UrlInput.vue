@@ -115,37 +115,37 @@ function handleKeydown(event) {
 .input-wrapper {
   display: flex;
   align-items: center;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-primary);
   border-radius: 12px;
   padding: 4px;
   transition: all 0.2s ease;
 }
 
 .input-wrapper:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 15%, transparent);
 }
 
 .input-wrapper.has-error {
-  border-color: #ef4444;
+  border-color: var(--error);
 }
 
 .input-wrapper.has-error:focus-within {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 15%, transparent);
 }
 
 .input-wrapper.is-valid {
-  border-color: #10b981;
+  border-color: var(--success);
 }
 
 .input-wrapper.is-valid:focus-within {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 15%, transparent);
 }
 
 .input-icon {
   padding: 0 12px;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .url-input {
@@ -156,15 +156,16 @@ function handleKeydown(event) {
   padding: 12px 8px;
   background: transparent;
   min-width: 0;
+  color: var(--text-primary);
 }
 
 .url-input:disabled {
-  background: #f9fafb;
+  background: var(--bg-tertiary);
   cursor: not-allowed;
 }
 
 .url-input::placeholder {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .submit-button {
@@ -187,36 +188,20 @@ function handleKeydown(event) {
 }
 
 .submit-button:disabled {
-  background: #9ca3af;
+  background: var(--text-muted);
   cursor: not-allowed;
   transform: none;
 }
 
 .error-message {
   margin-top: 8px;
-  color: #ef4444;
+  color: var(--error);
   font-size: 0.875rem;
 }
 
 .hint-message {
   margin-top: 8px;
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .input-wrapper {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  .url-input {
-    color: white;
-  }
-
-  .url-input:disabled {
-    background: #111827;
-  }
 }
 </style>

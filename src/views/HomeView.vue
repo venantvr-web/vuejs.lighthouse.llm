@@ -158,16 +158,16 @@
   display: flex;
   flex-direction: column;
   padding: 24px;
-  background: white;
-  border: 2px solid #e5e7eb;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-primary);
   border-radius: 16px;
   transition: all 0.2s ease;
   text-decoration: none;
 }
 
 .choice-card:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+  border-color: var(--info);
+  box-shadow: 0 10px 40px -10px color-mix(in srgb, var(--info) 30%, transparent);
   transform: translateY(-2px);
 }
 
@@ -184,13 +184,13 @@
 .card-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .card-description {
   flex: 1;
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-size: 0.875rem;
   line-height: 1.5;
   margin-bottom: 16px;
@@ -200,33 +200,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #3b82f6;
+  color: var(--info);
   font-weight: 600;
   font-size: 0.875rem;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .choice-card {
-    background: #1f2937;
-    border-color: #374151;
-  }
-
-  .choice-card:hover {
-    border-color: #60a5fa;
-    box-shadow: 0 10px 40px -10px rgba(96, 165, 250, 0.2);
-  }
-
-  .card-title {
-    color: white;
-  }
-
-  .card-description {
-    color: #9ca3af;
-  }
-
-  .card-cta {
-    color: #60a5fa;
-  }
 }
 </style>

@@ -34,6 +34,9 @@ function loadPreferences() {
     const saved = localStorage.getItem(PREFS_KEY)
     if (saved) {
       const prefs = JSON.parse(saved)
+      if (prefs.baseUrl && typeof prefs.baseUrl === 'string') {
+        baseUrl.value = prefs.baseUrl
+      }
       if (prefs.discoveryMode && Object.values(DISCOVERY_MODES).includes(prefs.discoveryMode)) {
         discoveryMode.value = prefs.discoveryMode
       }
@@ -46,6 +49,9 @@ function loadPreferences() {
       if (prefs.maxPages && typeof prefs.maxPages === 'number' && prefs.maxPages >= 1 && prefs.maxPages <= 20) {
         maxPages.value = prefs.maxPages
       }
+      if (prefs.manualUrls && typeof prefs.manualUrls === 'string') {
+        manualUrls.value = prefs.manualUrls
+      }
     }
   } catch {
     // Ignore invalid stored preferences
@@ -56,10 +62,12 @@ function loadPreferences() {
 function savePreferences() {
   try {
     const prefs = {
+      baseUrl: baseUrl.value,
       discoveryMode: discoveryMode.value,
       service: service.value,
       strategy: strategy.value,
-      maxPages: maxPages.value
+      maxPages: maxPages.value,
+      manualUrls: manualUrls.value
     }
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
   } catch {
@@ -68,7 +76,7 @@ function savePreferences() {
 }
 
 // Watch for preference changes and save
-watch([discoveryMode, service, strategy, maxPages], savePreferences)
+watch([baseUrl, discoveryMode, service, strategy, maxPages, manualUrls], savePreferences)
 
 // Computed
 const isRunning = computed(() => crawlStore.isRunning)

@@ -3,8 +3,9 @@ import { ref, computed } from 'vue'
 import { useIndexedDB } from '@/composables/useIndexedDB'
 
 const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'scores'
+const CRAWL_SESSIONS_STORE = 'crawl-sessions'
 
 /**
  * Extract domain from URL
@@ -68,13 +69,28 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
     error.value = null
 
     try {
-      await indexedDB.open((db) => {
-        // Create object store on first open
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
+      await indexedDB.open((db, oldVersion) => {
+        // Version 1: Create scores store
+        if (oldVersion < 1) {
           const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
           store.createIndex('domain', 'domain', { unique: false })
           store.createIndex('timestamp', 'timestamp', { unique: false })
           store.createIndex('domain_timestamp', ['domain', 'timestamp'], { unique: false })
+        }
+
+        // Version 2: Add crawl support
+        if (oldVersion < 2) {
+          // Create crawl-sessions store
+          if (!db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
+            const crawlStore = db.createObjectStore(CRAWL_SESSIONS_STORE, { keyPath: 'id' })
+            crawlStore.createIndex('domain', 'domain', { unique: false })
+            crawlStore.createIndex('timestamp', 'timestamp', { unique: false })
+            crawlStore.createIndex('status', 'status', { unique: false })
+          }
+
+          // Add new indexes to scores store for crawl support
+          // Note: Cannot add indexes to existing store in upgrade transaction
+          // New fields (crawlSessionId, pageTemplate, pagePath) will be added dynamically
         }
       })
 
@@ -91,15 +107,21 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
 
   /**
    * Load list of domains with their analysis counts
+   * @param {boolean} includeCrawl - Include crawl entries (default: false for simple history)
    */
-  async function loadDomains() {
+  async function loadDomains(includeCrawl = false) {
     try {
       const allScores = await indexedDB.getAll(STORE_NAME)
+
+      // Filter: exclude crawl entries for simple history
+      const filteredScores = includeCrawl
+        ? allScores
+        : allScores.filter(s => !s.crawlSessionId)
 
       // Group by domain
       const domainMap = new Map()
 
-      for (const score of allScores) {
+      for (const score of filteredScores) {
         if (!domainMap.has(score.domain)) {
           domainMap.set(score.domain, {
             domain: score.domain,
@@ -130,9 +152,10 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
    * @param {string} url - Full URL analyzed
    * @param {object} scoreData - Score data
    * @param {object} metadata - Additional metadata
+   * @param {object} crawlInfo - Optional crawl information
    * @returns {Promise<string>} - ID of the new entry
    */
-  async function addScore(url, scoreData, metadata = {}) {
+  async function addScore(url, scoreData, metadata = {}, crawlInfo = null) {
     if (!initialized.value) {
       await initialize()
     }
@@ -150,7 +173,11 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
       strategy: metadata.strategy || 'mobile',
       scores: scoreData.scores || {},
       coreWebVitals: scoreData.coreWebVitals || {},
-      lighthouseVersion: metadata.lighthouseVersion || null
+      lighthouseVersion: metadata.lighthouseVersion || null,
+      // Crawl-specific fields (v2)
+      crawlSessionId: crawlInfo?.sessionId || null,
+      pageTemplate: crawlInfo?.template || null,
+      pagePath: crawlInfo?.path || new URL(url).pathname
     }
 
     try {
@@ -175,8 +202,9 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
   /**
    * Load scores for a specific domain
    * @param {string} domain - Domain name
+   * @param {boolean} includeCrawl - Include crawl entries (default: false)
    */
-  async function loadScoresForDomain(domain) {
+  async function loadScoresForDomain(domain, includeCrawl = false) {
     if (!initialized.value) {
       await initialize()
     }
@@ -185,7 +213,11 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
     currentDomain.value = domain
 
     try {
-      currentScores.value = await indexedDB.getAllByIndex(STORE_NAME, 'domain', domain)
+      const allScores = await indexedDB.getAllByIndex(STORE_NAME, 'domain', domain)
+      // Filter: exclude crawl entries for simple history
+      currentScores.value = includeCrawl
+        ? allScores
+        : allScores.filter(s => !s.crawlSessionId)
     } catch (err) {
       error.value = err.message
       console.error('Failed to load scores for domain:', err)

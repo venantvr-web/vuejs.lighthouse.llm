@@ -76,6 +76,65 @@ app.get('/categories', (req, res) => {
   })
 })
 
+/**
+ * Fetch page content (proxy to avoid CORS)
+ * POST /api/fetch-page
+ * Body: { url: string }
+ */
+app.post('/api/fetch-page', async (req, res) => {
+  const { url } = req.body
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL requise' })
+  }
+
+  // Validate URL
+  try {
+    new URL(url)
+  } catch {
+    return res.status(400).json({ error: 'URL invalide' })
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; LighthouseCrawler/1.0)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8'
+      },
+      redirect: 'follow'
+    })
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Erreur HTTP ${response.status}`,
+        status: response.status
+      })
+    }
+
+    const contentType = response.headers.get('content-type') || ''
+
+    // Handle HTML content
+    if (contentType.includes('text/html') || contentType.includes('application/xhtml')) {
+      const html = await response.text()
+      return res.json({ html, contentType, url: response.url })
+    }
+
+    // Handle XML (sitemap)
+    if (contentType.includes('xml')) {
+      const xml = await response.text()
+      return res.json({ html: xml, contentType, url: response.url })
+    }
+
+    // Other content types
+    return res.status(415).json({ error: 'Type de contenu non supporte', contentType })
+
+  } catch (error) {
+    console.error('[Fetch Error]', error.message)
+    res.status(500).json({ error: error.message })
+  }
+})
+
 // Error handler
 app.use((err, req, res, next) => {
   console.error('[Error]', err)

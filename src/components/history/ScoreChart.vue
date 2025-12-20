@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { Line } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -23,6 +23,29 @@ ChartJS.register(
   Legend,
   Filler
 )
+
+// Dark mode detection
+const isDark = ref(false)
+
+function checkDarkMode() {
+  isDark.value = document.documentElement.classList.contains('dark')
+}
+
+let observer = null
+
+onMounted(() => {
+  checkDarkMode()
+  // Watch for dark mode changes
+  observer = new MutationObserver(checkDarkMode)
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class']
+  })
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
+})
 
 const props = defineProps({
   category: {
@@ -76,7 +99,7 @@ const chartData = computed(() => {
         pointRadius: 4,
         pointHoverRadius: 6,
         pointBackgroundColor: props.color,
-        pointBorderColor: '#fff',
+        pointBorderColor: isDark.value ? '#1f2937' : '#fff',
         pointBorderWidth: 2
       }
     ]
@@ -91,7 +114,9 @@ const chartOptions = computed(() => ({
       display: false
     },
     tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backgroundColor: isDark.value ? 'rgba(31, 41, 55, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+      titleColor: isDark.value ? '#f9fafb' : '#fff',
+      bodyColor: isDark.value ? '#d1d5db' : '#fff',
       padding: 12,
       titleFont: { size: 13 },
       bodyFont: { size: 12 },
@@ -108,19 +133,21 @@ const chartOptions = computed(() => ({
       ticks: {
         maxRotation: 45,
         minRotation: 0,
-        font: { size: 10 }
+        font: { size: 10 },
+        color: isDark.value ? '#9ca3af' : '#6b7280'
       }
     },
     y: {
       min: 0,
       max: 100,
       grid: {
-        color: 'rgba(0, 0, 0, 0.05)'
+        color: isDark.value ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'
       },
       ticks: {
         stepSize: 25,
         callback: (value) => value + '%',
-        font: { size: 10 }
+        font: { size: 10 },
+        color: isDark.value ? '#9ca3af' : '#6b7280'
       }
     }
   },

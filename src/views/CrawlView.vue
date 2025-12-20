@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCrawlStore, CRAWL_SERVICES, CRAWL_STATUS } from '@/stores/crawlStore'
-import { DISCOVERY_MODES } from '@/services/urlDiscovery'
-import { checkServerHealth } from '@/services/localLighthouse'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
+import {DISCOVERY_MODES} from '@/services/urlDiscovery'
+import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -164,10 +164,10 @@ onUnmounted(() => {
       <div class="max-w-5xl mx-auto px-4 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <router-link to="/" class="flex items-center gap-3">
+            <router-link class="flex items-center gap-3" to="/">
               <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </div>
               <div>
@@ -183,18 +183,19 @@ onUnmounted(() => {
 
           <div class="flex items-center gap-2">
             <router-link
-              to="/crawl/history"
-              class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                to="/crawl/history"
             >
               Historique
             </router-link>
             <router-link
-              to="/settings"
-              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                to="/settings"
             >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
+                      stroke-width="2"/>
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </router-link>
           </div>
@@ -209,7 +210,7 @@ onUnmounted(() => {
         <div v-if="isRunning" class="py-12">
           <!-- Progress header -->
           <div class="text-center mb-8">
-            <LoadingSpinner size="xl" :progress="progressPercentage" />
+            <LoadingSpinner :progress="progressPercentage" size="xl"/>
             <p class="mt-6 text-lg font-medium text-gray-900 dark:text-white">
               {{ statusText }}
             </p>
@@ -222,15 +223,15 @@ onUnmounted(() => {
           <div class="max-w-md mx-auto mb-8">
             <div class="flex items-center justify-between text-sm">
               <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-full flex items-center justify-center"
-                  :class="progress.stage === 'discovering'
+                <div :class="progress.stage === 'discovering'
                     ? 'bg-emerald-500 text-white'
                     : progress.stage === 'analyzing' || progress.stage === 'completed'
                       ? 'bg-emerald-500 text-white'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-500'"
+                     class="w-6 h-6 rounded-full flex items-center justify-center"
                 >
-                  <svg v-if="progress.stage !== 'discovering'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  <svg v-if="progress.stage !== 'discovering'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   <span v-else class="text-xs">1</span>
                 </div>
@@ -240,21 +241,21 @@ onUnmounted(() => {
               </div>
 
               <div class="flex-1 h-0.5 mx-4 bg-gray-200 dark:bg-gray-700">
-                <div class="h-full bg-emerald-500 transition-all"
-                  :style="{ width: progress.stage === 'discovering' ? '50%' : progress.stage !== 'idle' ? '100%' : '0%' }"
+                <div :style="{ width: progress.stage === 'discovering' ? '50%' : progress.stage !== 'idle' ? '100%' : '0%' }"
+                     class="h-full bg-emerald-500 transition-all"
                 ></div>
               </div>
 
               <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-full flex items-center justify-center"
-                  :class="progress.stage === 'analyzing'
+                <div :class="progress.stage === 'analyzing'
                     ? 'bg-emerald-500 text-white'
                     : progress.stage === 'completed'
                       ? 'bg-emerald-500 text-white'
                       : 'bg-gray-200 dark:bg-gray-700 text-gray-500'"
+                     class="w-6 h-6 rounded-full flex items-center justify-center"
                 >
-                  <svg v-if="progress.stage === 'completed'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  <svg v-if="progress.stage === 'completed'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   <span v-else class="text-xs">2</span>
                 </div>
@@ -272,25 +273,25 @@ onUnmounted(() => {
             </h3>
             <div class="max-h-40 overflow-y-auto space-y-1">
               <div
-                v-for="(url, index) in discoveredUrls"
-                :key="url"
-                class="flex items-center gap-2 text-sm"
+                  v-for="(url, index) in discoveredUrls"
+                  :key="url"
+                  class="flex items-center gap-2 text-sm"
               >
                 <span class="w-5 text-right text-gray-400 dark:text-gray-500">{{ index + 1 }}.</span>
                 <span
-                  class="truncate"
-                  :class="crawlResults.some(r => r.url === url)
+                    :class="crawlResults.some(r => r.url === url)
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : url === currentUrl
                       ? 'text-gray-900 dark:text-white font-medium'
                       : 'text-gray-500 dark:text-gray-400'"
+                    class="truncate"
                 >
                   {{ url }}
                 </span>
-                <svg v-if="crawlResults.some(r => r.url === url)" class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <svg v-if="crawlResults.some(r => r.url === url)" class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
-                <LoadingSpinner v-else-if="url === currentUrl" size="sm" class="flex-shrink-0" />
+                <LoadingSpinner v-else-if="url === currentUrl" class="flex-shrink-0" size="sm"/>
               </div>
             </div>
           </div>
@@ -298,9 +299,9 @@ onUnmounted(() => {
           <!-- Cancel button -->
           <div class="text-center">
             <button
-              type="button"
-              class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
-              @click="handleCancel"
+                class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
+                type="button"
+                @click="handleCancel"
             >
               Annuler
             </button>
@@ -320,13 +321,13 @@ onUnmounted(() => {
 
           <!-- Error alert -->
           <ErrorAlert
-            v-if="error || crawlStore.error"
-            type="error"
-            title="Erreur de crawl"
-            :message="error || crawlStore.error"
-            dismissible
-            class="mb-6"
-            @dismiss="handleDismissError"
+              v-if="error || crawlStore.error"
+              :message="error || crawlStore.error"
+              class="mb-6"
+              dismissible
+              title="Erreur de crawl"
+              type="error"
+              @dismiss="handleDismissError"
           />
 
           <div class="space-y-6">
@@ -336,10 +337,10 @@ onUnmounted(() => {
                 URL de base
               </label>
               <UrlInput
-                v-model="baseUrl"
-                :loading="false"
-                placeholder="https://example.com"
-                @submit="handleSubmit"
+                  v-model="baseUrl"
+                  :loading="false"
+                  placeholder="https://example.com"
+                  @submit="handleSubmit"
               />
             </div>
 
@@ -350,45 +351,45 @@ onUnmounted(() => {
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <button
-                  type="button"
-                  class="p-4 rounded-lg border-2 text-left transition-all"
-                  :class="discoveryMode === DISCOVERY_MODES.AUTO
+                    :class="discoveryMode === DISCOVERY_MODES.AUTO
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                  @click="discoveryMode = DISCOVERY_MODES.AUTO"
+                    class="p-4 rounded-lg border-2 text-left transition-all"
+                    type="button"
+                    @click="discoveryMode = DISCOVERY_MODES.AUTO"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.AUTO ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <svg :class="discoveryMode === DISCOVERY_MODES.AUTO ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Auto</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Suit les liens internes</div>
                 </button>
 
                 <button
-                  type="button"
-                  class="p-4 rounded-lg border-2 text-left transition-all"
-                  :class="discoveryMode === DISCOVERY_MODES.SITEMAP
+                    :class="discoveryMode === DISCOVERY_MODES.SITEMAP
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                  @click="discoveryMode = DISCOVERY_MODES.SITEMAP"
+                    class="p-4 rounded-lg border-2 text-left transition-all"
+                    type="button"
+                    @click="discoveryMode = DISCOVERY_MODES.SITEMAP"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.SITEMAP ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg :class="discoveryMode === DISCOVERY_MODES.SITEMAP ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Sitemap</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Parse sitemap.xml</div>
                 </button>
 
                 <button
-                  type="button"
-                  class="p-4 rounded-lg border-2 text-left transition-all"
-                  :class="discoveryMode === DISCOVERY_MODES.MANUAL
+                    :class="discoveryMode === DISCOVERY_MODES.MANUAL
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                  @click="discoveryMode = DISCOVERY_MODES.MANUAL"
+                    class="p-4 rounded-lg border-2 text-left transition-all"
+                    type="button"
+                    @click="discoveryMode = DISCOVERY_MODES.MANUAL"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.MANUAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <svg :class="discoveryMode === DISCOVERY_MODES.MANUAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Manuel</div>
                   <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Liste d'URLs</div>
@@ -402,12 +403,12 @@ onUnmounted(() => {
                 Liste des URLs (une par ligne)
               </label>
               <textarea
-                v-model="manualUrls"
-                rows="6"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="https://example.com/page-1
+                  v-model="manualUrls"
+                  class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  placeholder="https://example.com/page-1
 https://example.com/page-2
 https://example.com/page-3"
+                  rows="6"
               ></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Maximum {{ maxPages }} URLs. Les lignes commencant par # sont ignorees.
@@ -421,15 +422,15 @@ https://example.com/page-3"
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <button
-                  type="button"
-                  class="p-4 rounded-lg border-2 text-left transition-all"
-                  :class="service === CRAWL_SERVICES.PAGESPEED
+                    :class="service === CRAWL_SERVICES.PAGESPEED
                     ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                  @click="service = CRAWL_SERVICES.PAGESPEED"
+                    class="p-4 rounded-lg border-2 text-left transition-all"
+                    type="button"
+                    @click="service = CRAWL_SERVICES.PAGESPEED"
                 >
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.PAGESPEED ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" viewBox="0 0 24 24" fill="currentColor">
+                    <svg :class="service === CRAWL_SERVICES.PAGESPEED ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
                     <span class="font-medium text-gray-900 dark:text-white">PageSpeed Insights</span>
@@ -438,20 +439,20 @@ https://example.com/page-3"
                 </button>
 
                 <button
-                  type="button"
-                  class="p-4 rounded-lg border-2 text-left transition-all relative"
-                  :class="[
+                    :class="[
                     service === CRAWL_SERVICES.LOCAL
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
                     !localServerAvailable && 'opacity-60'
                   ]"
-                  :disabled="!localServerAvailable"
-                  @click="localServerAvailable && (service = CRAWL_SERVICES.LOCAL)"
+                    :disabled="!localServerAvailable"
+                    class="p-4 rounded-lg border-2 text-left transition-all relative"
+                    type="button"
+                    @click="localServerAvailable && (service = CRAWL_SERVICES.LOCAL)"
                 >
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.LOCAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                    <svg :class="service === CRAWL_SERVICES.LOCAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
                     <span class="font-medium text-gray-900 dark:text-white">Local Lighthouse</span>
                   </div>
@@ -459,7 +460,7 @@ https://example.com/page-3"
 
                   <!-- Server status -->
                   <div v-if="checkingServer" class="absolute top-2 right-2">
-                    <LoadingSpinner size="sm" />
+                    <LoadingSpinner size="sm"/>
                   </div>
                   <div v-else-if="!localServerAvailable" class="absolute top-2 right-2 text-xs text-orange-500">
                     Serveur non disponible
@@ -478,28 +479,28 @@ https://example.com/page-3"
               </label>
               <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1">
                 <button
-                  type="button"
-                  class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                  :class="strategy === 'mobile'
+                    :class="strategy === 'mobile'
                     ? 'bg-emerald-500 text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                  @click="strategy = 'mobile'"
+                    class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                    type="button"
+                    @click="strategy = 'mobile'"
                 >
-                  <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   Mobile
                 </button>
                 <button
-                  type="button"
-                  class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                  :class="strategy === 'desktop'
+                    :class="strategy === 'desktop'
                     ? 'bg-emerald-500 text-white'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                  @click="strategy = 'desktop'"
+                    class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                    type="button"
+                    @click="strategy = 'desktop'"
                 >
-                  <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   Desktop
                 </button>
@@ -513,11 +514,11 @@ https://example.com/page-3"
               </label>
               <div class="flex items-center gap-4">
                 <input
-                  v-model.number="maxPages"
-                  type="range"
-                  min="1"
-                  max="20"
-                  class="flex-1 h-2 rounded-lg appearance-none cursor-pointer slider-track"
+                    v-model.number="maxPages"
+                    class="flex-1 h-2 rounded-lg appearance-none cursor-pointer slider-track"
+                    max="20"
+                    min="1"
+                    type="range"
                 />
                 <div class="w-14 h-10 flex items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800">
                   <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ maxPages }}</span>
@@ -531,13 +532,13 @@ https://example.com/page-3"
 
             <!-- Submit button -->
             <button
-              type="button"
-              class="submit-crawl-button w-full"
-              :disabled="!canSubmit"
-              @click="handleSubmit"
+                :disabled="!canSubmit"
+                class="submit-crawl-button w-full"
+                type="button"
+                @click="handleSubmit"
             >
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <span>Lancer le crawl</span>
             </button>
@@ -546,8 +547,8 @@ https://example.com/page-3"
           <!-- Info box -->
           <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-blue-700 dark:text-blue-300">
                 <p class="font-medium mb-1">A propos du mode Crawl</p>
@@ -563,8 +564,8 @@ https://example.com/page-3"
           <!-- Rate limiting warning -->
           <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-amber-700 dark:text-amber-300">
                 <p class="font-medium mb-1">Temps d'execution</p>

@@ -121,12 +121,12 @@ You're now using AI to analyze Lighthouse reports!
 
 ### Provider Comparison
 
-| Provider | Speed | Cost | Quality | Free Tier |
-|----------|-------|------|---------|-----------|
-| Gemini   | ⚡⚡⚡ | $ | ⭐⭐⭐⭐ | ✅ Unlimited* |
-| OpenAI   | ⚡⚡ | $$$ | ⭐⭐⭐⭐⭐ | ✅ $5 credit |
-| Claude   | ⚡⚡ | $$ | ⭐⭐⭐⭐⭐ | ✅ $5 credit |
-| Ollama   | ⚡ | FREE | ⭐⭐⭐ | ✅ Unlimited |
+| Provider | Speed | Cost | Quality | Free Tier    |
+|----------|-------|------|---------|--------------|
+| Gemini   | ⚡⚡⚡   | $    | ⭐⭐⭐⭐    | ✅ Unlimited* |
+| OpenAI   | ⚡⚡    | $$$  | ⭐⭐⭐⭐⭐   | ✅ $5 credit  |
+| Claude   | ⚡⚡    | $$   | ⭐⭐⭐⭐⭐   | ✅ $5 credit  |
+| Ollama   | ⚡     | FREE | ⭐⭐⭐     | ✅ Unlimited  |
 
 *Rate limits apply
 

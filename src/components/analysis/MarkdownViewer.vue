@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { marked } from 'marked'
+import {computed} from 'vue'
+import {marked} from 'marked'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import typescript from 'highlight.js/lib/languages/typescript'
@@ -22,8 +22,8 @@ hljs.registerLanguage('bash', bash)
 hljs.registerLanguage('sh', bash)
 
 const props = defineProps({
-  content: { type: String, default: '' },
-  streaming: { type: Boolean, default: false }
+  content: {type: String, default: ''},
+  streaming: {type: Boolean, default: false}
 })
 
 // Configure marked
@@ -33,7 +33,7 @@ marked.setOptions({
   highlight: (code, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return hljs.highlight(code, { language: lang }).value
+        return hljs.highlight(code, {language: lang}).value
       } catch (e) {
         console.error('Highlight error:', e)
       }
@@ -56,7 +56,7 @@ const renderedContent = computed(() => {
 <template>
   <div class="markdown-viewer">
     <div
-      class="prose prose-gray dark:prose-invert max-w-none
+        class="prose prose-gray dark:prose-invert max-w-none
              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-gray-100
              prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
              prose-p:text-gray-700 dark:prose-p:text-gray-300
@@ -69,13 +69,13 @@ const renderedContent = computed(() => {
              prose-pre:text-gray-100
              prose-li:text-gray-700 dark:prose-li:text-gray-300
              prose-strong:text-gray-900 dark:prose-strong:text-gray-100"
-      v-html="renderedContent"
+        v-html="renderedContent"
     />
 
     <!-- Streaming cursor -->
     <span
-      v-if="streaming"
-      class="inline-block w-2 h-5 bg-primary-500 ml-1 animate-pulse rounded-sm"
+        v-if="streaming"
+        class="inline-block w-2 h-5 bg-primary-500 ml-1 animate-pulse rounded-sm"
     />
   </div>
 </template>

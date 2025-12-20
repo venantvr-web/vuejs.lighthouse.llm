@@ -4,23 +4,23 @@
  */
 
 export const comparisonPrompts = {
-  evolutionAnalysis: {
-    name: 'Analyse d\'Évolution',
-    description: 'Comparaison de deux rapports Lighthouse',
-    category: 'comparison',
-    strategy: 'deep',
-    variables: [
-      'url',
-      'beforeDate',
-      'afterDate',
-      'beforeScores',
-      'afterScores',
-      'improvements',
-      'regressions',
-      'metrics'
-    ],
-    tags: ['comparison', 'evolution', 'diff', 'history'],
-    template: `# Analyse d'Évolution - {{url}}
+    evolutionAnalysis: {
+        name: 'Analyse d\'Évolution',
+        description: 'Comparaison de deux rapports Lighthouse',
+        category: 'comparison',
+        strategy: 'deep',
+        variables: [
+            'url',
+            'beforeDate',
+            'afterDate',
+            'beforeScores',
+            'afterScores',
+            'improvements',
+            'regressions',
+            'metrics'
+        ],
+        tags: ['comparison', 'evolution', 'diff', 'history'],
+        template: `# Analyse d'Évolution - {{url}}
 
 ## Rôle
 Tu es un Expert en Analyse de Performance Web, spécialisé dans le suivi d'évolution et l'analyse comparative.
@@ -217,16 +217,16 @@ Résumé pour management (non-technique):
 - ROI: [Retour attendu des optimisations]
 
 Fournis une analyse comparative complète avec recommandations actionnables.`
-  },
+    },
 
-  budgetCompliance: {
-    name: 'Conformité aux Budgets',
-    description: 'Vérification respect des budgets définis',
-    category: 'comparison',
-    strategy: 'specific',
-    variables: ['url', 'budgets', 'actual', 'violations'],
-    tags: ['comparison', 'budget', 'compliance', 'monitoring'],
-    template: `# Conformité aux Budgets Performance - {{url}}
+    budgetCompliance: {
+        name: 'Conformité aux Budgets',
+        description: 'Vérification respect des budgets définis',
+        category: 'comparison',
+        strategy: 'specific',
+        variables: ['url', 'budgets', 'actual', 'violations'],
+        tags: ['comparison', 'budget', 'compliance', 'monitoring'],
+        template: `# Conformité aux Budgets Performance - {{url}}
 
 ## Rôle
 Tu es un Expert en Performance Budgets et monitoring continu des performances web.
@@ -433,16 +433,16 @@ Si les budgets sont trop stricts ou trop laxistes:
 - LCP: < 2.0s (critique pour conversion)
 
 Propose des ajustements de budgets réalistes et ambitieux.`
-  },
+    },
 
-  competitorComparison: {
-    name: 'Comparaison Concurrentielle',
-    description: 'Benchmarking vs concurrents',
-    category: 'comparison',
-    strategy: 'specific',
-    variables: ['url', 'competitors', 'scores', 'metrics', 'features'],
-    tags: ['comparison', 'competitor', 'benchmark', 'analysis'],
-    template: `# Benchmarking Concurrentiel - {{url}}
+    competitorComparison: {
+        name: 'Comparaison Concurrentielle',
+        description: 'Benchmarking vs concurrents',
+        category: 'comparison',
+        strategy: 'specific',
+        variables: ['url', 'competitors', 'scores', 'metrics', 'features'],
+        tags: ['comparison', 'competitor', 'benchmark', 'analysis'],
+        template: `# Benchmarking Concurrentiel - {{url}}
 
 ## Rôle
 Tu es un Expert en Analyse Concurrentielle et Benchmarking Performance Web.
@@ -596,7 +596,7 @@ compareAll()
 Utiliser Google Sheets/Data Studio pour tracker l'évolution vs concurrents.
 
 Fournis une analyse concurrentielle stratégique avec plan d'action.`
-  }
+    }
 };
 
 export default comparisonPrompts;

@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import {computed, onMounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import CategoryTabs from '@/components/analysis/CategoryTabs.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
-import { usePromptEngine } from '@/composables/usePromptEngine.js'
+import {usePromptEngine} from '@/composables/usePromptEngine.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -114,12 +114,12 @@ const categories = computed(() => {
   }
 
   return cats
-    .filter(id => report.value.categories[id])
-    .map(id => ({
-      id,
-      label: labels[id],
-      score: report.value.categories[id]?.score || 0
-    }))
+      .filter(id => report.value.categories[id])
+      .map(id => ({
+        id,
+        label: labels[id],
+        score: report.value.categories[id]?.score || 0
+      }))
 })
 
 const currentScore = computed(() => {
@@ -133,28 +133,28 @@ const failedAudits = computed(() => {
   const categoryAudits = report.value.categories[activeCategory.value].auditRefs || []
 
   return categoryAudits
-    .filter(ref => ref.weight > 0)
-    .map(ref => {
-      const audit = report.value.audits[ref.id]
-      if (!audit) return null
-      return {
-        ...audit,
-        id: ref.id,
-        weight: ref.weight,
-        group: ref.group
-      }
-    })
-    .filter(audit => audit && audit.score !== null && audit.score < 0.9)
-    .sort((a, b) => (a.score || 0) - (b.score || 0))
+      .filter(ref => ref.weight > 0)
+      .map(ref => {
+        const audit = report.value.audits[ref.id]
+        if (!audit) return null
+        return {
+          ...audit,
+          id: ref.id,
+          weight: ref.weight,
+          group: ref.group
+        }
+      })
+      .filter(audit => audit && audit.score !== null && audit.score < 0.9)
+      .sort((a, b) => (a.score || 0) - (b.score || 0))
 })
 
 const buildPrompt = async () => {
   try {
     // Use the J2 template engine to generate the prompt
     const prompt = await promptEngine.generatePrompt(
-      report.value,
-      activeCategory.value,
-      selectedTemplate.value
+        report.value,
+        activeCategory.value,
+        selectedTemplate.value
     )
 
     if (!prompt) {
@@ -167,8 +167,8 @@ const buildPrompt = async () => {
     // Fallback to simple prompt if template fails
     const categoryMeta = promptEngine.getCategoryMeta(activeCategory.value)
     const auditsText = failedAudits.value
-      .map(a => `- ${a.title}: ${a.description?.split('[')[0] || ''}`)
-      .join('\n')
+        .map(a => `- ${a.title}: ${a.description?.split('[')[0] || ''}`)
+        .join('\n')
 
     return `Tu es un ${categoryMeta?.role || 'expert technique'}.
 
@@ -191,15 +191,15 @@ Réponds en français avec une structure Markdown claire.`
 
 const analyzeWithGemini = async (prompt) => {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey.value}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
-      })
-    }
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey.value}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{parts: [{text: prompt}]}],
+          generationConfig: {temperature: 0.7, maxOutputTokens: 8192}
+        })
+      }
   )
 
   const reader = response.body.getReader()
@@ -207,10 +207,10 @@ const analyzeWithGemini = async (prompt) => {
   let buffer = ''
 
   while (true) {
-    const { done, value } = await reader.read()
+    const {done, value} = await reader.read()
     if (done) break
 
-    buffer += decoder.decode(value, { stream: true })
+    buffer += decoder.decode(value, {stream: true})
 
     // Parse JSON chunks
     const lines = buffer.split('\n')
@@ -247,8 +247,8 @@ const analyzeWithOpenAI = async (prompt) => {
     body: JSON.stringify({
       model: 'gpt-4-turbo-preview',
       messages: [
-        { role: 'system', content: 'Tu es un expert technique. Réponds en Markdown.' },
-        { role: 'user', content: prompt }
+        {role: 'system', content: 'Tu es un expert technique. Réponds en Markdown.'},
+        {role: 'user', content: prompt}
       ],
       stream: true,
       temperature: 0.7
@@ -259,7 +259,7 @@ const analyzeWithOpenAI = async (prompt) => {
   const decoder = new TextDecoder()
 
   while (true) {
-    const { done, value } = await reader.read()
+    const {done, value} = await reader.read()
     if (done) break
 
     const chunk = decoder.decode(value)
@@ -276,7 +276,8 @@ const analyzeWithOpenAI = async (prompt) => {
           analysisResult.value += content
           tokenCount.value += 1
         }
-      } catch (e) {}
+      } catch (e) {
+      }
     }
   }
 }
@@ -312,7 +313,7 @@ const cancelAnalysis = () => {
 }
 
 const exportAnalysis = () => {
-  const blob = new Blob([analysisResult.value], { type: 'text/markdown' })
+  const blob = new Blob([analysisResult.value], {type: 'text/markdown'})
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -329,18 +330,19 @@ const exportAnalysis = () => {
       <div class="max-w-6xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <router-link to="/dashboard" class="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <router-link class="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" to="/dashboard">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <span>Dashboard</span>
             </router-link>
           </div>
 
-          <router-link to="/settings" class="btn btn-ghost">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <router-link class="btn btn-ghost" to="/settings">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2"/>
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </router-link>
         </div>
@@ -351,9 +353,9 @@ const exportAnalysis = () => {
     <main class="max-w-6xl mx-auto px-4 py-8">
       <!-- Category tabs -->
       <CategoryTabs
-        v-if="categories.length"
-        :categories="categories"
-        v-model="activeCategory"
+          v-if="categories.length"
+          v-model="activeCategory"
+          :categories="categories"
       />
 
       <div class="mt-8 grid lg:grid-cols-3 gap-8">
@@ -361,7 +363,7 @@ const exportAnalysis = () => {
         <div class="lg:col-span-1 space-y-6">
           <!-- Score card -->
           <div class="card p-6 text-center">
-            <ScoreGauge :score="currentScore" size="lg" />
+            <ScoreGauge :score="currentScore" size="lg"/>
             <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
               {{ categories.find(c => c.id === activeCategory)?.label || '' }}
             </h3>
@@ -371,27 +373,27 @@ const exportAnalysis = () => {
           </div>
 
           <!-- Template selector -->
-          <div class="card p-4" v-if="availableTemplates.length > 1">
+          <div v-if="availableTemplates.length > 1" class="card p-4">
             <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               Type d'analyse
             </h4>
             <div class="space-y-2">
               <label
-                v-for="template in availableTemplates"
-                :key="template.id"
-                class="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors"
-                :class="selectedTemplate === template.id
+                  v-for="template in availableTemplates"
+                  :key="template.id"
+                  :class="selectedTemplate === template.id
                   ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
                   : 'bg-gray-50 dark:bg-gray-800 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'"
+                  class="flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors"
               >
                 <input
-                  type="radio"
-                  :value="template.id"
-                  v-model="selectedTemplate"
-                  class="mt-1"
+                    v-model="selectedTemplate"
+                    :value="template.id"
+                    class="mt-1"
+                    type="radio"
                 />
                 <div class="flex-1 min-w-0">
                   <p class="font-medium text-gray-900 dark:text-white text-sm">
@@ -401,12 +403,12 @@ const exportAnalysis = () => {
                     {{ template.description }}
                   </p>
                   <span
-                    class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full"
-                    :class="{
+                      :class="{
                       'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': template.strategy === 'quick',
                       'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': template.strategy === 'deep',
                       'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': template.strategy === 'specific'
                     }"
+                      class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full"
                   >
                     {{ template.strategy === 'quick' ? 'Rapide' : template.strategy === 'deep' ? 'Approfondi' : 'Specifique' }}
                   </span>
@@ -417,16 +419,16 @@ const exportAnalysis = () => {
 
           <!-- Generate button -->
           <button
-            @click="startAnalysis"
-            :disabled="isStreaming"
-            class="w-full btn btn-primary py-3 text-lg"
+              :disabled="isStreaming"
+              class="w-full btn btn-primary py-3 text-lg"
+              @click="startAnalysis"
           >
-            <svg v-if="!isStreaming" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            <svg v-if="!isStreaming" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             <svg v-else class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
             </svg>
             {{ isStreaming ? 'Analyse en cours...' : 'Générer le plan d\'action' }}
           </button>
@@ -439,28 +441,28 @@ const exportAnalysis = () => {
           <!-- Failed audits list - clickable -->
           <div class="card p-4">
             <h4 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-lighthouse-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg class="w-4 h-4 text-lighthouse-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               Problèmes détectés
             </h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour voir les détails</p>
             <ul class="space-y-1 max-h-64 overflow-y-auto">
               <li
-                v-for="audit in failedAudits"
-                :key="audit.id"
-                @click="selectAudit(audit)"
-                class="flex items-start gap-2 text-sm p-2 rounded-lg cursor-pointer transition-colors"
-                :class="selectedAudit?.id === audit.id
+                  v-for="audit in failedAudits"
+                  :key="audit.id"
+                  :class="selectedAudit?.id === audit.id
                   ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-800'"
+                  class="flex items-start gap-2 text-sm p-2 rounded-lg cursor-pointer transition-colors"
+                  @click="selectAudit(audit)"
               >
                 <span
-                  class="mt-1 w-2 h-2 rounded-full flex-shrink-0"
-                  :class="{
+                    :class="{
                     'bg-lighthouse-red': audit.score < 0.5,
                     'bg-lighthouse-orange': audit.score >= 0.5
                   }"
+                    class="mt-1 w-2 h-2 rounded-full flex-shrink-0"
                 />
                 <span class="flex-1 text-gray-700 dark:text-gray-300">{{ audit.title }}</span>
                 <span class="text-xs text-gray-400">{{ Math.round((audit.score || 0) * 100) }}%</span>
@@ -470,12 +472,12 @@ const exportAnalysis = () => {
 
           <!-- Prompt preview toggle -->
           <button
-            @click="togglePromptPreview"
-            class="w-full btn btn-secondary text-sm flex items-center justify-center gap-2"
+              class="w-full btn btn-secondary text-sm flex items-center justify-center gap-2"
+              @click="togglePromptPreview"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             {{ showPromptPreview ? 'Masquer le prompt' : 'Voir le prompt' }}
           </button>
@@ -489,23 +491,23 @@ const exportAnalysis = () => {
               <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <span
-                    class="w-3 h-3 rounded-full"
-                    :class="{
+                      :class="{
                       'bg-lighthouse-red': selectedAudit.score < 0.5,
                       'bg-lighthouse-orange': selectedAudit.score >= 0.5 && selectedAudit.score < 0.9,
                       'bg-lighthouse-green': selectedAudit.score >= 0.9
                     }"
+                      class="w-3 h-3 rounded-full"
                   />
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     {{ selectedAudit.title }}
                   </h3>
                 </div>
                 <button
-                  @click="selectedAudit = null"
-                  class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    @click="selectedAudit = null"
                 >
-                  <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                 </button>
               </div>
@@ -513,12 +515,12 @@ const exportAnalysis = () => {
               <!-- Score badge -->
               <div class="flex items-center gap-4 mb-4">
                 <span
-                  class="px-3 py-1 rounded-full text-sm font-medium"
-                  :class="{
+                    :class="{
                     'bg-lighthouse-red/10 text-lighthouse-red': selectedAudit.score < 0.5,
                     'bg-lighthouse-orange/10 text-lighthouse-orange': selectedAudit.score >= 0.5 && selectedAudit.score < 0.9,
                     'bg-lighthouse-green/10 text-lighthouse-green': selectedAudit.score >= 0.9
                   }"
+                    class="px-3 py-1 rounded-full text-sm font-medium"
                 >
                   Score: {{ Math.round((selectedAudit.score || 0) * 100) }}%
                 </span>
@@ -577,17 +579,17 @@ const exportAnalysis = () => {
             <div v-if="showPromptPreview" class="card p-4">
               <div class="flex items-center justify-between mb-3">
                 <h4 class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                   Apercu du prompt ({{ selectedTemplate }})
                 </h4>
                 <button
-                  @click="showPromptPreview = false"
-                  class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                    @click="showPromptPreview = false"
                 >
-                  <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                 </button>
               </div>
@@ -597,11 +599,11 @@ const exportAnalysis = () => {
 
           <!-- Analysis Output -->
           <StreamingOutput
-            :content="analysisResult"
-            :is-streaming="isStreaming"
-            :token-count="tokenCount"
-            @cancel="cancelAnalysis"
-            @export="exportAnalysis"
+              :content="analysisResult"
+              :is-streaming="isStreaming"
+              :token-count="tokenCount"
+              @cancel="cancelAnalysis"
+              @export="exportAnalysis"
           />
         </div>
       </div>
@@ -614,6 +616,7 @@ const exportAnalysis = () => {
 .slide-down-leave-active {
   transition: all 0.3s ease;
 }
+
 .slide-down-enter-from,
 .slide-down-leave-to {
   opacity: 0;

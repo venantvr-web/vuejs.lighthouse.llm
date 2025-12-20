@@ -9,8 +9,8 @@ const LOCAL_API = 'http://localhost:3001'
  * Analysis strategies
  */
 export const STRATEGIES = {
-  MOBILE: 'mobile',
-  DESKTOP: 'desktop'
+    MOBILE: 'mobile',
+    DESKTOP: 'desktop'
 }
 
 /**
@@ -18,24 +18,24 @@ export const STRATEGIES = {
  * @returns {Promise<{available: boolean, chromium: boolean}>}
  */
 export async function checkServerHealth() {
-  try {
-    const response = await fetch(`${LOCAL_API}/health`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    })
+    try {
+        const response = await fetch(`${LOCAL_API}/health`, {
+            method: 'GET',
+            headers: {'Accept': 'application/json'}
+        })
 
-    if (!response.ok) {
-      return { available: false, chromium: false }
-    }
+        if (!response.ok) {
+            return {available: false, chromium: false}
+        }
 
-    const data = await response.json()
-    return {
-      available: data.status === 'ok',
-      chromium: data.chromium === true
+        const data = await response.json()
+        return {
+            available: data.status === 'ok',
+            chromium: data.chromium === true
+        }
+    } catch {
+        return {available: false, chromium: false}
     }
-  } catch {
-    return { available: false, chromium: false }
-  }
 }
 
 /**
@@ -48,40 +48,40 @@ export async function checkServerHealth() {
  * @returns {Promise<Object>} Lighthouse report
  */
 export async function analyzeUrl(url, options = {}) {
-  const { strategy = STRATEGIES.MOBILE, categories, signal } = options
+    const {strategy = STRATEGIES.MOBILE, categories, signal} = options
 
-  // Normalize URL
-  let normalizedUrl = url.trim()
-  if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
-    normalizedUrl = 'https://' + normalizedUrl
-  }
-
-  const response = await fetch(`${LOCAL_API}/analyze`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      url: normalizedUrl,
-      strategy,
-      categories
-    }),
-    signal
-  })
-
-  if (!response.ok) {
-    let errorMessage = 'Analyse echouee'
-    try {
-      const error = await response.json()
-      errorMessage = error.error || errorMessage
-    } catch {
-      // Ignore JSON parse errors
+    // Normalize URL
+    let normalizedUrl = url.trim()
+    if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+        normalizedUrl = 'https://' + normalizedUrl
     }
-    throw new Error(errorMessage)
-  }
 
-  return response.json()
+    const response = await fetch(`${LOCAL_API}/analyze`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            url: normalizedUrl,
+            strategy,
+            categories
+        }),
+        signal
+    })
+
+    if (!response.ok) {
+        let errorMessage = 'Analyse echouee'
+        try {
+            const error = await response.json()
+            errorMessage = error.error || errorMessage
+        } catch {
+            // Ignore JSON parse errors
+        }
+        throw new Error(errorMessage)
+    }
+
+    return response.json()
 }
 
 /**
@@ -89,20 +89,20 @@ export async function analyzeUrl(url, options = {}) {
  * @returns {Promise<Array<{id: string, name: string}>>}
  */
 export async function getCategories() {
-  try {
-    const response = await fetch(`${LOCAL_API}/categories`)
-    const data = await response.json()
-    return data.categories
-  } catch {
-    // Return default categories if server is not available
-    return [
-      { id: 'performance', name: 'Performance' },
-      { id: 'accessibility', name: 'Accessibilite' },
-      { id: 'best-practices', name: 'Bonnes Pratiques' },
-      { id: 'seo', name: 'SEO' },
-      { id: 'pwa', name: 'PWA' }
-    ]
-  }
+    try {
+        const response = await fetch(`${LOCAL_API}/categories`)
+        const data = await response.json()
+        return data.categories
+    } catch {
+        // Return default categories if server is not available
+        return [
+            {id: 'performance', name: 'Performance'},
+            {id: 'accessibility', name: 'Accessibilite'},
+            {id: 'best-practices', name: 'Bonnes Pratiques'},
+            {id: 'seo', name: 'SEO'},
+            {id: 'pwa', name: 'PWA'}
+        ]
+    }
 }
 
 /**
@@ -112,9 +112,9 @@ export async function getCategories() {
  * @returns {number} Estimated time in seconds
  */
 export function getEstimatedTime(categories = []) {
-  const baseTime = 10 // Base time in seconds
-  const perCategory = 3 // Additional time per category
+    const baseTime = 10 // Base time in seconds
+    const perCategory = 3 // Additional time per category
 
-  const categoryCount = categories.length || 5
-  return baseTime + (categoryCount * perCategory)
+    const categoryCount = categories.length || 5
+    return baseTime + (categoryCount * perCategory)
 }

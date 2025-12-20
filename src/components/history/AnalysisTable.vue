@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   scores: {
@@ -15,11 +15,11 @@ const sortedScores = computed(() => {
 })
 
 const categories = [
-  { key: 'performance', label: 'Perf' },
-  { key: 'accessibility', label: 'A11y' },
-  { key: 'best-practices', label: 'BP' },
-  { key: 'seo', label: 'SEO' },
-  { key: 'pwa', label: 'PWA' }
+  {key: 'performance', label: 'Perf'},
+  {key: 'accessibility', label: 'A11y'},
+  {key: 'best-practices', label: 'BP'},
+  {key: 'seo', label: 'SEO'},
+  {key: 'pwa', label: 'PWA'}
 ]
 
 function formatDateTime(timestamp) {
@@ -62,51 +62,51 @@ function getStrategyLabel(strategy) {
   <div class="analysis-table-container">
     <table class="analysis-table">
       <thead>
-        <tr>
-          <th class="col-date">Date</th>
-          <th class="col-source">Source</th>
-          <th class="col-strategy">Mode</th>
-          <th v-for="cat in categories" :key="cat.key" class="col-score">
-            {{ cat.label }}
-          </th>
-          <th class="col-actions">Actions</th>
-        </tr>
+      <tr>
+        <th class="col-date">Date</th>
+        <th class="col-source">Source</th>
+        <th class="col-strategy">Mode</th>
+        <th v-for="cat in categories" :key="cat.key" class="col-score">
+          {{ cat.label }}
+        </th>
+        <th class="col-actions">Actions</th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="score in sortedScores" :key="score.id">
-          <td class="col-date">
-            <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
-          </td>
-          <td class="col-source">
-            <span class="source-badge" :class="score.source">
+      <tr v-for="score in sortedScores" :key="score.id">
+        <td class="col-date">
+          <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
+        </td>
+        <td class="col-source">
+            <span :class="score.source" class="source-badge">
               {{ getSourceLabel(score.source) }}
             </span>
-          </td>
-          <td class="col-strategy">
-            <span class="strategy-badge" :class="score.strategy">
+        </td>
+        <td class="col-strategy">
+            <span :class="score.strategy" class="strategy-badge">
               {{ getStrategyLabel(score.strategy) }}
             </span>
-          </td>
-          <td
+        </td>
+        <td
             v-for="cat in categories"
             :key="cat.key"
-            class="col-score"
             :class="getScoreClass(score.scores?.[cat.key])"
-          >
-            {{ formatScore(score.scores?.[cat.key]) }}
-          </td>
-          <td class="col-actions">
-            <button
+            class="col-score"
+        >
+          {{ formatScore(score.scores?.[cat.key]) }}
+        </td>
+        <td class="col-actions">
+          <button
               class="action-btn delete"
               title="Supprimer"
               @click="emit('delete', score.id)"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-              </svg>
-            </button>
-          </td>
-        </tr>
+          >
+            <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
       </tbody>
     </table>
 

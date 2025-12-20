@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   type: {
@@ -68,60 +68,60 @@ function handleDismiss() {
 
 <template>
   <div
-    class="alert-container"
-    :class="[typeConfig.bgClass, typeConfig.borderClass]"
-    role="alert"
+      :class="[typeConfig.bgClass, typeConfig.borderClass]"
+      class="alert-container"
+      role="alert"
   >
     <div class="alert-content">
       <!-- Icon -->
-      <div class="alert-icon" :class="typeConfig.iconClass">
+      <div :class="typeConfig.iconClass" class="alert-icon">
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            :d="typeConfig.icon"
+              :d="typeConfig.icon"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
           />
         </svg>
       </div>
 
       <!-- Content -->
       <div class="alert-body">
-        <h3 v-if="title" class="alert-title" :class="typeConfig.titleClass">
+        <h3 v-if="title" :class="typeConfig.titleClass" class="alert-title">
           {{ title }}
         </h3>
-        <p v-if="message" class="alert-message" :class="typeConfig.textClass">
+        <p v-if="message" :class="typeConfig.textClass" class="alert-message">
           {{ message }}
         </p>
-        <slot />
+        <slot/>
       </div>
 
       <!-- Dismiss button -->
       <button
-        v-if="dismissible"
-        type="button"
-        class="dismiss-button"
-        :class="typeConfig.iconClass"
-        @click="handleDismiss"
+          v-if="dismissible"
+          :class="typeConfig.iconClass"
+          class="dismiss-button"
+          type="button"
+          @click="handleDismiss"
       >
         <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
+              d="M6 18L18 6M6 6l12 12"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
           />
         </svg>
       </button>

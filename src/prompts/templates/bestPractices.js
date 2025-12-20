@@ -4,14 +4,14 @@
  */
 
 export const bestPracticesPrompts = {
-  quickAnalysis: {
-    name: 'Analyse Rapide Bonnes Pratiques',
-    description: 'Vérifications sécurité et standards',
-    category: 'best-practices',
-    strategy: 'quick',
-    variables: ['url', 'score', 'https', 'mixedContent', 'csp', 'deprecatedAPIs', 'vulnerabilities'],
-    tags: ['security', 'best-practices', 'https', 'standards'],
-    template: `# Analyse Bonnes Pratiques - {{url}}
+    quickAnalysis: {
+        name: 'Analyse Rapide Bonnes Pratiques',
+        description: 'Vérifications sécurité et standards',
+        category: 'best-practices',
+        strategy: 'quick',
+        variables: ['url', 'score', 'https', 'mixedContent', 'csp', 'deprecatedAPIs', 'vulnerabilities'],
+        tags: ['security', 'best-practices', 'https', 'standards'],
+        template: `# Analyse Bonnes Pratiques - {{url}}
 
 ## Rôle
 Tu es un Expert Sécurité Web et Bonnes Pratiques, spécialisé dans les standards modernes et la sécurisation des applications JavaScript.
@@ -171,16 +171,16 @@ npm audit --json
 3. Mise à jour dépendances vulnérables
 
 Fournis des solutions de sécurisation concrètes et applicables immédiatement.`
-  },
+    },
 
-  securityAudit: {
-    name: 'Audit Sécurité Approfondi',
-    description: 'Audit de sécurité complet',
-    category: 'best-practices',
-    strategy: 'deep',
-    variables: ['url', 'score', 'headers', 'csp', 'cors', 'cookies', 'dependencies'],
-    tags: ['security', 'audit', 'headers', 'vulnerabilities'],
-    template: `# Audit Sécurité Approfondi - {{url}}
+    securityAudit: {
+        name: 'Audit Sécurité Approfondi',
+        description: 'Audit de sécurité complet',
+        category: 'best-practices',
+        strategy: 'deep',
+        variables: ['url', 'score', 'headers', 'csp', 'cors', 'cookies', 'dependencies'],
+        tags: ['security', 'audit', 'headers', 'vulnerabilities'],
+        template: `# Audit Sécurité Approfondi - {{url}}
 
 ## Rôle
 Tu es un Expert en Sécurité des Applications Web (OWASP), spécialisé dans la sécurisation des applications JavaScript modernes.
@@ -438,16 +438,16 @@ jobs:
 - Scans réguliers (OWASP ZAP)
 
 Fournis un plan de sécurisation complet et des solutions production-ready.`
-  },
+    },
 
-  performanceSecurityBalance: {
-    name: 'Équilibre Performance-Sécurité',
-    description: 'Optimiser sans compromettre la sécurité',
-    category: 'best-practices',
-    strategy: 'specific',
-    variables: ['url', 'performanceScore', 'securityScore', 'conflicts'],
-    tags: ['security', 'performance', 'optimization', 'balance'],
-    template: `# Équilibre Performance-Sécurité - {{url}}
+    performanceSecurityBalance: {
+        name: 'Équilibre Performance-Sécurité',
+        description: 'Optimiser sans compromettre la sécurité',
+        category: 'best-practices',
+        strategy: 'specific',
+        variables: ['url', 'performanceScore', 'securityScore', 'conflicts'],
+        tags: ['security', 'performance', 'optimization', 'balance'],
+        template: `# Équilibre Performance-Sécurité - {{url}}
 
 ## Rôle
 Tu es un Expert en Architecture Web, spécialisé dans l'équilibre entre performance et sécurité.
@@ -591,7 +591,7 @@ location ~* \\.html$ {
 - ✅ Cache strategy sécurisée
 
 Fournis des solutions permettant d'atteindre de hauts scores en performance ET sécurité.`
-  }
+    }
 };
 
 export default bestPracticesPrompts;

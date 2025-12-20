@@ -1,11 +1,11 @@
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 
 const props = defineProps({
-  score: { type: Number, required: true, default: 0 }, // 0-100
-  label: { type: String, default: '' },
-  size: { type: String, default: 'md' }, // sm, md, lg
-  animated: { type: Boolean, default: true }
+  score: {type: Number, required: true, default: 0}, // 0-100
+  label: {type: String, default: ''},
+  size: {type: String, default: 'md'}, // sm, md, lg
+  animated: {type: Boolean, default: true}
 })
 
 const displayScore = ref(0)
@@ -89,42 +89,42 @@ watch(() => props.score, animateScore)
 
 <template>
   <div class="flex flex-col items-center gap-2">
-    <div class="relative" :class="sizeClasses">
+    <div :class="sizeClasses" class="relative">
       <svg class="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
         <!-- Background circle -->
         <circle
-          cx="50"
-          cy="50"
-          r="45"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="8"
-          class="text-gray-200 dark:text-gray-700"
+            class="text-gray-200 dark:text-gray-700"
+            cx="50"
+            cy="50"
+            fill="none"
+            r="45"
+            stroke="currentColor"
+            stroke-width="8"
         />
         <!-- Score arc -->
         <circle
-          cx="50"
-          cy="50"
-          r="45"
-          fill="none"
-          :stroke="scoreColor"
-          stroke-width="8"
-          stroke-linecap="round"
-          :stroke-dasharray="circumference"
-          :stroke-dashoffset="strokeOffset"
-          class="transition-all duration-1000 ease-out"
+            :stroke="scoreColor"
+            :stroke-dasharray="circumference"
+            :stroke-dashoffset="strokeOffset"
+            class="transition-all duration-1000 ease-out"
+            cx="50"
+            cy="50"
+            fill="none"
+            r="45"
+            stroke-linecap="round"
+            stroke-width="8"
         />
       </svg>
 
       <!-- Score number -->
       <div class="absolute inset-0 flex items-center justify-center">
         <div
-          class="flex items-center justify-center rounded-full w-3/4 h-3/4"
-          :class="scoreBgClass"
+            :class="scoreBgClass"
+            class="flex items-center justify-center rounded-full w-3/4 h-3/4"
         >
           <span
-            class="font-bold tabular-nums"
-            :class="[textSizeClasses, scoreTextClass]"
+              :class="[textSizeClasses, scoreTextClass]"
+              class="font-bold tabular-nums"
           >
             {{ displayScore }}
           </span>
@@ -134,9 +134,9 @@ watch(() => props.score, animateScore)
 
     <!-- Label -->
     <span
-      v-if="label"
-      class="font-medium text-gray-600 dark:text-gray-400 text-center"
-      :class="labelSizeClasses"
+        v-if="label"
+        :class="labelSizeClasses"
+        class="font-medium text-gray-600 dark:text-gray-400 text-center"
     >
       {{ label }}
     </span>

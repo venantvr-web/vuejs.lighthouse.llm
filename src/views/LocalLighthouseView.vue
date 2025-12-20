@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useLighthouseStore } from '@/stores/lighthouseStore'
+import {computed, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useLighthouseStore} from '@/stores/lighthouseStore'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
-import { analyzeUrl, checkServerHealth, STRATEGIES, getEstimatedTime } from '@/services/localLighthouse'
+import {analyzeUrl, checkServerHealth, getEstimatedTime, STRATEGIES} from '@/services/localLighthouse'
 
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
@@ -97,9 +97,9 @@ function handleDismissError() {
       <div class="max-w-5xl mx-auto px-4 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <router-link to="/" class="flex items-center gap-3">
+            <router-link class="flex items-center gap-3" to="/">
               <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
@@ -115,12 +115,13 @@ function handleDismissError() {
           </div>
 
           <router-link
-            to="/settings"
-            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              to="/settings"
           >
-            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2"/>
+              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </router-link>
         </div>
@@ -132,14 +133,14 @@ function handleDismissError() {
       <div class="w-full max-w-2xl">
         <!-- Checking server -->
         <div v-if="serverChecking" class="text-center py-12">
-          <LoadingSpinner size="lg" text="Verification du serveur local..." />
+          <LoadingSpinner size="lg" text="Verification du serveur local..."/>
         </div>
 
         <!-- Server not available -->
         <div v-else-if="!serverAvailable" class="text-center py-12">
           <div class="w-16 h-16 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </div>
           <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -160,13 +161,13 @@ function handleDismissError() {
 
           <div class="flex justify-center gap-4">
             <button
-              type="button"
-              class="btn btn-primary"
-              @click="checkServer"
+                class="btn btn-primary"
+                type="button"
+                @click="checkServer"
             >
               Réessayer
             </button>
-            <router-link to="/lighthouse" class="btn btn-secondary">
+            <router-link class="btn btn-secondary" to="/lighthouse">
               Utiliser PageSpeed Insights
             </router-link>
           </div>
@@ -174,7 +175,7 @@ function handleDismissError() {
 
         <!-- Loading state -->
         <div v-else-if="loading" class="text-center py-12">
-          <LoadingSpinner size="xl" :progress="progress" />
+          <LoadingSpinner :progress="progress" size="xl"/>
           <p class="mt-6 text-lg text-gray-600 dark:text-gray-300">
             Analyse en cours avec Chromium...
           </p>
@@ -182,9 +183,9 @@ function handleDismissError() {
             Temps estimé : ~{{ estimatedTime }} secondes
           </p>
           <button
-            type="button"
-            class="mt-6 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
-            @click="handleCancel"
+              class="mt-6 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
+              type="button"
+              @click="handleCancel"
           >
             Annuler
           </button>
@@ -213,28 +214,28 @@ function handleDismissError() {
           <div class="flex justify-center mb-6">
             <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1">
               <button
-                type="button"
-                class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                :class="strategy === 'mobile'
+                  :class="strategy === 'mobile'
                   ? 'bg-green-500 text-white'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                @click="strategy = 'mobile'"
+                  class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                  type="button"
+                  @click="strategy = 'mobile'"
               >
-                <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
                 Mobile
               </button>
               <button
-                type="button"
-                class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                :class="strategy === 'desktop'
+                  :class="strategy === 'desktop'
                   ? 'bg-green-500 text-white'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                @click="strategy = 'desktop'"
+                  class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                  type="button"
+                  @click="strategy = 'desktop'"
               >
-                <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
                 Desktop
               </button>
@@ -243,28 +244,28 @@ function handleDismissError() {
 
           <!-- Error alert -->
           <ErrorAlert
-            v-if="error"
-            type="error"
-            title="Erreur d'analyse"
-            :message="error"
-            dismissible
-            class="mb-6"
-            @dismiss="handleDismissError"
+              v-if="error"
+              :message="error"
+              class="mb-6"
+              dismissible
+              title="Erreur d'analyse"
+              type="error"
+              @dismiss="handleDismissError"
           />
 
           <!-- URL input -->
           <UrlInput
-            v-model="url"
-            :loading="loading"
-            placeholder="https://example.com"
-            @submit="handleSubmit"
+              v-model="url"
+              :loading="loading"
+              placeholder="https://example.com"
+              @submit="handleSubmit"
           />
 
           <!-- Info box -->
           <div class="mt-8 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <div class="flex gap-3">
-              <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-green-700 dark:text-green-300">
                 <p class="font-medium mb-1">Avantages du mode local</p>
@@ -282,7 +283,7 @@ function handleDismissError() {
           <div class="mt-8 text-center">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
               Préférez l'API Google ?
-              <router-link to="/lighthouse" class="text-primary-500 hover:text-primary-600 font-medium">
+              <router-link class="text-primary-500 hover:text-primary-600 font-medium" to="/lighthouse">
                 Utilisez PageSpeed Insights
               </router-link>
             </p>

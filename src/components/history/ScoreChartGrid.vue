@@ -9,22 +9,22 @@ defineProps({
 })
 
 const categories = [
-  { key: 'performance', color: '#ef4444' },
-  { key: 'accessibility', color: '#8b5cf6' },
-  { key: 'best-practices', color: '#3b82f6' },
-  { key: 'seo', color: '#10b981' },
-  { key: 'pwa', color: '#f59e0b' }
+  {key: 'performance', color: '#ef4444'},
+  {key: 'accessibility', color: '#8b5cf6'},
+  {key: 'best-practices', color: '#3b82f6'},
+  {key: 'seo', color: '#10b981'},
+  {key: 'pwa', color: '#f59e0b'}
 ]
 </script>
 
 <template>
   <div class="score-chart-grid">
     <ScoreChart
-      v-for="cat in categories"
-      :key="cat.key"
-      :category="cat.key"
-      :scores="scores"
-      :color="cat.color"
+        v-for="cat in categories"
+        :key="cat.key"
+        :category="cat.key"
+        :color="cat.color"
+        :scores="scores"
     />
   </div>
 </template>

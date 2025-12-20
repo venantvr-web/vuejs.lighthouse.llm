@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import {computed, ref} from 'vue'
 
 const emit = defineEmits(['file-selected', 'report-loaded'])
 
@@ -84,31 +84,31 @@ const clearFile = () => {
 
 <template>
   <div
-    class="relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer"
-    :class="dropZoneClasses"
-    @dragenter="onDragEnter"
-    @dragover="onDragOver"
-    @dragleave="onDragLeave"
-    @drop="onDrop"
-    @click="$refs.fileInput.click()"
+      :class="dropZoneClasses"
+      class="relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer"
+      @click="$refs.fileInput.click()"
+      @dragenter="onDragEnter"
+      @dragleave="onDragLeave"
+      @dragover="onDragOver"
+      @drop="onDrop"
   >
     <input
-      ref="fileInput"
-      type="file"
-      accept=".json"
-      class="hidden"
-      @change="onFileSelect"
+        ref="fileInput"
+        accept=".json"
+        class="hidden"
+        type="file"
+        @change="onFileSelect"
     />
 
     <!-- Drag overlay -->
     <Transition name="fade">
       <div
-        v-if="isDragging"
-        class="absolute inset-0 bg-primary-500/10 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10"
+          v-if="isDragging"
+          class="absolute inset-0 bg-primary-500/10 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10"
       >
         <div class="text-center">
-          <svg class="w-16 h-16 mx-auto text-primary-500 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          <svg class="w-16 h-16 mx-auto text-primary-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
           <p class="mt-4 text-lg font-medium text-primary-600 dark:text-primary-400">
             Deposez votre fichier JSON Lighthouse
@@ -118,9 +118,9 @@ const clearFile = () => {
     </Transition>
 
     <!-- Content -->
-    <div class="p-12 text-center" v-if="!fileName">
+    <div v-if="!fileName" class="p-12 text-center">
       <!-- Lighthouse icon -->
-      <svg class="w-20 h-20 mx-auto text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+      <svg class="w-20 h-20 mx-auto text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
       </svg>
 
@@ -132,8 +132,8 @@ const clearFile = () => {
       </p>
 
       <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
         <span>Export depuis Chrome DevTools > Lighthouse > Save as JSON</span>
       </div>
@@ -142,16 +142,16 @@ const clearFile = () => {
     <!-- File loaded -->
     <div v-else class="p-8 text-center">
       <div class="inline-flex items-center gap-3 px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-full">
-        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
         <span class="font-medium text-green-700 dark:text-green-300">{{ fileName }}</span>
         <button
-          @click.stop="clearFile"
-          class="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded-full transition-colors"
+            class="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded-full transition-colors"
+            @click.stop="clearFile"
         >
-          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
         </button>
       </div>
@@ -161,8 +161,8 @@ const clearFile = () => {
     <Transition name="slide-up">
       <div v-if="error" class="absolute bottom-4 left-4 right-4">
         <div class="flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm">
-          <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
           {{ error }}
         </div>
@@ -176,6 +176,7 @@ const clearFile = () => {
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -185,6 +186,7 @@ const clearFile = () => {
 .slide-up-leave-active {
   transition: all 0.3s ease;
 }
+
 .slide-up-enter-from,
 .slide-up-leave-to {
   opacity: 0;

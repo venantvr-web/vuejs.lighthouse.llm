@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -64,38 +64,38 @@ function handleKeydown(event) {
 
 <template>
   <div class="url-input-container">
-    <div class="input-wrapper" :class="{ 'has-error': error, 'is-valid': isValidUrl && !error }">
+    <div :class="{ 'has-error': error, 'is-valid': isValidUrl && !error }" class="input-wrapper">
       <div class="input-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
       </div>
 
       <input
-        v-model="inputValue"
-        type="url"
-        :placeholder="placeholder"
-        :disabled="disabled || loading"
-        class="url-input"
-        @keydown="handleKeydown"
+          v-model="inputValue"
+          :disabled="disabled || loading"
+          :placeholder="placeholder"
+          class="url-input"
+          type="url"
+          @keydown="handleKeydown"
       />
 
       <button
-        type="button"
-        :disabled="!canSubmit"
-        class="submit-button"
-        @click="handleSubmit"
+          :disabled="!canSubmit"
+          class="submit-button"
+          type="button"
+          @click="handleSubmit"
       >
         <template v-if="loading">
-          <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
           </svg>
           <span class="ml-2">Analyse...</span>
         </template>
         <template v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
           <span class="ml-2">Analyser</span>
         </template>

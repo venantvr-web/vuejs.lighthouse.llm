@@ -1,15 +1,15 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useScoreHistoryStore } from '@/stores/scoreHistoryStore'
-import { useExportPDF } from '@/composables/useExportPDF'
+import {computed, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
+import {useExportPDF} from '@/composables/useExportPDF'
 import DomainList from '@/components/history/DomainList.vue'
 import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
-const { generatePDF, loading: pdfLoading } = useExportPDF()
+const {generatePDF, loading: pdfLoading} = useExportPDF()
 
 const chartsRef = ref(null)
 
@@ -64,13 +64,13 @@ async function exportJSON() {
   exportLoading.value = true
   try {
     const json = await historyStore.exportToJSON(historyStore.currentDomain)
-    const blob = new Blob([json], { type: 'application/json' })
+    const blob = new Blob([json], {type: 'application/json'})
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = historyStore.currentDomain
-      ? `lighthouse-history-${historyStore.currentDomain}.json`
-      : 'lighthouse-history-all.json'
+        ? `lighthouse-history-${historyStore.currentDomain}.json`
+        : 'lighthouse-history-all.json'
     a.click()
     URL.revokeObjectURL(url)
   } catch (err) {
@@ -84,7 +84,7 @@ async function exportAllJSON() {
   exportLoading.value = true
   try {
     const json = await historyStore.exportToJSON()
-    const blob = new Blob([json], { type: 'application/json' })
+    const blob = new Blob([json], {type: 'application/json'})
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -102,9 +102,9 @@ async function exportPDF() {
   if (!historyStore.currentDomain) return
   try {
     await generatePDF(
-      historyStore.currentDomain,
-      historyStore.currentScores,
-      chartsRef.value
+        historyStore.currentDomain,
+        historyStore.currentScores,
+        chartsRef.value
     )
   } catch (err) {
     console.error('PDF export failed:', err)
@@ -127,8 +127,8 @@ function goHome() {
     <!-- Header -->
     <header class="history-header">
       <div class="header-left">
-        <button class="back-btn" @click="goHome" title="Retour">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="back-btn" title="Retour" @click="goHome">
+          <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </button>
@@ -136,21 +136,21 @@ function goHome() {
       </div>
       <div class="header-actions">
         <button
-          class="btn btn-secondary"
-          :disabled="historyStore.isEmpty || exportLoading"
-          @click="exportAllJSON"
+            :disabled="historyStore.isEmpty || exportLoading"
+            class="btn btn-secondary"
+            @click="exportAllJSON"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
           Exporter tout
         </button>
         <button
-          class="btn btn-danger"
-          :disabled="historyStore.isEmpty"
-          @click="confirmClearAll"
+            :disabled="historyStore.isEmpty"
+            class="btn btn-danger"
+            @click="confirmClearAll"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
           </svg>
           Tout supprimer
@@ -163,11 +163,11 @@ function goHome() {
       <!-- Sidebar - Domain List -->
       <aside class="history-sidebar">
         <DomainList
-          :domains="historyStore.domains"
-          :selected-domain="historyStore.currentDomain"
-          :loading="historyStore.loading"
-          @select="handleSelectDomain"
-          @delete="confirmDeleteDomain"
+            :domains="historyStore.domains"
+            :loading="historyStore.loading"
+            :selected-domain="historyStore.currentDomain"
+            @delete="confirmDeleteDomain"
+            @select="handleSelectDomain"
         />
       </aside>
 
@@ -176,7 +176,7 @@ function goHome() {
         <!-- Empty State -->
         <div v-if="historyStore.isEmpty" class="empty-state">
           <div class="empty-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg fill="none" height="64" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="64">
               <path d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
@@ -190,7 +190,7 @@ function goHome() {
         <!-- No Domain Selected -->
         <div v-else-if="!historyStore.currentDomain" class="no-selection">
           <div class="no-selection-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg fill="none" height="48" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="48">
               <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
             </svg>
           </div>
@@ -209,21 +209,21 @@ function goHome() {
             </div>
             <div class="domain-actions">
               <button
-                class="btn btn-secondary btn-sm"
-                :disabled="exportLoading"
-                @click="exportJSON"
+                  :disabled="exportLoading"
+                  class="btn btn-secondary btn-sm"
+                  @click="exportJSON"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                 </svg>
                 JSON
               </button>
               <button
-                class="btn btn-primary btn-sm"
-                :disabled="pdfLoading"
-                @click="exportPDF"
+                  :disabled="pdfLoading"
+                  class="btn btn-primary btn-sm"
+                  @click="exportPDF"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
                   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                   <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
                 </svg>
@@ -236,7 +236,7 @@ function goHome() {
           <section class="charts-section">
             <h3>Evolution des scores</h3>
             <div ref="chartsRef">
-              <ScoreChartGrid :scores="historyStore.currentScores" />
+              <ScoreChartGrid :scores="historyStore.currentScores"/>
             </div>
           </section>
 
@@ -244,8 +244,8 @@ function goHome() {
           <section class="table-section">
             <h3>Historique detaille</h3>
             <AnalysisTable
-              :scores="historyStore.currentScores"
-              @delete="confirmDeleteScore"
+                :scores="historyStore.currentScores"
+                @delete="confirmDeleteScore"
             />
           </section>
         </div>

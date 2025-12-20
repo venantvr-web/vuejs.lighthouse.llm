@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
   categories: {
@@ -7,7 +7,7 @@ const props = defineProps({
     required: true
     // [{ id, label, icon, score }]
   },
-  modelValue: { type: String, default: null }
+  modelValue: {type: String, default: null}
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -45,26 +45,26 @@ const getCategoryIcon = (id) => {
     <!-- Tabs navigation -->
     <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 overflow-x-auto">
       <button
-        v-for="category in categories"
-        :key="category.id"
-        class="relative flex-1 min-w-[120px] py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
-        :class="{
+          v-for="category in categories"
+          :key="category.id"
+          :class="{
           'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50': activeCategory !== category.id,
           'text-gray-900 dark:text-white bg-white dark:bg-gray-700 shadow-sm': activeCategory === category.id
         }"
-        @click="selectCategory(category.id)"
+          class="relative flex-1 min-w-[120px] py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+          @click="selectCategory(category.id)"
       >
         <span class="relative flex items-center justify-center gap-2">
           <!-- Icon -->
-          <span v-html="getCategoryIcon(category.id)" />
+          <span v-html="getCategoryIcon(category.id)"/>
 
           <!-- Label -->
           <span class="hidden sm:inline">{{ category.label }}</span>
 
           <!-- Score badge -->
           <span
-            class="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full"
-            :class="getScoreColor(category.score)"
+              :class="getScoreColor(category.score)"
+              class="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full"
           >
             {{ Math.round(category.score * 100) }}
           </span>
@@ -74,7 +74,7 @@ const getCategoryIcon = (id) => {
 
     <!-- Tab content slot -->
     <div class="mt-6">
-      <slot :active-category="activeCategory" />
+      <slot :active-category="activeCategory"/>
     </div>
   </div>
 </template>

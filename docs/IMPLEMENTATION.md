@@ -30,6 +30,7 @@ src/
 **Purpose:** Parse and extract data from Lighthouse JSON reports.
 
 **Key Features:**
+
 - Validates Lighthouse report structure
 - Extracts category data with scores and weights
 - Calculates Core Web Vitals (LCP, CLS, TBT, FCP, INP) with ratings
@@ -38,6 +39,7 @@ src/
 - Filters failed audits by category
 
 **Usage:**
+
 ```javascript
 import { useLighthouseParser } from '@/composables'
 
@@ -52,6 +54,7 @@ const opportunities = parser.getOpportunities(report)
 **Purpose:** Handle drag and drop file operations with validation.
 
 **Key Features:**
+
 - Drag state management (isDragging, isValidFile)
 - File validation (JSON format, Lighthouse structure, size limits)
 - Drag event handlers (enter, leave, drop)
@@ -59,6 +62,7 @@ const opportunities = parser.getOpportunities(report)
 - Error handling with callbacks
 
 **Usage:**
+
 ```javascript
 import { useDragDrop } from '@/composables'
 
@@ -77,6 +81,7 @@ function handleFile(json, error, file) {
 **Purpose:** Manage dark/light/system theme.
 
 **Key Features:**
+
 - Theme modes: light, dark, system
 - Auto-detect system preference
 - Listen to prefers-color-scheme changes
@@ -85,6 +90,7 @@ function handleFile(json, error, file) {
 - Update color-scheme for native elements
 
 **Usage:**
+
 ```javascript
 import { useTheme } from '@/composables'
 
@@ -99,6 +105,7 @@ console.log(resolvedTheme.value) // 'dark'
 **Purpose:** Export and copy analysis data.
 
 **Key Features:**
+
 - Copy to clipboard (Clipboard API with fallback)
 - Export to Markdown file with download
 - Format data objects for export
@@ -106,6 +113,7 @@ console.log(resolvedTheme.value) // 'dark'
 - Include metadata, scores, CWV, opportunities, failed audits
 
 **Usage:**
+
 ```javascript
 import { useExport } from '@/composables'
 
@@ -120,6 +128,7 @@ exportToMarkdown(analysisData, 'report-filename')
 **Purpose:** Handle LLM streaming responses.
 
 **Key Features:**
+
 - Process SSE (Server-Sent Events) format
 - Handle newline-delimited JSON
 - Support multiple providers (OpenAI, Anthropic, Ollama)
@@ -128,6 +137,7 @@ exportToMarkdown(analysisData, 'report-filename')
 - Handle both streaming and non-streaming responses
 
 **Usage:**
+
 ```javascript
 import { useStreamingResponse } from '@/composables'
 
@@ -147,6 +157,7 @@ while (!done) {
 **Purpose:** Main store for Lighthouse report state.
 
 **State:**
+
 - `currentReport` - Full Lighthouse report object
 - `parsedData` - Extracted and processed data
 - `loading` - Loading state
@@ -155,6 +166,7 @@ while (!done) {
 - `loadedAt` - Load timestamp
 
 **Key Getters:**
+
 - `url` - Page URL from report
 - `scores` - All category scores
 - `coreWebVitals` - CWV metrics with ratings
@@ -163,6 +175,7 @@ while (!done) {
 - `isLoaded` - Report loaded status
 
 **Key Actions:**
+
 - `loadReport(file)` - Load and parse report
 - `clearReport()` - Clear current report
 - `getFailedAudits(categoryId)` - Get failed audits
@@ -176,12 +189,14 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 **Purpose:** Manage application settings.
 
 **State:**
+
 - LLM configuration (provider, model, apiKey, temperature, maxTokens)
 - Ollama configuration (baseUrl, model)
 - Theme configuration
 - UI preferences (lineNumbers, autoAnalyze, saveHistory)
 
 **Key Getters:**
+
 - `currentProvider` - Current LLM provider
 - `isConfigured` - Whether LLM is ready to use
 - `currentModel` - Active model name
@@ -189,6 +204,7 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 - `modelOptions` - Available models for provider
 
 **Key Actions:**
+
 - `setLLMProvider(provider)` - Set provider (openai/anthropic/ollama)
 - `setAPIKey(key)` - Set API key
 - `setTheme(theme)` - Set theme
@@ -196,6 +212,7 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 - `resetSettings()` - Reset to defaults
 
 **Features:**
+
 - Auto-persistence to localStorage
 - Watchers for auto-save on changes
 - Provider-specific model options
@@ -206,11 +223,13 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 **Purpose:** Manage analysis history.
 
 **State:**
+
 - `analyses` - Array of analysis entries
 - `loading` - Loading state
 - `error` - Error messages
 
 **Key Getters:**
+
 - `sortedByDate` - Analyses sorted newest first
 - `groupedByUrl` - Analyses grouped by URL
 - `recentUrls` - 10 most recent unique URLs
@@ -218,6 +237,7 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 - `isEmpty` - Whether history is empty
 
 **Key Actions:**
+
 - `addAnalysis(analysis)` - Add new entry (returns ID)
 - `removeAnalysis(id)` - Remove by ID
 - `getAnalysesByUrl(url)` - Filter by URL
@@ -226,6 +246,7 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 - `exportHistory()` / `importHistory(json)` - Backup/restore
 
 **Features:**
+
 - Limit to 100 entries max
 - Auto-truncate data for storage efficiency
 - localStorage quota handling
@@ -237,6 +258,7 @@ Uses `useLighthouseParser` composable internally for all parsing operations.
 ### 1. Composition API Pattern
 
 All composables follow Vue 3 Composition API best practices:
+
 - Return reactive refs and computed values
 - Expose methods for actions
 - Keep state encapsulated
@@ -245,6 +267,7 @@ All composables follow Vue 3 Composition API best practices:
 ### 2. Store Pattern (Pinia)
 
 Stores follow Pinia setup syntax:
+
 - Use `defineStore` with setup function
 - Separate state, getters, and actions
 - Compose with other stores when needed
@@ -253,6 +276,7 @@ Stores follow Pinia setup syntax:
 ### 3. Error Handling
 
 Consistent error handling across all modules:
+
 - Error refs for reactive error state
 - Try-catch blocks with detailed logging
 - Return success/failure booleans
@@ -261,6 +285,7 @@ Consistent error handling across all modules:
 ### 4. Persistence
 
 Smart persistence strategy:
+
 - Settings auto-save to localStorage
 - History with size limits and cleanup
 - Quota exceeded handling
@@ -269,6 +294,7 @@ Smart persistence strategy:
 ### 5. Provider Abstraction
 
 LLM provider abstraction in streaming:
+
 - Support multiple response formats
 - Unified interface for all providers
 - Automatic format detection

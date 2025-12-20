@@ -4,14 +4,14 @@
  */
 
 export const pwaPrompts = {
-  quickAnalysis: {
-    name: 'Analyse Rapide PWA',
-    description: 'Vérification conformité PWA',
-    category: 'pwa',
-    strategy: 'quick',
-    variables: ['url', 'score', 'manifest', 'serviceWorker', 'offline', 'installable'],
-    tags: ['pwa', 'manifest', 'service-worker', 'offline'],
-    template: `# Analyse PWA - {{url}}
+    quickAnalysis: {
+        name: 'Analyse Rapide PWA',
+        description: 'Vérification conformité PWA',
+        category: 'pwa',
+        strategy: 'quick',
+        variables: ['url', 'score', 'manifest', 'serviceWorker', 'offline', 'installable'],
+        tags: ['pwa', 'manifest', 'service-worker', 'offline'],
+        template: `# Analyse PWA - {{url}}
 
 ## Rôle
 Tu es un Expert Progressive Web Apps (PWA), spécialisé dans les Service Workers et l'expérience hors ligne.
@@ -413,16 +413,16 @@ const installPWA = async () => {
 - ✅ Tests sur mobile (Android/iOS)
 
 Fournis une implémentation PWA complète et production-ready.`
-  },
+    },
 
-  offlineStrategy: {
-    name: 'Stratégie Hors Ligne Avancée',
-    description: 'Optimisation expérience offline',
-    category: 'pwa',
-    strategy: 'deep',
-    variables: ['url', 'cacheStrategy', 'offlinePages', 'syncStrategy'],
-    tags: ['pwa', 'offline', 'cache', 'sync'],
-    template: `# Stratégie Hors Ligne Avancée - {{url}}
+    offlineStrategy: {
+        name: 'Stratégie Hors Ligne Avancée',
+        description: 'Optimisation expérience offline',
+        category: 'pwa',
+        strategy: 'deep',
+        variables: ['url', 'cacheStrategy', 'offlinePages', 'syncStrategy'],
+        tags: ['pwa', 'offline', 'cache', 'sync'],
+        template: `# Stratégie Hors Ligne Avancée - {{url}}
 
 ## Rôle
 Tu es un Expert PWA spécialisé dans les stratégies de cache et la synchronisation hors ligne.
@@ -726,7 +726,7 @@ test.describe('Offline functionality', () => {
 \`\`\`
 
 Fournis une stratégie offline complète avec sync et optimistic UI.`
-  }
+    }
 };
 
 export default pwaPrompts;

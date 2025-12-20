@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useCrawlStore, CRAWL_STATUS } from '@/stores/crawlStore'
-import { TEMPLATE_COLORS } from '@/services/templateDetector'
+import {computed, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
+import {TEMPLATE_COLORS} from '@/services/templateDetector'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
-import { jsPDF } from 'jspdf'
+import {jsPDF} from 'jspdf'
 
 const route = useRoute()
 const router = useRouter()
@@ -137,7 +137,7 @@ function exportJSON() {
     }))
   }
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'})
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -208,8 +208,8 @@ function exportPDF() {
       y += 6
       if (template.avgScores) {
         const scores = Object.entries(template.avgScores)
-          .map(([cat, data]) => `${cat}: ${Math.round(data.avg * 100)}%`)
-          .join(' | ')
+            .map(([cat, data]) => `${cat}: ${Math.round(data.avg * 100)}%`)
+            .join(' | ')
         doc.setFontSize(9)
         doc.text(`  ${scores}`, margin, y)
         doc.setFontSize(10)
@@ -302,10 +302,10 @@ onMounted(async () => {
       <div class="max-w-6xl mx-auto px-4 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <router-link to="/crawl" class="flex items-center gap-3">
+            <router-link class="flex items-center gap-3" to="/crawl">
               <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </div>
               <div>
@@ -323,36 +323,36 @@ onMounted(async () => {
             <!-- Export buttons -->
             <div v-if="session" class="flex items-center gap-1 mr-2">
               <button
-                @click="exportJSON"
-                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-                title="Exporter en JSON"
+                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+                  title="Exporter en JSON"
+                  @click="exportJSON"
               >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
                 JSON
               </button>
               <button
-                @click="exportPDF"
-                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-                title="Exporter en PDF"
+                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+                  title="Exporter en PDF"
+                  @click="exportPDF"
               >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
                 PDF
               </button>
             </div>
 
             <router-link
-              to="/crawl/history"
-              class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                to="/crawl/history"
             >
               Historique
             </router-link>
             <router-link
-              to="/crawl"
-              class="px-3 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                class="px-3 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                to="/crawl"
             >
               Nouveau crawl
             </router-link>
@@ -366,16 +366,16 @@ onMounted(async () => {
       <div class="max-w-6xl mx-auto">
         <!-- Loading -->
         <div v-if="loading" class="flex justify-center py-12">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner size="lg"/>
         </div>
 
         <!-- Error -->
         <ErrorAlert
-          v-else-if="error"
-          type="error"
-          title="Erreur"
-          :message="error"
-          class="mb-6"
+            v-else-if="error"
+            :message="error"
+            class="mb-6"
+            title="Erreur"
+            type="error"
         />
 
         <!-- Results -->
@@ -412,8 +412,8 @@ onMounted(async () => {
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-6">
               <div v-for="(data, category) in aggregateScores" :key="category" class="text-center">
                 <ScoreGauge
-                  :score="Math.round(data.avg * 100)"
-                  size="sm"
+                    :score="Math.round(data.avg * 100)"
+                    size="sm"
                 />
                 <div class="mt-2 text-sm font-medium text-gray-900 dark:text-white capitalize">
                   {{ category.replace('-', ' ') }}
@@ -432,19 +432,19 @@ onMounted(async () => {
             </h2>
             <div class="space-y-4">
               <div
-                v-for="template in templates"
-                :key="template.name"
-                class="p-4 rounded-lg border-2 cursor-pointer transition-all"
-                :class="selectedTemplate === template.name
+                  v-for="template in templates"
+                  :key="template.name"
+                  :class="selectedTemplate === template.name
                   ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
-                @click="filterByTemplate(template.name)"
+                  class="p-4 rounded-lg border-2 cursor-pointer transition-all"
+                  @click="filterByTemplate(template.name)"
               >
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-3">
                     <div
-                      class="w-4 h-4 rounded"
-                      :style="{ backgroundColor: getTemplateColor(template.name) }"
+                        :style="{ backgroundColor: getTemplateColor(template.name) }"
+                        class="w-4 h-4 rounded"
                     ></div>
                     <span class="font-medium text-gray-900 dark:text-white">
                       {{ template.name }}
@@ -454,13 +454,13 @@ onMounted(async () => {
                     </span>
                   </div>
                   <svg
-                    class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform"
-                    :class="selectedTemplate === template.name && 'rotate-180'"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                      :class="selectedTemplate === template.name && 'rotate-180'"
+                      class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                   >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
                 </div>
 
@@ -473,9 +473,9 @@ onMounted(async () => {
                     </div>
                     <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        class="h-full rounded-full transition-all"
-                        :class="catData.avg >= 0.9 ? 'bg-emerald-500' : catData.avg >= 0.5 ? 'bg-amber-500' : 'bg-red-500'"
-                        :style="{ width: `${catData.avg * 100}%` }"
+                          :class="catData.avg >= 0.9 ? 'bg-emerald-500' : catData.avg >= 0.5 ? 'bg-amber-500' : 'bg-red-500'"
+                          :style="{ width: `${catData.avg * 100}%` }"
+                          class="h-full rounded-full transition-all"
                       ></div>
                     </div>
                   </div>
@@ -494,9 +494,9 @@ onMounted(async () => {
                 </span>
               </h2>
               <button
-                v-if="selectedTemplate"
-                class="text-sm text-emerald-500 hover:text-emerald-600"
-                @click="selectedTemplate = null"
+                  v-if="selectedTemplate"
+                  class="text-sm text-emerald-500 hover:text-emerald-600"
+                  @click="selectedTemplate = null"
               >
                 Voir tout
               </button>
@@ -505,83 +505,83 @@ onMounted(async () => {
             <div class="overflow-x-auto">
               <table class="w-full">
                 <thead>
-                  <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                    <th class="pb-3 font-medium">URL</th>
-                    <th class="pb-3 font-medium">Template</th>
-                    <th class="pb-3 font-medium text-center">Perf</th>
-                    <th class="pb-3 font-medium text-center">A11y</th>
-                    <th class="pb-3 font-medium text-center">BP</th>
-                    <th class="pb-3 font-medium text-center">SEO</th>
-                    <th class="pb-3 font-medium text-center">PWA</th>
-                  </tr>
+                <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                  <th class="pb-3 font-medium">URL</th>
+                  <th class="pb-3 font-medium">Template</th>
+                  <th class="pb-3 font-medium text-center">Perf</th>
+                  <th class="pb-3 font-medium text-center">A11y</th>
+                  <th class="pb-3 font-medium text-center">BP</th>
+                  <th class="pb-3 font-medium text-center">SEO</th>
+                  <th class="pb-3 font-medium text-center">PWA</th>
+                </tr>
                 </thead>
                 <tbody>
-                  <tr
+                <tr
                     v-for="urlInfo in filteredUrls"
                     :key="urlInfo.url"
                     class="border-b border-gray-100 dark:border-gray-700/50 last:border-0"
-                  >
-                    <td class="py-3 pr-4">
-                      <div class="flex items-center gap-2">
+                >
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2">
                         <span
-                          v-if="urlInfo.analyzed"
-                          class="w-2 h-2 rounded-full bg-emerald-500"
+                            v-if="urlInfo.analyzed"
+                            class="w-2 h-2 rounded-full bg-emerald-500"
                         ></span>
-                        <span
+                      <span
                           v-else-if="urlInfo.error"
                           class="w-2 h-2 rounded-full bg-red-500"
-                        ></span>
-                        <span
+                      ></span>
+                      <span
                           v-else
                           class="w-2 h-2 rounded-full bg-gray-300"
-                        ></span>
-                        <a
+                      ></span>
+                      <a
                           :href="urlInfo.url"
-                          target="_blank"
-                          class="text-sm text-gray-900 dark:text-white hover:text-emerald-500 truncate max-w-xs"
                           :title="urlInfo.url"
-                        >
-                          {{ urlInfo.path || urlInfo.url }}
-                        </a>
-                      </div>
-                    </td>
-                    <td class="py-3">
+                          class="text-sm text-gray-900 dark:text-white hover:text-emerald-500 truncate max-w-xs"
+                          target="_blank"
+                      >
+                        {{ urlInfo.path || urlInfo.url }}
+                      </a>
+                    </div>
+                  </td>
+                  <td class="py-3">
                       <span
-                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium"
-                        :style="{
+                          :style="{
                           backgroundColor: getTemplateColor(urlInfo.template) + '20',
                           color: getTemplateColor(urlInfo.template)
                         }"
+                          class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium"
                       >
                         {{ urlInfo.template || 'other' }}
                       </span>
-                    </td>
-                    <td class="py-3 text-center">
+                  </td>
+                  <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColor(urlInfo.scores?.performance)]">
                         {{ formatScore(urlInfo.scores?.performance) }}
                       </span>
-                    </td>
-                    <td class="py-3 text-center">
+                  </td>
+                  <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColor(urlInfo.scores?.accessibility)]">
                         {{ formatScore(urlInfo.scores?.accessibility) }}
                       </span>
-                    </td>
-                    <td class="py-3 text-center">
+                  </td>
+                  <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColor(urlInfo.scores?.['best-practices'])]">
                         {{ formatScore(urlInfo.scores?.['best-practices']) }}
                       </span>
-                    </td>
-                    <td class="py-3 text-center">
+                  </td>
+                  <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColor(urlInfo.scores?.seo)]">
                         {{ formatScore(urlInfo.scores?.seo) }}
                       </span>
-                    </td>
-                    <td class="py-3 text-center">
+                  </td>
+                  <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColor(urlInfo.scores?.pwa)]">
                         {{ formatScore(urlInfo.scores?.pwa) }}
                       </span>
-                    </td>
-                  </tr>
+                  </td>
+                </tr>
                 </tbody>
               </table>
             </div>
@@ -596,8 +596,8 @@ onMounted(async () => {
         <div v-else class="text-center py-12">
           <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune session trouvee</p>
           <router-link
-            to="/crawl"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              to="/crawl"
           >
             Lancer un crawl
           </router-link>

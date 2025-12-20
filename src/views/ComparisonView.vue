@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import {computed, ref} from 'vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import DropZone from '@/components/upload/DropZone.vue'
 
@@ -56,9 +56,9 @@ const clearReport = (which) => {
     <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       <div class="max-w-6xl mx-auto px-4 py-4">
         <div class="flex items-center gap-4">
-          <router-link to="/dashboard" class="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <router-link class="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" to="/dashboard">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             <span>Retour</span>
           </router-link>
@@ -78,7 +78,7 @@ const clearReport = (which) => {
           </div>
 
           <div v-if="!reportA">
-            <DropZone @report-loaded="onReportALoaded" />
+            <DropZone @report-loaded="onReportALoaded"/>
           </div>
 
           <div v-else class="card p-6">
@@ -86,16 +86,16 @@ const clearReport = (which) => {
               <span class="text-sm text-gray-500 dark:text-gray-400 truncate">
                 {{ reportA.finalUrl || reportA.requestedUrl }}
               </span>
-              <button @click="clearReport('A')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" @click="clearReport('A')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </button>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div v-for="(score, key) in scoresA" :key="key" class="text-center">
-                <ScoreGauge :score="score" :label="categoryLabels[key]" size="sm" />
+                <ScoreGauge :label="categoryLabels[key]" :score="score" size="sm"/>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@ const clearReport = (which) => {
           </div>
 
           <div v-if="!reportB">
-            <DropZone @report-loaded="onReportBLoaded" />
+            <DropZone @report-loaded="onReportBLoaded"/>
           </div>
 
           <div v-else class="card p-6">
@@ -117,16 +117,16 @@ const clearReport = (which) => {
               <span class="text-sm text-gray-500 dark:text-gray-400 truncate">
                 {{ reportB.finalUrl || reportB.requestedUrl }}
               </span>
-              <button @click="clearReport('B')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" @click="clearReport('B')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </button>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div v-for="(score, key) in scoresB" :key="key" class="text-center">
-                <ScoreGauge :score="score" :label="categoryLabels[key]" size="sm" />
+                <ScoreGauge :label="categoryLabels[key]" :score="score" size="sm"/>
               </div>
             </div>
           </div>
@@ -139,9 +139,9 @@ const clearReport = (which) => {
 
         <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div
-            v-for="(diff, key) in scoreDiffs"
-            :key="key"
-            class="card p-4"
+              v-for="(diff, key) in scoreDiffs"
+              :key="key"
+              class="card p-4"
           >
             <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">
               {{ categoryLabels[key] }}
@@ -158,18 +158,18 @@ const clearReport = (which) => {
               </div>
 
               <div
-                class="flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium"
-                :class="{
+                  :class="{
                   'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': diff > 0,
                   'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': diff < 0,
                   'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': diff === 0
                 }"
+                  class="flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium"
               >
-                <svg v-if="diff > 0" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                <svg v-if="diff > 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
-                <svg v-else-if="diff < 0" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                <svg v-else-if="diff < 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
                 <span>{{ diff > 0 ? '+' : '' }}{{ diff }}</span>
               </div>

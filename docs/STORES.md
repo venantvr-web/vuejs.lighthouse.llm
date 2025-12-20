@@ -88,6 +88,7 @@ const config = settings.llmConfig
 #### State
 
 **LLM Configuration:**
+
 - `llmProvider` - 'openai' | 'anthropic' | 'ollama'
 - `llmModel` - Model identifier
 - `apiKey` - API key for OpenAI/Anthropic
@@ -95,10 +96,12 @@ const config = settings.llmConfig
 - `maxTokens` - Max tokens for response
 
 **Ollama Configuration:**
+
 - `ollamaBaseUrl` - Ollama server URL (default: http://localhost:11434)
 - `ollamaModel` - Ollama model name
 
 **UI Preferences:**
+
 - `theme` - 'light' | 'dark' | 'system'
 - `showLineNumbers` - Show line numbers in code blocks
 - `autoAnalyze` - Auto-analyze on report load
@@ -134,17 +137,20 @@ const config = settings.llmConfig
 #### Model Options
 
 **OpenAI:**
+
 - GPT-4o
 - GPT-4o Mini
 - GPT-4 Turbo
 - GPT-3.5 Turbo
 
 **Anthropic:**
+
 - Claude 3.5 Sonnet
 - Claude 3.5 Haiku
 - Claude 3 Opus
 
 **Ollama:**
+
 - Llama 3.2
 - Llama 3.1
 - Mistral

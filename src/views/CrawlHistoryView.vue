@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCrawlStore, CRAWL_STATUS } from '@/stores/crawlStore'
+import {computed, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 
@@ -138,10 +138,10 @@ onMounted(async () => {
       <div class="max-w-5xl mx-auto px-4 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <router-link to="/crawl" class="flex items-center gap-3">
+            <router-link class="flex items-center gap-3" to="/crawl">
               <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </div>
               <div>
@@ -156,8 +156,8 @@ onMounted(async () => {
           </div>
 
           <router-link
-            to="/crawl"
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              to="/crawl"
           >
             Nouveau crawl
           </router-link>
@@ -170,25 +170,25 @@ onMounted(async () => {
       <div class="max-w-5xl mx-auto">
         <!-- Loading -->
         <div v-if="loading" class="flex justify-center py-12">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner size="lg"/>
         </div>
 
         <!-- Error -->
         <ErrorAlert
-          v-else-if="error"
-          type="error"
-          title="Erreur"
-          :message="error"
-          dismissible
-          class="mb-6"
-          @dismiss="error = ''"
+            v-else-if="error"
+            :message="error"
+            class="mb-6"
+            dismissible
+            title="Erreur"
+            type="error"
+            @dismiss="error = ''"
         />
 
         <!-- Empty state -->
         <div v-else-if="isEmpty" class="text-center py-16">
           <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -198,11 +198,11 @@ onMounted(async () => {
             Lancez votre premier crawl pour analyser plusieurs pages de votre site.
           </p>
           <router-link
-            to="/crawl"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              to="/crawl"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             Lancer un crawl
           </router-link>
@@ -211,10 +211,10 @@ onMounted(async () => {
         <!-- Sessions list -->
         <div v-else class="space-y-4">
           <div
-            v-for="session in sessions"
-            :key="session.id"
-            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors cursor-pointer"
-            @click="viewSession(session.id)"
+              v-for="session in sessions"
+              :key="session.id"
+              class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors cursor-pointer"
+              @click="viewSession(session.id)"
           >
             <div class="flex items-start justify-between gap-4">
               <!-- Left: Info -->
@@ -240,8 +240,8 @@ onMounted(async () => {
                 <!-- Average score -->
                 <div v-if="getAverageScore(session.aggregateScores) !== null" class="text-center">
                   <div
-                    class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold"
-                    :class="getScoreColorClass(getAverageScore(session.aggregateScores))"
+                      :class="getScoreColorClass(getAverageScore(session.aggregateScores))"
+                      class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold"
                   >
                     {{ formatScore(getAverageScore(session.aggregateScores)) }}
                   </div>
@@ -251,12 +251,12 @@ onMounted(async () => {
                 <!-- Actions -->
                 <div class="flex items-center gap-2" @click.stop>
                   <button
-                    class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    title="Supprimer"
-                    @click="confirmDelete(session.id)"
+                      class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Supprimer"
+                      @click="confirmDelete(session.id)"
                   >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
                   </button>
                 </div>
@@ -266,19 +266,19 @@ onMounted(async () => {
             <!-- Template summary (if available) -->
             <div v-if="session.templates && session.templates.length > 0" class="mt-4 flex flex-wrap gap-2">
               <span
-                v-for="template in session.templates.slice(0, 5)"
-                :key="template.name"
-                class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300"
+                  v-for="template in session.templates.slice(0, 5)"
+                  :key="template.name"
+                  class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-300"
               >
                 <span
-                  class="w-2 h-2 rounded-full"
-                  :style="{ backgroundColor: template.color }"
+                    :style="{ backgroundColor: template.color }"
+                    class="w-2 h-2 rounded-full"
                 ></span>
                 {{ template.name }} ({{ template.count }})
               </span>
               <span
-                v-if="session.templates.length > 5"
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 dark:text-gray-400"
+                  v-if="session.templates.length > 5"
+                  class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 dark:text-gray-400"
               >
                 +{{ session.templates.length - 5 }} autres
               </span>
@@ -291,9 +291,9 @@ onMounted(async () => {
     <!-- Delete confirmation modal -->
     <Teleport to="body">
       <div
-        v-if="deleteConfirm"
-        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-        @click.self="cancelDelete"
+          v-if="deleteConfirm"
+          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          @click.self="cancelDelete"
       >
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -304,14 +304,14 @@ onMounted(async () => {
           </p>
           <div class="flex justify-end gap-3">
             <button
-              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
-              @click="cancelDelete"
+                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
+                @click="cancelDelete"
             >
               Annuler
             </button>
             <button
-              class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-              @click="deleteSession(deleteConfirm)"
+                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                @click="deleteSession(deleteConfirm)"
             >
               Supprimer
             </button>

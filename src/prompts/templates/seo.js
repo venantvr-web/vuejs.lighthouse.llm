@@ -4,14 +4,14 @@
  */
 
 export const seoPrompts = {
-  quickAnalysis: {
-    name: 'Analyse Rapide SEO',
-    description: 'Vérifications SEO fondamentales',
-    category: 'seo',
-    strategy: 'quick',
-    variables: ['url', 'score', 'title', 'description', 'metaTags', 'headings', 'crawlable'],
-    tags: ['seo', 'quick', 'meta', 'basics'],
-    template: `# Analyse SEO - {{url}}
+    quickAnalysis: {
+        name: 'Analyse Rapide SEO',
+        description: 'Vérifications SEO fondamentales',
+        category: 'seo',
+        strategy: 'quick',
+        variables: ['url', 'score', 'title', 'description', 'metaTags', 'headings', 'crawlable'],
+        tags: ['seo', 'quick', 'meta', 'basics'],
+        template: `# Analyse SEO - {{url}}
 
 ## Rôle
 Tu es un Consultant SEO Technique spécialisé dans l'optimisation des applications Vue.js et Single Page Applications.
@@ -84,16 +84,16 @@ Solutions pour les problèmes SEO spécifiques aux SPA Vue.js:
 3 améliorations rapides et à fort impact.
 
 Fournis des exemples de code directement intégrables dans Vue.js 3.`
-  },
+    },
 
-  technicalSEO: {
-    name: 'Analyse SEO Technique Avancée',
-    description: 'Audit technique complet',
-    category: 'seo',
-    strategy: 'deep',
-    variables: ['url', 'score', 'canonical', 'robots', 'sitemap', 'hreflang', 'structured'],
-    tags: ['seo', 'technical', 'advanced', 'audit'],
-    template: `# Audit SEO Technique Avancé - {{url}}
+    technicalSEO: {
+        name: 'Analyse SEO Technique Avancée',
+        description: 'Audit technique complet',
+        category: 'seo',
+        strategy: 'deep',
+        variables: ['url', 'score', 'canonical', 'robots', 'sitemap', 'hreflang', 'structured'],
+        tags: ['seo', 'technical', 'advanced', 'audit'],
+        template: `# Audit SEO Technique Avancé - {{url}}
 
 ## Rôle
 Tu es un Expert SEO Technique avec une spécialisation dans les applications JavaScript modernes (Vue.js, SPA).
@@ -213,16 +213,16 @@ Sitemap: https://{{url}}/sitemap.xml
 - Alertes sur problèmes d'indexation
 
 Fournis des solutions techniques complètes et directement implémentables.`
-  },
+    },
 
-  contentSEO: {
-    name: 'Analyse SEO du Contenu',
-    description: 'Optimisation du contenu et des mots-clés',
-    category: 'seo',
-    strategy: 'specific',
-    variables: ['url', 'title', 'description', 'headings', 'textContent', 'images', 'links'],
-    tags: ['seo', 'content', 'keywords', 'optimization'],
-    template: `# Analyse SEO du Contenu - {{url}}
+    contentSEO: {
+        name: 'Analyse SEO du Contenu',
+        description: 'Optimisation du contenu et des mots-clés',
+        category: 'seo',
+        strategy: 'specific',
+        variables: ['url', 'title', 'description', 'headings', 'textContent', 'images', 'links'],
+        tags: ['seo', 'content', 'keywords', 'optimization'],
+        template: `# Analyse SEO du Contenu - {{url}}
 
 ## Rôle
 Tu es un Expert en Rédaction et Optimisation SEO, spécialisé dans le contenu web et le référencement naturel.
@@ -328,16 +328,16 @@ Analyse le contenu SEO et fournis:
 Types de rich snippets recommandés pour améliorer la visibilité SERP.
 
 Fournis des recommandations actionnables pour améliorer le référencement du contenu.`
-  },
+    },
 
-  mobileSEO: {
-    name: 'Analyse SEO Mobile',
-    description: 'Optimisation Mobile-First',
-    category: 'seo',
-    strategy: 'specific',
-    variables: ['url', 'score', 'viewport', 'mobileFriendly', 'tapTargets', 'fontSize'],
-    tags: ['seo', 'mobile', 'responsive', 'mobile-first'],
-    template: `# Audit SEO Mobile - {{url}}
+    mobileSEO: {
+        name: 'Analyse SEO Mobile',
+        description: 'Optimisation Mobile-First',
+        category: 'seo',
+        strategy: 'specific',
+        variables: ['url', 'score', 'viewport', 'mobileFriendly', 'tapTargets', 'fontSize'],
+        tags: ['seo', 'mobile', 'responsive', 'mobile-first'],
+        template: `# Audit SEO Mobile - {{url}}
 
 ## Rôle
 Tu es un Expert SEO Mobile-First, spécialisé dans l'optimisation pour l'indexation mobile de Google.
@@ -417,7 +417,7 @@ Optimise le site pour l'indexation mobile-first de Google:
 - Lighthouse mobile audit
 
 Fournis des solutions pour un SEO mobile optimal compatible avec l'indexation mobile-first.`
-  }
+    }
 };
 
 export default seoPrompts;

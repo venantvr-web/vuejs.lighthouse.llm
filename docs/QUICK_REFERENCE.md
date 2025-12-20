@@ -5,6 +5,7 @@ Fast reference for Vue.js composables and Pinia stores in the Lighthouse Analyze
 ## Composables Cheat Sheet
 
 ### useLighthouseParser
+
 ```javascript
 const { parseReport, getCoreWebVitals, getOpportunities, getFailedAudits } = useLighthouseParser()
 
@@ -15,6 +16,7 @@ const failed = getFailedAudits(report, 'performance') // Score < 0.9
 ```
 
 ### useDragDrop
+
 ```javascript
 const { isDragging, isValidFile, onDrop } = useDragDrop()
 
@@ -26,6 +28,7 @@ function handleFile(json, error, file) { }
 ```
 
 ### useTheme
+
 ```javascript
 const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme()
 
@@ -35,6 +38,7 @@ toggleTheme()              // Switch light/dark
 ```
 
 ### useExport
+
 ```javascript
 const { copyToClipboard, exportToMarkdown } = useExport()
 
@@ -43,6 +47,7 @@ exportToMarkdown(analysis, 'filename')   // Download .md file
 ```
 
 ### useStreamingResponse
+
 ```javascript
 const { content, isComplete, processChunk, reset } = useStreamingResponse()
 
@@ -54,6 +59,7 @@ processChunk(chunk)   // Process SSE/JSON chunk
 ## Store Cheat Sheet
 
 ### lighthouseStore
+
 ```javascript
 const lighthouse = useLighthouseStore()
 
@@ -73,6 +79,7 @@ lighthouse.clearReport()
 ```
 
 ### settingsStore
+
 ```javascript
 const settings = useSettingsStore()
 
@@ -91,6 +98,7 @@ settings.llmConfig                       // Complete config object
 ```
 
 ### historyStore
+
 ```javascript
 const history = useHistoryStore()
 
@@ -115,6 +123,7 @@ history.clearHistory()
 ## Common Patterns
 
 ### Load and Analyze Report
+
 ```javascript
 import { useLighthouseStore, useHistoryStore } from '@/stores'
 import { useDragDrop } from '@/composables'
@@ -137,6 +146,7 @@ async function handleFile(json, error) {
 ```
 
 ### Stream LLM Analysis
+
 ```javascript
 import { useStreamingResponse } from '@/composables'
 import { useSettingsStore } from '@/stores'
@@ -162,6 +172,7 @@ async function analyze(report) {
 ```
 
 ### Export Results
+
 ```javascript
 import { useExport } from '@/composables'
 
@@ -181,6 +192,7 @@ function exportReport() {
 ## Component Integration
 
 ### Template Example
+
 ```vue
 <script setup>
 import { useLighthouseStore, useSettingsStore } from '@/stores'
@@ -263,6 +275,7 @@ import { useLighthouseStore } from '@/stores/lighthouseStore'
 ## Default Values
 
 **Settings:**
+
 - Provider: `openai`
 - Model: `gpt-4o`
 - Temperature: `0.7`
@@ -272,6 +285,7 @@ import { useLighthouseStore } from '@/stores/lighthouseStore'
 - Ollama Model: `llama3.2`
 
 **History:**
+
 - Max Entries: `100`
 - Auto-truncate: Top 5 opportunities & audits only
 
@@ -287,6 +301,7 @@ import { useLighthouseStore } from '@/stores/lighthouseStore'
 ```
 
 Thresholds:
+
 - **Good**: score >= 0.9
 - **Needs Improvement**: 0.5 <= score < 0.9
 - **Poor**: score < 0.5
@@ -294,6 +309,7 @@ Thresholds:
 ## Provider Support
 
 **useStreamingResponse** supports:
+
 - OpenAI (Chat & Completion)
 - Anthropic (Claude)
 - Ollama

@@ -452,6 +452,7 @@ All providers implement:
 ### Common Issues
 
 **API Key Error**
+
 ```javascript
 // Error: API key is required for GeminiProvider
 // Solution: Provide valid API key in config
@@ -461,6 +462,7 @@ const provider = LLMProviderFactory.create('gemini', {
 ```
 
 **Ollama Connection Error**
+
 ```javascript
 // Check if Ollama is running
 const isConnected = await ollama.checkConnection();
@@ -470,6 +472,7 @@ if (!isConnected) {
 ```
 
 **Streaming Not Working**
+
 ```javascript
 // Make sure to await inside the loop
 for await (const chunk of provider.stream(prompt)) {

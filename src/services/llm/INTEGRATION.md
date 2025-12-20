@@ -19,6 +19,7 @@ Complete step-by-step guide for integrating the LLM system into your Vue.js Ligh
 ### 1. Copy Files
 
 All files are already in `/src/services/llm/`:
+
 - `BaseLLMProvider.js`
 - `GeminiProvider.js`
 - `OpenAIProvider.js`

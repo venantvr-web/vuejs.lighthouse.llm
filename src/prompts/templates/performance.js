@@ -4,14 +4,14 @@
  */
 
 export const performancePrompts = {
-  quickAnalysis: {
-    name: 'Analyse Rapide Performance',
-    description: 'Vue d\'ensemble avec Core Web Vitals',
-    category: 'performance',
-    strategy: 'quick',
-    variables: ['url', 'score', 'lcp', 'cls', 'tbt', 'inp', 'fcp', 'si', 'tti'],
-    tags: ['performance', 'cwv', 'quick', 'overview'],
-    template: `# Analyse Performance - {{url}}
+    quickAnalysis: {
+        name: 'Analyse Rapide Performance',
+        description: 'Vue d\'ensemble avec Core Web Vitals',
+        category: 'performance',
+        strategy: 'quick',
+        variables: ['url', 'score', 'lcp', 'cls', 'tbt', 'inp', 'fcp', 'si', 'tti'],
+        tags: ['performance', 'cwv', 'quick', 'overview'],
+        template: `# Analyse Performance - {{url}}
 
 ## Rôle
 Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3 et Vite.
@@ -57,16 +57,16 @@ Analyse ces métriques et fournis:
 3. **Quick Wins:** 3 optimisations rapides à implémenter immédiatement
 
 Réponds en Markdown avec des exemples de code concrets.`
-  },
+    },
 
-  deepDive: {
-    name: 'Analyse Approfondie Performance',
-    description: 'Analyse détaillée avec solutions de code',
-    category: 'performance',
-    strategy: 'deep',
-    variables: ['url', 'score', 'opportunities', 'diagnostics', 'metrics'],
-    tags: ['performance', 'deep', 'optimization', 'code'],
-    template: `# Analyse Approfondie Performance - {{url}}
+    deepDive: {
+        name: 'Analyse Approfondie Performance',
+        description: 'Analyse détaillée avec solutions de code',
+        category: 'performance',
+        strategy: 'deep',
+        variables: ['url', 'score', 'opportunities', 'diagnostics', 'metrics'],
+        tags: ['performance', 'deep', 'optimization', 'code'],
+        template: `# Analyse Approfondie Performance - {{url}}
 
 ## Rôle
 Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3, Vite, et les optimisations avancées.
@@ -142,16 +142,16 @@ Roadmap priorisée avec:
 Méthodes de test et KPIs pour valider les améliorations.
 
 Réponds en Markdown avec des blocs de code détaillés et commentés.`
-  },
+    },
 
-  coreWebVitals: {
-    name: 'Analyse Core Web Vitals',
-    description: 'Focus sur LCP, CLS, INP/TBT',
-    category: 'performance',
-    strategy: 'specific',
-    variables: ['url', 'lcp', 'cls', 'tbt', 'inp', 'lcpElement', 'clsElements'],
-    tags: ['performance', 'cwv', 'google', 'vitals'],
-    template: `# Analyse Core Web Vitals - {{url}}
+    coreWebVitals: {
+        name: 'Analyse Core Web Vitals',
+        description: 'Focus sur LCP, CLS, INP/TBT',
+        category: 'performance',
+        strategy: 'specific',
+        variables: ['url', 'lcp', 'cls', 'tbt', 'inp', 'lcpElement', 'clsElements'],
+        tags: ['performance', 'cwv', 'google', 'vitals'],
+        template: `# Analyse Core Web Vitals - {{url}}
 
 ## Rôle
 Tu es un Expert Google Core Web Vitals, spécialisé dans l'optimisation LCP, CLS et INP pour Vue.js 3.
@@ -225,16 +225,16 @@ Analyse approfondie de chaque Core Web Vital:
 Roadmap priorisée pour passer tous les CWV en "Bon" (vert).
 
 Fournis des exemples de code concrets et directement implémentables.`
-  },
+    },
 
-  budgetAnalysis: {
-    name: 'Analyse Budget Performance',
-    description: 'Analyse des budgets JS/CSS/Images',
-    category: 'performance',
-    strategy: 'specific',
-    variables: ['url', 'totalSize', 'jsSize', 'cssSize', 'imageSize', 'requests'],
-    tags: ['performance', 'budget', 'size', 'resources'],
-    template: `# Analyse Budget Performance - {{url}}
+    budgetAnalysis: {
+        name: 'Analyse Budget Performance',
+        description: 'Analyse des budgets JS/CSS/Images',
+        category: 'performance',
+        strategy: 'specific',
+        variables: ['url', 'totalSize', 'jsSize', 'cssSize', 'imageSize', 'requests'],
+        tags: ['performance', 'budget', 'size', 'resources'],
+        template: `# Analyse Budget Performance - {{url}}
 
 ## Rôle
 Tu es un Expert en Performance Budgets et optimisation des ressources pour applications Vue.js.
@@ -287,7 +287,7 @@ Identifie les ressources problématiques et leur impact.
 \`\`\`
 
 Fournis des solutions pour respecter les budgets recommandés.`
-  }
+    }
 };
 
 export default performancePrompts;

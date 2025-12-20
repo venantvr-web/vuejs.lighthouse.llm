@@ -12,14 +12,14 @@ import LLMProviderFactory from './LLMProviderFactory.js';
  * ========================================================================= */
 
 export async function analyzeLighthouseReport(reportData) {
-  const provider = LLMProviderFactory.create('gemini', {
-    apiKey: import.meta.env.VITE_GEMINI_API_KEY,
-    model: 'gemini-1.5-flash',
-    temperature: 0.7,
-    maxTokens: 2048
-  });
+    const provider = LLMProviderFactory.create('gemini', {
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+        model: 'gemini-1.5-flash',
+        temperature: 0.7,
+        maxTokens: 2048
+    });
 
-  const prompt = `
+    const prompt = `
 Analyze this Lighthouse performance report and provide actionable insights:
 
 Performance Score: ${reportData.performance}
@@ -34,19 +34,19 @@ Please provide:
 3. Specific recommendations for improvement
 `;
 
-  try {
-    const analysis = await provider.send(prompt);
-    return {
-      success: true,
-      analysis: analysis,
-      provider: provider.getModelInfo()
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
-  }
+    try {
+        const analysis = await provider.send(prompt);
+        return {
+            success: true,
+            analysis: analysis,
+            provider: provider.getModelInfo()
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
 /* ============================================================================
@@ -54,12 +54,12 @@ Please provide:
  * ========================================================================= */
 
 export async function* streamLighthouseAnalysis(reportData, onProgress) {
-  const provider = LLMProviderFactory.create('gemini', {
-    apiKey: import.meta.env.VITE_GEMINI_API_KEY,
-    model: 'gemini-1.5-flash'
-  });
+    const provider = LLMProviderFactory.create('gemini', {
+        apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+        model: 'gemini-1.5-flash'
+    });
 
-  const prompt = `
+    const prompt = `
 Provide a detailed analysis of this Lighthouse audit:
 
 ${JSON.stringify(reportData, null, 2)}
@@ -67,27 +67,27 @@ ${JSON.stringify(reportData, null, 2)}
 Include performance bottlenecks, accessibility issues, and SEO recommendations.
 `;
 
-  let fullResponse = '';
+    let fullResponse = '';
 
-  try {
-    for await (const chunk of provider.stream(prompt)) {
-      fullResponse += chunk;
+    try {
+        for await (const chunk of provider.stream(prompt)) {
+            fullResponse += chunk;
 
-      // Call progress callback if provided
-      if (onProgress) {
-        onProgress(chunk, fullResponse);
-      }
+            // Call progress callback if provided
+            if (onProgress) {
+                onProgress(chunk, fullResponse);
+            }
 
-      yield {
-        chunk: chunk,
-        fullResponse: fullResponse
-      };
+            yield {
+                chunk: chunk,
+                fullResponse: fullResponse
+            };
+        }
+    } catch (error) {
+        yield {
+            error: error.message
+        };
     }
-  } catch (error) {
-    yield {
-      error: error.message
-    };
-  }
 }
 
 /* ============================================================================
@@ -95,48 +95,48 @@ Include performance bottlenecks, accessibility issues, and SEO recommendations.
  * ========================================================================= */
 
 export async function compareProvidersAnalysis(prompt) {
-  const providers = {
-    gemini: LLMProviderFactory.create('gemini', {
-      apiKey: import.meta.env.VITE_GEMINI_API_KEY,
-      model: 'gemini-1.5-flash'
-    }),
-    openai: LLMProviderFactory.create('openai', {
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-      model: 'gpt-4-turbo'
-    }),
-    claude: LLMProviderFactory.create('anthropic', {
-      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
-      model: 'claude-3-5-sonnet-20241022'
-    })
-  };
+    const providers = {
+        gemini: LLMProviderFactory.create('gemini', {
+            apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+            model: 'gemini-1.5-flash'
+        }),
+        openai: LLMProviderFactory.create('openai', {
+            apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+            model: 'gpt-4-turbo'
+        }),
+        claude: LLMProviderFactory.create('anthropic', {
+            apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
+            model: 'claude-3-5-sonnet-20241022'
+        })
+    };
 
-  const results = {};
+    const results = {};
 
-  // Run all providers in parallel
-  await Promise.all(
-    Object.entries(providers).map(async ([name, provider]) => {
-      const startTime = Date.now();
+    // Run all providers in parallel
+    await Promise.all(
+        Object.entries(providers).map(async ([name, provider]) => {
+            const startTime = Date.now();
 
-      try {
-        const response = await provider.send(prompt);
-        const endTime = Date.now();
+            try {
+                const response = await provider.send(prompt);
+                const endTime = Date.now();
 
-        results[name] = {
-          success: true,
-          response: response,
-          responseTime: endTime - startTime,
-          info: provider.getModelInfo()
-        };
-      } catch (error) {
-        results[name] = {
-          success: false,
-          error: error.message
-        };
-      }
-    })
-  );
+                results[name] = {
+                    success: true,
+                    response: response,
+                    responseTime: endTime - startTime,
+                    info: provider.getModelInfo()
+                };
+            } catch (error) {
+                results[name] = {
+                    success: false,
+                    error: error.message
+                };
+            }
+        })
+    );
 
-  return results;
+    return results;
 }
 
 /* ============================================================================
@@ -144,40 +144,40 @@ export async function compareProvidersAnalysis(prompt) {
  * ========================================================================= */
 
 export async function analyzeWithLocalModel(reportData) {
-  const ollama = LLMProviderFactory.create('ollama', {
-    baseURL: 'http://localhost:11434',
-    model: 'llama2',
-    temperature: 0.7
-  });
+    const ollama = LLMProviderFactory.create('ollama', {
+        baseURL: 'http://localhost:11434',
+        model: 'llama2',
+        temperature: 0.7
+    });
 
-  // Check if Ollama is running
-  const isConnected = await ollama.checkConnection();
-  if (!isConnected) {
-    return {
-      success: false,
-      error: 'Ollama is not running. Please start it with: ollama serve'
-    };
-  }
+    // Check if Ollama is running
+    const isConnected = await ollama.checkConnection();
+    if (!isConnected) {
+        return {
+            success: false,
+            error: 'Ollama is not running. Please start it with: ollama serve'
+        };
+    }
 
-  // Get available models
-  const availableModels = await ollama.getAvailableModels();
-  console.log('Available models:', availableModels);
+    // Get available models
+    const availableModels = await ollama.getAvailableModels();
+    console.log('Available models:', availableModels);
 
-  const prompt = `Analyze this web performance data: ${JSON.stringify(reportData)}`;
+    const prompt = `Analyze this web performance data: ${JSON.stringify(reportData)}`;
 
-  try {
-    const analysis = await ollama.send(prompt);
-    return {
-      success: true,
-      analysis: analysis,
-      models: availableModels
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    };
-  }
+    try {
+        const analysis = await ollama.send(prompt);
+        return {
+            success: true,
+            analysis: analysis,
+            models: availableModels
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
 /* ============================================================================
@@ -185,47 +185,47 @@ export async function analyzeWithLocalModel(reportData) {
  * ========================================================================= */
 
 export class CancellableAnalysis {
-  constructor(providerType = 'gemini', config = {}) {
-    this.provider = LLMProviderFactory.create(providerType, config);
-    this.isRunning = false;
-  }
-
-  async analyze(prompt, onChunk) {
-    this.isRunning = true;
-    let fullResponse = '';
-
-    try {
-      for await (const chunk of this.provider.stream(prompt)) {
-        if (!this.isRunning) {
-          break;
-        }
-
-        fullResponse += chunk;
-
-        if (onChunk) {
-          onChunk(chunk, fullResponse);
-        }
-      }
-
-      return {
-        success: true,
-        response: fullResponse,
-        cancelled: !this.isRunning
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      };
-    } finally {
-      this.isRunning = false;
+    constructor(providerType = 'gemini', config = {}) {
+        this.provider = LLMProviderFactory.create(providerType, config);
+        this.isRunning = false;
     }
-  }
 
-  cancel() {
-    this.isRunning = false;
-    this.provider.abort();
-  }
+    async analyze(prompt, onChunk) {
+        this.isRunning = true;
+        let fullResponse = '';
+
+        try {
+            for await (const chunk of this.provider.stream(prompt)) {
+                if (!this.isRunning) {
+                    break;
+                }
+
+                fullResponse += chunk;
+
+                if (onChunk) {
+                    onChunk(chunk, fullResponse);
+                }
+            }
+
+            return {
+                success: true,
+                response: fullResponse,
+                cancelled: !this.isRunning
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        } finally {
+            this.isRunning = false;
+        }
+    }
+
+    cancel() {
+        this.isRunning = false;
+        this.provider.abort();
+    }
 }
 
 /* ============================================================================
@@ -233,60 +233,60 @@ export class CancellableAnalysis {
  * ========================================================================= */
 
 export class BatchLighthouseAnalyzer {
-  constructor(providerConfig, options = {}) {
-    this.provider = LLMProviderFactory.create(
-      options.providerType || 'gemini',
-      providerConfig
-    );
-    this.batchSize = options.batchSize || 3;
-    this.delayMs = options.delayMs || 1000;
-  }
-
-  async analyzeMultipleReports(reports, onProgress) {
-    const results = [];
-
-    for (let i = 0; i < reports.length; i += this.batchSize) {
-      const batch = reports.slice(i, i + this.batchSize);
-
-      const batchResults = await Promise.all(
-        batch.map(async (report) => {
-          try {
-            const prompt = `Analyze this Lighthouse report: ${JSON.stringify(report)}`;
-            const analysis = await this.provider.send(prompt);
-
-            return {
-              reportId: report.id,
-              success: true,
-              analysis: analysis
-            };
-          } catch (error) {
-            return {
-              reportId: report.id,
-              success: false,
-              error: error.message
-            };
-          }
-        })
-      );
-
-      results.push(...batchResults);
-
-      if (onProgress) {
-        onProgress({
-          processed: results.length,
-          total: reports.length,
-          percentage: (results.length / reports.length) * 100
-        });
-      }
-
-      // Delay between batches
-      if (i + this.batchSize < reports.length) {
-        await new Promise(resolve => setTimeout(resolve, this.delayMs));
-      }
+    constructor(providerConfig, options = {}) {
+        this.provider = LLMProviderFactory.create(
+            options.providerType || 'gemini',
+            providerConfig
+        );
+        this.batchSize = options.batchSize || 3;
+        this.delayMs = options.delayMs || 1000;
     }
 
-    return results;
-  }
+    async analyzeMultipleReports(reports, onProgress) {
+        const results = [];
+
+        for (let i = 0; i < reports.length; i += this.batchSize) {
+            const batch = reports.slice(i, i + this.batchSize);
+
+            const batchResults = await Promise.all(
+                batch.map(async (report) => {
+                    try {
+                        const prompt = `Analyze this Lighthouse report: ${JSON.stringify(report)}`;
+                        const analysis = await this.provider.send(prompt);
+
+                        return {
+                            reportId: report.id,
+                            success: true,
+                            analysis: analysis
+                        };
+                    } catch (error) {
+                        return {
+                            reportId: report.id,
+                            success: false,
+                            error: error.message
+                        };
+                    }
+                })
+            );
+
+            results.push(...batchResults);
+
+            if (onProgress) {
+                onProgress({
+                    processed: results.length,
+                    total: reports.length,
+                    percentage: (results.length / reports.length) * 100
+                });
+            }
+
+            // Delay between batches
+            if (i + this.batchSize < reports.length) {
+                await new Promise(resolve => setTimeout(resolve, this.delayMs));
+            }
+        }
+
+        return results;
+    }
 }
 
 /* ============================================================================
@@ -294,46 +294,46 @@ export class BatchLighthouseAnalyzer {
  * ========================================================================= */
 
 export class FallbackAnalyzer {
-  constructor(configs) {
-    this.providers = configs.map(config => ({
-      provider: LLMProviderFactory.create(config.type, config.config),
-      name: config.type
-    }));
-    this.currentIndex = 0;
-  }
-
-  async analyze(prompt, options = {}) {
-    const maxRetries = options.maxRetries || this.providers.length;
-    const errors = [];
-
-    for (let i = 0; i < maxRetries; i++) {
-      const { provider, name } = this.providers[this.currentIndex];
-
-      try {
-        console.log(`Attempting analysis with ${name}...`);
-        const response = await provider.send(prompt);
-
-        return {
-          success: true,
-          response: response,
-          provider: name,
-          attempts: i + 1
-        };
-      } catch (error) {
-        console.error(`${name} failed:`, error.message);
-        errors.push({ provider: name, error: error.message });
-
-        // Move to next provider
-        this.currentIndex = (this.currentIndex + 1) % this.providers.length;
-      }
+    constructor(configs) {
+        this.providers = configs.map(config => ({
+            provider: LLMProviderFactory.create(config.type, config.config),
+            name: config.type
+        }));
+        this.currentIndex = 0;
     }
 
-    return {
-      success: false,
-      errors: errors,
-      message: 'All providers failed'
-    };
-  }
+    async analyze(prompt, options = {}) {
+        const maxRetries = options.maxRetries || this.providers.length;
+        const errors = [];
+
+        for (let i = 0; i < maxRetries; i++) {
+            const {provider, name} = this.providers[this.currentIndex];
+
+            try {
+                console.log(`Attempting analysis with ${name}...`);
+                const response = await provider.send(prompt);
+
+                return {
+                    success: true,
+                    response: response,
+                    provider: name,
+                    attempts: i + 1
+                };
+            } catch (error) {
+                console.error(`${name} failed:`, error.message);
+                errors.push({provider: name, error: error.message});
+
+                // Move to next provider
+                this.currentIndex = (this.currentIndex + 1) % this.providers.length;
+            }
+        }
+
+        return {
+            success: false,
+            errors: errors,
+            message: 'All providers failed'
+        };
+    }
 }
 
 /* ============================================================================
@@ -341,52 +341,52 @@ export class FallbackAnalyzer {
  * ========================================================================= */
 
 export class ConversationalAnalyzer {
-  constructor(providerType = 'openai', config = {}) {
-    this.provider = LLMProviderFactory.create(providerType, config);
-    this.conversationHistory = [];
-    this.systemMessage = config.systemMessage ||
-      'You are a web performance expert specializing in Lighthouse analysis.';
-  }
-
-  async ask(question) {
-    // Add user message
-    this.conversationHistory.push({
-      role: 'user',
-      content: question
-    });
-
-    try {
-      const response = await this.provider.send(question, {
-        systemMessage: this.systemMessage,
-        messages: this.conversationHistory
-      });
-
-      // Add assistant response
-      this.conversationHistory.push({
-        role: 'assistant',
-        content: response
-      });
-
-      return {
-        success: true,
-        response: response,
-        historyLength: this.conversationHistory.length
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      };
+    constructor(providerType = 'openai', config = {}) {
+        this.provider = LLMProviderFactory.create(providerType, config);
+        this.conversationHistory = [];
+        this.systemMessage = config.systemMessage ||
+            'You are a web performance expert specializing in Lighthouse analysis.';
     }
-  }
 
-  clearHistory() {
-    this.conversationHistory = [];
-  }
+    async ask(question) {
+        // Add user message
+        this.conversationHistory.push({
+            role: 'user',
+            content: question
+        });
 
-  getHistory() {
-    return [...this.conversationHistory];
-  }
+        try {
+            const response = await this.provider.send(question, {
+                systemMessage: this.systemMessage,
+                messages: this.conversationHistory
+            });
+
+            // Add assistant response
+            this.conversationHistory.push({
+                role: 'assistant',
+                content: response
+            });
+
+            return {
+                success: true,
+                response: response,
+                historyLength: this.conversationHistory.length
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    clearHistory() {
+        this.conversationHistory = [];
+    }
+
+    getHistory() {
+        return [...this.conversationHistory];
+    }
 }
 
 /* ============================================================================
@@ -394,56 +394,56 @@ export class ConversationalAnalyzer {
  * ========================================================================= */
 
 export class TokenTrackedAnalyzer {
-  constructor(providerType, config) {
-    this.provider = LLMProviderFactory.create(providerType, config);
-    this.providerType = providerType;
-    this.totalTokensUsed = 0;
-    this.requestCount = 0;
-  }
-
-  async analyze(prompt) {
-    this.requestCount++;
-
-    try {
-      // Count input tokens (if provider supports it)
-      if (this.provider.countTokens) {
-        const inputTokens = await this.provider.countTokens(prompt);
-        console.log(`Input tokens: ${inputTokens}`);
-      }
-
-      const response = await this.provider.send(prompt);
-
-      // Estimate output tokens (rough approximation)
-      const outputTokens = Math.ceil(response.length / 4);
-      this.totalTokensUsed += outputTokens;
-
-      return {
-        success: true,
-        response: response,
-        stats: this.getStats()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message
-      };
+    constructor(providerType, config) {
+        this.provider = LLMProviderFactory.create(providerType, config);
+        this.providerType = providerType;
+        this.totalTokensUsed = 0;
+        this.requestCount = 0;
     }
-  }
 
-  getStats() {
-    return {
-      totalTokens: this.totalTokensUsed,
-      requestCount: this.requestCount,
-      avgTokensPerRequest: this.requestCount > 0
-        ? Math.round(this.totalTokensUsed / this.requestCount)
-        : 0
-    };
-  }
+    async analyze(prompt) {
+        this.requestCount++;
 
-  reset() {
-    this.totalTokensUsed = 0;
-    this.requestCount = 0;
-  }
+        try {
+            // Count input tokens (if provider supports it)
+            if (this.provider.countTokens) {
+                const inputTokens = await this.provider.countTokens(prompt);
+                console.log(`Input tokens: ${inputTokens}`);
+            }
+
+            const response = await this.provider.send(prompt);
+
+            // Estimate output tokens (rough approximation)
+            const outputTokens = Math.ceil(response.length / 4);
+            this.totalTokensUsed += outputTokens;
+
+            return {
+                success: true,
+                response: response,
+                stats: this.getStats()
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    getStats() {
+        return {
+            totalTokens: this.totalTokensUsed,
+            requestCount: this.requestCount,
+            avgTokensPerRequest: this.requestCount > 0
+                ? Math.round(this.totalTokensUsed / this.requestCount)
+                : 0
+        };
+    }
+
+    reset() {
+        this.totalTokensUsed = 0;
+        this.requestCount = 0;
+    }
 }
 
 /* ============================================================================
@@ -451,84 +451,84 @@ export class TokenTrackedAnalyzer {
  * ========================================================================= */
 
 export function createLighthouseAnalyzerComposable() {
-  return function useLighthouseAnalyzer(providerType = 'gemini') {
-    const provider = ref(null);
-    const isAnalyzing = ref(false);
-    const analysis = ref('');
-    const error = ref(null);
-    const streamingChunks = ref([]);
+    return function useLighthouseAnalyzer(providerType = 'gemini') {
+        const provider = ref(null);
+        const isAnalyzing = ref(false);
+        const analysis = ref('');
+        const error = ref(null);
+        const streamingChunks = ref([]);
 
-    const initialize = (config) => {
-      try {
-        provider.value = LLMProviderFactory.create(providerType, config);
-      } catch (err) {
-        error.value = err.message;
-      }
-    };
+        const initialize = (config) => {
+            try {
+                provider.value = LLMProviderFactory.create(providerType, config);
+            } catch (err) {
+                error.value = err.message;
+            }
+        };
 
-    const analyze = async (reportData) => {
-      if (!provider.value) return;
+        const analyze = async (reportData) => {
+            if (!provider.value) return;
 
-      isAnalyzing.value = true;
-      error.value = null;
-      analysis.value = '';
+            isAnalyzing.value = true;
+            error.value = null;
+            analysis.value = '';
 
-      const prompt = `
+            const prompt = `
 Analyze this Lighthouse report:
 ${JSON.stringify(reportData, null, 2)}
 
 Provide specific, actionable recommendations.
 `;
 
-      try {
-        analysis.value = await provider.value.send(prompt);
-      } catch (err) {
-        error.value = err.message;
-      } finally {
-        isAnalyzing.value = false;
-      }
+            try {
+                analysis.value = await provider.value.send(prompt);
+            } catch (err) {
+                error.value = err.message;
+            } finally {
+                isAnalyzing.value = false;
+            }
+        };
+
+        const analyzeStreaming = async (reportData) => {
+            if (!provider.value) return;
+
+            isAnalyzing.value = true;
+            error.value = null;
+            analysis.value = '';
+            streamingChunks.value = [];
+
+            const prompt = `Analyze: ${JSON.stringify(reportData)}`;
+
+            try {
+                for await (const chunk of provider.value.stream(prompt)) {
+                    streamingChunks.value.push(chunk);
+                    analysis.value += chunk;
+                }
+            } catch (err) {
+                error.value = err.message;
+            } finally {
+                isAnalyzing.value = false;
+            }
+        };
+
+        const cancel = () => {
+            if (provider.value) {
+                provider.value.abort();
+                isAnalyzing.value = false;
+            }
+        };
+
+        return {
+            initialize,
+            analyze,
+            analyzeStreaming,
+            cancel,
+            isAnalyzing: readonly(isAnalyzing),
+            analysis: readonly(analysis),
+            error: readonly(error),
+            streamingChunks: readonly(streamingChunks)
+        };
     };
-
-    const analyzeStreaming = async (reportData) => {
-      if (!provider.value) return;
-
-      isAnalyzing.value = true;
-      error.value = null;
-      analysis.value = '';
-      streamingChunks.value = [];
-
-      const prompt = `Analyze: ${JSON.stringify(reportData)}`;
-
-      try {
-        for await (const chunk of provider.value.stream(prompt)) {
-          streamingChunks.value.push(chunk);
-          analysis.value += chunk;
-        }
-      } catch (err) {
-        error.value = err.message;
-      } finally {
-        isAnalyzing.value = false;
-      }
-    };
-
-    const cancel = () => {
-      if (provider.value) {
-        provider.value.abort();
-        isAnalyzing.value = false;
-      }
-    };
-
-    return {
-      initialize,
-      analyze,
-      analyzeStreaming,
-      cancel,
-      isAnalyzing: readonly(isAnalyzing),
-      analysis: readonly(analysis),
-      error: readonly(error),
-      streamingChunks: readonly(streamingChunks)
-    };
-  };
 }
 
 /* ============================================================================
@@ -536,20 +536,20 @@ Provide specific, actionable recommendations.
  * ========================================================================= */
 
 export function createProviderFromEnvironment() {
-  try {
-    return LLMProviderFactory.createFromEnv({
-      LLM_PROVIDER: import.meta.env.VITE_LLM_PROVIDER || 'gemini',
-      LLM_API_KEY: import.meta.env.VITE_GEMINI_API_KEY ||
-                    import.meta.env.VITE_OPENAI_API_KEY ||
-                    import.meta.env.VITE_ANTHROPIC_API_KEY,
-      LLM_MODEL: import.meta.env.VITE_LLM_MODEL,
-      LLM_TEMPERATURE: import.meta.env.VITE_LLM_TEMPERATURE || '0.7',
-      LLM_MAX_TOKENS: import.meta.env.VITE_LLM_MAX_TOKENS || '2048'
-    });
-  } catch (error) {
-    console.error('Failed to create provider from environment:', error);
-    throw error;
-  }
+    try {
+        return LLMProviderFactory.createFromEnv({
+            LLM_PROVIDER: import.meta.env.VITE_LLM_PROVIDER || 'gemini',
+            LLM_API_KEY: import.meta.env.VITE_GEMINI_API_KEY ||
+                import.meta.env.VITE_OPENAI_API_KEY ||
+                import.meta.env.VITE_ANTHROPIC_API_KEY,
+            LLM_MODEL: import.meta.env.VITE_LLM_MODEL,
+            LLM_TEMPERATURE: import.meta.env.VITE_LLM_TEMPERATURE || '0.7',
+            LLM_MAX_TOKENS: import.meta.env.VITE_LLM_MAX_TOKENS || '2048'
+        });
+    } catch (error) {
+        console.error('Failed to create provider from environment:', error);
+        throw error;
+    }
 }
 
 /* ============================================================================

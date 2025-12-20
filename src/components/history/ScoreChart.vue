@@ -1,27 +1,17 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { Line } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-} from 'chart.js'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {Line} from 'vue-chartjs'
+import {CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
 )
 
 // Dark mode detection
@@ -80,10 +70,10 @@ const chartData = computed(() => {
 
   return {
     labels: sorted.map(s =>
-      new Date(s.timestamp).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit'
-      })
+        new Date(s.timestamp).toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit'
+        })
     ),
     datasets: [
       {
@@ -118,8 +108,8 @@ const chartOptions = computed(() => ({
       titleColor: isDark.value ? '#f9fafb' : '#fff',
       bodyColor: isDark.value ? '#d1d5db' : '#fff',
       padding: 12,
-      titleFont: { size: 13 },
-      bodyFont: { size: 12 },
+      titleFont: {size: 13},
+      bodyFont: {size: 12},
       callbacks: {
         label: (context) => `Score: ${context.parsed.y}%`
       }
@@ -133,7 +123,7 @@ const chartOptions = computed(() => ({
       ticks: {
         maxRotation: 45,
         minRotation: 0,
-        font: { size: 10 },
+        font: {size: 10},
         color: isDark.value ? '#9ca3af' : '#6b7280'
       }
     },
@@ -146,7 +136,7 @@ const chartOptions = computed(() => ({
       ticks: {
         stepSize: 25,
         callback: (value) => value + '%',
-        font: { size: 10 },
+        font: {size: 10},
         color: isDark.value ? '#9ca3af' : '#6b7280'
       }
     }
@@ -199,14 +189,14 @@ function getScoreClass() {
     <div class="chart-header">
       <h4 class="chart-title">{{ categoryLabels[category] || category }}</h4>
       <div class="chart-stats">
-        <span class="latest-score" :class="getScoreClass()">
+        <span :class="getScoreClass()" class="latest-score">
           {{ latestScore !== null ? latestScore + '%' : '-' }}
         </span>
-        <span v-if="trend !== null" class="trend" :class="getTrendClass()">
-          <svg v-if="trend > 0" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+        <span v-if="trend !== null" :class="getTrendClass()" class="trend">
+          <svg v-if="trend > 0" fill="currentColor" height="12" viewBox="0 0 24 24" width="12">
             <path d="M7 14l5-5 5 5z"/>
           </svg>
-          <svg v-else-if="trend < 0" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <svg v-else-if="trend < 0" fill="currentColor" height="12" viewBox="0 0 24 24" width="12">
             <path d="M7 10l5 5 5-5z"/>
           </svg>
           <span v-else>-</span>
@@ -217,9 +207,9 @@ function getScoreClass() {
 
     <div class="chart-container">
       <Line
-        v-if="scores.length > 0"
-        :data="chartData"
-        :options="chartOptions"
+          v-if="scores.length > 0"
+          :data="chartData"
+          :options="chartOptions"
       />
       <div v-else class="no-data">
         Aucune donnee

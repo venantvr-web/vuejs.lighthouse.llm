@@ -4,14 +4,14 @@
  */
 
 export const accessibilityPrompts = {
-  quickAnalysis: {
-    name: 'Analyse Rapide Accessibilité',
-    description: 'Violations WCAG principales',
-    category: 'accessibility',
-    strategy: 'quick',
-    variables: ['url', 'score', 'violations', 'ariaIssues', 'colorContrast'],
-    tags: ['accessibility', 'a11y', 'wcag', 'quick'],
-    template: `# Analyse Accessibilité - {{url}}
+    quickAnalysis: {
+        name: 'Analyse Rapide Accessibilité',
+        description: 'Violations WCAG principales',
+        category: 'accessibility',
+        strategy: 'quick',
+        variables: ['url', 'score', 'violations', 'ariaIssues', 'colorContrast'],
+        tags: ['accessibility', 'a11y', 'wcag', 'quick'],
+        template: `# Analyse Accessibilité - {{url}}
 
 ## Rôle
 Tu es un Expert Accessibilité Numérique, spécialisé RGAA (Référentiel Général d'Amélioration de l'Accessibilité) et WCAG 2.1 niveau AA.
@@ -118,16 +118,16 @@ const handleKeyboard = (event) => {
 3 corrections rapides et à fort impact pour améliorer immédiatement l'accessibilité.
 
 Fournis des solutions conformes WCAG 2.1 AA et RGAA.`
-  },
+    },
 
-  wcagCompliance: {
-    name: 'Audit Conformité WCAG 2.1 AA',
-    description: 'Audit complet WCAG 2.1 niveau AA',
-    category: 'accessibility',
-    strategy: 'deep',
-    variables: ['url', 'score', 'perceivable', 'operable', 'understandable', 'robust'],
-    tags: ['accessibility', 'wcag', 'compliance', 'audit'],
-    template: `# Audit Conformité WCAG 2.1 AA - {{url}}
+    wcagCompliance: {
+        name: 'Audit Conformité WCAG 2.1 AA',
+        description: 'Audit complet WCAG 2.1 niveau AA',
+        category: 'accessibility',
+        strategy: 'deep',
+        variables: ['url', 'score', 'perceivable', 'operable', 'understandable', 'robust'],
+        tags: ['accessibility', 'wcag', 'compliance', 'audit'],
+        template: `# Audit Conformité WCAG 2.1 AA - {{url}}
 
 ## Rôle
 Tu es un Auditeur Expert en Accessibilité Numérique, certifié WCAG 2.1 et RGAA.
@@ -378,16 +378,16 @@ Roadmap priorisée:
 - P2: Améliorations et niveau AAA
 
 Fournis un plan d'action détaillé pour atteindre la conformité WCAG 2.1 AA complète.`
-  },
+    },
 
-  screenReaderOptimization: {
-    name: 'Optimisation Lecteurs d\'Écran',
-    description: 'Optimisation pour NVDA, JAWS, VoiceOver',
-    category: 'accessibility',
-    strategy: 'specific',
-    variables: ['url', 'ariaLabels', 'landmarks', 'liveRegions', 'focusManagement'],
-    tags: ['accessibility', 'screen-reader', 'aria', 'nvda', 'jaws'],
-    template: `# Optimisation Lecteurs d'Écran - {{url}}
+    screenReaderOptimization: {
+        name: 'Optimisation Lecteurs d\'Écran',
+        description: 'Optimisation pour NVDA, JAWS, VoiceOver',
+        category: 'accessibility',
+        strategy: 'specific',
+        variables: ['url', 'ariaLabels', 'landmarks', 'liveRegions', 'focusManagement'],
+        tags: ['accessibility', 'screen-reader', 'aria', 'nvda', 'jaws'],
+        template: `# Optimisation Lecteurs d'Écran - {{url}}
 
 ## Rôle
 Tu es un Expert en Technologies d'Assistance, spécialisé dans l'optimisation pour lecteurs d'écran (NVDA, JAWS, VoiceOver, TalkBack).
@@ -692,7 +692,7 @@ const validateEmail = () => {
 - TalkBack (Android)
 
 Fournis des solutions testées avec les principaux lecteurs d'écran.`
-  }
+    }
 };
 
 export default accessibilityPrompts;

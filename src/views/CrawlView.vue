@@ -23,6 +23,7 @@ const maxPages = ref(20)
 const error = ref('')
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
+const showOnboarding = ref(false)
 
 // Computed
 const isRunning = computed(() => crawlStore.isRunning)
@@ -107,7 +108,7 @@ async function handleSubmit() {
   if (discoveryMode.value !== DISCOVERY_MODES.MANUAL) {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
-      error.value = 'Le serveur local n\'est pas disponible. Demarrez-le avec "npm run server" (ou "npm run server:install" si premiere fois), ou utilisez le mode Manuel.'
+      error.value = 'Le serveur proxy est requis pour la découverte automatique des URLs (mode Auto/Sitemap). Démarrez-le avec "npm run server" (ou "npm run server:install" la première fois), ou utilisez le mode Manuel pour saisir les URLs directement.'
       return
     }
   }
@@ -182,21 +183,42 @@ onUnmounted(() => {
           </div>
 
           <div class="flex items-center gap-2">
+            <!-- Onboarding button -->
+            <button
+                class="header-btn"
+                title="Guide d'utilisation"
+                type="button"
+                @click="showOnboarding = true"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              <span class="hidden sm:inline">Guide</span>
+            </button>
+
+            <!-- History button -->
             <router-link
-                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="header-btn"
+                title="Historique des crawls"
                 to="/crawl/history"
             >
-              Historique
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              <span class="hidden sm:inline">Historique</span>
             </router-link>
+
+            <!-- Settings button -->
             <router-link
-                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="header-btn"
+                title="Paramètres"
                 to="/settings"
             >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"/>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
+              <span class="hidden sm:inline">Paramètres</span>
             </router-link>
           </div>
         </div>
@@ -579,6 +601,179 @@ https://example.com/page-3"
         </div>
       </div>
     </main>
+
+    <!-- Onboarding Modal -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showOnboarding" class="modal-overlay" @click.self="showOnboarding = false">
+          <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">Guide du Mode Crawl</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Comprendre les options disponibles</p>
+                </div>
+              </div>
+              <button
+                  class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  type="button"
+                  @click="showOnboarding = false"
+              >
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="modal-body">
+              <!-- Discovery modes -->
+              <div class="guide-section">
+                <h4 class="guide-section-title">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                  Modes de découverte des URLs
+                </h4>
+
+                <div class="guide-grid">
+                  <div class="guide-card guide-card-warning">
+                    <div class="guide-card-header">
+                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
+                      <strong>Auto</strong>
+                    </div>
+                    <p>Crawle automatiquement les liens internes du site. Nécessite le serveur proxy local pour contourner les restrictions CORS du navigateur.</p>
+                  </div>
+
+                  <div class="guide-card guide-card-warning">
+                    <div class="guide-card-header">
+                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
+                      <strong>Sitemap</strong>
+                    </div>
+                    <p>Parse le fichier sitemap.xml du site. Nécessite également le serveur proxy pour accéder au sitemap.</p>
+                  </div>
+
+                  <div class="guide-card guide-card-success">
+                    <div class="guide-card-header">
+                      <span class="guide-card-badge guide-card-badge-success">Sans serveur</span>
+                      <strong>Manuel</strong>
+                    </div>
+                    <p>Saisissez vous-même la liste des URLs à analyser. Aucun serveur requis, les URLs sont traitées localement.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Analysis services -->
+              <div class="guide-section">
+                <h4 class="guide-section-title">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                  Services d'analyse
+                </h4>
+
+                <div class="guide-grid">
+                  <div class="guide-card guide-card-success">
+                    <div class="guide-card-header">
+                      <span class="guide-card-badge guide-card-badge-success">Sans serveur</span>
+                      <strong>PageSpeed Insights</strong>
+                    </div>
+                    <p>Utilise l'API Google PageSpeed. Gratuit, sans installation, mais avec des quotas limités (environ 25 requêtes/jour sans clé API).</p>
+                  </div>
+
+                  <div class="guide-card guide-card-warning">
+                    <div class="guide-card-header">
+                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
+                      <strong>Local Lighthouse</strong>
+                    </div>
+                    <p>Analyse via Chromium local. Plus rapide, sans limite, confidentiel. Nécessite le serveur avec Chromium installé.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Compatibility table -->
+              <div class="guide-section">
+                <h4 class="guide-section-title">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                  Tableau de compatibilité
+                </h4>
+
+                <div class="overflow-x-auto">
+                  <table class="guide-table">
+                    <thead>
+                      <tr>
+                        <th>Découverte</th>
+                        <th>Service</th>
+                        <th>Serveur</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Manuel</td>
+                        <td>PageSpeed Insights</td>
+                        <td><span class="text-emerald-600 dark:text-emerald-400 font-medium">Non requis</span></td>
+                      </tr>
+                      <tr>
+                        <td>Manuel</td>
+                        <td>Local Lighthouse</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                      </tr>
+                      <tr>
+                        <td>Auto / Sitemap</td>
+                        <td>PageSpeed Insights</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                      </tr>
+                      <tr>
+                        <td>Auto / Sitemap</td>
+                        <td>Local Lighthouse</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Server instructions -->
+              <div class="guide-section">
+                <h4 class="guide-section-title">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                  </svg>
+                  Démarrer le serveur
+                </h4>
+
+                <div class="guide-code">
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Première installation :</p>
+                  <code class="guide-code-block">npm run server:install</code>
+
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 mt-4">Démarrage :</p>
+                  <code class="guide-code-block">npm run server</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+              <button
+                  class="btn-primary"
+                  type="button"
+                  @click="showOnboarding = false"
+              >
+                Compris !
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -656,5 +851,246 @@ html.dark .slider-track::-webkit-slider-thumb {
 
 html.dark .slider-track::-moz-range-thumb {
   border-color: #374151;
+}
+
+/* Header buttons */
+.header-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.header-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-color: var(--border-secondary);
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal-content {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-primary);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Guide sections */
+.guide-section {
+  margin-bottom: 1.5rem;
+}
+
+.guide-section:last-child {
+  margin-bottom: 0;
+}
+
+.guide-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.guide-card {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+.guide-card p {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.guide-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.guide-card-header strong {
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+}
+
+.guide-card-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.guide-card-badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+.guide-card-badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+html.dark .guide-card-badge-success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+html.dark .guide-card-badge-warning {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.guide-card-success {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.guide-card-warning {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Guide table */
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.guide-table th,
+.guide-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.guide-table th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.guide-table td {
+  color: var(--text-primary);
+}
+
+.guide-table tbody tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* Guide code */
+.guide-code-block {
+  display: block;
+  padding: 0.75rem 1rem;
+  background: #1f2937;
+  color: #34d399;
+  border-radius: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+}
+
+/* Primary button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.4);
+}
+
+/* Modal transition */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-enter-active .modal-content,
+.modal-leave-active .modal-content {
+  transition: transform 0.2s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-content,
+.modal-leave-to .modal-content {
+  transform: scale(0.95) translateY(10px);
 }
 </style>

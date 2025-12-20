@@ -77,7 +77,7 @@ function formatScore(score) {
 
 // Get score color
 function getScoreColor(score) {
-  if (score === null || score === undefined) return 'text-gray-400'
+  if (score === null || score === undefined) return 'text-gray-400 dark:text-gray-500'
   const value = score * 100
   if (value >= 90) return 'text-emerald-500'
   if (value >= 50) return 'text-amber-500'
@@ -386,16 +386,16 @@ onMounted(async () => {
               <span :class="['px-3 py-1 rounded-full text-sm font-medium', statusClass]">
                 {{ statusLabel }}
               </span>
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-gray-500 dark:text-gray-400">
                 {{ formatDate(session.timestamp) }}
               </span>
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-gray-500 dark:text-gray-400">
                 Mode: {{ session.discoveryMode }}
               </span>
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-gray-500 dark:text-gray-400">
                 Service: {{ session.service }}
               </span>
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-gray-500 dark:text-gray-400">
                 Strategie: {{ session.strategy }}
               </span>
             </div>
@@ -418,7 +418,7 @@ onMounted(async () => {
                 <div class="mt-2 text-sm font-medium text-gray-900 dark:text-white capitalize">
                   {{ category.replace('-', ' ') }}
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-gray-500 dark:text-gray-400">
                   Min: {{ formatScore(data.min) }} / Max: {{ formatScore(data.max) }}
                 </div>
               </div>
@@ -449,12 +449,12 @@ onMounted(async () => {
                     <span class="font-medium text-gray-900 dark:text-white">
                       {{ template.name }}
                     </span>
-                    <span class="text-sm text-gray-500">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
                       ({{ template.count }} page{{ template.count > 1 ? 's' : '' }})
                     </span>
                   </div>
                   <svg
-                    class="w-5 h-5 text-gray-400 transition-transform"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500 transition-transform"
                     :class="selectedTemplate === template.name && 'rotate-180'"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -467,7 +467,7 @@ onMounted(async () => {
                 <!-- Score bars -->
                 <div class="grid grid-cols-5 gap-4">
                   <div v-for="(catData, cat) in template.avgScores" :key="cat">
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                       <span class="truncate">{{ cat.replace('-', ' ') }}</span>
                       <span :class="getScoreColor(catData.avg)">{{ formatScore(catData.avg) }}</span>
                     </div>
@@ -489,7 +489,7 @@ onMounted(async () => {
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                 Detail par page
-                <span v-if="selectedTemplate" class="text-sm font-normal text-gray-500">
+                <span v-if="selectedTemplate" class="text-sm font-normal text-gray-500 dark:text-gray-400">
                   (filtre: {{ selectedTemplate }})
                 </span>
               </h2>
@@ -505,7 +505,7 @@ onMounted(async () => {
             <div class="overflow-x-auto">
               <table class="w-full">
                 <thead>
-                  <tr class="text-left text-sm text-gray-500 border-b border-gray-200 dark:border-gray-700">
+                  <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                     <th class="pb-3 font-medium">URL</th>
                     <th class="pb-3 font-medium">Template</th>
                     <th class="pb-3 font-medium text-center">Perf</th>
@@ -586,7 +586,7 @@ onMounted(async () => {
               </table>
             </div>
 
-            <div v-if="filteredUrls.length === 0" class="text-center py-8 text-gray-500">
+            <div v-if="filteredUrls.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
               Aucune URL trouvee pour ce filtre.
             </div>
           </div>
@@ -594,7 +594,7 @@ onMounted(async () => {
 
         <!-- No session -->
         <div v-else class="text-center py-12">
-          <p class="text-gray-500 mb-4">Aucune session trouvee</p>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune session trouvee</p>
           <router-link
             to="/crawl"
             class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"

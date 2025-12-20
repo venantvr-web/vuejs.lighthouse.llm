@@ -88,7 +88,7 @@ function formatScore(score) {
 
 // Get score color class
 function getScoreColorClass(score) {
-  if (score === null || score === undefined) return 'bg-gray-200'
+  if (score === null || score === undefined) return 'bg-gray-200 dark:bg-gray-700'
   const value = score * 100
   if (value >= 90) return 'bg-emerald-500'
   if (value >= 50) return 'bg-amber-500'
@@ -187,14 +187,14 @@ onMounted(async () => {
         <!-- Empty state -->
         <div v-else-if="isEmpty" class="text-center py-16">
           <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
             Aucun crawl enregistre
           </h3>
-          <p class="text-gray-500 mb-6">
+          <p class="text-gray-500 dark:text-gray-400 mb-6">
             Lancez votre premier crawl pour analyser plusieurs pages de votre site.
           </p>
           <router-link
@@ -227,7 +227,7 @@ onMounted(async () => {
                     {{ getStatusLabel(session.status) }}
                   </span>
                 </div>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                   <span>{{ formatRelativeTime(session.timestamp) }}</span>
                   <span>{{ session.pagesAnalyzed }}/{{ session.pageCount }} pages</span>
                   <span>{{ session.service }}</span>
@@ -245,13 +245,13 @@ onMounted(async () => {
                   >
                     {{ formatScore(getAverageScore(session.aggregateScores)) }}
                   </div>
-                  <span class="text-xs text-gray-500 mt-1 block">Moyenne</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">Moyenne</span>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2" @click.stop>
                   <button
-                    class="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     title="Supprimer"
                     @click="confirmDelete(session.id)"
                   >
@@ -278,7 +278,7 @@ onMounted(async () => {
               </span>
               <span
                 v-if="session.templates.length > 5"
-                class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500"
+                class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 dark:text-gray-400"
               >
                 +{{ session.templates.length - 5 }} autres
               </span>
@@ -299,7 +299,7 @@ onMounted(async () => {
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             Supprimer cette session ?
           </h3>
-          <p class="text-gray-500 mb-6">
+          <p class="text-gray-500 dark:text-gray-400 mb-6">
             Cette action est irreversible. Les donnees de cette session de crawl seront definitivement supprimees.
           </p>
           <div class="flex justify-end gap-3">

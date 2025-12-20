@@ -234,7 +234,7 @@ onUnmounted(() => {
                   </svg>
                   <span v-else class="text-xs">1</span>
                 </div>
-                <span :class="progress.stage === 'discovering' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500'">
+                <span :class="progress.stage === 'discovering' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">
                   Decouverte
                 </span>
               </div>
@@ -258,7 +258,7 @@ onUnmounted(() => {
                   </svg>
                   <span v-else class="text-xs">2</span>
                 </div>
-                <span :class="progress.stage === 'analyzing' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500'">
+                <span :class="progress.stage === 'analyzing' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">
                   Analyse
                 </span>
               </div>
@@ -276,14 +276,14 @@ onUnmounted(() => {
                 :key="url"
                 class="flex items-center gap-2 text-sm"
               >
-                <span class="w-5 text-right text-gray-400">{{ index + 1 }}.</span>
+                <span class="w-5 text-right text-gray-400 dark:text-gray-500">{{ index + 1 }}.</span>
                 <span
                   class="truncate"
                   :class="crawlResults.some(r => r.url === url)
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : url === currentUrl
                       ? 'text-gray-900 dark:text-white font-medium'
-                      : 'text-gray-500'"
+                      : 'text-gray-500 dark:text-gray-400'"
                 >
                   {{ url }}
                 </span>
@@ -357,11 +357,11 @@ onUnmounted(() => {
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
                   @click="discoveryMode = DISCOVERY_MODES.AUTO"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.AUTO ? 'text-emerald-500' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.AUTO ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Auto</div>
-                  <div class="text-xs text-gray-500 mt-1">Suit les liens internes</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Suit les liens internes</div>
                 </button>
 
                 <button
@@ -372,11 +372,11 @@ onUnmounted(() => {
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
                   @click="discoveryMode = DISCOVERY_MODES.SITEMAP"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.SITEMAP ? 'text-emerald-500' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.SITEMAP ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Sitemap</div>
-                  <div class="text-xs text-gray-500 mt-1">Parse sitemap.xml</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Parse sitemap.xml</div>
                 </button>
 
                 <button
@@ -387,11 +387,11 @@ onUnmounted(() => {
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
                   @click="discoveryMode = DISCOVERY_MODES.MANUAL"
                 >
-                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.MANUAL ? 'text-emerald-500' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-6 h-6 mb-2" :class="discoveryMode === DISCOVERY_MODES.MANUAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <div class="font-medium text-gray-900 dark:text-white">Manuel</div>
-                  <div class="text-xs text-gray-500 mt-1">Liste d'URLs</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Liste d'URLs</div>
                 </button>
               </div>
             </div>
@@ -409,7 +409,7 @@ onUnmounted(() => {
 https://example.com/page-2
 https://example.com/page-3"
               ></textarea>
-              <p class="mt-1 text-xs text-gray-500">
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Maximum {{ maxPages }} URLs. Les lignes commencant par # sont ignorees.
               </p>
             </div>
@@ -429,12 +429,12 @@ https://example.com/page-3"
                   @click="service = CRAWL_SERVICES.PAGESPEED"
                 >
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.PAGESPEED ? 'text-emerald-500' : 'text-gray-400'" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.PAGESPEED ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
                     <span class="font-medium text-gray-900 dark:text-white">PageSpeed Insights</span>
                   </div>
-                  <div class="text-xs text-gray-500">API Google, pas de serveur local requis</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">API Google, pas de serveur local requis</div>
                 </button>
 
                 <button
@@ -450,12 +450,12 @@ https://example.com/page-3"
                   @click="localServerAvailable && (service = CRAWL_SERVICES.LOCAL)"
                 >
                   <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.LOCAL ? 'text-emerald-500' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-5 h-5" :class="service === CRAWL_SERVICES.LOCAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                     </svg>
                     <span class="font-medium text-gray-900 dark:text-white">Local Lighthouse</span>
                   </div>
-                  <div class="text-xs text-gray-500">Serveur local, plus rapide</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">Serveur local, plus rapide</div>
 
                   <!-- Server status -->
                   <div v-if="checkingServer" class="absolute top-2 right-2">

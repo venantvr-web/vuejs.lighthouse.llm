@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {DISCOVERY_MODES} from '@/services/urlDiscovery'
@@ -24,6 +24,51 @@ const error = ref('')
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)
+
+// LocalStorage key for preferences
+const PREFS_KEY = 'crawl-preferences'
+
+// Load saved preferences
+function loadPreferences() {
+  try {
+    const saved = localStorage.getItem(PREFS_KEY)
+    if (saved) {
+      const prefs = JSON.parse(saved)
+      if (prefs.discoveryMode && Object.values(DISCOVERY_MODES).includes(prefs.discoveryMode)) {
+        discoveryMode.value = prefs.discoveryMode
+      }
+      if (prefs.service && Object.values(CRAWL_SERVICES).includes(prefs.service)) {
+        service.value = prefs.service
+      }
+      if (prefs.strategy && ['mobile', 'desktop'].includes(prefs.strategy)) {
+        strategy.value = prefs.strategy
+      }
+      if (prefs.maxPages && typeof prefs.maxPages === 'number' && prefs.maxPages >= 1 && prefs.maxPages <= 20) {
+        maxPages.value = prefs.maxPages
+      }
+    }
+  } catch {
+    // Ignore invalid stored preferences
+  }
+}
+
+// Save preferences to localStorage
+function savePreferences() {
+  try {
+    const prefs = {
+      discoveryMode: discoveryMode.value,
+      service: service.value,
+      strategy: strategy.value,
+      maxPages: maxPages.value
+    }
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Watch for preference changes and save
+watch([discoveryMode, service, strategy, maxPages], savePreferences)
 
 // Computed
 const isRunning = computed(() => crawlStore.isRunning)
@@ -146,6 +191,7 @@ function handleDismissError() {
 
 // Initialize
 onMounted(async () => {
+  loadPreferences()
   await crawlStore.initialize()
   await checkLocalServer()
 })

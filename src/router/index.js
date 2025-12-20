@@ -47,6 +47,21 @@ const routes = [
     path: '/history',
     name: 'history',
     component: () => import('@/views/HistoryView.vue')
+  },
+  {
+    path: '/crawl',
+    name: 'crawl',
+    component: () => import('@/views/CrawlView.vue')
+  },
+  {
+    path: '/crawl/results/:id',
+    name: 'crawl-results',
+    component: () => import('@/views/CrawlResultsView.vue')
+  },
+  {
+    path: '/crawl/history',
+    name: 'crawl-history',
+    component: () => import('@/views/CrawlHistoryView.vue')
   }
 ]
 

@@ -67,7 +67,7 @@
         </div>
 
         <!-- Choice cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Live analysis -->
           <router-link
             to="/lighthouse"
@@ -128,6 +128,28 @@
             </p>
             <div class="card-cta">
               <span>Importer un fichier</span>
+              <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </router-link>
+
+          <!-- Crawl mode -->
+          <router-link
+            to="/crawl"
+            class="choice-card choice-card-crawl group"
+          >
+            <div class="card-icon bg-gradient-to-br from-emerald-500 to-emerald-700">
+              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <h3 class="card-title">Mode Crawl</h3>
+            <p class="card-description">
+              Analysez plusieurs pages et obtenez des scores agreges par template.
+            </p>
+            <div class="card-cta card-cta-crawl">
+              <span>Crawler un site</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -249,5 +271,14 @@
 
 .card-cta-local {
   color: #22c55e;
+}
+
+.choice-card-crawl:hover {
+  border-color: #10b981;
+  box-shadow: 0 10px 40px -10px color-mix(in srgb, #10b981 30%, transparent);
+}
+
+.card-cta-crawl {
+  color: #10b981;
 }
 </style>

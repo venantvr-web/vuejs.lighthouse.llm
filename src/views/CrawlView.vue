@@ -615,7 +615,6 @@ https://example.com/page-3"
 
 /* Slider styling */
 .slider-track {
-  background: linear-gradient(to right, #10b981 0%, #10b981 calc(var(--value, 100) * 1%), #e5e7eb calc(var(--value, 100) * 1%), #e5e7eb 100%);
   background: var(--bg-tertiary);
 }
 

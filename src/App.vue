@@ -7,18 +7,14 @@ const isDark = ref(false)
 
 // Initialize theme
 onMounted(() => {
-  // Check localStorage or system preference
-  const stored = localStorage.getItem('theme')
-  if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    isDark.value = true
-    document.documentElement.classList.add('dark')
-  }
+  // Check current state from html element
+  isDark.value = document.documentElement.classList.contains('dark')
 
   // Listen for system preference changes
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     if (!localStorage.getItem('theme')) {
       isDark.value = e.matches
-      document.documentElement.classList.toggle('dark', e.matches)
+      document.documentElement.classList.toggle('dark', isDark.value)
     }
   })
 })
@@ -32,11 +28,12 @@ const toggleTheme = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+  <div class="min-h-screen transition-colors" style="background-color: var(--bg-secondary);">
     <!-- Theme toggle (floating) -->
     <button
       @click="toggleTheme"
-      class="fixed bottom-4 right-4 z-50 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700"
+      class="fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg hover:shadow-xl transition-all border"
+      :class="isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
       :title="isDark ? 'Mode clair' : 'Mode sombre'"
     >
       <!-- Sun icon -->

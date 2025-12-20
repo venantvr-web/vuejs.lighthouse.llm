@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable dark mode with class strategy */
+@variant dark (&:where(.dark, .dark *));
+
 /* Tailwind v4 Theme Configuration */
 @theme {
   /* Primary color palette */
@@ -21,128 +24,128 @@
 }
 
 /* CSS Custom Properties for theming */
-:root {
-  /* Background colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --bg-elevated: #ffffff;
+@layer base {
+  :root {
+    /* Background colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --bg-elevated: #ffffff;
 
-  /* Text colors */
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #6b7280;
-  --text-muted: #9ca3af;
+    /* Text colors */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-tertiary: #6b7280;
+    --text-muted: #9ca3af;
 
-  /* Border colors */
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db;
-  --border-focus: #0ea5e9;
+    /* Border colors */
+    --border-primary: #e5e7eb;
+    --border-secondary: #d1d5db;
+    --border-focus: #0ea5e9;
 
-  /* Interactive colors */
-  --interactive-hover: #f3f4f6;
-  --interactive-active: #e5e7eb;
+    /* Interactive colors */
+    --interactive-hover: #f3f4f6;
+    --interactive-active: #e5e7eb;
 
-  /* Status colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+    /* Status colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
 
-  /* History component colors */
-  --color-bg: #f9fafb;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-hover: #f3f4f6;
-  --color-border: #e5e7eb;
-  --color-text: #111827;
-  --color-text-muted: #6b7280;
-  --color-primary: #3b82f6;
-  --color-primary-light: #eff6ff;
-  --color-primary-dark: #2563eb;
-  --color-secondary: #6b7280;
-  --color-secondary-light: #f3f4f6;
-  --color-danger: #ef4444;
-  --color-danger-light: #fef2f2;
-  --color-danger-dark: #dc2626;
-  --color-score-good: #10b981;
-  --color-score-average: #f59e0b;
-  --color-score-poor: #ef4444;
-  --color-info: #3b82f6;
-  --color-info-light: #eff6ff;
-  --color-success: #10b981;
-  --color-success-light: #ecfdf5;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fffbeb;
+    /* History component colors */
+    --color-bg: #f9fafb;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #f3f4f6;
+    --color-bg-hover: #f3f4f6;
+    --color-border: #e5e7eb;
+    --color-text: #111827;
+    --color-text-muted: #6b7280;
+    --color-primary: #3b82f6;
+    --color-primary-light: #eff6ff;
+    --color-primary-dark: #2563eb;
+    --color-secondary: #6b7280;
+    --color-secondary-light: #f3f4f6;
+    --color-danger: #ef4444;
+    --color-danger-light: #fef2f2;
+    --color-danger-dark: #dc2626;
+    --color-score-good: #10b981;
+    --color-score-average: #f59e0b;
+    --color-score-poor: #ef4444;
+    --color-info: #3b82f6;
+    --color-info-light: #eff6ff;
+    --color-success: #10b981;
+    --color-success-light: #ecfdf5;
+    --color-warning: #f59e0b;
+    --color-warning-light: #fffbeb;
+  }
+
+  html.dark {
+    /* Background colors */
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --bg-elevated: #1f2937;
+
+    /* Text colors */
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --text-muted: #6b7280;
+
+    /* Border colors */
+    --border-primary: #374151;
+    --border-secondary: #4b5563;
+    --border-focus: #38bdf8;
+
+    /* Interactive colors */
+    --interactive-hover: #374151;
+    --interactive-active: #4b5563;
+
+    /* Status colors */
+    --success: #34d399;
+    --warning: #fbbf24;
+    --error: #f87171;
+    --info: #60a5fa;
+
+    /* History component colors (dark mode) */
+    --color-bg: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-tertiary: #374151;
+    --color-bg-hover: #374151;
+    --color-border: #374151;
+    --color-text: #f9fafb;
+    --color-text-muted: #9ca3af;
+    --color-primary: #60a5fa;
+    --color-primary-light: #1e3a5f;
+    --color-primary-dark: #3b82f6;
+    --color-secondary: #9ca3af;
+    --color-secondary-light: #374151;
+    --color-danger: #f87171;
+    --color-danger-light: #450a0a;
+    --color-danger-dark: #ef4444;
+    --color-score-good: #34d399;
+    --color-score-average: #fbbf24;
+    --color-score-poor: #f87171;
+    --color-info: #60a5fa;
+    --color-info-light: #1e3a5f;
+    --color-success: #34d399;
+    --color-success-light: #064e3b;
+    --color-warning: #fbbf24;
+    --color-warning-light: #451a03;
+  }
+
+  html,
+  body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
 }
 
-html.dark {
-  /* Background colors */
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --bg-tertiary: #374151;
-  --bg-elevated: #1f2937;
-
-  /* Text colors */
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
-  --text-muted: #6b7280;
-
-  /* Border colors */
-  --border-primary: #374151;
-  --border-secondary: #4b5563;
-  --border-focus: #38bdf8;
-
-  /* Interactive colors */
-  --interactive-hover: #374151;
-  --interactive-active: #4b5563;
-
-  /* Status colors */
-  --success: #34d399;
-  --warning: #fbbf24;
-  --error: #f87171;
-  --info: #60a5fa;
-
-  /* History component colors (dark mode) */
-  --color-bg: #111827;
-  --color-bg-secondary: #1f2937;
-  --color-bg-tertiary: #374151;
-  --color-bg-hover: #374151;
-  --color-border: #374151;
-  --color-text: #f9fafb;
-  --color-text-muted: #9ca3af;
-  --color-primary: #60a5fa;
-  --color-primary-light: #1e3a5f;
-  --color-primary-dark: #3b82f6;
-  --color-secondary: #9ca3af;
-  --color-secondary-light: #374151;
-  --color-danger: #f87171;
-  --color-danger-light: #450a0a;
-  --color-danger-dark: #ef4444;
-  --color-score-good: #34d399;
-  --color-score-average: #fbbf24;
-  --color-score-poor: #f87171;
-  --color-info: #60a5fa;
-  --color-info-light: #1e3a5f;
-  --color-success: #34d399;
-  --color-success-light: #064e3b;
-  --color-warning: #fbbf24;
-  --color-warning-light: #451a03;
-}
-
-/* Custom base styles */
-html {
-  background-color: var(--bg-secondary);
-}
-
-body {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
 
 /* Custom component styles */
 @layer components {
@@ -281,3 +284,4 @@ body {
 .dark ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-500;
 }
+

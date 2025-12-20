@@ -107,7 +107,7 @@ const categories = computed(() => {
   const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
   const labels = {
     'performance': 'Performance',
-    'accessibility': 'Accessibilite',
+    'accessibility': 'Accessibilité',
     'best-practices': 'Bonnes Pratiques',
     'seo': 'SEO',
     'pwa': 'PWA'
@@ -173,19 +173,19 @@ const buildPrompt = async () => {
     return `Tu es un ${categoryMeta?.role || 'expert technique'}.
 
 ## Contexte
-- URL analysee: ${report.value.finalUrl || report.value.requestedUrl}
+- URL analysée : ${report.value.finalUrl || report.value.requestedUrl}
 - Score: ${currentScore.value}/100
-- ${failedAudits.value.length} problemes detectes
+- ${failedAudits.value.length} problèmes détectés
 
-## Audits echoues
+## Audits échoués
 ${auditsText}
 
 ## Ta mission
-1. Analyse chaque probleme et explique son impact
-2. Propose des solutions concretes avec des exemples de code Vue 3
+1. Analyse chaque problème et explique son impact
+2. Propose des solutions concrètes avec des exemples de code Vue 3
 3. Priorise les actions par impact/effort
 
-Reponds en francais avec une structure Markdown claire.`
+Réponds en français avec une structure Markdown claire.`
   }
 }
 
@@ -247,7 +247,7 @@ const analyzeWithOpenAI = async (prompt) => {
     body: JSON.stringify({
       model: 'gpt-4-turbo-preview',
       messages: [
-        { role: 'system', content: 'Tu es un expert technique. Reponds en Markdown.' },
+        { role: 'system', content: 'Tu es un expert technique. Réponds en Markdown.' },
         { role: 'user', content: prompt }
       ],
       stream: true,
@@ -283,7 +283,7 @@ const analyzeWithOpenAI = async (prompt) => {
 
 const startAnalysis = async () => {
   if (!apiKey.value) {
-    error.value = 'Veuillez configurer votre cle API dans les parametres'
+    error.value = 'Veuillez configurer votre clé API dans les paramètres'
     return
   }
 
@@ -366,7 +366,7 @@ const exportAnalysis = () => {
               {{ categories.find(c => c.id === activeCategory)?.label || '' }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {{ failedAudits.length }} problemes detectes
+              {{ failedAudits.length }} problèmes détectés
             </p>
           </div>
 
@@ -428,7 +428,7 @@ const exportAnalysis = () => {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ isStreaming ? 'Analyse en cours...' : 'Generer le plan d\'action' }}
+            {{ isStreaming ? 'Analyse en cours...' : 'Générer le plan d\'action' }}
           </button>
 
           <!-- Error message -->
@@ -442,9 +442,9 @@ const exportAnalysis = () => {
               <svg class="w-4 h-4 text-lighthouse-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              Problemes detectes
+              Problèmes détectés
             </h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour voir les details</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour voir les détails</p>
             <ul class="space-y-1 max-h-64 overflow-y-auto">
               <li
                 v-for="audit in failedAudits"
@@ -535,7 +535,7 @@ const exportAnalysis = () => {
               <!-- Details items if available -->
               <div v-if="selectedAudit.details?.items?.length" class="mt-4">
                 <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Elements concernes ({{ selectedAudit.details.items.length }})
+                  Éléments concernés ({{ selectedAudit.details.items.length }})
                 </h4>
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 max-h-48 overflow-y-auto">
                   <ul class="space-y-2 text-sm">
@@ -552,7 +552,7 @@ const exportAnalysis = () => {
                     </li>
                   </ul>
                   <p v-if="selectedAudit.details.items.length > 10" class="text-xs text-gray-400 mt-2">
-                    Et {{ selectedAudit.details.items.length - 10 }} autres elements...
+                    Et {{ selectedAudit.details.items.length - 10 }} autres éléments...
                   </p>
                 </div>
               </div>

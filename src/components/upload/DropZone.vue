@@ -54,7 +54,7 @@ const processFile = async (file) => {
   error.value = null
 
   if (!file.name.endsWith('.json')) {
-    error.value = 'Veuillez selectionner un fichier JSON'
+    error.value = 'Veuillez sélectionner un fichier JSON'
     return
   }
 
@@ -128,7 +128,7 @@ const clearFile = () => {
         Importez un rapport Lighthouse
       </h3>
       <p class="mt-2 text-gray-500 dark:text-gray-400">
-        Glissez-deposez un fichier JSON ou cliquez pour selectionner
+        Glissez-déposez un fichier JSON ou cliquez pour sélectionner
       </p>
 
       <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">

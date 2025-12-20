@@ -103,7 +103,7 @@ function handleKeydown(event) {
     </div>
 
     <p v-if="error" class="error-message">{{ error }}</p>
-    <p v-else-if="inputValue && !isValidUrl" class="hint-message">Entrez une URL valide (ex: https://example.com)</p>
+    <p v-else-if="inputValue && !isValidUrl" class="hint-message">Entrez une URL valide (ex : https://example.com)</p>
   </div>
 </template>
 

@@ -118,7 +118,7 @@ const testConnection = async () => {
             class="input"
           />
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Votre cle API est stockee localement dans votre navigateur.
+            Votre clé API est stockée localement dans votre navigateur.
           </p>
         </div>
 
@@ -170,11 +170,11 @@ const testConnection = async () => {
             </svg>
           </div>
           <div>
-            <h3 class="font-medium text-gray-900 dark:text-white">Gemini (Recommande)</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white">Gemini (Recommandé)</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Contexte de 1M tokens, tier gratuit genereux, excellent en francais.
+              Contexte de 1M tokens, tier gratuit généreux, excellent en français.
               <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">
-                Obtenir une cle API
+                Obtenir une clé API
               </a>
             </p>
           </div>
@@ -189,7 +189,7 @@ const testConnection = async () => {
           <div>
             <h3 class="font-medium text-gray-900 dark:text-white">Ollama (100% Local)</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Executez des modeles IA localement sans envoyer vos donnees.
+              Exécutez des modèles IA localement sans envoyer vos données.
               <a href="https://ollama.ai" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">
                 Installer Ollama
               </a>

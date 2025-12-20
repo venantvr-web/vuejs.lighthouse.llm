@@ -28,7 +28,7 @@ const categories = computed(() => {
   const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
   const labels = {
     'performance': 'Performance',
-    'accessibility': 'Accessibilite',
+    'accessibility': 'Accessibilité',
     'best-practices': 'Bonnes Pratiques',
     'seo': 'SEO',
     'pwa': 'PWA'
@@ -191,7 +191,7 @@ const clearReport = () => {
             </div>
             <div>
               <h3 class="font-semibold text-gray-900 dark:text-white">Optimiser la Performance</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Obtenez des recommandations IA pour ameliorer vos Core Web Vitals</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Obtenez des recommandations IA pour améliorer vos Core Web Vitals</p>
             </div>
           </router-link>
 
@@ -206,7 +206,7 @@ const clearReport = () => {
             </div>
             <div>
               <h3 class="font-semibold text-gray-900 dark:text-white">Comparer les rapports</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Analysez l'evolution de votre site dans le temps</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Analysez l'évolution de votre site dans le temps</p>
             </div>
           </router-link>
         </div>

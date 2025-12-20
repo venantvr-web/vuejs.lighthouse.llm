@@ -75,7 +75,7 @@ function handleDismissError() {
             Importez votre rapport Lighthouse
           </h2>
           <p class="text-gray-500 dark:text-gray-400">
-            Glissez-deposez ou selectionnez un fichier JSON exporte depuis Chrome DevTools
+            Glissez-déposez ou sélectionnez un fichier JSON exporté depuis Chrome DevTools
           </p>
         </div>
 
@@ -109,7 +109,7 @@ function handleDismissError() {
         <!-- Alternative option -->
         <div class="mt-8 text-center">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            Vous preferez une analyse en temps reel ?
+            Vous préférez une analyse en temps réel ?
             <router-link to="/lighthouse" class="text-primary-500 hover:text-primary-600 font-medium">
               Analysez votre URL directement
             </router-link>

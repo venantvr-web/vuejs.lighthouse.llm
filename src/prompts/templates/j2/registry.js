@@ -53,7 +53,7 @@ export const templateRegistry = {
   accessibility: {
     quickAnalysis: {
       id: 'quickAnalysis',
-      name: 'Analyse Rapide Accessibilite',
+      name: 'Analyse Rapide Accessibilité',
       description: 'Violations WCAG principales',
       strategy: 'quick',
       file: 'accessibility-quick.j2',
@@ -105,14 +105,14 @@ export const categoryMeta = {
     name: 'SEO',
     icon: '🔍',
     role: 'Consultant SEO Technique',
-    description: 'Referencement, Meta tags, Schema.org'
+    description: 'Référencement, Meta tags, Schema.org'
   },
   accessibility: {
     id: 'accessibility',
-    name: 'Accessibilite',
+    name: 'Accessibilité',
     icon: '♿',
     role: 'Expert WCAG/RGAA',
-    description: 'WCAG 2.1 AA, ARIA, lecteurs d\'ecran'
+    description: 'WCAG 2.1 AA, ARIA, lecteurs d\'écran'
   },
   'best-practices': {
     id: 'best-practices',

@@ -39,7 +39,7 @@ const scoreDiffs = computed(() => {
 
 const categoryLabels = {
   performance: 'Performance',
-  accessibility: 'Accessibilite',
+  accessibility: 'Accessibilité',
   seo: 'SEO',
   'best-practices': 'Bonnes Pratiques'
 }
@@ -184,13 +184,13 @@ const clearReport = (which) => {
           <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
             <p>
               <template v-if="Object.values(scoreDiffs).every(d => d >= 0)">
-                Excellente evolution ! Tous les scores se sont ameliores ou sont restes stables.
+                Excellente évolution ! Tous les scores se sont améliorés ou sont restés stables.
               </template>
               <template v-else-if="Object.values(scoreDiffs).every(d => d <= 0)">
-                Attention, des regressions ont ete detectees sur plusieurs categories.
+                Attention, des régressions ont été détectées sur plusieurs catégories.
               </template>
               <template v-else>
-                Evolution mitigee : certaines categories se sont ameliorees, d'autres ont regresse.
+                Évolution mitigée : certaines catégories se sont améliorées, d'autres ont régressé.
               </template>
             </p>
 

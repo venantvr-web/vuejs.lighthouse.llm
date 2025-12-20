@@ -27,7 +27,7 @@ describe('DropZone', () => {
 
     it('should show import instructions initially', () => {
       expect(wrapper.text()).toContain('Importez un rapport Lighthouse')
-      expect(wrapper.text()).toContain('Glissez-deposez')
+      expect(wrapper.text()).toContain('Glissez-déposez')
     })
   })
 
@@ -111,7 +111,7 @@ describe('DropZone', () => {
       await input.trigger('change')
       await new Promise(resolve => setTimeout(resolve, 100))
 
-      expect(wrapper.text()).toContain('Veuillez selectionner un fichier JSON')
+      expect(wrapper.text()).toContain('Veuillez sélectionner un fichier JSON')
       expect(wrapper.emitted('file-selected')).toBeFalsy()
     })
 

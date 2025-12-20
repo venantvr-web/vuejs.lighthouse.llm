@@ -121,7 +121,7 @@ function handleDismissError() {
             Analyse en cours...
           </p>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Temps estime : ~{{ estimatedTime }} secondes
+            Temps estimé : ~{{ estimatedTime }} secondes
           </p>
           <button
             type="button"
@@ -139,7 +139,7 @@ function handleDismissError() {
               Analysez votre site web
             </h2>
             <p class="text-gray-500 dark:text-gray-400">
-              Entrez l'URL de votre site pour lancer une analyse Lighthouse en temps reel
+              Entrez l'URL de votre site pour lancer une analyse Lighthouse en temps réel
             </p>
           </div>
 
@@ -201,10 +201,10 @@ function handleDismissError() {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="text-sm text-blue-700 dark:text-blue-300">
-                <p class="font-medium mb-1">A propos de l'analyse</p>
+                <p class="font-medium mb-1">À propos de l'analyse</p>
                 <p>
-                  Cette analyse utilise l'API PageSpeed Insights de Google pour executer
-                  Lighthouse sur votre site. Les resultats sont identiques a ceux de Chrome DevTools.
+                  Cette analyse utilise l'API PageSpeed Insights de Google pour exécuter
+                  Lighthouse sur votre site. Les résultats sont identiques à ceux de Chrome DevTools.
                 </p>
               </div>
             </div>
@@ -213,7 +213,7 @@ function handleDismissError() {
           <!-- Alternative option -->
           <div class="mt-8 text-center">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              Vous avez deja un rapport Lighthouse ?
+              Vous avez déjà un rapport Lighthouse ?
               <router-link to="/upload" class="text-primary-500 hover:text-primary-600 font-medium">
                 Importez-le ici
               </router-link>

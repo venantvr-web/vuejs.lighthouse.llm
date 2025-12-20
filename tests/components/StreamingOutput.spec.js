@@ -32,7 +32,7 @@ describe('StreamingOutput', () => {
         props: { content: '', isStreaming: false }
       })
 
-      expect(wrapper.text()).toContain('Selectionnez une categorie')
+      expect(wrapper.text()).toContain('Sélectionnez une catégorie')
     })
 
     it('should show MarkdownViewer when content is present', () => {
@@ -206,7 +206,7 @@ describe('StreamingOutput', () => {
   describe('props', () => {
     it('should default content to empty string', () => {
       const wrapper = mount(StreamingOutput)
-      expect(wrapper.text()).toContain('Selectionnez une categorie')
+      expect(wrapper.text()).toContain('Sélectionnez une catégorie')
     })
 
     it('should default isStreaming to false', () => {

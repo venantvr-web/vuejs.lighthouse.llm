@@ -196,7 +196,7 @@ describe('categoryMeta', () => {
       expect(meta.name).toBe('SEO')
       expect(meta.icon).toBe('🔍')
       expect(meta.role).toContain('SEO')
-      expect(meta.description).toContain('Referencement')
+      expect(meta.description).toContain('Référencement')
     })
   })
 
@@ -205,7 +205,7 @@ describe('categoryMeta', () => {
       const meta = categoryMeta.accessibility
 
       expect(meta.id).toBe('accessibility')
-      expect(meta.name).toBe('Accessibilite')
+      expect(meta.name).toBe('Accessibilité')
       expect(meta.icon).toBe('♿')
       expect(meta.role).toContain('WCAG')
       expect(meta.description).toContain('WCAG')

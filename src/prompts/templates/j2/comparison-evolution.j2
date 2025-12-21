@@ -1,0 +1,157 @@
+{# Comparison Evolution Analysis - Expert Performance Tracking #}
+# Analyse d'Evolution - {{ url }}
+
+## Role
+Tu es un Expert en Analyse de Performance Web, specialise dans le suivi d'evolution et l'analyse comparative.
+
+## Periode Analysee
+
+**Avant:** {{ beforeDate }}
+**Apres:** {{ afterDate }}
+**Intervalle:** {{ daysBetween | default('N/A') }} jours
+
+## Evolution des Scores
+
+| Categorie | Avant | Apres | Evolution | Statut |
+|-----------|-------|-------|-----------|--------|
+| **Performance** | {{ beforeScores.performance | score }} | {{ afterScores.performance | score }} | {% if afterScores.performance > beforeScores.performance %}+{% endif %}{{ ((afterScores.performance - beforeScores.performance) * 100) | round(0) }}% | {% if afterScores.performance > beforeScores.performance %}Amelioration{% elif afterScores.performance < beforeScores.performance %}Regression{% else %}Stable{% endif %} |
+| **Accessibilite** | {{ beforeScores.accessibility | score }} | {{ afterScores.accessibility | score }} | {% if afterScores.accessibility > beforeScores.accessibility %}+{% endif %}{{ ((afterScores.accessibility - beforeScores.accessibility) * 100) | round(0) }}% | {% if afterScores.accessibility > beforeScores.accessibility %}Amelioration{% elif afterScores.accessibility < beforeScores.accessibility %}Regression{% else %}Stable{% endif %} |
+| **Bonnes Pratiques** | {{ beforeScores.bestPractices | score }} | {{ afterScores.bestPractices | score }} | {% if afterScores.bestPractices > beforeScores.bestPractices %}+{% endif %}{{ ((afterScores.bestPractices - beforeScores.bestPractices) * 100) | round(0) }}% | {% if afterScores.bestPractices > beforeScores.bestPractices %}Amelioration{% elif afterScores.bestPractices < beforeScores.bestPractices %}Regression{% else %}Stable{% endif %} |
+| **SEO** | {{ beforeScores.seo | score }} | {{ afterScores.seo | score }} | {% if afterScores.seo > beforeScores.seo %}+{% endif %}{{ ((afterScores.seo - beforeScores.seo) * 100) | round(0) }}% | {% if afterScores.seo > beforeScores.seo %}Amelioration{% elif afterScores.seo < beforeScores.seo %}Regression{% else %}Stable{% endif %} |
+| **PWA** | {{ beforeScores.pwa | score }} | {{ afterScores.pwa | score }} | {% if afterScores.pwa > beforeScores.pwa %}+{% endif %}{{ ((afterScores.pwa - beforeScores.pwa) * 100) | round(0) }}% | {% if afterScores.pwa > beforeScores.pwa %}Amelioration{% elif afterScores.pwa < beforeScores.pwa %}Regression{% else %}Stable{% endif %} |
+
+{% if metrics %}
+## Evolution des Metriques
+
+| Metrique | Avant | Apres | Difference | Analyse |
+|----------|-------|-------|------------|---------|
+{% if metrics.before.lcp and metrics.after.lcp %}| **LCP** | {{ metrics.before.lcp | metric }} | {{ metrics.after.lcp | metric }} | {{ (metrics.after.lcp - metrics.before.lcp) | metric }} | {% if metrics.after.lcp < metrics.before.lcp %}Ameliore{% elif metrics.after.lcp > metrics.before.lcp %}Degrade{% else %}Stable{% endif %} |
+{% endif %}
+{% if metrics.before.fcp and metrics.after.fcp %}| **FCP** | {{ metrics.before.fcp | metric }} | {{ metrics.after.fcp | metric }} | {{ (metrics.after.fcp - metrics.before.fcp) | metric }} | {% if metrics.after.fcp < metrics.before.fcp %}Ameliore{% elif metrics.after.fcp > metrics.before.fcp %}Degrade{% else %}Stable{% endif %} |
+{% endif %}
+{% if metrics.before.tbt and metrics.after.tbt %}| **TBT** | {{ metrics.before.tbt | metric }} | {{ metrics.after.tbt | metric }} | {{ (metrics.after.tbt - metrics.before.tbt) | metric }} | {% if metrics.after.tbt < metrics.before.tbt %}Ameliore{% elif metrics.after.tbt > metrics.before.tbt %}Degrade{% else %}Stable{% endif %} |
+{% endif %}
+{% if metrics.before.cls and metrics.after.cls %}| **CLS** | {{ metrics.before.cls | round(3) }} | {{ metrics.after.cls | round(3) }} | {{ (metrics.after.cls - metrics.before.cls) | round(3) }} | {% if metrics.after.cls < metrics.before.cls %}Ameliore{% elif metrics.after.cls > metrics.before.cls %}Degrade{% else %}Stable{% endif %} |
+{% endif %}
+{% if metrics.before.si and metrics.after.si %}| **Speed Index** | {{ metrics.before.si | metric }} | {{ metrics.after.si | metric }} | {{ (metrics.after.si - metrics.before.si) | metric }} | {% if metrics.after.si < metrics.before.si %}Ameliore{% elif metrics.after.si > metrics.before.si %}Degrade{% else %}Stable{% endif %} |
+{% endif %}
+{% endif %}
+
+{% if improvements %}
+## Ameliorations Detectees
+
+{% for imp in improvements %}
+### {{ loop.index }}. {{ imp.title }}
+**Gain:** {{ imp.diff | round(0) }}%
+{{ imp.description | truncate(200) }}
+{% endfor %}
+{% endif %}
+
+{% if regressions %}
+## Regressions Detectees
+
+{% for reg in regressions %}
+### {{ loop.index }}. {{ reg.title }}
+**Perte:** {{ reg.diff | round(0) }}%
+{{ reg.description | truncate(200) }}
+{% endfor %}
+{% endif %}
+
+## Demande
+
+Analyse comparative approfondie:
+
+### 1. Synthese de l'Evolution
+
+Analyse l'evolution globale:
+- **Points forts:** Quelles sont les principales ameliorations?
+- **Points faibles:** Quelles sont les regressions critiques?
+- **Tendance generale:** Le site s'ameliore-t-il globalement?
+
+### 2. Analyse des Ameliorations
+
+Pour chaque amelioration significative:
+- Quelle optimisation a probablement cause cette amelioration?
+- Impact utilisateur concret
+- Recommandation pour maintenir/amplifier cette amelioration
+
+**Exemple d'analyse:**
+```
+Amelioration: LCP reduit de 4.2s a 2.1s (-50%)
+
+Causes probables:
+- Optimisation des images (format WebP, lazy-loading)
+- Amelioration du code splitting
+- Utilisation d'un CDN
+
+Impact utilisateur:
+- Contenu principal visible 2x plus rapidement
+- Amelioration de l'experience utilisateur
+- Meilleur ranking Google (Core Web Vitals)
+
+Recommandations:
+- Maintenir l'optimisation images
+- Monitorer regulierement le LCP
+- Continuer a optimiser les ressources critiques
+```
+
+### 3. Analyse des Regressions
+
+{% if regressions %}
+Pour chaque regression:
+- Identifier la cause probable
+- Estimer l'impact utilisateur
+- Proposer une solution de correction
+
+**Plan de correction:**
+```vue
+// Code pour corriger les regressions identifiees
+```
+{% else %}
+Aucune regression detectee.
+{% endif %}
+
+### 4. Recommandations Priorisees
+
+**Quick Wins (< 1h):**
+1. [Action rapide a fort impact]
+2. [Correction simple]
+3. [Ajustement mineur]
+
+**Optimisations Moyennes (1-3h):**
+1. [Amelioration substantielle]
+2. [Refactoring cible]
+
+**Optimisations Avancees (> 3h):**
+1. [Changement architectural]
+2. [Optimisation complexe]
+
+### 5. Suivi et Monitoring
+
+**KPIs a suivre:**
+- Core Web Vitals (LCP, CLS, INP)
+- Scores Lighthouse
+- Metriques business (taux de conversion, engagement)
+
+**Configuration monitoring:**
+```javascript
+// web-vitals.js
+import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals'
+
+const sendToAnalytics = ({ name, value, id }) => {
+  gtag('event', name, {
+    event_category: 'Web Vitals',
+    event_label: id,
+    value: Math.round(name === 'CLS' ? value * 1000 : value),
+    non_interaction: true
+  })
+}
+
+onCLS(sendToAnalytics)
+onFCP(sendToAnalytics)
+onLCP(sendToAnalytics)
+onTTFB(sendToAnalytics)
+onINP(sendToAnalytics)
+```
+
+Fournis une analyse comparative complete avec recommandations actionnables.

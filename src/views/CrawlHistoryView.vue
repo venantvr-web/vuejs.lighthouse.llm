@@ -11,6 +11,7 @@ import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
 import {useFilters} from '@/composables/useFilters'
 import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
+import {formatScore, formatRelativeTime, getScoreBgClass} from '@/utils/formatters'
 
 const router = useRouter()
 const crawlStore = useCrawlStore()
@@ -128,50 +129,12 @@ function getStatusLabel(status) {
   }
 }
 
-// Format date
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleString('fr-FR', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  })
-}
-
-// Format relative time
-function formatRelativeTime(timestamp) {
-  const now = Date.now()
-  const diff = now - timestamp
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-
-  if (minutes < 1) return 'A l\'instant'
-  if (minutes < 60) return `Il y a ${minutes} min`
-  if (hours < 24) return `Il y a ${hours}h`
-  if (days < 7) return `Il y a ${days}j`
-  return formatDate(timestamp)
-}
-
 // Get average score
 function getAverageScore(aggregateScores) {
   if (!aggregateScores) return null
   const values = Object.values(aggregateScores).map(s => s.avg).filter(v => v !== null)
   if (values.length === 0) return null
   return values.reduce((a, b) => a + b, 0) / values.length
-}
-
-// Format score
-function formatScore(score) {
-  if (score === null || score === undefined) return '-'
-  return Math.round(score * 100)
-}
-
-// Get score color class
-function getScoreColorClass(score) {
-  if (score === null || score === undefined) return 'bg-gray-200 dark:bg-gray-700'
-  const value = score * 100
-  if (value >= 90) return 'bg-emerald-500'
-  if (value >= 50) return 'bg-amber-500'
-  return 'bg-red-500'
 }
 
 // View session
@@ -374,7 +337,7 @@ onMounted(async () => {
                 <!-- Average score -->
                 <div v-if="getAverageScore(session.aggregateScores) !== null" class="text-center">
                   <div
-                      :class="getScoreColorClass(getAverageScore(session.aggregateScores))"
+                      :class="getScoreBgClass(getAverageScore(session.aggregateScores))"
                       class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold"
                   >
                     {{ formatScore(getAverageScore(session.aggregateScores)) }}

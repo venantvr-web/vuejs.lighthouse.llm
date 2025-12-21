@@ -3,9 +3,10 @@ import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 
 const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 3
+const DB_VERSION = 5
 const STORE_NAME = 'scores'
 const CRAWL_SESSIONS_STORE = 'crawl-sessions'
+const REPORTS_STORE = 'reports'
 
 /**
  * Extract domain from URL
@@ -62,15 +63,27 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
 
     /**
      * Initialize the database
+     * @param {boolean} forceReset - If true, delete and recreate the database
      */
-    async function initialize() {
-        if (initialized.value) return
+    async function initialize(forceReset = false) {
+        if (initialized.value && !forceReset) return
 
         loading.value = true
         error.value = null
 
+        // Force reset if requested
+        if (forceReset) {
+            try {
+                await indexedDB.deleteDatabase()
+                console.log('[IndexedDB] Database deleted for reset')
+            } catch (err) {
+                console.warn('[IndexedDB] Could not delete database:', err)
+            }
+        }
+
         try {
-            await indexedDB.open((db, oldVersion) => {
+            await indexedDB.open((db, oldVersion, newVersion) => {
+                console.log(`[IndexedDB] Upgrading from v${oldVersion} to v${newVersion}`)
                 // Version 1: Create scores store
                 if (oldVersion < 1) {
                     const store = db.createObjectStore(STORE_NAME, {keyPath: 'id'})
@@ -111,12 +124,34 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
                         crawlStore.createIndex('status', 'status', {unique: false})
                     }
                 }
+
+                // Version 4: Add reports store for full Lighthouse JSON reports
+                if (oldVersion < 4) {
+                    if (!db.objectStoreNames.contains(REPORTS_STORE)) {
+                        const reportsStore = db.createObjectStore(REPORTS_STORE, {keyPath: 'id'})
+                        reportsStore.createIndex('scoreId', 'scoreId', {unique: true})
+                        reportsStore.createIndex('timestamp', 'timestamp', {unique: false})
+                    }
+                }
             })
 
             // Load domains list
             await loadDomains()
             initialized.value = true
         } catch (err) {
+            // Handle version conflict - database has higher version
+            if (err.name === 'VersionError' || err.message?.includes('higher version')) {
+                console.warn('[IndexedDB] Version conflict detected, resetting database...')
+                try {
+                    await indexedDB.deleteDatabase()
+                    // Retry initialization after reset
+                    loading.value = false
+                    initialized.value = false
+                    return initialize(false)
+                } catch (resetErr) {
+                    console.error('[IndexedDB] Failed to reset database:', resetErr)
+                }
+            }
             error.value = err.message
             console.error('Failed to initialize score history:', err)
         } finally {
@@ -311,6 +346,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
 
         try {
             await indexedDB.clear(STORE_NAME)
+            await indexedDB.clear(REPORTS_STORE)
             domains.value = []
             currentDomain.value = null
             currentScores.value = []
@@ -319,6 +355,195 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
             console.error('Failed to clear history:', err)
             throw err
         }
+    }
+
+    /**
+     * Add a new score entry with full report
+     * @param {string} url - Full URL analyzed
+     * @param {object} scoreData - Score data
+     * @param {object} metadata - Additional metadata
+     * @param {object} crawlInfo - Optional crawl information
+     * @param {object} fullReport - Full Lighthouse JSON report
+     * @returns {Promise<string>} - ID of the new entry
+     */
+    async function addScoreWithReport(url, scoreData, metadata = {}, crawlInfo = null, fullReport = null) {
+        const scoreId = await addScore(url, scoreData, metadata, crawlInfo)
+
+        if (fullReport) {
+            try {
+                const reportEntry = {
+                    id: crypto.randomUUID(),
+                    scoreId,
+                    report: fullReport,
+                    timestamp: Date.now()
+                }
+                await indexedDB.add(REPORTS_STORE, reportEntry)
+            } catch (err) {
+                console.error('Failed to store full report:', err)
+                // Don't throw - score was still saved successfully
+            }
+        }
+
+        return scoreId
+    }
+
+    /**
+     * Get a score entry by ID
+     * @param {string} id - Score entry ID
+     * @returns {Promise<object|null>} - Score entry or null
+     */
+    async function getScoreById(id) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        try {
+            return await indexedDB.get(STORE_NAME, id)
+        } catch (err) {
+            console.error('Failed to get score by ID:', err)
+            return null
+        }
+    }
+
+    /**
+     * Get full Lighthouse report for a score entry
+     * @param {string} scoreId - Score entry ID
+     * @returns {Promise<object|null>} - Full report or null
+     */
+    async function getFullReport(scoreId) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        try {
+            const reports = await indexedDB.getAllByIndex(REPORTS_STORE, 'scoreId', scoreId)
+            return reports.length > 0 ? reports[0].report : null
+        } catch (err) {
+            console.error('Failed to get full report:', err)
+            return null
+        }
+    }
+
+    /**
+     * Check if a full report exists for a score entry
+     * @param {string} scoreId - Score entry ID
+     * @returns {Promise<boolean>}
+     */
+    async function hasFullReport(scoreId) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        try {
+            const reports = await indexedDB.getAllByIndex(REPORTS_STORE, 'scoreId', scoreId)
+            return reports.length > 0
+        } catch (err) {
+            console.error('Failed to check for full report:', err)
+            return false
+        }
+    }
+
+    /**
+     * Delete full report for a score entry
+     * @param {string} scoreId - Score entry ID
+     */
+    async function deleteFullReport(scoreId) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        try {
+            const reports = await indexedDB.getAllByIndex(REPORTS_STORE, 'scoreId', scoreId)
+            for (const report of reports) {
+                await indexedDB.remove(REPORTS_STORE, report.id)
+            }
+        } catch (err) {
+            console.error('Failed to delete full report:', err)
+        }
+    }
+
+    /**
+     * Migrate data from localStorage (historyStore) to IndexedDB
+     * This should be called once during app initialization
+     * @returns {Promise<{migrated: number, skipped: number}>}
+     */
+    async function migrateFromLocalStorage() {
+        const LEGACY_STORAGE_KEY = 'lighthouse-history'
+        const MIGRATION_FLAG_KEY = 'lighthouse-history-migrated'
+
+        // Check if migration already done
+        if (localStorage.getItem(MIGRATION_FLAG_KEY)) {
+            return {migrated: 0, skipped: 0, alreadyMigrated: true}
+        }
+
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        const stored = localStorage.getItem(LEGACY_STORAGE_KEY)
+        if (!stored) {
+            localStorage.setItem(MIGRATION_FLAG_KEY, 'true')
+            return {migrated: 0, skipped: 0}
+        }
+
+        let migrated = 0
+        let skipped = 0
+
+        try {
+            const analyses = JSON.parse(stored)
+
+            if (!Array.isArray(analyses)) {
+                console.warn('Invalid localStorage format for migration')
+                return {migrated: 0, skipped: 0}
+            }
+
+            for (const analysis of analyses) {
+                try {
+                    // Convert localStorage format to IndexedDB format
+                    const url = analysis.url || 'https://unknown'
+                    const domain = extractDomain(url)
+                    const timestamp = analysis.timestamp
+                        ? new Date(analysis.timestamp).getTime()
+                        : Date.now()
+
+                    const entry = {
+                        id: analysis.id || crypto.randomUUID(),
+                        domain,
+                        url,
+                        timestamp,
+                        source: 'file', // Legacy data came from file uploads
+                        strategy: 'mobile', // Default
+                        scores: analysis.scores || {},
+                        coreWebVitals: analysis.coreWebVitals || {},
+                        lighthouseVersion: analysis.lighthouseVersion || null,
+                        crawlSessionId: null,
+                        pageTemplate: null,
+                        pagePath: new URL(url).pathname
+                    }
+
+                    await indexedDB.add(STORE_NAME, entry)
+                    migrated++
+                } catch (entryErr) {
+                    console.warn('Failed to migrate entry:', entryErr)
+                    skipped++
+                }
+            }
+
+            // Mark migration as complete
+            localStorage.setItem(MIGRATION_FLAG_KEY, 'true')
+
+            // Optionally clear old localStorage data (commented out for safety)
+            // localStorage.removeItem(LEGACY_STORAGE_KEY)
+
+            // Reload domains after migration
+            await loadDomains()
+
+            console.log(`Migration complete: ${migrated} migrated, ${skipped} skipped`)
+        } catch (err) {
+            console.error('Migration failed:', err)
+        }
+
+        return {migrated, skipped}
     }
 
     /**
@@ -477,6 +702,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         initialize,
         loadDomains,
         addScore,
+        addScoreWithReport,
         loadScoresForDomain,
         deleteDomain,
         deleteScore,
@@ -486,6 +712,13 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         getStatistics,
         getChartData,
         setIncludeCrawl,
-        toggleIncludeCrawl
+        toggleIncludeCrawl,
+        // Report management
+        getScoreById,
+        getFullReport,
+        hasFullReport,
+        deleteFullReport,
+        // Migration
+        migrateFromLocalStorage
     }
 })

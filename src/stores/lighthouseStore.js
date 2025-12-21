@@ -249,22 +249,29 @@ export const useLighthouseStore = defineStore('lighthouse', () => {
 
     /**
      * Save current report to history (IndexedDB)
+     * @param {boolean} includeFullReport - Whether to store the full report (default: true)
      * @returns {Promise<string|null>} Entry ID or null if failed
      */
-    async function saveToHistory() {
+    async function saveToHistory(includeFullReport = true) {
         if (!currentReport.value || !url.value) return null
 
         try {
             const historyStore = useScoreHistoryStore()
 
-            const entryId = await historyStore.addScore(url.value, {
-                scores: scores.value,
-                coreWebVitals: coreWebVitals.value
-            }, {
-                source: source.value,
-                strategy: strategy.value,
-                lighthouseVersion: lighthouseVersion.value
-            })
+            const entryId = await historyStore.addScoreWithReport(
+                url.value,
+                {
+                    scores: scores.value,
+                    coreWebVitals: coreWebVitals.value
+                },
+                {
+                    source: source.value,
+                    strategy: strategy.value,
+                    lighthouseVersion: lighthouseVersion.value
+                },
+                null, // crawlInfo
+                includeFullReport ? currentReport.value : null
+            )
 
             return entryId
         } catch (err) {

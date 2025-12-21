@@ -1,0 +1,209 @@
+{# Budget Compliance Analysis - Performance Budget Monitoring #}
+# Conformite aux Budgets Performance - {{ url }}
+
+## Role
+Tu es un Expert en Performance Budgets et monitoring continu des performances web.
+
+## Budgets vs Realite
+
+### Metriques de Timing
+
+| Metrique | Budget | Actuel | Ecart | Statut |
+|----------|--------|--------|-------|--------|
+{% if budgets.performance %}| **Performance Score** | {{ budgets.performance }}% | {{ actual.performance }}% | {{ (actual.performance - budgets.performance) | round(0) }}% | {% if actual.performance >= budgets.performance %}OK{% elif actual.performance >= budgets.performance - 10 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.lcp %}| **LCP** | {{ budgets.lcp | metric }} | {{ actual.lcp | metric }} | {{ (actual.lcp - budgets.lcp) | metric }} | {% if actual.lcp <= budgets.lcp %}OK{% elif actual.lcp <= budgets.lcp * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.tbt %}| **TBT** | {{ budgets.tbt | metric }} | {{ actual.tbt | metric }} | {{ (actual.tbt - budgets.tbt) | metric }} | {% if actual.tbt <= budgets.tbt %}OK{% elif actual.tbt <= budgets.tbt * 1.5 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.cls %}| **CLS** | {{ budgets.cls | round(2) }} | {{ actual.cls | round(2) }} | {{ (actual.cls - budgets.cls) | round(2) }} | {% if actual.cls <= budgets.cls %}OK{% elif actual.cls <= budgets.cls * 1.5 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.fcp %}| **FCP** | {{ budgets.fcp | metric }} | {{ actual.fcp | metric }} | {{ (actual.fcp - budgets.fcp) | metric }} | {% if actual.fcp <= budgets.fcp %}OK{% elif actual.fcp <= budgets.fcp * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.tti %}| **TTI** | {{ budgets.tti | metric }} | {{ actual.tti | metric }} | {{ (actual.tti - budgets.tti) | metric }} | {% if actual.tti <= budgets.tti %}OK{% elif actual.tti <= budgets.tti * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+
+### Tailles de Ressources
+
+| Type | Budget | Actuel | Ecart | Statut |
+|------|--------|--------|-------|--------|
+{% if budgets.js %}| **JavaScript** | {{ budgets.js | size }} | {{ actual.js | size }} | {% if actual.js > budgets.js %}+{% endif %}{{ (actual.js - budgets.js) | size }} | {% if actual.js <= budgets.js %}OK{% elif actual.js <= budgets.js * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.css %}| **CSS** | {{ budgets.css | size }} | {{ actual.css | size }} | {% if actual.css > budgets.css %}+{% endif %}{{ (actual.css - budgets.css) | size }} | {% if actual.css <= budgets.css %}OK{% elif actual.css <= budgets.css * 1.5 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.images %}| **Images** | {{ budgets.images | size }} | {{ actual.images | size }} | {% if actual.images > budgets.images %}+{% endif %}{{ (actual.images - budgets.images) | size }} | {% if actual.images <= budgets.images %}OK{% elif actual.images <= budgets.images * 1.3 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.fonts %}| **Fonts** | {{ budgets.fonts | size }} | {{ actual.fonts | size }} | {% if actual.fonts > budgets.fonts %}+{% endif %}{{ (actual.fonts - budgets.fonts) | size }} | {% if actual.fonts <= budgets.fonts %}OK{% elif actual.fonts <= budgets.fonts * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+{% if budgets.total %}| **Total** | {{ budgets.total | size }} | {{ actual.total | size }} | {% if actual.total > budgets.total %}+{% endif %}{{ (actual.total - budgets.total) | size }} | {% if actual.total <= budgets.total %}OK{% elif actual.total <= budgets.total * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
+
+{% if violations %}
+## Violations Detectees
+
+{% for violation in violations %}
+### {{ loop.index }}. {{ violation.metric }}
+**Budget:** {{ violation.budget }} | **Actuel:** {{ violation.actual }} | **Depassement:** {{ violation.overBy }}
+**Severite:** {{ violation.severity | default('error') }}
+{% endfor %}
+{% else %}
+## Conformite
+
+Tous les budgets sont respectes.
+{% endif %}
+
+## Demande
+
+Analyse de conformite aux budgets:
+
+### 1. Configuration Budget Lighthouse CI
+
+```json
+// budget.json
+{
+  "path": "/*",
+  "timings": [
+    {
+      "metric": "interactive",
+      "budget": 3800
+    },
+    {
+      "metric": "first-contentful-paint",
+      "budget": 1800
+    },
+    {
+      "metric": "largest-contentful-paint",
+      "budget": 2500
+    },
+    {
+      "metric": "cumulative-layout-shift",
+      "budget": 0.1
+    },
+    {
+      "metric": "total-blocking-time",
+      "budget": 200
+    }
+  ],
+  "resourceSizes": [
+    {
+      "resourceType": "script",
+      "budget": 200
+    },
+    {
+      "resourceType": "stylesheet",
+      "budget": 50
+    },
+    {
+      "resourceType": "image",
+      "budget": 500
+    },
+    {
+      "resourceType": "total",
+      "budget": 1000
+    }
+  ],
+  "resourceCounts": [
+    {
+      "resourceType": "script",
+      "budget": 10
+    },
+    {
+      "resourceType": "stylesheet",
+      "budget": 5
+    },
+    {
+      "resourceType": "third-party",
+      "budget": 5
+    }
+  ]
+}
+```
+
+### 2. Actions Correctives
+
+{% if violations %}
+Pour chaque violation de budget, fournis:
+
+**Plan de reduction JavaScript:**
+```javascript
+// vite.config.js
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            // Separer les gros vendors
+            if (id.includes('lodash')) return 'lodash'
+            if (id.includes('moment')) return 'moment'
+            return 'vendor'
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**Optimisations specifiques:**
+- Tree-shaking agressif
+- Lazy-loading des composants lourds
+- Compression Brotli/Gzip
+- Minification avancee
+{% endif %}
+
+### 3. Integration CI/CD
+
+**GitHub Actions:**
+```yaml
+name: Performance Budget
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  budget-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Check budgets
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          budgetPath: ./budget.json
+          uploadArtifacts: true
+      - name: Fail if budget exceeded
+        if: failure()
+        run: echo "Performance budget exceeded!" && exit 1
+```
+
+### 4. Bundle Analyzer
+
+```javascript
+// vite.config.js
+import { visualizer } from 'rollup-plugin-visualizer'
+
+export default {
+  plugins: [
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'bundle-analysis.html'
+    })
+  ]
+}
+```
+
+### 5. Ajustement des Budgets
+
+Si les budgets sont trop stricts ou trop laxistes, propose des ajustements realistes.
+
+**Budgets recommandes par type de site:**
+
+| Type | JS | CSS | Images | LCP | Score Min |
+|------|-----|-----|--------|-----|-----------|
+| **Site vitrine** | < 150KB | < 30KB | < 300KB | < 2.0s | 90+ |
+| **Application SPA** | < 250KB | < 50KB | < 500KB | < 2.5s | 80+ |
+| **E-commerce** | < 200KB | < 40KB | < 400KB | < 2.0s | 85+ |
+| **Dashboard** | < 300KB | < 60KB | < 200KB | < 3.0s | 75+ |
+
+Propose des solutions concretes pour respecter les budgets definis.

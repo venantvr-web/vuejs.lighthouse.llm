@@ -3,6 +3,7 @@ import {computed} from 'vue'
 import {useRouter} from 'vue-router'
 import CrawlBadge from '@/components/history/CrawlBadge.vue'
 import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
+import {formatScore, formatDateTime, getScoreCssClass} from '@/utils/formatters'
 
 const router = useRouter()
 
@@ -68,28 +69,6 @@ const categories = [
   {key: 'seo', label: 'SEO'},
   {key: 'pwa', label: 'PWA'}
 ]
-
-function formatDateTime(timestamp) {
-  return new Date(timestamp).toLocaleString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-function formatScore(score) {
-  if (score === null || score === undefined) return '-'
-  return Math.round(score * 100)
-}
-
-function getScoreClass(score) {
-  if (score === null || score === undefined) return ''
-  if (score >= 0.9) return 'score-good'
-  if (score >= 0.5) return 'score-average'
-  return 'score-poor'
-}
 
 function getSourceLabel(source) {
   const labels = {
@@ -170,7 +149,7 @@ function getStrategyLabel(strategy) {
         <td
             v-for="cat in categories"
             :key="cat.key"
-            :class="getScoreClass(score.scores?.[cat.key])"
+            :class="getScoreCssClass(score.scores?.[cat.key])"
             class="col-score"
         >
           {{ formatScore(score.scores?.[cat.key]) }}

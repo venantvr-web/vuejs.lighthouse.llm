@@ -28,6 +28,14 @@ export const templateRegistry = {
             strategy: 'specific',
             file: 'performance-cwv.j2',
             tags: ['performance', 'cwv', 'google', 'vitals']
+        },
+        budgetAnalysis: {
+            id: 'budgetAnalysis',
+            name: 'Analyse Budget Performance',
+            description: 'Optimisation des ressources et budgets',
+            strategy: 'specific',
+            file: 'performance-budget.j2',
+            tags: ['performance', 'budget', 'resources', 'optimization']
         }
     },
 
@@ -89,6 +97,33 @@ export const templateRegistry = {
             file: 'pwa-quick.j2',
             tags: ['pwa', 'quick', 'installable', 'offline']
         }
+    },
+
+    comparison: {
+        evolution: {
+            id: 'evolution',
+            name: 'Analyse Evolution',
+            description: 'Comparaison temporelle entre deux analyses',
+            strategy: 'specific',
+            file: 'comparison-evolution.j2',
+            tags: ['comparison', 'evolution', 'tracking', 'trends']
+        },
+        budget: {
+            id: 'budget',
+            name: 'Conformite Budget',
+            description: 'Verification du respect des budgets performance',
+            strategy: 'specific',
+            file: 'comparison-budget.j2',
+            tags: ['comparison', 'budget', 'compliance', 'monitoring']
+        },
+        competitor: {
+            id: 'competitor',
+            name: 'Benchmarking Concurrentiel',
+            description: 'Analyse comparative vs concurrents',
+            strategy: 'specific',
+            file: 'comparison-competitor.j2',
+            tags: ['comparison', 'competitor', 'benchmark', 'analysis']
+        }
     }
 }
 
@@ -127,6 +162,13 @@ export const categoryMeta = {
         icon: '📱',
         role: 'Expert Progressive Web Apps',
         description: 'Service Workers, Offline, Installation'
+    },
+    comparison: {
+        id: 'comparison',
+        name: 'Comparaison',
+        icon: '📊',
+        role: 'Expert Analyse Comparative',
+        description: 'Evolution, Budgets, Benchmarking concurrentiel'
     }
 }
 

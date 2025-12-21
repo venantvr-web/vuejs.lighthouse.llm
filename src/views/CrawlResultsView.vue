@@ -7,6 +7,7 @@ import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
+import {formatScore, getScoreColorClass, formatDateTimeMedium, formatDateISO} from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,32 +70,9 @@ const statusLabel = computed(() => {
   }
 })
 
-// Format score for display
-function formatScore(score) {
-  if (score === null || score === undefined) return '-'
-  return Math.round(score * 100)
-}
-
-// Get score color
-function getScoreColor(score) {
-  if (score === null || score === undefined) return 'text-gray-400 dark:text-gray-500'
-  const value = score * 100
-  if (value >= 90) return 'text-emerald-500'
-  if (value >= 50) return 'text-amber-500'
-  return 'text-red-500'
-}
-
 // Get template color
 function getTemplateColor(template) {
   return TEMPLATE_COLORS[template] || TEMPLATE_COLORS.other
-}
-
-// Format date
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleString('fr-FR', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  })
 }
 
 // Filter by template
@@ -141,7 +119,7 @@ function exportJSON() {
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = `crawl-${session.value.domain}-${new Date(session.value.timestamp).toISOString().split('T')[0]}.json`
+  link.download = `crawl-${session.value.domain}-${formatDateISO(session.value.timestamp)}.json`
   link.click()
   URL.revokeObjectURL(url)
 }
@@ -167,7 +145,7 @@ function exportPDF() {
   y += 7
   doc.text(`URL de base: ${session.value.baseUrl}`, margin, y)
   y += 7
-  doc.text(`Date: ${formatDate(session.value.timestamp)}`, margin, y)
+  doc.text(`Date: ${formatDateTimeMedium(session.value.timestamp)}`, margin, y)
   y += 7
   doc.text(`Pages analysees: ${session.value.pagesAnalyzed}/${session.value.pageCount}`, margin, y)
   y += 7
@@ -271,7 +249,7 @@ function exportPDF() {
   }
 
   // Save
-  doc.save(`crawl-${session.value.domain}-${new Date(session.value.timestamp).toISOString().split('T')[0]}.pdf`)
+  doc.save(`crawl-${session.value.domain}-${formatDateISO(session.value.timestamp)}.pdf`)
 }
 
 // Initialize
@@ -387,7 +365,7 @@ onMounted(async () => {
                 {{ statusLabel }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(session.timestamp) }}
+                {{ formatDateTimeMedium(session.timestamp) }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 Mode: {{ session.discoveryMode }}
@@ -469,7 +447,7 @@ onMounted(async () => {
                   <div v-for="(catData, cat) in template.avgScores" :key="cat">
                     <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                       <span class="truncate">{{ cat.replace('-', ' ') }}</span>
-                      <span :class="getScoreColor(catData.avg)">{{ formatScore(catData.avg) }}</span>
+                      <span :class="getScoreColorClass(catData.avg)">{{ formatScore(catData.avg) }}</span>
                     </div>
                     <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
@@ -557,27 +535,27 @@ onMounted(async () => {
                       </span>
                   </td>
                   <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColor(urlInfo.scores?.performance)]">
+                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.performance)]">
                         {{ formatScore(urlInfo.scores?.performance) }}
                       </span>
                   </td>
                   <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColor(urlInfo.scores?.accessibility)]">
+                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.accessibility)]">
                         {{ formatScore(urlInfo.scores?.accessibility) }}
                       </span>
                   </td>
                   <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColor(urlInfo.scores?.['best-practices'])]">
+                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.['best-practices'])]">
                         {{ formatScore(urlInfo.scores?.['best-practices']) }}
                       </span>
                   </td>
                   <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColor(urlInfo.scores?.seo)]">
+                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.seo)]">
                         {{ formatScore(urlInfo.scores?.seo) }}
                       </span>
                   </td>
                   <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColor(urlInfo.scores?.pwa)]">
+                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.pwa)]">
                         {{ formatScore(urlInfo.scores?.pwa) }}
                       </span>
                   </td>

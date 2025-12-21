@@ -1,0 +1,165 @@
+{# Performance Budget Analysis - Expert Resource Optimization #}
+# Analyse Budget Performance - {{ url }}
+
+## Role
+Tu es un Expert en Performance Budgets et optimisation des ressources pour applications Vue.js.
+
+## Tailles des Ressources
+
+| Type | Taille actuelle | Budget recommande | Statut |
+|------|-----------------|-------------------|--------|
+| **Total** | {{ totalSize | size }} | < 1.5 MB | {% if totalSize < 1500000 %}OK{% elif totalSize < 2000000 %}Attention{% else %}Critique{% endif %} |
+| **JavaScript** | {{ jsSize | size }} | < 200 KB | {% if jsSize < 200000 %}OK{% elif jsSize < 350000 %}Attention{% else %}Critique{% endif %} |
+| **CSS** | {{ cssSize | size }} | < 50 KB | {% if cssSize < 50000 %}OK{% elif cssSize < 100000 %}Attention{% else %}Critique{% endif %} |
+| **Images** | {{ imageSize | size }} | < 500 KB | {% if imageSize < 500000 %}OK{% elif imageSize < 1000000 %}Attention{% else %}Critique{% endif %} |
+| **Fonts** | {{ fontSize | size }} | < 100 KB | {% if fontSize < 100000 %}OK{% elif fontSize < 200000 %}Attention{% else %}Critique{% endif %} |
+
+**Nombre de requetes:** {{ requests }} (recommande: < 50)
+
+{% if jsBundles %}
+## Analyse des Bundles JavaScript
+
+| Bundle | Taille | Gaspillage estime |
+|--------|--------|-------------------|
+{% for bundle in jsBundles %}| `{{ bundle.url | truncate(50) }}` | {{ bundle.totalBytes | size }} | {{ bundle.wastedBytes | size }} |
+{% endfor %}
+{% endif %}
+
+{% if cssResources %}
+## Ressources CSS
+
+| Fichier | Taille | CSS non utilise |
+|---------|--------|-----------------|
+{% for css in cssResources %}| `{{ css.url | truncate(50) }}` | {{ css.totalBytes | size }} | {{ css.wastedBytes | size }} |
+{% endfor %}
+{% endif %}
+
+{% if imageResources %}
+## Ressources Images
+
+| Image | Taille | Format | Optimisation possible |
+|-------|--------|--------|----------------------|
+{% for img in imageResources %}| `{{ img.url | truncate(45) }}` | {{ img.totalBytes | size }} | {{ img.mimeType | default('unknown') }} | {{ img.wastedBytes | size }} |
+{% endfor %}
+{% endif %}
+
+## Budgets Recommandes par Type de Site
+
+### Site Vitrine / Landing Page
+- JavaScript: < 150 KB (initial bundle)
+- CSS: < 30 KB
+- Images: < 300 KB
+- Total: < 800 KB
+- LCP: < 2.0s
+
+### Application SPA (Vue.js)
+- JavaScript: < 250 KB (initial bundle)
+- CSS: < 50 KB
+- Images: < 500 KB
+- Total: < 1.2 MB
+- LCP: < 2.5s
+
+### E-commerce
+- JavaScript: < 200 KB
+- CSS: < 40 KB
+- Images: < 400 KB
+- Total: < 1.0 MB
+- LCP: < 2.0s (critique pour conversion)
+
+## Demande
+
+En tant qu'expert en Performance Budgets, analyse ces donnees et fournis:
+
+### 1. Audit des Depassements
+Identifie tous les depassements de budget avec leur impact sur les metriques Lighthouse.
+
+### 2. Strategies de Reduction JavaScript
+
+```javascript
+// vite.config.js - Configuration optimisee
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separer les vendors
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          // Librairies lourdes dans des chunks separes
+        }
+      }
+    },
+    // Activer la compression
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
+  }
+})
+```
+
+### 3. Optimisation CSS
+
+```javascript
+// PostCSS avec PurgeCSS
+// postcss.config.js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+    // Supprimer le CSS non utilise en production
+    ...(process.env.NODE_ENV === 'production' ? {
+      '@fullhuman/postcss-purgecss': {
+        content: ['./index.html', './src/**/*.{vue,js,ts}'],
+        safelist: [/^dark/, /^router-link/]
+      }
+    } : {})
+  }
+}
+```
+
+### 4. Optimisation Images
+
+```vue
+<!-- Composant Image Optimise -->
+<template>
+  <picture>
+    <source :srcset="webpSrc" type="image/webp">
+    <source :srcset="avifSrc" type="image/avif">
+    <img
+      :src="fallbackSrc"
+      :alt="alt"
+      loading="lazy"
+      decoding="async"
+      :width="width"
+      :height="height"
+    >
+  </picture>
+</template>
+```
+
+### 5. Configuration Budget CI/CD
+
+```json
+// lighthouserc.json ou budget.json
+{
+  "ci": {
+    "assert": {
+      "assertions": {
+        "resource-summary:script:size": ["error", {"maxNumericValue": 200000}],
+        "resource-summary:stylesheet:size": ["error", {"maxNumericValue": 50000}],
+        "resource-summary:image:size": ["warn", {"maxNumericValue": 500000}],
+        "resource-summary:total:size": ["error", {"maxNumericValue": 1500000}]
+      }
+    }
+  }
+}
+```
+
+Propose des solutions concretes pour respecter les budgets avec du code Vue.js/Vite directement implementable.

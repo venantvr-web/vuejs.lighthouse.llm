@@ -7,6 +7,7 @@ import SessionComparisonCard from '@/components/comparison/SessionComparisonCard
 import ScoreDiffIndicator from '@/components/comparison/ScoreDiffIndicator.vue'
 import TemplateComparisonTable from '@/components/comparison/TemplateComparisonTable.vue'
 import {useComparison, COMPARISON_CATEGORIES} from '@/composables/useComparison'
+import {formatDateTime} from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -129,17 +130,6 @@ function getItemScore(item, category) {
   return null
 }
 
-// Format date
-function formatDate(timestamp) {
-  if (!timestamp) return '-'
-  return new Date(timestamp).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 </script>
 
 <template>
@@ -439,7 +429,7 @@ function formatDate(timestamp) {
                 {{ itemA?.url || itemA?.domain || 'URL inconnue' }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(itemA?.timestamp) }}
+                {{ formatDateTime(itemA?.timestamp) }}
               </p>
             </div>
 
@@ -452,7 +442,7 @@ function formatDate(timestamp) {
                 {{ itemB?.url || itemB?.domain || 'URL inconnue' }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(itemB?.timestamp) }}
+                {{ formatDateTime(itemB?.timestamp) }}
               </p>
             </div>
           </div>

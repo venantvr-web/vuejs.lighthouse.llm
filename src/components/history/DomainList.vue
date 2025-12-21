@@ -1,5 +1,6 @@
 <script setup>
 import {computed} from 'vue'
+import {formatDate} from '@/utils/formatters'
 
 const props = defineProps({
   domains: {
@@ -21,14 +22,6 @@ const emit = defineEmits(['select', 'delete'])
 const sortedDomains = computed(() => {
   return [...props.domains].sort((a, b) => b.lastAnalysis - a.lastAnalysis)
 })
-
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
 
 function getScoreColor(score) {
   if (score === null || score === undefined) return 'var(--color-text-muted)'

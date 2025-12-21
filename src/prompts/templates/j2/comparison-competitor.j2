@@ -1,0 +1,152 @@
+{# Competitor Comparison Analysis - Benchmarking vs Competitors #}
+# Benchmarking Concurrentiel - {{ url }}
+
+## Role
+Tu es un Expert en Analyse Concurrentielle et Benchmarking Performance Web.
+
+## Comparaison des Scores
+
+{% if competitors %}
+| Site | Performance | Accessibilite | SEO | PWA | Bonnes Pratiques |
+|------|-------------|---------------|-----|-----|------------------|
+| **Votre site** | {{ scores.own.performance | score }} | {{ scores.own.accessibility | score }} | {{ scores.own.seo | score }} | {{ scores.own.pwa | score }} | {{ scores.own.bestPractices | score }} |
+{% for competitor in competitors %}| {{ competitor.name }} | {{ competitor.scores.performance | score }} | {{ competitor.scores.accessibility | score }} | {{ competitor.scores.seo | score }} | {{ competitor.scores.pwa | score }} | {{ competitor.scores.bestPractices | score }} |
+{% endfor %}
+{% endif %}
+
+## Metriques Detaillees
+
+{% if metrics %}
+| Site | LCP | FCP | TBT | CLS | SI |
+|------|-----|-----|-----|-----|-----|
+| **Votre site** | {{ metrics.own.lcp | metric }} | {{ metrics.own.fcp | metric }} | {{ metrics.own.tbt | metric }} | {{ metrics.own.cls | round(3) }} | {{ metrics.own.si | metric }} |
+{% for competitor in competitors %}| {{ competitor.name }} | {{ competitor.metrics.lcp | metric }} | {{ competitor.metrics.fcp | metric }} | {{ competitor.metrics.tbt | metric }} | {{ competitor.metrics.cls | round(3) }} | {{ competitor.metrics.si | metric }} |
+{% endfor %}
+{% endif %}
+
+{% if features %}
+## Fonctionnalites Comparees
+
+| Fonctionnalite | Votre site | {% for competitor in competitors %}{{ competitor.name }} | {% endfor %}
+|----------------|------------|{% for competitor in competitors %}:---:|{% endfor %}
+{% for feature in features %}| {{ feature.name }} | {% if feature.own %}OK{% else %}Non{% endif %} | {% for comp in feature.competitors %}{% if comp.value %}OK{% else %}Non{% endif %} | {% endfor %}
+{% endfor %}
+{% endif %}
+
+## Demande
+
+Analyse concurrentielle approfondie:
+
+### 1. Position Relative
+
+Classe les sites du meilleur au moins bon pour chaque categorie:
+- Performance
+- Accessibilite
+- SEO
+- Experience utilisateur
+
+Identifie votre position dans chaque classement.
+
+### 2. Analyse des Ecarts
+
+Pour chaque concurrent mieux classe:
+
+**Points forts a etudier:**
+- Quelles techniques utilisent-ils?
+- Quelles optimisations peut-on reproduire?
+- Quelle est leur stack technique?
+
+**Exemple d'analyse:**
+```
+Concurrent A: Performance 95% (vs notre 78%)
+
+Avantages identifies:
+1. CDN global (Cloudflare) vs notre hebergement unique
+   → Action: Migrer vers CDN
+   → Impact estime: +10% performance
+
+2. Images au format AVIF vs notre JPEG
+   → Action: Implementer formats modernes
+   → Impact estime: +5% performance
+
+3. Service Worker agressif vs notre cache basique
+   → Action: Ameliorer strategie cache
+   → Impact estime: +7% performance
+```
+
+### 3. Avantages Competitifs
+
+Identifie vos points forts:
+- Domaines ou vous surpassez la concurrence
+- Fonctionnalites uniques
+- Opportunites de differenciation
+
+### 4. Roadmap Concurrentielle
+
+Plan pour rattraper et depasser les concurrents:
+
+**Phase 1: Parite (Court terme)**
+Objectif: Atteindre le niveau moyen des concurrents
+- Actions prioritaires
+- Quick wins
+
+**Phase 2: Excellence (Moyen terme)**
+Objectif: Depasser les meilleurs concurrents
+- Optimisations avancees
+- Innovations
+
+**Phase 3: Leadership (Long terme)**
+Objectif: Devenir la reference du secteur
+- Fonctionnalites differenciantes
+- Excellence technique
+
+### 5. Veille Concurrentielle
+
+**Monitoring automatise:**
+```javascript
+// Script de surveillance concurrents
+// scripts/competitor-monitor.js
+import lighthouse from 'lighthouse'
+import chromeLauncher from 'chrome-launcher'
+
+const competitors = [
+  'https://competitor-a.com',
+  'https://competitor-b.com',
+  'https://competitor-c.com'
+]
+
+const runLighthouse = async (url) => {
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] })
+  const options = {
+    logLevel: 'info',
+    output: 'json',
+    port: chrome.port
+  }
+
+  const runnerResult = await lighthouse(url, options)
+  await chrome.kill()
+
+  return {
+    url,
+    scores: runnerResult.lhr.categories,
+    metrics: runnerResult.lhr.audits
+  }
+}
+
+const compareAll = async () => {
+  const results = await Promise.all(
+    competitors.map(url => runLighthouse(url))
+  )
+
+  // Analyser et alerter si concurrent s'ameliore
+  console.log('Competitor analysis:', results)
+}
+
+// Lancer hebdomadairement
+compareAll()
+```
+
+**Dashboard de suivi:**
+Utiliser Google Sheets/Data Studio pour tracker l'evolution vs concurrents.
+
+Fournis une analyse concurrentielle strategique avec plan d'action.

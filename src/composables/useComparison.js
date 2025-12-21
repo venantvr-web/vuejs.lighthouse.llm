@@ -1,4 +1,6 @@
 import {ref, computed} from 'vue'
+import {formatScore as formatScoreUtil} from '@/utils/formatters'
+import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 
 /**
  * Categories used for comparison
@@ -96,8 +98,9 @@ export function useComparison() {
     }
 
     /**
-     * Set items from sessionStorage data
+     * Set items from sessionStorage data (legacy - stores full objects)
      * @param {string} key - Storage key
+     * @deprecated Use loadFromStorageById instead
      */
     function loadFromStorage(key = 'comparison-items') {
         try {
@@ -115,16 +118,66 @@ export function useComparison() {
     }
 
     /**
-     * Save items to sessionStorage for cross-page navigation
+     * Save items to sessionStorage for cross-page navigation (legacy - stores full objects)
      * @param {Object} a - First item
      * @param {Object} b - Second item
      * @param {string} key - Storage key
+     * @deprecated Use saveToStorageById instead
      */
     function saveToStorage(a, b, key = 'comparison-items') {
         try {
             sessionStorage.setItem(key, JSON.stringify({a, b}))
         } catch (err) {
             console.error('Failed to save comparison to storage:', err)
+        }
+    }
+
+    /**
+     * Save item IDs to sessionStorage for cross-page navigation
+     * @param {string} idA - First item ID
+     * @param {string} idB - Second item ID
+     * @param {string} key - Storage key
+     */
+    function saveToStorageById(idA, idB, key = 'comparison-ids') {
+        try {
+            sessionStorage.setItem(key, JSON.stringify({idA, idB}))
+        } catch (err) {
+            console.error('Failed to save comparison IDs to storage:', err)
+        }
+    }
+
+    /**
+     * Load items from sessionStorage by IDs and fetch from IndexedDB
+     * @param {string} key - Storage key
+     * @returns {Promise<boolean>} True if successful
+     */
+    async function loadFromStorageById(key = 'comparison-ids') {
+        try {
+            const stored = sessionStorage.getItem(key)
+            if (!stored) return false
+
+            const {idA, idB} = JSON.parse(stored)
+            if (!idA || !idB) return false
+
+            const historyStore = useScoreHistoryStore()
+            await historyStore.initialize()
+
+            const [scoreA, scoreB] = await Promise.all([
+                historyStore.getScoreById(idA),
+                historyStore.getScoreById(idB)
+            ])
+
+            if (scoreA && scoreB) {
+                setItems(scoreA, scoreB)
+                sessionStorage.removeItem(key)
+                return true
+            }
+
+            console.warn('Could not load one or both scores from storage')
+            return false
+        } catch (err) {
+            console.error('Failed to load comparison from storage by ID:', err)
+            return false
         }
     }
 
@@ -219,13 +272,12 @@ export function useComparison() {
     }
 
     /**
-     * Format score as percentage
+     * Format score as percentage (wrapper for utils/formatters)
      * @param {number|null} score - Score value (0-1 scale)
      * @returns {string}
      */
     function formatScore(score) {
-        if (score === null || score === undefined) return '-'
-        return Math.round(score * 100).toString()
+        return formatScoreUtil(score)
     }
 
     /**
@@ -290,6 +342,8 @@ export function useComparison() {
         setItems,
         loadFromStorage,
         saveToStorage,
+        saveToStorageById,
+        loadFromStorageById,
         clear,
         getScore,
         getStatus,

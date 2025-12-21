@@ -124,6 +124,51 @@ export class J2TemplateEngine {
             if (typeof value !== 'number') return value
             return Number(value.toFixed(decimals))
         })
+
+        // Format number with thousand separators
+        this.registerFilter('number', (value, decimals = 0) => {
+            if (value == null) return 'N/A'
+            if (typeof value !== 'number') return value
+            return value.toLocaleString('fr-FR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            })
+        })
+
+        // Format as percentage
+        this.registerFilter('percent', (value, decimals = 0) => {
+            if (value == null) return 'N/A'
+            if (typeof value !== 'number') return value
+            return `${value.toFixed(decimals)}%`
+        })
+
+        // Alias for size filter
+        this.registerFilter('filesize', (bytes) => {
+            return this.filters.get('size')(bytes)
+        })
+
+        // Format date
+        this.registerFilter('date', (timestamp, format = 'short') => {
+            if (!timestamp) return 'N/A'
+            const date = new Date(timestamp)
+            if (format === 'short') {
+                return date.toLocaleDateString('fr-FR')
+            }
+            if (format === 'long') {
+                return date.toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                })
+            }
+            return date.toLocaleString('fr-FR')
+        })
+
+        // Absolute value
+        this.registerFilter('abs', (value) => {
+            if (typeof value !== 'number') return value
+            return Math.abs(value)
+        })
     }
 
     /**

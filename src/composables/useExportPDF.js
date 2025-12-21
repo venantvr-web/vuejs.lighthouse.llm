@@ -1,6 +1,7 @@
 import {ref} from 'vue'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import {formatScorePercent, formatDateTime, getScoreHexColor} from '@/utils/formatters'
 
 /**
  * Composable for exporting history data to PDF
@@ -23,37 +24,6 @@ export function useExportPDF() {
         'best-practices': '#3b82f6',
         seo: '#10b981',
         pwa: '#f59e0b'
-    }
-
-    /**
-     * Format score as percentage
-     */
-    function formatScore(score) {
-        if (score === null || score === undefined) return '-'
-        return Math.round(score * 100) + '%'
-    }
-
-    /**
-     * Format timestamp to French date
-     */
-    function formatDate(timestamp) {
-        return new Date(timestamp).toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
-
-    /**
-     * Get score color based on value
-     */
-    function getScoreColor(score) {
-        if (score === null || score === undefined) return '#9ca3af'
-        if (score >= 0.9) return '#10b981'
-        if (score >= 0.5) return '#f59e0b'
-        return '#ef4444'
     }
 
     /**
@@ -92,7 +62,7 @@ export function useExportPDF() {
             yPos += 8
 
             pdf.setFontSize(10)
-            pdf.text(`Genere le ${formatDate(Date.now())}`, margin, yPos)
+            pdf.text(`Genere le ${formatDateTime(Date.now())}`, margin, yPos)
             pdf.setTextColor(0)
             yPos += 15
 
@@ -114,7 +84,7 @@ export function useExportPDF() {
 
                 for (const cat of categories) {
                     const score = latestScore.scores?.[cat]
-                    const color = getScoreColor(score)
+                    const color = getScoreHexColor(score)
 
                     // Box background
                     pdf.setFillColor(245, 245, 245)
@@ -133,7 +103,7 @@ export function useExportPDF() {
                     }
                     const rgb = hexToRgb(color)
                     pdf.setTextColor(rgb.r, rgb.g, rgb.b)
-                    pdf.text(formatScore(score), xPos + boxWidth / 2, yPos + 12, {align: 'center'})
+                    pdf.text(formatScorePercent(score), xPos + boxWidth / 2, yPos + 12, {align: 'center'})
 
                     // Category label
                     pdf.setFontSize(7)
@@ -235,14 +205,14 @@ export function useExportPDF() {
 
                 let cellX = margin + 2
                 const rowData = [
-                    formatDate(score.timestamp),
+                    formatDateTime(score.timestamp),
                     score.source || '-',
                     score.strategy || '-',
-                    formatScore(score.scores?.performance),
-                    formatScore(score.scores?.accessibility),
-                    formatScore(score.scores?.['best-practices']),
-                    formatScore(score.scores?.seo),
-                    formatScore(score.scores?.pwa)
+                    formatScorePercent(score.scores?.performance),
+                    formatScorePercent(score.scores?.accessibility),
+                    formatScorePercent(score.scores?.['best-practices']),
+                    formatScorePercent(score.scores?.seo),
+                    formatScorePercent(score.scores?.pwa)
                 ]
 
                 for (let i = 0; i < rowData.length; i++) {

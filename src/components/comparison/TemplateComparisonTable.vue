@@ -1,5 +1,6 @@
 <script setup>
 import ScoreDiffIndicator from './ScoreDiffIndicator.vue'
+import {formatScore, getScoreColorClass} from '@/utils/formatters'
 
 defineProps({
   templates: {
@@ -15,18 +16,6 @@ defineProps({
     default: 'Comparaison'
   }
 })
-
-function formatScore(score) {
-  if (score === null || score === undefined) return '-'
-  return Math.round(score * 100)
-}
-
-function getScoreClass(score) {
-  if (score === null || score === undefined) return ''
-  if (score >= 0.9) return 'text-emerald-600 dark:text-emerald-400'
-  if (score >= 0.5) return 'text-amber-600 dark:text-amber-400'
-  return 'text-red-600 dark:text-red-400'
-}
 </script>
 
 <template>
@@ -82,7 +71,7 @@ function getScoreClass(score) {
         <td class="py-3 px-4 text-center">
           <span
               v-if="template.avgScoreA !== null"
-              :class="['font-semibold', getScoreClass(template.avgScoreA)]"
+              :class="['font-semibold', getScoreColorClass(template.avgScoreA)]"
           >
             {{ formatScore(template.avgScoreA) }}
           </span>
@@ -93,7 +82,7 @@ function getScoreClass(score) {
         <td class="py-3 px-4 text-center">
           <span
               v-if="template.avgScoreB !== null"
-              :class="['font-semibold', getScoreClass(template.avgScoreB)]"
+              :class="['font-semibold', getScoreColorClass(template.avgScoreB)]"
           >
             {{ formatScore(template.avgScoreB) }}
           </span>

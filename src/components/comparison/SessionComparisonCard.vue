@@ -1,5 +1,6 @@
 <script setup>
 import {computed} from 'vue'
+import {formatDateTime, getScoreBgClass} from '@/utils/formatters'
 
 const props = defineProps({
   session: {
@@ -19,13 +20,7 @@ const props = defineProps({
 
 const formattedDate = computed(() => {
   if (!props.session?.timestamp) return '-'
-  return new Date(props.session.timestamp).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return formatDateTime(props.session.timestamp)
 })
 
 const averageScore = computed(() => {
@@ -42,13 +37,6 @@ const formattedAverage = computed(() => {
   return Math.round(averageScore.value * 100)
 })
 
-function getScoreColorClass(score) {
-  if (score === null) return 'bg-gray-200 dark:bg-gray-700'
-  const value = score * 100
-  if (value >= 90) return 'bg-emerald-500'
-  if (value >= 50) return 'bg-amber-500'
-  return 'bg-red-500'
-}
 </script>
 
 <template>
@@ -98,7 +86,7 @@ function getScoreColorClass(score) {
         <div
             :class="[
               'w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold',
-              getScoreColorClass(averageScore)
+              getScoreBgClass(averageScore)
             ]"
         >
           {{ formattedAverage }}

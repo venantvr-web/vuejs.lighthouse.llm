@@ -1,14 +1,39 @@
 <script setup>
 import {computed} from 'vue'
+import {useRouter} from 'vue-router'
+import CrawlBadge from '@/components/history/CrawlBadge.vue'
+import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
+
+const router = useRouter()
 
 const props = defineProps({
   scores: {
     type: Array,
     required: true
+  },
+  selectionMode: {
+    type: Boolean,
+    default: false
+  },
+  selectedIds: {
+    type: Array,
+    default: () => []
+  },
+  canSelect: {
+    type: Boolean,
+    default: true
   }
 })
 
-const emit = defineEmits(['delete', 'view'])
+const emit = defineEmits(['delete', 'view', 'toggle-selection'])
+
+function isSelected(id) {
+  return props.selectedIds.includes(id)
+}
+
+function navigateToCrawl(sessionId) {
+  router.push(`/crawl/results/${sessionId}`)
+}
 
 const sortedScores = computed(() => {
   return [...props.scores].sort((a, b) => b.timestamp - a.timestamp)
@@ -63,9 +88,11 @@ function getStrategyLabel(strategy) {
     <table class="analysis-table">
       <thead>
       <tr>
+        <th v-if="selectionMode" class="col-select"></th>
         <th class="col-date">Date</th>
         <th class="col-source">Source</th>
         <th class="col-strategy">Mode</th>
+        <th class="col-crawl">Crawl</th>
         <th v-for="cat in categories" :key="cat.key" class="col-score">
           {{ cat.label }}
         </th>
@@ -73,7 +100,23 @@ function getStrategyLabel(strategy) {
       </tr>
       </thead>
       <tbody>
-      <tr v-for="score in sortedScores" :key="score.id">
+      <tr
+          v-for="score in sortedScores"
+          :key="score.id"
+          :class="{
+            'row-selected': selectionMode && isSelected(score.id),
+            'row-selectable': selectionMode
+          }"
+          @click="selectionMode ? emit('toggle-selection', score) : null"
+      >
+        <td v-if="selectionMode" class="col-select">
+          <SelectionCheckbox
+              :disabled="!canSelect"
+              :selected="isSelected(score.id)"
+              size="sm"
+              @toggle="emit('toggle-selection', score)"
+          />
+        </td>
         <td class="col-date">
           <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
         </td>
@@ -86,6 +129,16 @@ function getStrategyLabel(strategy) {
             <span :class="score.strategy" class="strategy-badge">
               {{ getStrategyLabel(score.strategy) }}
             </span>
+        </td>
+        <td class="col-crawl">
+          <CrawlBadge
+              v-if="score.crawlSessionId"
+              :session-id="score.crawlSessionId"
+              :template-name="score.pageTemplate"
+              size="xs"
+              @click="navigateToCrawl"
+          />
+          <span v-else class="no-crawl">-</span>
         </td>
         <td
             v-for="cat in categories"
@@ -154,6 +207,15 @@ function getStrategyLabel(strategy) {
 .col-source,
 .col-strategy {
   min-width: 80px;
+}
+
+.col-crawl {
+  min-width: 90px;
+  text-align: center !important;
+}
+
+.no-crawl {
+  color: var(--color-text-muted);
 }
 
 .col-score {
@@ -239,5 +301,23 @@ function getStrategyLabel(strategy) {
   padding: 2rem;
   text-align: center;
   color: var(--color-text-muted);
+}
+
+/* Selection styles */
+.col-select {
+  width: 40px;
+  text-align: center !important;
+}
+
+.row-selectable {
+  cursor: pointer;
+}
+
+.row-selected {
+  background-color: var(--color-primary-light) !important;
+}
+
+.row-selected td {
+  border-color: var(--color-primary);
 }
 </style>

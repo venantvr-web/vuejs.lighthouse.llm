@@ -36,10 +36,23 @@ watch(() => historyStore.currentDomain, () => {
   selectedSlugFilter.value = null // Reset slug filter
 })
 
+// Auto-select available strategy when data changes
+watch(() => historyStore.currentScores, (scores) => {
+  if (scores.length === 0) return
+  const strategies = new Set(scores.map(s => s.strategy).filter(Boolean))
+  // If current selection not available, switch to available one
+  if (!strategies.has(selectedStrategyFilter.value)) {
+    selectedStrategyFilter.value = strategies.has('mobile') ? 'mobile' : 'desktop'
+  }
+}, {immediate: true})
+
 const chartsRef = ref(null)
 
 // Slug filter for charts
 const selectedSlugFilter = ref(null)
+
+// Strategy filter for charts (mobile/desktop)
+const selectedStrategyFilter = ref('mobile')
 
 // Get unique slugs from current scores
 const uniqueSlugs = computed(() => {
@@ -52,12 +65,27 @@ const uniqueSlugs = computed(() => {
   return Array.from(slugs).sort()
 })
 
-// Filter scores for charts based on selected slug
+// Get available strategies in current scores
+const availableStrategies = computed(() => {
+  const strategies = new Set(historyStore.currentScores.map(s => s.strategy).filter(Boolean))
+  return strategies
+})
+
+// Filter scores for charts based on selected slug and strategy
 const filteredChartScores = computed(() => {
-  if (!selectedSlugFilter.value) {
-    return historyStore.currentScores
+  let scores = historyStore.currentScores
+
+  // Filter by strategy
+  if (selectedStrategyFilter.value) {
+    scores = scores.filter(s => s.strategy === selectedStrategyFilter.value)
   }
-  return historyStore.currentScores.filter(s => s.pagePath === selectedSlugFilter.value)
+
+  // Filter by slug
+  if (selectedSlugFilter.value) {
+    scores = scores.filter(s => s.pagePath === selectedSlugFilter.value)
+  }
+
+  return scores
 })
 
 const showDeleteConfirm = ref(false)
@@ -328,18 +356,46 @@ function compareSelected() {
           <section class="charts-section">
             <div class="charts-header">
               <h3>Evolution des scores</h3>
-              <div v-if="uniqueSlugs.length > 1" class="slug-filter">
-                <label for="slug-select">Page :</label>
-                <select
-                    id="slug-select"
-                    v-model="selectedSlugFilter"
-                    class="slug-select"
-                >
-                  <option :value="null">Toutes ({{ uniqueSlugs.length }})</option>
-                  <option v-for="slug in uniqueSlugs" :key="slug" :value="slug">
-                    {{ slug }}
-                  </option>
-                </select>
+              <div class="charts-filters">
+                <!-- Strategy toggle -->
+                <div class="strategy-toggle">
+                  <button
+                      :class="['toggle-btn', { active: selectedStrategyFilter === 'mobile' }]"
+                      :disabled="!availableStrategies.has('mobile')"
+                      @click="selectedStrategyFilter = 'mobile'"
+                  >
+                    <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+                      <rect height="18" rx="2" width="12" x="6" y="3"/>
+                      <path d="M12 18h.01"/>
+                    </svg>
+                    Mobile
+                  </button>
+                  <button
+                      :class="['toggle-btn', { active: selectedStrategyFilter === 'desktop' }]"
+                      :disabled="!availableStrategies.has('desktop')"
+                      @click="selectedStrategyFilter = 'desktop'"
+                  >
+                    <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+                      <rect height="14" rx="2" width="20" x="2" y="3"/>
+                      <path d="M8 21h8M12 17v4"/>
+                    </svg>
+                    Desktop
+                  </button>
+                </div>
+                <!-- Slug filter -->
+                <div v-if="uniqueSlugs.length > 1" class="slug-filter">
+                  <label for="slug-select">Page :</label>
+                  <select
+                      id="slug-select"
+                      v-model="selectedSlugFilter"
+                      class="slug-select"
+                  >
+                    <option :value="null">Toutes ({{ uniqueSlugs.length }})</option>
+                    <option v-for="slug in uniqueSlugs" :key="slug" :value="slug">
+                      {{ slug }}
+                    </option>
+                  </select>
+                </div>
               </div>
             </div>
             <div ref="chartsRef">
@@ -637,6 +693,49 @@ function compareSelected() {
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-text);
+}
+
+.charts-filters {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.strategy-toggle {
+  display: flex;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggle-btn:hover {
+  color: var(--color-text);
+}
+
+.toggle-btn.active {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .slug-filter {

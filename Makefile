@@ -193,12 +193,17 @@ start-all: dev lighthouse-start
 	@echo "  Frontend: http://localhost:5173"
 	@echo "  Lighthouse: http://localhost:$(LIGHTHOUSE_PORT)"
 
-# Stop all servers
-stop-all: stop lighthouse-stop
+# Stop all servers (ignore errors if already stopped)
+stop-all:
+	-@$(MAKE) stop 2>/dev/null || true
+	-@$(MAKE) lighthouse-stop 2>/dev/null || true
 	@echo "All services stopped."
 
 # Restart all servers
-restart-all: stop-all
+restart-all:
+	@echo "Restarting all services..."
+	-@$(MAKE) stop 2>/dev/null || true
+	-@$(MAKE) lighthouse-stop 2>/dev/null || true
 	@sleep 1
 	@$(MAKE) start-all
 

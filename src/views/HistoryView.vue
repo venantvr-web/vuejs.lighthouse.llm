@@ -33,9 +33,32 @@ const {
 // Clear selection when changing domain
 watch(() => historyStore.currentDomain, () => {
   clearSelection()
+  selectedSlugFilter.value = null // Reset slug filter
 })
 
 const chartsRef = ref(null)
+
+// Slug filter for charts
+const selectedSlugFilter = ref(null)
+
+// Get unique slugs from current scores
+const uniqueSlugs = computed(() => {
+  const slugs = new Set()
+  for (const score of historyStore.currentScores) {
+    if (score.pagePath) {
+      slugs.add(score.pagePath)
+    }
+  }
+  return Array.from(slugs).sort()
+})
+
+// Filter scores for charts based on selected slug
+const filteredChartScores = computed(() => {
+  if (!selectedSlugFilter.value) {
+    return historyStore.currentScores
+  }
+  return historyStore.currentScores.filter(s => s.pagePath === selectedSlugFilter.value)
+})
 
 const showDeleteConfirm = ref(false)
 const domainToDelete = ref(null)
@@ -303,9 +326,24 @@ function compareSelected() {
 
           <!-- Charts Grid -->
           <section class="charts-section">
-            <h3>Evolution des scores</h3>
+            <div class="charts-header">
+              <h3>Evolution des scores</h3>
+              <div v-if="uniqueSlugs.length > 1" class="slug-filter">
+                <label for="slug-select">Page :</label>
+                <select
+                    id="slug-select"
+                    v-model="selectedSlugFilter"
+                    class="slug-select"
+                >
+                  <option :value="null">Toutes ({{ uniqueSlugs.length }})</option>
+                  <option v-for="slug in uniqueSlugs" :key="slug" :value="slug">
+                    {{ slug }}
+                  </option>
+                </select>
+              </div>
+            </div>
             <div ref="chartsRef">
-              <ScoreChartGrid :scores="historyStore.currentScores"/>
+              <ScoreChartGrid :scores="filteredChartScores"/>
             </div>
           </section>
 
@@ -587,7 +625,53 @@ function compareSelected() {
   margin-bottom: 2rem;
 }
 
-.charts-section h3,
+.charts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.charts-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.slug-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.slug-filter label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.slug-select {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-family: monospace;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.slug-select:hover {
+  border-color: var(--color-primary);
+}
+
+.slug-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
 .table-section h3 {
   margin: 0 0 1rem;
   font-size: 1rem;

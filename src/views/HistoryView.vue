@@ -14,7 +14,7 @@ const historyStore = useScoreHistoryStore()
 const {generatePDF, loading: pdfLoading} = useExportPDF()
 const {saveToStorage} = useComparison()
 
-// Selection mode for comparison
+// Selection mode for comparison - lock to same pagePath
 const {
   selectedItems,
   selectionMode,
@@ -26,8 +26,9 @@ const {
   clearSelection,
   enterSelectionMode,
   exitSelectionMode,
-  getComparisonPair
-} = useSelection(2)
+  getComparisonPair,
+  lockedValue: lockedPath
+} = useSelection(2, {matchKey: 'pagePath'})
 
 // Clear selection when changing domain
 watch(() => historyStore.currentDomain, () => {
@@ -313,11 +314,17 @@ function compareSelected() {
             <div class="table-header">
               <h3>Historique detaille</h3>
               <p v-if="selectionMode" class="selection-hint">
-                Selectionnez 2 analyses a comparer
+                <template v-if="lockedPath">
+                  Comparaison : <code>{{ lockedPath }}</code>
+                </template>
+                <template v-else>
+                  Selectionnez une page pour comparer son evolution
+                </template>
               </p>
             </div>
             <AnalysisTable
                 :can-select="canSelect"
+                :locked-path="lockedPath"
                 :scores="historyStore.currentScores"
                 :selected-ids="selectedItems.map(s => s.id)"
                 :selection-mode="selectionMode"
@@ -365,8 +372,8 @@ function compareSelected() {
             class="floating-bar"
         >
           <div class="floating-bar-info">
-            <span class="count">{{ selectedCount }}</span>
-            analyse{{ selectedCount > 1 ? 's' : '' }} selectionnee{{ selectedCount > 1 ? 's' : '' }}
+            <span class="count">{{ selectedCount }}/2</span>
+            <span v-if="lockedPath" class="locked-path">{{ lockedPath }}</span>
           </div>
 
           <div class="floating-bar-actions">
@@ -747,6 +754,14 @@ function compareSelected() {
   color: var(--color-primary);
 }
 
+.selection-hint code {
+  font-family: monospace;
+  background-color: var(--color-bg-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+}
+
 /* Floating comparison bar */
 .floating-bar {
   position: fixed;
@@ -772,6 +787,14 @@ function compareSelected() {
 .floating-bar-info .count {
   font-weight: 600;
   color: var(--color-text);
+}
+
+.floating-bar-info .locked-path {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  background-color: var(--color-bg-tertiary);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
 }
 
 .floating-bar-actions {

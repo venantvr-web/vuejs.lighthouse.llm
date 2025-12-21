@@ -22,6 +22,10 @@ const props = defineProps({
   canSelect: {
     type: Boolean,
     default: true
+  },
+  lockedPath: {
+    type: String,
+    default: null
   }
 })
 
@@ -31,8 +35,26 @@ function isSelected(id) {
   return props.selectedIds.includes(id)
 }
 
+function isRowDisabled(score) {
+  if (!props.selectionMode) return false
+  if (isSelected(score.id)) return false
+  if (!props.canSelect) return true
+  // Disable if locked to a different path
+  if (props.lockedPath && score.pagePath !== props.lockedPath) return true
+  return false
+}
+
 function navigateToCrawl(sessionId) {
   router.push(`/crawl/results/${sessionId}`)
+}
+
+function formatPath(pagePath) {
+  if (!pagePath || pagePath === '/') return '/'
+  // Truncate long paths
+  if (pagePath.length > 30) {
+    return pagePath.substring(0, 27) + '...'
+  }
+  return pagePath
 }
 
 const sortedScores = computed(() => {
@@ -90,6 +112,7 @@ function getStrategyLabel(strategy) {
       <tr>
         <th v-if="selectionMode" class="col-select"></th>
         <th class="col-date">Date</th>
+        <th class="col-path">Page</th>
         <th class="col-source">Source</th>
         <th class="col-strategy">Mode</th>
         <th class="col-crawl">Crawl</th>
@@ -105,13 +128,14 @@ function getStrategyLabel(strategy) {
           :key="score.id"
           :class="{
             'row-selected': selectionMode && isSelected(score.id),
-            'row-selectable': selectionMode
+            'row-selectable': selectionMode && !isRowDisabled(score),
+            'row-disabled': isRowDisabled(score)
           }"
-          @click="selectionMode ? emit('toggle-selection', score) : null"
+          @click="selectionMode && !isRowDisabled(score) ? emit('toggle-selection', score) : null"
       >
         <td v-if="selectionMode" class="col-select">
           <SelectionCheckbox
-              :disabled="!canSelect"
+              :disabled="isRowDisabled(score)"
               :selected="isSelected(score.id)"
               size="sm"
               @toggle="emit('toggle-selection', score)"
@@ -119,6 +143,9 @@ function getStrategyLabel(strategy) {
         </td>
         <td class="col-date">
           <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
+        </td>
+        <td class="col-path">
+          <span :title="score.pagePath" class="path-value">{{ formatPath(score.pagePath) }}</span>
         </td>
         <td class="col-source">
             <span :class="score.source" class="source-badge">
@@ -202,6 +229,25 @@ function getStrategyLabel(strategy) {
 
 .col-date {
   min-width: 150px;
+}
+
+.col-path {
+  min-width: 120px;
+  max-width: 180px;
+}
+
+.path-value {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  background-color: var(--color-bg-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .col-source,
@@ -319,5 +365,14 @@ function getStrategyLabel(strategy) {
 
 .row-selected td {
   border-color: var(--color-primary);
+}
+
+.row-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.row-disabled:hover {
+  background-color: transparent;
 }
 </style>

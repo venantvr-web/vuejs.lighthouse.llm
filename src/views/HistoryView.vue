@@ -1,8 +1,10 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useExportPDF} from '@/composables/useExportPDF'
+import {useSelection} from '@/composables/useSelection'
+import {useComparison} from '@/composables/useComparison'
 import DomainList from '@/components/history/DomainList.vue'
 import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
@@ -10,6 +12,27 @@ import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
 const {generatePDF, loading: pdfLoading} = useExportPDF()
+const {saveToStorage} = useComparison()
+
+// Selection mode for comparison
+const {
+  selectedItems,
+  selectionMode,
+  canSelect,
+  canCompare,
+  selectedCount,
+  toggleSelection,
+  isSelected,
+  clearSelection,
+  enterSelectionMode,
+  exitSelectionMode,
+  getComparisonPair
+} = useSelection(2)
+
+// Clear selection when changing domain
+watch(() => historyStore.currentDomain, () => {
+  clearSelection()
+})
 
 const chartsRef = ref(null)
 
@@ -28,7 +51,7 @@ const selectedDomainData = computed(() => {
 })
 
 async function handleSelectDomain(domain) {
-  await historyStore.loadScoresForDomain(domain)
+  await historyStore.loadScoresForDomain(domain, historyStore.includeCrawl)
 }
 
 function confirmDeleteDomain(domain) {
@@ -120,6 +143,16 @@ async function confirmClearAll() {
 function goHome() {
   router.push('/')
 }
+
+// Compare selected analyses
+function compareSelected() {
+  if (!canCompare.value) return
+  const [analysisA, analysisB] = getComparisonPair()
+  // Sort by date: older first (reference), newer second (comparison)
+  const sorted = [analysisA, analysisB].sort((a, b) => a.timestamp - b.timestamp)
+  saveToStorage(sorted[0], sorted[1], 'comparison-items')
+  router.push('/comparison?mode=history')
+}
 </script>
 
 <template>
@@ -134,6 +167,23 @@ function goHome() {
         </button>
         <h1>Historique des Analyses</h1>
       </div>
+
+      <!-- Crawl toggle -->
+      <label class="crawl-toggle">
+        <input
+            :checked="historyStore.includeCrawl"
+            type="checkbox"
+            @change="historyStore.toggleIncludeCrawl()"
+        />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">
+          <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+          </svg>
+          Inclure les crawls
+        </span>
+      </label>
+
       <div class="header-actions">
         <button
             :disabled="historyStore.isEmpty || exportLoading"
@@ -208,6 +258,24 @@ function goHome() {
               </span>
             </div>
             <div class="domain-actions">
+              <!-- Compare button -->
+              <button
+                  v-if="!selectionMode && historyStore.currentScores.length >= 2"
+                  class="btn btn-info btn-sm"
+                  @click="enterSelectionMode"
+              >
+                <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+                  <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+                </svg>
+                Comparer
+              </button>
+              <button
+                  v-if="selectionMode"
+                  class="btn btn-secondary btn-sm"
+                  @click="exitSelectionMode"
+              >
+                Annuler
+              </button>
               <button
                   :disabled="exportLoading"
                   class="btn btn-secondary btn-sm"
@@ -242,10 +310,19 @@ function goHome() {
 
           <!-- Analysis Table -->
           <section class="table-section">
-            <h3>Historique detaille</h3>
+            <div class="table-header">
+              <h3>Historique detaille</h3>
+              <p v-if="selectionMode" class="selection-hint">
+                Selectionnez 2 analyses a comparer
+              </p>
+            </div>
             <AnalysisTable
+                :can-select="canSelect"
                 :scores="historyStore.currentScores"
+                :selected-ids="selectedItems.map(s => s.id)"
+                :selection-mode="selectionMode"
                 @delete="confirmDeleteScore"
+                @toggle-selection="toggleSelection"
             />
           </section>
         </div>
@@ -273,6 +350,42 @@ function goHome() {
           </div>
         </div>
       </div>
+
+      <!-- Floating comparison bar -->
+      <Transition
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="transform translate-y-full opacity-0"
+          enter-to-class="transform translate-y-0 opacity-100"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="transform translate-y-0 opacity-100"
+          leave-to-class="transform translate-y-full opacity-0"
+      >
+        <div
+            v-if="selectionMode && selectedCount > 0"
+            class="floating-bar"
+        >
+          <div class="floating-bar-info">
+            <span class="count">{{ selectedCount }}</span>
+            analyse{{ selectedCount > 1 ? 's' : '' }} selectionnee{{ selectedCount > 1 ? 's' : '' }}
+          </div>
+
+          <div class="floating-bar-actions">
+            <button class="btn btn-secondary btn-sm" @click="clearSelection">
+              Effacer
+            </button>
+            <button
+                :class="['btn btn-sm', canCompare ? 'btn-primary' : 'btn-disabled']"
+                :disabled="!canCompare"
+                @click="compareSelected"
+            >
+              <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+                <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+              </svg>
+              Comparer
+            </button>
+          </div>
+        </div>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -328,6 +441,61 @@ function goHome() {
 .header-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+/* Crawl Toggle */
+.crawl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.crawl-toggle input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.crawl-toggle input:checked + .toggle-slider {
+  background-color: var(--color-primary);
+}
+
+.crawl-toggle input:checked + .toggle-slider::after {
+  transform: translateX(16px);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.crawl-toggle input:checked ~ .toggle-label {
+  color: var(--color-primary);
 }
 
 /* Content Layout */
@@ -543,5 +711,71 @@ function goHome() {
   .header-actions {
     justify-content: flex-end;
   }
+}
+
+/* Info button */
+.btn-info {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-disabled {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Table header */
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.table-header h3 {
+  margin: 0;
+}
+
+.selection-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-primary);
+}
+
+/* Floating comparison bar */
+.floating-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-bg-secondary);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 100;
+}
+
+.floating-bar-info {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.floating-bar-info .count {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.floating-bar-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 </style>

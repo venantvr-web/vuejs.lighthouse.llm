@@ -8,7 +8,7 @@ import {analyzeUrl as analyzeWithPageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeWithLocal} from '@/services/localLighthouse'
 
 const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const CRAWL_SESSIONS_STORE = 'crawl-sessions'
 
 /**
@@ -98,6 +98,13 @@ export const useCrawlStore = defineStore('crawl', () => {
                 // Migration handled by scoreHistoryStore
                 // Just ensure crawl-sessions store exists
                 if (oldVersion < 2 && !db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
+                    const store = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
+                    store.createIndex('domain', 'domain', {unique: false})
+                    store.createIndex('timestamp', 'timestamp', {unique: false})
+                    store.createIndex('status', 'status', {unique: false})
+                }
+                // Version 3: Fix missing stores (recovery from corrupted state)
+                if (oldVersion < 3 && !db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
                     const store = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
                     store.createIndex('domain', 'domain', {unique: false})
                     store.createIndex('timestamp', 'timestamp', {unique: false})

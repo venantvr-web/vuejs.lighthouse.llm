@@ -3,7 +3,7 @@ import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 
 const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_NAME = 'scores'
 const CRAWL_SESSIONS_STORE = 'crawl-sessions'
 
@@ -91,6 +91,24 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
                     // Add new indexes to scores store for crawl support
                     // Note: Cannot add indexes to existing store in upgrade transaction
                     // New fields (crawlSessionId, pageTemplate, pagePath) will be added dynamically
+                }
+
+                // Version 3: Fix missing stores (recovery from corrupted state)
+                if (oldVersion < 3) {
+                    // Recreate scores store if missing
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, {keyPath: 'id'})
+                        store.createIndex('domain', 'domain', {unique: false})
+                        store.createIndex('timestamp', 'timestamp', {unique: false})
+                        store.createIndex('domain_timestamp', ['domain', 'timestamp'], {unique: false})
+                    }
+                    // Recreate crawl-sessions store if missing
+                    if (!db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
+                        const crawlStore = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
+                        crawlStore.createIndex('domain', 'domain', {unique: false})
+                        crawlStore.createIndex('timestamp', 'timestamp', {unique: false})
+                        crawlStore.createIndex('status', 'status', {unique: false})
+                    }
                 }
             })
 

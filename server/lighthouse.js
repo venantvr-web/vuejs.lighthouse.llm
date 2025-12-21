@@ -35,10 +35,17 @@ export async function analyzeUrl(url, options = {}) {
     // Launch Chrome
     const chrome = await chromeLauncher.launch({
         chromeFlags: [
-            '--headless',
+            '--headless=new',
             '--disable-gpu',
             '--no-sandbox',
-            '--disable-dev-shm-usage'
+            '--disable-dev-shm-usage',
+            '--disable-extensions',
+            '--disable-background-networking',
+            '--disable-default-apps',
+            '--disable-sync',
+            '--disable-translate',
+            '--mute-audio',
+            '--hide-scrollbars'
         ]
     })
 
@@ -53,6 +60,7 @@ export async function analyzeUrl(url, options = {}) {
     const config = {
         extends: 'lighthouse:default',
         settings: {
+            maxWaitForLoad: 45000,
             formFactor: strategy === 'desktop' ? 'desktop' : 'mobile',
             screenEmulation: strategy === 'desktop'
                 ? {

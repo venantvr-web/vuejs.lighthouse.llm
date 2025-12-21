@@ -3,7 +3,7 @@
 
 .PHONY: help install dev start stop build preview clean lint test test-coverage test-watch
 .PHONY: lighthouse-install lighthouse-start lighthouse-stop lighthouse-status lighthouse-restart
-.PHONY: start-all stop-all status-all
+.PHONY: start-all stop-all restart-all status-all
 
 # Variables
 LIGHTHOUSE_PORT ?= 3001
@@ -32,9 +32,10 @@ help:
 	@echo "  make lighthouse-restart - Restart Lighthouse server"
 	@echo ""
 	@echo "All Services:"
-	@echo "  make start-all  - Start dev server + Lighthouse server"
-	@echo "  make stop-all   - Stop all servers"
-	@echo "  make status-all - Check all servers status"
+	@echo "  make start-all   - Start dev server + Lighthouse server"
+	@echo "  make stop-all    - Stop all servers"
+	@echo "  make restart-all - Restart all servers"
+	@echo "  make status-all  - Check all servers status"
 	@echo ""
 
 # Install dependencies
@@ -195,6 +196,11 @@ start-all: dev lighthouse-start
 # Stop all servers
 stop-all: stop lighthouse-stop
 	@echo "All services stopped."
+
+# Restart all servers
+restart-all: stop-all
+	@sleep 1
+	@$(MAKE) start-all
 
 # Check all servers status
 status-all: status lighthouse-status

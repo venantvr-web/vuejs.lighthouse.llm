@@ -64,9 +64,13 @@ const categoryLabels = {
   pwa: 'PWA'
 }
 
+// Keep sorted scores for tooltip access
+const sortedScores = computed(() => {
+  return [...props.scores].sort((a, b) => a.timestamp - b.timestamp)
+})
+
 const chartData = computed(() => {
-  // Sort by timestamp ascending for chronological display
-  const sorted = [...props.scores].sort((a, b) => a.timestamp - b.timestamp)
+  const sorted = sortedScores.value
 
   return {
     labels: sorted.map(s =>
@@ -111,6 +115,27 @@ const chartOptions = computed(() => ({
       titleFont: {size: 13},
       bodyFont: {size: 12},
       callbacks: {
+        title: (context) => {
+          const idx = context[0]?.dataIndex
+          if (idx === undefined) return ''
+          const score = sortedScores.value[idx]
+          if (!score) return ''
+          const date = new Date(score.timestamp).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+          return date
+        },
+        afterTitle: (context) => {
+          const idx = context[0]?.dataIndex
+          if (idx === undefined) return ''
+          const score = sortedScores.value[idx]
+          if (!score?.pagePath) return ''
+          return score.pagePath
+        },
         label: (context) => `Score: ${context.parsed.y}%`
       }
     }

@@ -60,7 +60,9 @@ export async function analyzeUrl(url, options = {}) {
     const config = {
         extends: 'lighthouse:default',
         settings: {
-            maxWaitForLoad: 45000,
+            maxWaitForLoad: 60000,
+            maxWaitForFcp: 30000,
+            networkQuietThresholdMs: 1000,
             formFactor: strategy === 'desktop' ? 'desktop' : 'mobile',
             screenEmulation: strategy === 'desktop'
                 ? {

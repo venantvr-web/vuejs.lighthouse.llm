@@ -193,7 +193,11 @@ function extractInternalLinks(html, baseOrigin) {
             let url
 
             // Handle relative URLs
-            if (href.startsWith('/')) {
+            if (href.startsWith('//')) {
+                // Protocol-relative URL (e.g., //fonts.gstatic.com)
+                url = 'https:' + href
+            } else if (href.startsWith('/')) {
+                // Relative path (e.g., /page)
                 url = baseOrigin + href
             } else if (href.startsWith('http')) {
                 url = href
@@ -297,14 +301,28 @@ function normalizeUrl(url) {
  * @returns {boolean} - True if should exclude
  */
 function shouldExcludeUrl(url) {
+    // Extract pathname without query string for extension check
+    let pathname = url
+    try {
+        pathname = new URL(url).pathname
+    } catch {
+        // Use url as-is if parsing fails
+    }
+
     const excludePatterns = [
-        /\.(jpg|jpeg|png|gif|svg|webp|ico|css|js|woff|woff2|ttf|eot|pdf|zip|rar)$/i,
-        /\/(wp-admin|wp-includes|admin|backend|api|cdn-cgi)\//i,
+        // Asset extensions (check on pathname to handle query strings)
+        /\.(jpg|jpeg|png|gif|svg|webp|ico|css|js|woff|woff2|ttf|eot|pdf|zip|rar|mp3|mp4|webm|ogg|wav)$/i,
+        // WordPress/CMS admin paths
+        /\/(wp-admin|wp-includes|wp-content\/plugins|wp-content\/themes|admin|backend|api|cdn-cgi)\//i,
+        // Feed/sitemap paths
         /\/(feed|rss|atom|sitemap)\/?$/i,
-        /[?&](add-to-cart|action=|ajax)/i
+        // Action parameters
+        /[?&](add-to-cart|action=|ajax|callback=)/i
     ]
 
-    return excludePatterns.some(pattern => pattern.test(url))
+    // Test pathname for extensions, full url for other patterns
+    return excludePatterns[0].test(pathname) ||
+           excludePatterns.slice(1).some(pattern => pattern.test(url))
 }
 
 /**

@@ -199,11 +199,13 @@ stop-all:
 	-@$(MAKE) lighthouse-stop 2>/dev/null || true
 	@echo "All services stopped."
 
-# Restart all servers
+# Restart all servers (with rebuild)
 restart-all:
 	@echo "Restarting all services..."
 	-@$(MAKE) stop 2>/dev/null || true
 	-@$(MAKE) lighthouse-stop 2>/dev/null || true
+	@echo "Rebuilding frontend..."
+	@npm run build
 	@sleep 1
 	@$(MAKE) start-all
 

@@ -24,6 +24,8 @@ const error = ref('')
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)
+const urlsListRef = ref(null)
+const currentUrlRef = ref(null)
 
 // LocalStorage key for preferences
 const PREFS_KEY = 'crawl-preferences'
@@ -82,6 +84,13 @@ watch([baseUrl, discoveryMode, service, strategy, maxPages, manualUrls], savePre
 const isRunning = computed(() => crawlStore.isRunning)
 const progress = computed(() => crawlStore.progress)
 const currentUrl = computed(() => crawlStore.currentUrl)
+
+// Auto-scroll to current URL being analyzed
+watch(currentUrl, () => {
+  if (currentUrlRef.value) {
+    currentUrlRef.value.scrollIntoView({behavior: 'smooth', block: 'center'})
+  }
+})
 const discoveredUrls = computed(() => crawlStore.discoveredUrls)
 const analyzedCount = computed(() => crawlStore.analyzedCount)
 const crawlResults = computed(() => crawlStore.crawlResults)
@@ -347,10 +356,11 @@ onUnmounted(() => {
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               URLs decouvertes ({{ discoveredUrls.length }})
             </h3>
-            <div class="max-h-40 overflow-y-auto space-y-1">
+            <div ref="urlsListRef" class="max-h-40 overflow-y-auto space-y-1">
               <div
                   v-for="(url, index) in discoveredUrls"
                   :key="url"
+                  :ref="url === currentUrl ? (el) => currentUrlRef = el : undefined"
                   class="flex items-center gap-2 text-sm"
               >
                 <span class="w-5 text-right text-gray-400 dark:text-gray-500">{{ index + 1 }}.</span>

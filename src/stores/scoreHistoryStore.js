@@ -34,6 +34,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
     const loading = ref(false)
     const error = ref(null)
     const initialized = ref(false)
+    const includeCrawl = ref(false) // Toggle to include crawl entries in history
 
     // Getters
     const sortedDomains = computed(() => {
@@ -435,6 +436,25 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         }
     }
 
+    /**
+     * Set the includeCrawl flag and reload data
+     * @param {boolean} value - Whether to include crawl entries
+     */
+    async function setIncludeCrawl(value) {
+        includeCrawl.value = value
+        await loadDomains(value)
+        if (currentDomain.value) {
+            await loadScoresForDomain(currentDomain.value, value)
+        }
+    }
+
+    /**
+     * Toggle the includeCrawl flag
+     */
+    async function toggleIncludeCrawl() {
+        await setIncludeCrawl(!includeCrawl.value)
+    }
+
     return {
         // State
         domains,
@@ -443,6 +463,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         loading,
         error,
         initialized,
+        includeCrawl,
 
         // Getters
         sortedDomains,
@@ -463,6 +484,8 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         exportToJSON,
         importFromJSON,
         getStatistics,
-        getChartData
+        getChartData,
+        setIncludeCrawl,
+        toggleIncludeCrawl
     }
 })

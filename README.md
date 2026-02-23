@@ -36,3 +36,7 @@ npm run dev
 ```sh
 npm run build
 ```
+
+## Stack
+
+[![Stack](https://skillicons.dev/icons?i=vue,js,py&theme=dark)](https://skillicons.dev)

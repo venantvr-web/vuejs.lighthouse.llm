@@ -6,6 +6,9 @@ import {analyzeUrl as analyzeLocal} from '@/services/localLighthouse'
 
 const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo']
 
+// A drop of 3 points or more between two audits counts as a regression.
+const REGRESSION_THRESHOLD = 0.03
+
 /**
  * Extract category scores (0-1) from a raw Lighthouse report.
  * @param {object} report - Lighthouse report
@@ -37,6 +40,46 @@ function computeDeltas(latest, previous) {
         }
     }
     return deltas
+}
+
+/**
+ * Detect regressions and budget breaches for a freshly-audited item.
+ * @param {object} item - Watchlist item (carries budgets)
+ * @param {object} latest - Latest score entry
+ * @param {object} previous - Previous score entry (may be null)
+ * @returns {{regressions: Array, breaches: Array}}
+ */
+function analyzeAudit(item, latest, previous) {
+    const regressions = []
+    const breaches = []
+
+    for (const category of CATEGORIES) {
+        const score = latest?.scores?.[category]
+        if (typeof score !== 'number') continue
+
+        // Regression vs previous audit
+        const prev = previous?.scores?.[category]
+        if (typeof prev === 'number' && score - prev <= -REGRESSION_THRESHOLD) {
+            regressions.push({
+                category,
+                from: Math.round(prev * 100),
+                to: Math.round(score * 100),
+                delta: Math.round((score - prev) * 100)
+            })
+        }
+
+        // Budget breach
+        const budget = item.budgets?.[category]
+        if (typeof budget === 'number' && Math.round(score * 100) < budget) {
+            breaches.push({
+                category,
+                score: Math.round(score * 100),
+                budget
+            })
+        }
+    }
+
+    return {regressions, breaches}
 }
 
 /**
@@ -99,11 +142,14 @@ export function useWatchlist() {
     /**
      * Run a fresh audit for an item, persist it, and refresh its stats.
      * @param {object} item - Watchlist item
-     * @returns {Promise<boolean>} True on success
+     * @returns {Promise<{success: boolean, regressions: Array, breaches: Array}>}
      */
     async function refreshItem(item) {
         refreshingById.value = {...refreshingById.value, [item.id]: true}
         errorById.value = {...errorById.value, [item.id]: null}
+
+        // Capture the pre-audit latest so we can diff against the new result
+        const previous = statsById.value[item.id]?.latest || null
 
         try {
             const analyze = item.source === 'local' ? analyzeLocal : analyzePageSpeed
@@ -125,13 +171,16 @@ export function useWatchlist() {
             )
 
             await loadItemStats(item)
-            return true
+
+            const latest = statsById.value[item.id]?.latest || {scores}
+            const {regressions, breaches} = analyzeAudit(item, latest, previous)
+            return {success: true, regressions, breaches}
         } catch (err) {
             errorById.value = {
                 ...errorById.value,
                 [item.id]: err.message || 'Échec de l\'analyse'
             }
-            return false
+            return {success: false, regressions: [], breaches: []}
         } finally {
             refreshingById.value = {...refreshingById.value, [item.id]: false}
         }

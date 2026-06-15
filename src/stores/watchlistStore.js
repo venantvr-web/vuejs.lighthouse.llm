@@ -87,11 +87,35 @@ export const useWatchlistStore = defineStore('watchlist', () => {
             label: (options.label || '').trim() || extractDomain(normalized),
             strategy: options.strategy === 'desktop' ? 'desktop' : 'mobile',
             source: options.source === 'local' ? 'local' : 'pagespeed',
+            // Per-category performance budgets (0-100), null = no budget
+            budgets: {
+                performance: null,
+                accessibility: null,
+                'best-practices': null,
+                seo: null
+            },
             createdAt: Date.now()
         }
 
         items.value.push(item)
         return item
+    }
+
+    /**
+     * Set (or clear) a performance budget for a category on an item.
+     * @param {string} id - Item id
+     * @param {string} category - Category id
+     * @param {number|null} value - Threshold 0-100, or null to clear
+     */
+    function setBudget(id, category, value) {
+        const item = items.value.find(i => i.id === id)
+        if (!item) return
+        if (!item.budgets) item.budgets = {}
+        if (value === null || value === '' || Number.isNaN(Number(value))) {
+            item.budgets[category] = null
+        } else {
+            item.budgets[category] = Math.max(0, Math.min(100, Math.round(Number(value))))
+        }
     }
 
     /**
@@ -142,7 +166,11 @@ export const useWatchlistStore = defineStore('watchlist', () => {
             if (!stored) return
             const parsed = JSON.parse(stored)
             if (Array.isArray(parsed)) {
-                items.value = parsed
+                // Ensure forward-compatible shape for items saved by older versions
+                items.value = parsed.map(item => ({
+                    budgets: {performance: null, accessibility: null, 'best-practices': null, seo: null},
+                    ...item
+                }))
             }
         } catch (error) {
             console.error('Failed to load watchlist:', error)
@@ -166,6 +194,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
         hasUrl,
         addItem,
         updateItem,
+        setBudget,
         removeItem,
         clearAll,
         saveToStorage,

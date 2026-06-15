@@ -92,6 +92,67 @@ describe('watchlistStore', () => {
         })
     })
 
+    describe('setBudget', () => {
+        it('initializes items with empty budgets', () => {
+            const store = useWatchlistStore()
+            const item = store.addItem('https://example.com')
+            expect(item.budgets).toEqual({
+                performance: null,
+                accessibility: null,
+                'best-practices': null,
+                seo: null
+            })
+        })
+
+        it('sets and clamps a budget value', () => {
+            const store = useWatchlistStore()
+            const item = store.addItem('https://example.com')
+
+            store.setBudget(item.id, 'performance', 90)
+            expect(item.budgets.performance).toBe(90)
+
+            store.setBudget(item.id, 'performance', 150)
+            expect(item.budgets.performance).toBe(100)
+
+            store.setBudget(item.id, 'performance', -10)
+            expect(item.budgets.performance).toBe(0)
+        })
+
+        it('clears a budget with null or empty value', () => {
+            const store = useWatchlistStore()
+            const item = store.addItem('https://example.com')
+
+            store.setBudget(item.id, 'seo', 80)
+            expect(item.budgets.seo).toBe(80)
+
+            store.setBudget(item.id, 'seo', '')
+            expect(item.budgets.seo).toBeNull()
+        })
+
+        it('rounds fractional values', () => {
+            const store = useWatchlistStore()
+            const item = store.addItem('https://example.com')
+            store.setBudget(item.id, 'accessibility', 87.6)
+            expect(item.budgets.accessibility).toBe(88)
+        })
+    })
+
+    describe('backward compatibility', () => {
+        it('adds a budgets shape to legacy items on load', () => {
+            localStorage.setItem('lighthouse-watchlist', JSON.stringify([
+                {id: 'x', url: 'https://legacy.com', label: 'Legacy', strategy: 'mobile', source: 'pagespeed', createdAt: 1}
+            ]))
+
+            const store = useWatchlistStore()
+            expect(store.items[0].budgets).toEqual({
+                performance: null,
+                accessibility: null,
+                'best-practices': null,
+                seo: null
+            })
+        })
+    })
+
     describe('removeItem and clearAll', () => {
         it('removes a single item', () => {
             const store = useWatchlistStore()

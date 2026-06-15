@@ -3,12 +3,14 @@ import {computed, onMounted, ref} from 'vue'
 import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useWatchlist} from '@/composables/useWatchlist'
+import {useNotifications} from '@/composables/useNotifications'
 import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
-const {statsById, refreshingById, errorById, loadStats, loadItemStats, refreshItem, refreshAll} = useWatchlist()
+const {statsById, refreshingById, errorById, loadStats, loadItemStats, refreshItem} = useWatchlist()
+const {isSupported: notificationsSupported, permission: notificationPermission, requestPermission, notify} = useNotifications()
 
 const CATEGORIES = [
   {id: 'performance', label: 'Perf.'},
@@ -16,6 +18,38 @@ const CATEGORIES = [
   {id: 'best-practices', label: 'Pratiques'},
   {id: 'seo', label: 'SEO'}
 ]
+
+const CATEGORY_LABELS = {
+  performance: 'Performance',
+  accessibility: 'Accessibilité',
+  'best-practices': 'Bonnes pratiques',
+  seo: 'SEO'
+}
+
+// Track which cards have their budget editor expanded
+const budgetEditing = ref({})
+
+function toggleBudgetEditor(id) {
+  budgetEditing.value = {...budgetEditing.value, [id]: !budgetEditing.value[id]}
+}
+
+function onBudgetInput(item, category, event) {
+  const raw = event.target.value
+  watchlistStore.setBudget(item.id, category, raw === '' ? null : raw)
+}
+
+// Categories of a card whose latest score is below its configured budget
+function breachedCategories(item) {
+  const latest = statsById.value[item.id]?.latest
+  if (!latest?.scores || !item.budgets) return []
+  return CATEGORIES
+      .filter(cat => {
+        const budget = item.budgets[cat.id]
+        const score = latest.scores[cat.id]
+        return typeof budget === 'number' && typeof score === 'number' && Math.round(score * 100) < budget
+      })
+      .map(cat => cat.id)
+}
 
 // Add form state
 const newUrl = ref('')
@@ -46,11 +80,14 @@ const summary = computed(() => {
 
   const neverAudited = stats.filter(s => !s.latest).length
 
+  const budgetBreaches = items.value.filter(item => breachedCategories(item).length > 0).length
+
   return {
     total: watchlistStore.count,
     avgPerf,
     regressions,
-    neverAudited
+    neverAudited,
+    budgetBreaches
   }
 })
 
@@ -92,13 +129,44 @@ function handleRemove(item) {
   }
 }
 
+/**
+ * Re-audit a single item and surface regressions / budget breaches as a
+ * browser notification when notifications are enabled.
+ */
+async function handleRefresh(item) {
+  const result = await refreshItem(item)
+  if (!result.success) return
+
+  if (notificationPermission.value === 'granted') {
+    const lines = []
+    for (const r of result.regressions) {
+      lines.push(`${CATEGORY_LABELS[r.category]} : ${r.from} → ${r.to} (${r.delta})`)
+    }
+    for (const b of result.breaches) {
+      lines.push(`${CATEGORY_LABELS[b.category]} sous le budget (${b.score} < ${b.budget})`)
+    }
+    if (lines.length > 0) {
+      notify(`⚠️ ${item.label}`, {
+        body: lines.join('\n'),
+        tag: `watchlist-${item.id}`
+      })
+    }
+  }
+}
+
 async function handleRefreshAll() {
   refreshingAll.value = true
   try {
-    await refreshAll(items.value)
+    for (const item of items.value) {
+      await handleRefresh(item)
+    }
   } finally {
     refreshingAll.value = false
   }
+}
+
+async function handleEnableNotifications() {
+  await requestPermission()
 }
 
 function deltaPoints(delta) {
@@ -133,20 +201,45 @@ function deltaPoints(delta) {
             </div>
           </div>
 
-          <button
-              v-if="!watchlistStore.isEmpty"
-              :disabled="refreshingAll"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-              @click="handleRefreshAll"
-          >
-            <svg
-                :class="{ 'animate-spin': refreshingAll }"
-                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          <div class="flex items-center gap-2">
+            <!-- Notifications toggle -->
+            <button
+                v-if="notificationsSupported && notificationPermission !== 'granted'"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Recevoir une alerte navigateur en cas de régression ou de budget dépassé"
+                @click="handleEnableNotifications"
             >
-              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-            {{ refreshingAll ? 'Analyse en cours…' : 'Tout ré-auditer' }}
-          </button>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              Activer les alertes
+            </button>
+            <span
+                v-else-if="notificationsSupported && notificationPermission === 'granted'"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-emerald-600 dark:text-emerald-400 text-sm font-medium"
+                title="Les alertes navigateur sont activées"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              Alertes actives
+            </span>
+
+            <button
+                v-if="!watchlistStore.isEmpty"
+                :disabled="refreshingAll"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                @click="handleRefreshAll"
+            >
+              <svg
+                  :class="{ 'animate-spin': refreshingAll }"
+                  class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              {{ refreshingAll ? 'Analyse en cours…' : 'Tout ré-auditer' }}
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -194,7 +287,7 @@ function deltaPoints(delta) {
       </div>
 
       <!-- Summary strip -->
-      <div v-if="!watchlistStore.isEmpty" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div v-if="!watchlistStore.isEmpty" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
           <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Pages suivies</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ summary.total }}</p>
@@ -209,6 +302,12 @@ function deltaPoints(delta) {
           <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Régressions</p>
           <p :class="summary.regressions > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">
             {{ summary.regressions }}
+          </p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Budgets dépassés</p>
+          <p :class="summary.budgetBreaches > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">
+            {{ summary.budgetBreaches }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
@@ -237,7 +336,10 @@ function deltaPoints(delta) {
         <div
             v-for="item in items"
             :key="item.id"
-            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col"
+            :class="breachedCategories(item).length > 0
+              ? 'border-red-300 dark:border-red-500/50 ring-1 ring-red-200 dark:ring-red-500/20'
+              : 'border-gray-200 dark:border-gray-700'"
+            class="bg-white dark:bg-gray-800 border rounded-xl p-5 flex flex-col"
         >
           <!-- Card header -->
           <div class="flex items-start justify-between gap-2 mb-4">
@@ -258,22 +360,62 @@ function deltaPoints(delta) {
                 </span>
               </div>
             </div>
-            <button
-                class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-                title="Retirer"
-                @click="handleRemove(item)"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </button>
+            <div class="flex items-center gap-0.5 shrink-0">
+              <button
+                  :class="budgetEditing[item.id] ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-400 hover:text-primary-500'"
+                  class="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                  title="Budgets de performance"
+                  @click="toggleBudgetEditor(item.id)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 6l9-4 9 4M4 10v10a1 1 0 001 1h3m10-11v11a1 1 0 01-1 1h-3m-6 0h6m-6 0v-6a1 1 0 011-1h4a1 1 0 011 1v6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+              </button>
+              <button
+                  class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
+                  title="Retirer"
+                  @click="handleRemove(item)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Budget editor -->
+          <div v-if="budgetEditing[item.id]" class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              Budgets (score minimum)
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              <label v-for="cat in CATEGORIES" :key="cat.id" class="flex items-center justify-between gap-2 text-xs text-gray-600 dark:text-gray-300">
+                <span>{{ cat.label }}</span>
+                <input
+                    :value="item.budgets?.[cat.id] ?? ''"
+                    class="w-16 px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs text-right focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    max="100"
+                    min="0"
+                    placeholder="—"
+                    type="number"
+                    @input="onBudgetInput(item, cat.id, $event)"
+                />
+              </label>
+            </div>
           </div>
 
           <!-- Scores -->
           <div v-if="statsById[item.id]?.latest" class="grid grid-cols-4 gap-2 mb-4">
             <div v-for="cat in CATEGORIES" :key="cat.id" class="text-center">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">{{ cat.label }}</p>
-              <p :class="getScoreColorClass(statsById[item.id].latest.scores?.[cat.id])" class="text-lg font-bold leading-none">
+              <p
+                  :class="[
+                    getScoreColorClass(statsById[item.id].latest.scores?.[cat.id]),
+                    breachedCategories(item).includes(cat.id) ? 'underline decoration-red-500 decoration-2 underline-offset-2' : ''
+                  ]"
+                  class="text-lg font-bold leading-none"
+                  :title="breachedCategories(item).includes(cat.id) ? `Budget ${item.budgets[cat.id]} non atteint` : ''"
+              >
                 {{ formatScore(statsById[item.id].latest.scores?.[cat.id]) }}
               </p>
               <p
@@ -312,7 +454,7 @@ function deltaPoints(delta) {
             <button
                 :disabled="refreshingById[item.id]"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium transition-colors disabled:opacity-50"
-                @click="refreshItem(item)"
+                @click="handleRefresh(item)"
             >
               <svg
                   :class="{ 'animate-spin': refreshingById[item.id] }"

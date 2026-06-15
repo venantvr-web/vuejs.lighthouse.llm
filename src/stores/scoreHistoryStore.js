@@ -281,6 +281,40 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
     }
 
     /**
+     * Get all non-crawl scores for a specific URL, sorted newest first.
+     * Matches on normalized URL (ignores trailing slash and host case).
+     * @param {string} url - Full URL
+     * @returns {Promise<Array>} - Sorted score entries for the URL
+     */
+    async function getScoresForUrl(url) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        const normalize = (u) => {
+            try {
+                const parsed = new URL(u)
+                parsed.hostname = parsed.hostname.toLowerCase()
+                return parsed.origin + parsed.pathname.replace(/\/$/, '') + parsed.search
+            } catch {
+                return (u || '').replace(/\/$/, '')
+            }
+        }
+
+        const target = normalize(url)
+
+        try {
+            const all = await indexedDB.getAllByIndex(STORE_NAME, 'domain', extractDomain(url))
+            return all
+                .filter(s => !s.crawlSessionId && normalize(s.url) === target)
+                .sort((a, b) => b.timestamp - a.timestamp)
+        } catch (err) {
+            console.error('Failed to get scores for URL:', err)
+            return []
+        }
+    }
+
+    /**
      * Delete all scores for a domain
      * @param {string} domain - Domain name
      * @returns {Promise<number>} - Number of deleted entries
@@ -704,6 +738,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         addScore,
         addScoreWithReport,
         loadScoresForDomain,
+        getScoresForUrl,
         deleteDomain,
         deleteScore,
         clearAll,

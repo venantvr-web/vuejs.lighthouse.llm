@@ -49,6 +49,11 @@ const routes = [
         component: () => import('@/views/HistoryView.vue')
     },
     {
+        path: '/watchlist',
+        name: 'watchlist',
+        component: () => import('@/views/WatchlistView.vue')
+    },
+    {
         path: '/crawl',
         name: 'crawl',
         component: () => import('@/views/CrawlView.vue')

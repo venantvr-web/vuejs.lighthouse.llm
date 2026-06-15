@@ -11,3 +11,12 @@ app.use(pinia)
 app.use(router)
 
 app.mount('#app')
+
+// Register the PWA service worker (production only to avoid dev caching).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.error('Service worker registration failed:', err)
+        })
+    })
+}

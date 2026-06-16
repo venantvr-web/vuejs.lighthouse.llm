@@ -4,17 +4,17 @@ import {useLighthouseParser} from '@/composables/useLighthouseParser'
 import {analyzeUrl as analyzePageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeLocal} from '@/services/localLighthouse'
 
-const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo']
+export const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo']
 
 // A drop of 3 points or more between two audits counts as a regression.
-const REGRESSION_THRESHOLD = 0.03
+export const REGRESSION_THRESHOLD = 0.03
 
 /**
  * Extract category scores (0-1) from a raw Lighthouse report.
  * @param {object} report - Lighthouse report
  * @returns {object} Map of category id -> score
  */
-function extractScores(report) {
+export function extractScores(report) {
     const scores = {}
     if (!report?.categories) return scores
     for (const [key, category] of Object.entries(report.categories)) {
@@ -29,7 +29,7 @@ function extractScores(report) {
  * @param {object} previous - Previous score entry
  * @returns {object} Map of category id -> delta (0-1 scale) or null
  */
-function computeDeltas(latest, previous) {
+export function computeDeltas(latest, previous) {
     const deltas = {}
     if (!latest?.scores || !previous?.scores) return deltas
     for (const category of CATEGORIES) {
@@ -49,7 +49,7 @@ function computeDeltas(latest, previous) {
  * @param {object} previous - Previous score entry (may be null)
  * @returns {{regressions: Array, breaches: Array}}
  */
-function analyzeAudit(item, latest, previous) {
+export function analyzeAudit(item, latest, previous) {
     const regressions = []
     const breaches = []
 
@@ -186,16 +186,6 @@ export function useWatchlist() {
         }
     }
 
-    /**
-     * Re-audit every item sequentially to avoid hammering the APIs.
-     * @param {Array} items - Watchlist items
-     */
-    async function refreshAll(items) {
-        for (const item of items) {
-            await refreshItem(item)
-        }
-    }
-
     return {
         statsById,
         refreshingById,
@@ -203,8 +193,7 @@ export function useWatchlist() {
         loadingStats,
         loadStats,
         loadItemStats,
-        refreshItem,
-        refreshAll
+        refreshItem
     }
 }
 

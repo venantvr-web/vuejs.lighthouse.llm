@@ -1,26 +1,13 @@
 import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
+import {extractDomain, normalizeUrl} from '@/utils/url'
 
 const DB_NAME = 'lighthouse-history'
 const DB_VERSION = 5
 const STORE_NAME = 'scores'
 const CRAWL_SESSIONS_STORE = 'crawl-sessions'
 const REPORTS_STORE = 'reports'
-
-/**
- * Extract domain from URL
- * @param {string} url - Full URL
- * @returns {string} Domain name
- */
-function extractDomain(url) {
-    try {
-        const urlObj = new URL(url)
-        return urlObj.hostname
-    } catch {
-        return url
-    }
-}
 
 /**
  * Store for managing Lighthouse score history with IndexedDB
@@ -291,22 +278,12 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
             await initialize()
         }
 
-        const normalize = (u) => {
-            try {
-                const parsed = new URL(u)
-                parsed.hostname = parsed.hostname.toLowerCase()
-                return parsed.origin + parsed.pathname.replace(/\/$/, '') + parsed.search
-            } catch {
-                return (u || '').replace(/\/$/, '')
-            }
-        }
-
-        const target = normalize(url)
+        const target = normalizeUrl(url)
 
         try {
             const all = await indexedDB.getAllByIndex(STORE_NAME, 'domain', extractDomain(url))
             return all
-                .filter(s => !s.crawlSessionId && normalize(s.url) === target)
+                .filter(s => !s.crawlSessionId && normalizeUrl(s.url) === target)
                 .sort((a, b) => b.timestamp - a.timestamp)
         } catch (err) {
             console.error('Failed to get scores for URL:', err)

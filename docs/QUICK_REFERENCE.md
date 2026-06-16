@@ -238,20 +238,23 @@ async function handleDrop(event) {
 
 ## File Paths
 
-```
-/home/rvv/WebstormProjects/vuejs.lighthouse.llm/src/
-├── composables/
-│   ├── index.js
-│   ├── useLighthouseParser.js
-│   ├── useDragDrop.js
-│   ├── useTheme.js
-│   ├── useExport.js
-│   └── useStreamingResponse.js
-└── stores/
-    ├── index.js
-    ├── lighthouseStore.js
-    ├── settingsStore.js
-    └── historyStore.js
+```mermaid
+graph TD
+    src["src/"]
+    src --> composables["composables/"]
+    src --> stores["stores/"]
+
+    composables --> c_index["index.js"]
+    composables --> c_parser["useLighthouseParser.js"]
+    composables --> c_drag["useDragDrop.js"]
+    composables --> c_theme["useTheme.js"]
+    composables --> c_export["useExport.js"]
+    composables --> c_stream["useStreamingResponse.js"]
+
+    stores --> s_index["index.js"]
+    stores --> s_lh["lighthouseStore.js"]
+    stores --> s_settings["settingsStore.js"]
+    stores --> s_history["historyStore.js"]
 ```
 
 ## Import Paths

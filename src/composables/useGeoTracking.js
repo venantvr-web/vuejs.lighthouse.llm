@@ -105,20 +105,72 @@ export function detectChanges(item, latest, previous) {
 }
 
 /**
- * Build a configured LLM provider from the current settings.
+ * Group a prompt's runs by provider and build a comparison summary.
+ * Runs must be sorted newest-first.
+ * @param {Array} runs - Run records for a single prompt
+ * @returns {{
+ *   providers: string[],
+ *   byProvider: Object,
+ *   engineCount: number,
+ *   enginesCited: number,
+ *   avgShareOfVoice: number|null,
+ *   lastRunAt: number|null
+ * }}
+ */
+export function groupRunsByProvider(runs) {
+    const grouped = {}
+    for (const run of runs) {
+        if (!grouped[run.provider]) grouped[run.provider] = []
+        grouped[run.provider].push(run)
+    }
+
+    const providers = Object.keys(grouped)
+    const byProvider = {}
+    const sovValues = []
+    let enginesCited = 0
+    let lastRunAt = null
+
+    for (const provider of providers) {
+        const list = grouped[provider] // newest first
+        const latest = list[0]
+        const sparkline = [...list]
+            .reverse()
+            .map(r => (typeof r.shareOfVoice === 'number' ? r.shareOfVoice : null))
+            .filter(v => v !== null)
+            .slice(-12)
+
+        byProvider[provider] = {latest, previous: list[1] || null, sparkline, lastRunAt: latest.timestamp}
+
+        if (latest.brandMentioned) enginesCited++
+        if (typeof latest.shareOfVoice === 'number') sovValues.push(latest.shareOfVoice)
+        if (latest.timestamp > (lastRunAt || 0)) lastRunAt = latest.timestamp
+    }
+
+    const avgShareOfVoice = sovValues.length
+        ? Math.round(sovValues.reduce((a, b) => a + b, 0) / sovValues.length)
+        : null
+
+    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, lastRunAt}
+}
+
+/**
+ * Build a configured LLM provider for a given GEO provider descriptor.
+ * @param {object} settings - settings store
+ * @param {{id: string, model: string}} descriptor - provider id + model
  * @returns {import('@/services/llm/BaseLLMProvider').default}
  */
-function buildProvider(settings) {
+function buildProviderFor(settings, descriptor) {
     const cfg = {
-        apiKey: settings.apiKey,
-        model: settings.currentModel,
+        model: descriptor.model,
         temperature: settings.temperature,
         maxTokens: settings.maxTokens
     }
-    if (settings.currentProvider === 'ollama') {
+    if (descriptor.id === 'ollama') {
         cfg.baseURL = settings.ollamaBaseUrl
+    } else {
+        cfg.apiKey = settings.providerKeys[descriptor.id]
     }
-    return LLMProviderFactory.create(settings.currentProvider, cfg)
+    return LLMProviderFactory.create(descriptor.id, cfg)
 }
 
 /**
@@ -134,28 +186,14 @@ export function useGeoTracking() {
     const errorById = ref({})
 
     /**
-     * Build enriched stats for a prompt from its stored runs.
+     * Build enriched, per-provider stats for a prompt from its stored runs.
      * @param {object} item - Tracked prompt
      */
     async function loadItemStats(item) {
         const runs = await geoHistory.getRunsForPrompt(item.id)
-        const latest = runs[0] || null
-
-        const sparkline = [...runs]
-            .reverse()
-            .map(r => (typeof r.shareOfVoice === 'number' ? r.shareOfVoice : null))
-            .filter(v => v !== null)
-            .slice(-12)
-
         statsById.value = {
             ...statsById.value,
-            [item.id]: {
-                latest,
-                previous: runs[1] || null,
-                sparkline,
-                count: runs.length,
-                lastRunAt: latest?.timestamp || null
-            }
+            [item.id]: {...groupRunsByProvider(runs), count: runs.length}
         }
     }
 
@@ -168,45 +206,61 @@ export function useGeoTracking() {
     }
 
     /**
-     * Run a prompt against the configured provider, score and persist it.
+     * Run a prompt across several providers in parallel, scoring and
+     * persisting one result per provider.
      * @param {object} item - Tracked prompt
+     * @param {Array<{id: string, label: string, model: string}>} providers - Providers to query
      * @returns {Promise<{success: boolean, changes: string[]}>}
      */
-    async function runPrompt(item) {
-        if (!settings.isConfigured) {
-            errorById.value = {...errorById.value, [item.id]: 'Aucun fournisseur LLM configuré (voir Paramètres).'}
+    async function runPrompt(item, providers = []) {
+        if (!providers.length) {
+            errorById.value = {...errorById.value, [item.id]: 'Aucun fournisseur sélectionné (configurez une clé).'}
             return {success: false, changes: []}
         }
 
         runningById.value = {...runningById.value, [item.id]: true}
         errorById.value = {...errorById.value, [item.id]: null}
 
-        const previous = statsById.value[item.id]?.latest || null
+        // Capture each provider's previous latest for change detection
+        const prevByProvider = statsById.value[item.id]?.byProvider || {}
 
-        try {
-            const provider = buildProvider(settings)
+        const results = await Promise.allSettled(providers.map(async (descriptor) => {
+            const provider = buildProviderFor(settings, descriptor)
             const answer = await provider.send(item.prompt)
             const analysis = analyzeResponse(answer, item.brand, item.competitors)
-
             await geoHistory.addRun({
                 promptId: item.id,
-                provider: settings.currentProvider,
-                model: settings.currentModel,
+                provider: descriptor.id,
+                model: descriptor.model,
                 response: answer,
                 ...analysis
             })
+            return {descriptor, analysis}
+        }))
 
-            await loadItemStats(item)
-            return {success: true, changes: detectChanges(item, analysis, previous)}
-        } catch (err) {
-            errorById.value = {
-                ...errorById.value,
-                [item.id]: err.message || 'Échec de l\'exécution'
+        await loadItemStats(item)
+
+        const changes = []
+        const errors = []
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i]
+            const label = providers[i].label
+            if (result.status === 'fulfilled') {
+                const prevLatest = prevByProvider[providers[i].id]?.latest || null
+                for (const change of detectChanges(item, result.value.analysis, prevLatest)) {
+                    changes.push(`[${label}] ${change}`)
+                }
+            } else {
+                errors.push(`${label} : ${result.reason?.message || 'échec'}`)
             }
-            return {success: false, changes: []}
-        } finally {
-            runningById.value = {...runningById.value, [item.id]: false}
         }
+
+        if (errors.length) {
+            errorById.value = {...errorById.value, [item.id]: errors.join(' · ')}
+        }
+        runningById.value = {...runningById.value, [item.id]: false}
+
+        return {success: errors.length < providers.length, changes}
     }
 
     return {

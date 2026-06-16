@@ -144,6 +144,38 @@ npm run preview          # prévisualise le build
 
 ---
 
+## ☁️ Déploiement (Cloudflare Pages)
+
+L'application est une SPA statique : elle se déploie directement sur Cloudflare Pages.
+
+**Réglages de build à configurer dans le tableau de bord Cloudflare :**
+
+| Paramètre | Valeur |
+| --- | --- |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node version | `20` ou plus (variable `NODE_VERSION`) |
+
+> ⚠️ Le **répertoire de sortie doit être `dist`**. S'il pointe vers la racine du dépôt, Cloudflare sert le `index.html` source (qui référence `/src/main.js`, inexistant en production) et la page reste **blanche**.
+
+**Fichiers fournis (copiés automatiquement à la racine de `dist/`) :**
+
+- `public/_redirects` → `/*  /index.html  200` : repli SPA indispensable pour que les routes côté client (`/watchlist`, `/history`…) et les rechargements ne renvoient pas un 404.
+- `public/_headers` : empêche la mise en cache longue du service worker (`/sw.js`) et fixe le type MIME du manifeste.
+
+```mermaid
+flowchart LR
+    Git["Dépôt Git"] -->|"push"| CF["Cloudflare Pages"]
+    CF -->|"npm run build"| Dist["dist/"]
+    Dist -->|"_redirects (SPA)"| Edge["Réseau Edge"]
+    Edge -->|"/* → index.html"| Browser["Navigateur"]
+    Browser -->|"PWA + service worker"| Offline["Disponible hors-ligne"]
+```
+
+> Le serveur Chromium local (`server/`) n'est **pas** déployé sur Cloudflare : c'est un utilitaire optionnel exécuté sur le poste de l'utilisateur. En production, privilégiez la source PageSpeed Insights ou l'import de fichiers.
+
+---
+
 ## 📜 Scripts disponibles
 
 | Script | Description |

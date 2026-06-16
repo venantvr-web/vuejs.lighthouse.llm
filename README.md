@@ -206,20 +206,22 @@ L'application est installable et fonctionne hors-ligne :
 
 ## 🗂️ Structure du projet
 
-```
-src/
-├── components/      # Composants réutilisables (common, history, dashboard…)
-├── composables/     # Logique réutilisable (useWatchlist, useNotifications…)
-├── prompts/         # Moteur et gabarits de prompts (.j2)
-├── router/          # Définition des routes
-├── services/        # Accès API (PageSpeed, Chromium local, LLM)
-├── stores/          # État Pinia (watchlist, scoreHistory, lighthouse, settings)
-├── utils/           # Formatters centralisés
-└── views/           # Pages de l'application
+```mermaid
+graph TD
+    root["Racine du projet"]
+    root --> src["src/ — code de l'application"]
+    root --> server["server/ — serveur Express + Lighthouse local"]
+    root --> tests["tests/ — tests Vitest (stores, composables, composants, services)"]
+    root --> public["public/ — manifeste PWA, service worker, icônes"]
 
-server/              # Serveur Express + Lighthouse local
-tests/               # Tests Vitest (stores, composables, composants, services)
-public/              # Manifeste PWA, service worker, icônes
+    src --> components["components/ — composants réutilisables (common, history, dashboard…)"]
+    src --> composables["composables/ — logique réutilisable (useWatchlist, useNotifications…)"]
+    src --> prompts["prompts/ — moteur et gabarits de prompts (.j2)"]
+    src --> router["router/ — définition des routes"]
+    src --> services["services/ — accès API (PageSpeed, Chromium local, LLM)"]
+    src --> stores["stores/ — état Pinia (watchlist, scoreHistory, lighthouse, settings)"]
+    src --> utils["utils/ — formatters et helpers (url…)"]
+    src --> views["views/ — pages de l'application"]
 ```
 
 ---

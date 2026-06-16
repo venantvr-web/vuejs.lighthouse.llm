@@ -1,19 +1,16 @@
 /**
  * Service worker for the Lighthouse AI Analyzer PWA.
  *
- * Safety-first strategy (avoids the classic "blank page" PWA failure):
- *  - Navigations are ALWAYS network-first. While online the user gets the
- *    fresh index.html, so a stale shell can never reference dead hashed
- *    chunks. The cached shell is only used as an offline fallback.
- *  - Build assets under /assets/ are content-hashed (immutable) -> cache-first.
- *  - Other same-origin GET requests -> network-first with cache fallback.
- *  - Cross-origin calls (PageSpeed API, LLM providers, local server) are never
- *    intercepted.
+ * Network-first for EVERY same-origin GET (navigation, CSS, JS, assets).
+ * While online the browser always receives fresh content, so the worker can
+ * never serve stale CSS/JS or a stale HTML shell. The cache is populated from
+ * successful responses and used only as an offline fallback.
  *
- * Bump CACHE_VERSION to invalidate every previous cache on activation.
+ * Cross-origin calls (PageSpeed API, LLM providers, local server) are never
+ * intercepted. Bump CACHE_VERSION to invalidate previous caches on activation.
  */
 
-const CACHE_VERSION = 'v2'
+const CACHE_VERSION = 'v3'
 const CACHE_NAME = `lighthouse-ai-${CACHE_VERSION}`
 const OFFLINE_URL = '/index.html'
 const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest', '/icon.svg', '/favicon.ico']
@@ -21,7 +18,7 @@ const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest', '/icon.svg', '/favicon.i
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            // Don't let a single missing file abort the whole install.
+            // Don't let one missing file abort the whole install.
             .then((cache) => Promise.allSettled(PRECACHE.map((url) => cache.add(url))))
             .then(() => self.skipWaiting())
     )
@@ -47,44 +44,21 @@ self.addEventListener('fetch', (event) => {
     // Never touch cross-origin requests (APIs, LLM providers, local server…)
     if (url.origin !== self.location.origin) return
 
-    // Navigations: network-first, cached shell only as offline fallback.
-    if (request.mode === 'navigate') {
-        event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    const copy = response.clone()
-                    caches.open(CACHE_NAME).then((cache) => cache.put(OFFLINE_URL, copy))
-                    return response
-                })
-                .catch(() => caches.match(OFFLINE_URL))
-        )
-        return
-    }
-
-    // Immutable hashed build assets: cache-first.
-    if (url.pathname.startsWith('/assets/')) {
-        event.respondWith(
-            caches.match(request).then((cached) => cached || fetch(request).then((response) => {
-                if (response && response.status === 200) {
-                    const copy = response.clone()
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
-                }
-                return response
-            }))
-        )
-        return
-    }
-
-    // Other same-origin GET: network-first, fall back to cache when offline.
+    // Network-first everywhere: always prefer fresh content; cache is a backup.
     event.respondWith(
         fetch(request)
             .then((response) => {
-                if (response && response.status === 200) {
+                if (response && response.status === 200 && response.type === 'basic') {
                     const copy = response.clone()
                     caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
                 }
                 return response
             })
-            .catch(() => caches.match(request))
+            .catch(() => caches.match(request).then((cached) => {
+                if (cached) return cached
+                // Offline navigation fallback to the cached app shell.
+                if (request.mode === 'navigate') return caches.match(OFFLINE_URL)
+                return undefined
+            }))
     )
 })

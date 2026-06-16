@@ -54,6 +54,11 @@ const routes = [
         component: () => import('@/views/WatchlistView.vue')
     },
     {
+        path: '/geo',
+        name: 'geo',
+        component: () => import('@/views/GeoView.vue')
+    },
+    {
         path: '/crawl',
         name: 'crawl',
         component: () => import('@/views/CrawlView.vue')

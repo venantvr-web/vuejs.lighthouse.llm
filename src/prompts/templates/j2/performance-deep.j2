@@ -2,12 +2,12 @@
 # Analyse Approfondie Performance - {{ url }}
 
 ## Role
-Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vue.js 3, Vite, et les optimisations avancees.
+Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3, Vite, et les optimisations avancées.
 
 ## Score Performance
 {{ score | score }}
 
-## Opportunites d'Optimisation
+## Opportunités d'Optimisation
 
 {% if opportunities %}
 {% for opp in opportunities %}{% if opp.title %}
@@ -25,10 +25,10 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vu
 {% endif %}{% endfor %}
 {% endif %}
 
-## Metriques Detaillees
+## Métriques Détaillées
 
 {% if metrics %}
-| Metrique | Valeur | Cible |
+| Métrique | Valeur | Cible |
 |----------|--------|-------|
 | LCP | {{ metrics.lcp | metric }} | < 2.5s |
 | FCP | {{ metrics.fcp | metric }} | < 1.8s |
@@ -37,7 +37,7 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vu
 | Speed Index | {{ metrics.si | metric }} | < 3.4s |
 {% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 ### {{ loop.index }}. {{ audit.title }}
@@ -50,11 +50,11 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vu
 
 En tant qu'expert WPO Vue.js/Vite, analyse en profondeur:
 
-### 1. Analyse des Opportunites
-Pour chaque opportunite majeure:
-- Explication technique du probleme
-- Impact precis sur les Core Web Vitals
-- Priorite d'implementation (P0/P1/P2)
+### 1. Analyse des Opportunités
+Pour chaque opportunité majeure:
+- Explication technique du problème
+- Impact précis sur les Core Web Vitals
+- Priorité d'implémentation (P0/P1/P2)
 
 ### 2. Solutions de Code
 Fournis des exemples concrets:
@@ -87,12 +87,12 @@ export default {
 }
 ```
 
-**c) Techniques Avancees:**
+**c) Techniques Avancées:**
 - Resource hints (preload, prefetch, preconnect)
 - Dynamic imports strategiques
 - Optimisation des images (formats modernes)
 
 ### 3. Plan d'Action
-Roadmap priorisee avec Quick wins et optimisations avancees.
+Roadmap priorisée avec Quick wins et optimisations avancées.
 
-Reponds en Markdown avec des blocs de code detailles et commentes.
+Reponds en Markdown avec des blocs de code détaillés et commentes.

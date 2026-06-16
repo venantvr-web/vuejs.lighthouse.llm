@@ -58,7 +58,7 @@ const props = defineProps({
 
 const categoryLabels = {
   performance: 'Performance',
-  accessibility: 'Accessibilite',
+  accessibility: 'Accessibilité',
   'best-practices': 'Bonnes Pratiques',
   seo: 'SEO',
   pwa: 'PWA'
@@ -237,7 +237,7 @@ function getScoreClass() {
           :options="chartOptions"
       />
       <div v-else class="no-data">
-        Aucune donnee
+        Aucune donnée
       </div>
     </div>
   </div>

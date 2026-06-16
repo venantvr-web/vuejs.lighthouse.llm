@@ -296,7 +296,7 @@ function compareSelected() {
               <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
             </svg>
           </div>
-          <p>Selectionnez un domaine pour voir son historique</p>
+          <p>Sélectionnez un domaine pour voir son historique</p>
         </div>
 
         <!-- Domain Details -->
@@ -355,7 +355,7 @@ function compareSelected() {
           <!-- Charts Grid -->
           <section class="charts-section">
             <div class="charts-header">
-              <h3>Evolution des scores</h3>
+              <h3>Évolution des scores</h3>
               <div class="charts-filters">
                 <!-- Strategy toggle -->
                 <div class="strategy-toggle">
@@ -412,7 +412,7 @@ function compareSelected() {
                   Comparaison : <code>{{ lockedPath }}</code>
                 </template>
                 <template v-else>
-                  Selectionnez une page pour comparer son evolution
+                  Sélectionnez une page pour comparer son évolution
                 </template>
               </p>
             </div>

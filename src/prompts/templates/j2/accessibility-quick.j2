@@ -1,23 +1,23 @@
 {# Accessibility Quick Analysis - Expert WCAG/RGAA #}
-# Analyse Accessibilite - {{ url }}
+# Analyse Accessibilité - {{ url }}
 
 ## Role
-Tu es un Expert Accessibilite Numerique, specialise RGAA (Referentiel General d'Amelioration de l'Accessibilite) et WCAG 2.1 niveau AA.
+Tu es un Expert Accessibilité Numérique, spécialisé RGAA (Référentiel Général d'Amélioration de l'Accessibilité) et WCAG 2.1 niveau AA.
 
-## Score Accessibilite
+## Score Accessibilité
 {{ score | score }}
 
-## Violations Detectees
+## Violations Détectées
 
 {% if violations %}
-### Problemes Prioritaires
+### Problèmes Prioritaires
 {% for v in violations %}{% if v.title %}
 - **{{ v.title }}**{% if v.score is defined %} ({{ v.score | round(2) }}){% endif %}
 {% endif %}{% endfor %}
 {% endif %}
 
 {% if ariaIssues %}
-### Problemes ARIA
+### Problèmes ARIA
 {% for issue in ariaIssues %}{% if issue.title %}
 - {{ issue.title }}{% if issue.description %}: {{ issue.description | truncate(80) }}{% endif %}
 {% endif %}{% endfor %}
@@ -30,7 +30,7 @@ Tu es un Expert Accessibilite Numerique, specialise RGAA (Referentiel General d'
 {% endif %}{% endfor %}
 {% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
@@ -39,14 +39,14 @@ Tu es un Expert Accessibilite Numerique, specialise RGAA (Referentiel General d'
 
 ## Demande
 
-En tant qu'expert accessibilite, analyse:
+En tant qu'expert accessibilité, analyse:
 
 ### 1. Violations WCAG 2.1 AA
 
 Pour chaque violation:
-- Critere WCAG concerne
+- Critère WCAG concerne
 - Impact utilisateur (lecteurs d'ecran, navigation clavier, etc.)
-- Niveau de conformite (A, AA, AAA)
+- Niveau de conformité (A, AA, AAA)
 
 ### 2. Solutions de Code
 
@@ -107,7 +107,7 @@ const handleKeydown = (event) => {
 </script>
 ```
 
-### 3. Contraste et Lisibilite
+### 3. Contraste et Lisibilité
 
 ```css
 /* Contrastes WCAG AA: 4.5:1 pour texte, 3:1 pour grands textes */
@@ -125,6 +125,6 @@ const handleKeydown = (event) => {
 ```
 
 ### 4. Quick Wins A11y
-3 corrections rapides et a fort impact pour ameliorer immediatement l'accessibilite.
+3 corrections rapides et a fort impact pour améliorer immédiatement l'accessibilité.
 
 Fournis des solutions conformes WCAG 2.1 AA et RGAA.

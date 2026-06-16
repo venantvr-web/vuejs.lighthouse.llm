@@ -2,7 +2,7 @@
 # Analyse SEO - {{ url }}
 
 ## Role
-Tu es un Consultant SEO Technique specialise dans l'optimisation des applications Vue.js et Single Page Applications.
+Tu es un Consultant SEO Technique spécialisé dans l'optimisation des applications Vue.js et Single Page Applications.
 
 ## Score SEO
 {{ score | score }}
@@ -12,15 +12,15 @@ Tu es un Consultant SEO Technique specialise dans l'optimisation des application
 ### Title
 {% if title %}
 ✅ **Present:** {{ title }}
-- Longueur: {{ title | length }} caracteres (optimal: 50-60)
+- Longueur: {{ title | length }} caractères (optimal: 50-60)
 {% else %}
-❌ **Absent:** Aucune balise title detectee
+❌ **Absent:** Aucune balise title détectée
 {% endif %}
 
 ### Meta Description
 {% if description %}
 ✅ **Presente:** {{ description }}
-- Longueur: {{ description | length }} caracteres (optimal: 150-160)
+- Longueur: {{ description | length }} caractères (optimal: 150-160)
 {% else %}
 ❌ **Absente:** Aucune meta description
 {% endif %}
@@ -28,17 +28,17 @@ Tu es un Consultant SEO Technique specialise dans l'optimisation des application
 ## Structure de Contenu
 
 {% if headings %}
-### Hierarchie des Titres
+### Hiérarchie des Titres
 {% for heading in headings %}{% if heading %}
 - {{ heading }}
 {% endif %}{% endfor %}
 {% endif %}
 
-## Indexabilite
+## Indexabilité
 
-**Crawlable:** {% if crawlable %}✅ Oui{% else %}❌ Non - Probleme d'indexation{% endif %}
+**Crawlable:** {% if crawlable %}✅ Oui{% else %}❌ Non - Problème d'indexation{% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
@@ -50,7 +50,7 @@ Tu es un Consultant SEO Technique specialise dans l'optimisation des application
 En tant que consultant SEO technique, analyse:
 
 ### 1. Optimisation des Meta Tags
-Fournis des recommandations concretes:
+Fournis des recommandations concrètes:
 
 ```vue
 <script setup>
@@ -59,7 +59,7 @@ import { useHead } from '@unhead/vue'
 useHead({
   title: 'Titre optimise | Marque',
   meta: [
-    { name: 'description', content: 'Description optimisee 150-160 caracteres' },
+    { name: 'description', content: 'Description optimisée 150-160 caractères' },
     { property: 'og:title', content: 'Titre pour reseaux sociaux' },
     { property: 'og:description', content: 'Description Open Graph' },
     { property: 'og:image', content: 'https://example.com/og-image.jpg' },
@@ -70,17 +70,17 @@ useHead({
 ```
 
 ### 2. Structure Semantique
-- Hierarchie H1-H6 optimale
+- Hiérarchie H1-H6 optimale
 - Balises semantiques HTML5
-- Micro-donnees structurees
+- Micro-données structurées
 
-### 3. Problemes SPA
-Solutions pour les problemes SEO specifiques aux SPA Vue.js:
+### 3. Problèmes SPA
+Solutions pour les problèmes SEO spécifiques aux SPA Vue.js:
 - Rendu cote serveur (SSR/Nuxt)
 - Pre-rendering
 - Hydratation SEO-friendly
 
 ### 4. Quick Wins SEO
-3 ameliorations rapides et a fort impact.
+3 améliorations rapides et a fort impact.
 
 Fournis des exemples de code directement integrables dans Vue.js 3.

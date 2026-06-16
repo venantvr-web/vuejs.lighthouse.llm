@@ -2,12 +2,12 @@
 # Analyse PWA - {{ url }}
 
 ## Role
-Tu es un Expert Progressive Web Apps, specialise dans la creation d'applications web installables avec Vue.js et Vite.
+Tu es un Expert Progressive Web Apps, spécialisé dans la création d'applications web installables avec Vue.js et Vite.
 
 ## Score PWA
 {{ score | score }}
 
-## Criteres d'Installabilite
+## Critères d'Installabilité
 
 ### Manifest
 {% if manifest %}
@@ -34,10 +34,10 @@ Tu es un Expert Progressive Web Apps, specialise dans la creation d'applications
 {% if installable %}
 ✅ **Application installable**
 {% else %}
-❌ **Non installable** - Criteres manquants
+❌ **Non installable** - Critères manquants
 {% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**

@@ -33,7 +33,7 @@ defineProps({
           {{ labelB }}
         </th>
         <th class="text-center py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
-          Evolution
+          Évolution
         </th>
       </tr>
       </thead>

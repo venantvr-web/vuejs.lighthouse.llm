@@ -2,13 +2,13 @@
 # Analyse Core Web Vitals - {{ url }}
 
 ## Role
-Tu es un Expert Google Core Web Vitals, specialise dans l'optimisation LCP, CLS et INP pour Vue.js 3.
+Tu es un Expert Google Core Web Vitals, spécialisé dans l'optimisation LCP, CLS et INP pour Vue.js 3.
 
-## Metriques Core Web Vitals
+## Métriques Core Web Vitals
 
 ### 1. Largest Contentful Paint (LCP)
 **Valeur actuelle:** {{ lcp | metric }}
-**Statut:** {% if lcpStatus == 'good' %}✅ Bon{% elif lcpStatus == 'medium' %}⚠️ A ameliorer{% else %}❌ Faible{% endif %}
+**Statut:** {% if lcpStatus == 'good' %}✅ Bon{% elif lcpStatus == 'medium' %}⚠️ A améliorer{% else %}❌ Faible{% endif %}
 **Cible Google:** < 2.5s
 
 {% if lcpElement and (lcpElement.snippet or lcpElement.selector or lcpElement.nodeLabel) %}
@@ -19,7 +19,7 @@ Tu es un Expert Google Core Web Vitals, specialise dans l'optimisation LCP, CLS 
 
 ### 2. Cumulative Layout Shift (CLS)
 **Valeur actuelle:** {{ cls }}
-**Statut:** {% if clsStatus == 'good' %}✅ Bon{% elif clsStatus == 'medium' %}⚠️ A ameliorer{% else %}❌ Faible{% endif %}
+**Statut:** {% if clsStatus == 'good' %}✅ Bon{% elif clsStatus == 'medium' %}⚠️ A améliorer{% else %}❌ Faible{% endif %}
 **Cible Google:** < 0.1
 
 {% if clsElements %}
@@ -42,7 +42,7 @@ Analyse approfondie de chaque Core Web Vital:
 ### Pour LCP (Largest Contentful Paint)
 
 **Causes courantes:**
-- Temps de reponse serveur (TTFB eleve)
+- Temps de réponse serveur (TTFB élevé)
 - Ressources CSS/JS bloquant le rendu
 - Temps de chargement des images
 - Rendu cote client (Client-Side Rendering)
@@ -69,7 +69,7 @@ Analyse approfondie de chaque Core Web Vital:
 
 ### Pour CLS (Cumulative Layout Shift)
 
-**Solutions concretes:**
+**Solutions concrètes:**
 ```vue
 <template>
   <!-- Reserver l'espace pour les images -->
@@ -114,4 +114,4 @@ export default {
 ```
 
 ### Plan d'Action CWV
-Fournis une roadmap priorisee pour passer tous les CWV en "Bon" (vert).
+Fournis une roadmap priorisée pour passer tous les CWV en "Bon" (vert).

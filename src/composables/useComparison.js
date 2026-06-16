@@ -7,7 +7,7 @@ import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
  */
 export const COMPARISON_CATEGORIES = [
     {key: 'performance', label: 'Performance', color: '#f97316'},
-    {key: 'accessibility', label: 'Accessibilite', color: '#3b82f6'},
+    {key: 'accessibility', label: 'Accessibilité', color: '#3b82f6'},
     {key: 'best-practices', label: 'Bonnes Pratiques', color: '#22c55e'},
     {key: 'seo', label: 'SEO', color: '#8b5cf6'},
     {key: 'pwa', label: 'PWA', color: '#ec4899'}

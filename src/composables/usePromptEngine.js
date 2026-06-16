@@ -435,7 +435,7 @@ export function usePromptEngine() {
         return vulnAudit.details.items.map(item => ({
             name: item.detectedLib?.text,
             severity: item.vulnCount > 3 ? 'high' : item.vulnCount > 1 ? 'medium' : 'low',
-            title: `${item.detectedLib?.text} - ${item.vulnCount} vulnerabilite(s)`
+            title: `${item.detectedLib?.text} - ${item.vulnCount} vulnérabilité(s)`
         }))
     }
 

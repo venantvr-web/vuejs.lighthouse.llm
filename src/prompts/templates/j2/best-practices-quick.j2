@@ -1,17 +1,17 @@
-{# Best Practices Quick Analysis - Expert Securite Web #}
+{# Best Practices Quick Analysis - Expert Sécurité Web #}
 # Analyse Bonnes Pratiques - {{ url }}
 
 ## Role
-Tu es un Expert en Securite Web et Standards Modernes, specialise dans les applications Vue.js et les meilleures pratiques de developpement.
+Tu es un Expert en Sécurité Web et Standards Modernes, spécialisé dans les applications Vue.js et les meilleures pratiques de développement.
 
 ## Score Bonnes Pratiques
 {{ score | score }}
 
-## Securite
+## Sécurité
 
 ### HTTPS
 {% if https %}
-✅ **Connexion securisee** - HTTPS active
+✅ **Connexion sécurisée** - HTTPS active
 {% else %}
 ❌ **Non securise** - HTTPS requis
 {% endif %}
@@ -23,27 +23,27 @@ Tu es un Expert en Securite Web et Standards Modernes, specialise dans les appli
 ⚠️ **CSP absent** - Risque XSS
 {% endif %}
 
-### Vulnerabilites
+### Vulnérabilités
 {% if vulnerabilities %}
 {% for vuln in vulnerabilities %}{% if vuln.title or vuln.name or vuln %}
 - {% if vuln.title %}{{ vuln.title }}{% elif vuln.name %}{{ vuln.name }}{% else %}{{ vuln }}{% endif %}{% if vuln.severity %} ({{ vuln.severity }}){% endif %}
 {% endif %}{% endfor %}
 {% else %}
-✅ Aucune vulnerabilite connue detectee
+✅ Aucune vulnérabilité connue détectée
 {% endif %}
 
 ## Standards Web
 
-### APIs Depreciees
+### APIs Dépréciées
 {% if deprecations %}
 {% for dep in deprecations %}{% if dep %}
 - {{ dep }}
 {% endif %}{% endfor %}
 {% else %}
-✅ Aucune API deprecie utilisee
+✅ Aucune API déprécié utilisée
 {% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 {{ loop.index }}. **{{ audit.title }}**
@@ -54,7 +54,7 @@ Tu es un Expert en Securite Web et Standards Modernes, specialise dans les appli
 
 Analyse les bonnes pratiques et fournis:
 
-### 1. Securite Frontend
+### 1. Sécurité Frontend
 
 **Configuration CSP stricte:**
 ```html
@@ -72,7 +72,7 @@ Analyse les bonnes pratiques et fournis:
 ">
 ```
 
-**Headers de securite (Vite):**
+**Headers de sécurité (Vite):**
 ```javascript
 // vite.config.js
 export default {
@@ -100,29 +100,29 @@ const sanitizedHtml = computed(() =>
 </script>
 
 <template>
-  <!-- Eviter v-html avec contenu non-fiable -->
+  <!-- Éviter v-html avec contenu non-fiable -->
   <div v-html="sanitizedHtml" />
 
-  <!-- Preferer l'interpolation securisee -->
+  <!-- Preferer l'interpolation sécurisée -->
   <p>{{ userInput }}</p>
 </template>
 ```
 
-### 3. Gestion des Dependances
+### 3. Gestion des Dépendances
 
 ```bash
-# Audit des vulnerabilites
+# Audit des vulnérabilités
 npm audit
 
-# Mise a jour securisee
+# Mise a jour sécurisée
 npm update --save
 
-# Verification des depreciations
+# Vérification des dépréciations
 npx depcheck
 ```
 
-### 4. Quick Wins Securite
+### 4. Quick Wins Sécurité
 
-3 ameliorations rapides pour renforcer la securite.
+3 améliorations rapides pour renforcer la sécurité.
 
 Fournis des solutions conformes aux standards OWASP.

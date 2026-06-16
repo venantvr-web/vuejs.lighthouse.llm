@@ -32,12 +32,12 @@ Tu es un Expert SEO Technique avec une specialisation dans les applications Java
 
 ### 4. Hreflang
 {% if hreflang %}
-✅ **Implemente** pour internationalisation
+✅ **Implémenté** pour internationalisation
 {% else %}
-⚠️ **Absent** (si site multilingue, a implementer)
+⚠️ **Absent** (si site multilingue, a implémenter)
 {% endif %}
 
-### 5. Donnees Structurees (Schema.org)
+### 5. Données Structurées (Schema.org)
 {% if structured %}
 ✅ **Presentes**
 {% for item in structured %}{% if item %}
@@ -47,7 +47,7 @@ Tu es un Expert SEO Technique avec une specialisation dans les applications Java
 ⚠️ **Absentes:** Impact sur rich snippets Google
 {% endif %}
 
-## Audits Echoues
+## Audits Échoués
 
 {% for audit in failedAudits %}{% if audit.title %}
 - **{{ audit.title }}**{% if audit.score is defined %} ({{ audit.score | round(2) }}){% endif %}
@@ -86,7 +86,7 @@ pages.forEach(page => sitemap.write(page))
 sitemap.end()
 ```
 
-### 2. Implementation Schema.org
+### 2. Implémentation Schema.org
 
 ```vue
 <script setup>
@@ -122,4 +122,4 @@ export default defineNuxtConfig({
 })
 ```
 
-Fournis des solutions techniques completes et directement implementables.
+Fournis des solutions techniques complètes et directement implementables.

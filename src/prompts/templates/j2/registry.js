@@ -16,7 +16,7 @@ export const templateRegistry = {
         deepDive: {
             id: 'deepDive',
             name: 'Analyse Approfondie Performance',
-            description: 'Analyse detaillee avec solutions de code',
+            description: 'Analyse détaillée avec solutions de code',
             strategy: 'deep',
             file: 'performance-deep.j2',
             tags: ['performance', 'deep', 'optimization', 'code']
@@ -100,13 +100,13 @@ export const templateRegistry = {
     },
 
     comparison: {
-        evolution: {
-            id: 'evolution',
-            name: 'Analyse Evolution',
+        évolution: {
+            id: 'évolution',
+            name: 'Analyse Évolution',
             description: 'Comparaison temporelle entre deux analyses',
             strategy: 'specific',
-            file: 'comparison-evolution.j2',
-            tags: ['comparison', 'evolution', 'tracking', 'trends']
+            file: 'comparison-évolution.j2',
+            tags: ['comparison', 'évolution', 'tracking', 'trends']
         },
         budget: {
             id: 'budget',
@@ -153,8 +153,8 @@ export const categoryMeta = {
         id: 'best-practices',
         name: 'Bonnes Pratiques',
         icon: '🛡️',
-        role: 'Expert Securite Web',
-        description: 'Securite, CSP, OWASP, Standards'
+        role: 'Expert Sécurité Web',
+        description: 'Sécurité, CSP, OWASP, Standards'
     },
     pwa: {
         id: 'pwa',
@@ -168,7 +168,7 @@ export const categoryMeta = {
         name: 'Comparaison',
         icon: '📊',
         role: 'Expert Analyse Comparative',
-        description: 'Evolution, Budgets, Benchmarking concurrentiel'
+        description: 'Évolution, Budgets, Benchmarking concurrentiel'
     }
 }
 

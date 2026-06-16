@@ -2,7 +2,7 @@
 # Analyse Performance - {{ url }}
 
 ## Role
-Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vue.js 3 et Vite.
+Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3 et Vite.
 
 ## Score Global
 Performance: {{ score | score }}
@@ -48,9 +48,9 @@ Performance: {{ score | score }}
 **Cible:** < 200ms
 {% endif %}
 
-## Autres Metriques
+## Autres Métriques
 
-| Metrique | Valeur | Cible |
+| Métrique | Valeur | Cible |
 |----------|--------|-------|
 | First Contentful Paint (FCP) | {{ fcpDisplay | default(fcp | metric) }} | < 1.8s |
 | Speed Index (SI) | {{ siDisplay | default(si | metric) }} | < 3.4s |
@@ -59,23 +59,23 @@ Performance: {{ score | score }}
 | Taille totale | {{ totalSizeDisplay | default('N/A') }} | < 1.5 MB |
 | Requetes | {{ requests }} | < 50 |
 
-## Diagnostics Detailles
+## Diagnostics Détaillés
 
 {% if mainThreadWork %}
 ### Thread Principal
 **Temps total:** {{ mainThreadWork }}
 {% if mainThreadBreakdown %}
-| Categorie | Duree |
+| Catégorie | Durée |
 |-----------|-------|
 {% for task in mainThreadBreakdown %}| {{ task.group }} | {{ task.duration | round(0) }}ms |
 {% endfor %}{% endif %}
 {% endif %}
 
 {% if bootupTime %}
-### Temps d'Execution JavaScript
+### Temps d'Exécution JavaScript
 **Total:** {{ bootupTime }}
 {% if bootupBreakdown %}
-| Script | Total | Execution | Compilation |
+| Script | Total | Exécution | Compilation |
 |--------|-------|-----------|-------------|
 {% for script in bootupBreakdown %}| `{{ script.url | truncate(50) }}` | {{ script.total | round(0) }}ms | {{ script.scripting | round(0) }}ms | {{ script.scriptParseCompile | round(0) }}ms |
 {% endfor %}{% endif %}
@@ -121,13 +121,13 @@ Performance: {{ score | score }}
 
 {% if longTasks %}
 ### Taches Longues (Long Tasks)
-| Script | Duree | Debut |
+| Script | Durée | Debut |
 |--------|-------|-------|
 {% for task in longTasks %}| `{{ task.url | truncate(50) }}` | {{ task.duration | round(0) }}ms | {{ task.startTime | round(0) }}ms |
 {% endfor %}
 {% endif %}
 
-## Audits Echoues ({{ totalFailedAudits }} total)
+## Audits Échoués ({{ totalFailedAudits }} total)
 
 {% for audit in failedAudits %}
 ### {{ loop.index }}. {{ audit.title }}
@@ -146,7 +146,7 @@ Performance: {{ score | score }}
 {% set has_displayable_items = [] %}
 {% for item in audit.items %}{% if item.url or item.location or item.element or (item.node and item.node.selector) or item.wastedMs or item.wastedBytes or item.totalBytes %}{% set _ = has_displayable_items.append(1) %}{% endif %}{% endfor %}
 {% if has_displayable_items %}
-**Ressources concernees:**
+**Ressources concernées:**
 {% for item in audit.items %}{% if item.url or item.location or item.element or (item.node and item.node.selector) or item.wastedMs or item.wastedBytes or item.totalBytes %}
 - {% if item.url %}`{{ item.url | truncate(70) }}`{% endif %}{% if item.element and not item.url %}**Element:** `{{ item.element | truncate(60) }}`{% endif %}{% if item.node and item.node.selector and not item.url and not item.element %}`{{ item.node.selector }}`{% endif %}
 {% if item.location %}  - **Source:** `{{ item.location }}`{% endif %}
@@ -159,7 +159,7 @@ Performance: {{ score | score }}
 
 {% endfor %}
 
-## Opportunites d'Optimisation
+## Opportunités d'Optimisation
 
 {% for opp in opportunities %}
 {% if opp.savingsMs > 100 or opp.savingsBytes > 10000 %}
@@ -172,7 +172,7 @@ Performance: {{ score | score }}
 {% set has_opp_items = [] %}
 {% for item in opp.items %}{% if item.url %}{% set _ = has_opp_items.append(1) %}{% endif %}{% endfor %}
 {% if has_opp_items %}
-**Fichiers concernes:**
+**Fichiers concernés:**
 {% for item in opp.items %}{% if item.url %}
 - `{{ item.url | truncate(65) }}`{% if item.wastedBytes %} (gaspillage: {{ item.wastedBytes | size }}){% endif %}{% if item.wastedMs %} (-{{ item.wastedMs | round(0) }}ms){% endif %}
 {% if item.location %}  - Source: `{{ item.location }}`{% endif %}
@@ -184,16 +184,16 @@ Performance: {{ score | score }}
 
 ## Demande
 
-Analyse ces donnees et fournis:
+Analyse ces données et fournis:
 
-1. **Diagnostic Prioritaire:** Identifie les 3 problemes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
+1. **Diagnostic Prioritaire:** Identifié les 3 problèmes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
 
-2. **Plan d'Action:** Pour chaque probleme:
+2. **Plan d'Action:** Pour chaque problème:
    - Fichier(s) exact(s) a modifier avec le chemin
    - Code Vue.js 3 (Composition API) optimise
-   - Configuration Vite specifique si necessaire
+   - Configuration Vite spécifique si nécessaire
    - Commandes npm/pnpm a executer
 
 3. **Quick Wins:** 3 optimisations implementables en moins de 30 minutes avec les fichiers cibles
 
-Structure ta reponse en Markdown avec des exemples de code concrets et fonctionnels.
+Structure ta réponse en Markdown avec des exemples de code concrets et fonctionnels.

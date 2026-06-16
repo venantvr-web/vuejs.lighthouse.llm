@@ -1,14 +1,14 @@
 {# Budget Compliance Analysis - Performance Budget Monitoring #}
-# Conformite aux Budgets Performance - {{ url }}
+# Conformité aux Budgets Performance - {{ url }}
 
 ## Role
 Tu es un Expert en Performance Budgets et monitoring continu des performances web.
 
-## Budgets vs Realite
+## Budgets vs Réalité
 
-### Metriques de Timing
+### Métriques de Timing
 
-| Metrique | Budget | Actuel | Ecart | Statut |
+| Métrique | Budget | Actuel | Ecart | Statut |
 |----------|--------|--------|-------|--------|
 {% if budgets.performance %}| **Performance Score** | {{ budgets.performance }}% | {{ actual.performance }}% | {{ (actual.performance - budgets.performance) | round(0) }}% | {% if actual.performance >= budgets.performance %}OK{% elif actual.performance >= budgets.performance - 10 %}Attention{% else %}Critique{% endif %} |{% endif %}
 {% if budgets.lcp %}| **LCP** | {{ budgets.lcp | metric }} | {{ actual.lcp | metric }} | {{ (actual.lcp - budgets.lcp) | metric }} | {% if actual.lcp <= budgets.lcp %}OK{% elif actual.lcp <= budgets.lcp * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
@@ -28,22 +28,22 @@ Tu es un Expert en Performance Budgets et monitoring continu des performances we
 {% if budgets.total %}| **Total** | {{ budgets.total | size }} | {{ actual.total | size }} | {% if actual.total > budgets.total %}+{% endif %}{{ (actual.total - budgets.total) | size }} | {% if actual.total <= budgets.total %}OK{% elif actual.total <= budgets.total * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
 
 {% if violations %}
-## Violations Detectees
+## Violations Détectées
 
 {% for violation in violations %}
 ### {{ loop.index }}. {{ violation.metric }}
 **Budget:** {{ violation.budget }} | **Actuel:** {{ violation.actual }} | **Depassement:** {{ violation.overBy }}
-**Severite:** {{ violation.severity | default('error') }}
+**Sévérité:** {{ violation.severity | default('error') }}
 {% endfor %}
 {% else %}
-## Conformite
+## Conformité
 
 Tous les budgets sont respectes.
 {% endif %}
 
 ## Demande
 
-Analyse de conformite aux budgets:
+Analyse de conformité aux budgets:
 
 ### 1. Configuration Budget Lighthouse CI
 
@@ -113,7 +113,7 @@ Analyse de conformite aux budgets:
 {% if violations %}
 Pour chaque violation de budget, fournis:
 
-**Plan de reduction JavaScript:**
+**Plan de réduction JavaScript:**
 ```javascript
 // vite.config.js
 export default {
@@ -134,11 +134,11 @@ export default {
 }
 ```
 
-**Optimisations specifiques:**
+**Optimisations spécifiques:**
 - Tree-shaking agressif
 - Lazy-loading des composants lourds
 - Compression Brotli/Gzip
-- Minification avancee
+- Minification avancée
 {% endif %}
 
 ### 3. Integration CI/CD
@@ -197,7 +197,7 @@ export default {
 
 Si les budgets sont trop stricts ou trop laxistes, propose des ajustements realistes.
 
-**Budgets recommandes par type de site:**
+**Budgets recommandés par type de site:**
 
 | Type | JS | CSS | Images | LCP | Score Min |
 |------|-----|-----|--------|-----|-----------|
@@ -206,4 +206,4 @@ Si les budgets sont trop stricts ou trop laxistes, propose des ajustements reali
 | **E-commerce** | < 200KB | < 40KB | < 400KB | < 2.0s | 85+ |
 | **Dashboard** | < 300KB | < 60KB | < 200KB | < 3.0s | 75+ |
 
-Propose des solutions concretes pour respecter les budgets definis.
+Propose des solutions concrètes pour respecter les budgets definis.

@@ -71,7 +71,7 @@ export async function analyzeUrl(url, options = {}) {
     })
 
     if (!response.ok) {
-        let errorMessage = 'Analyse echouee'
+        let errorMessage = 'Analyse échouée'
         try {
             const error = await response.json()
             errorMessage = error.error || errorMessage
@@ -97,7 +97,7 @@ export async function getCategories() {
         // Return default categories if server is not available
         return [
             {id: 'performance', name: 'Performance'},
-            {id: 'accessibility', name: 'Accessibilite'},
+            {id: 'accessibility', name: 'Accessibilité'},
             {id: 'best-practices', name: 'Bonnes Pratiques'},
             {id: 'seo', name: 'SEO'},
             {id: 'pwa', name: 'PWA'}

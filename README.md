@@ -17,6 +17,10 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
   - **budgets de performance** par catégorie, avec alerte visuelle en cas de dépassement ;
   - **notifications navigateur** lors d'une régression ou d'un budget non atteint ;
   - **courbe de tendance** (sparkline) et ré-audit en un clic.
+- **GEO Tracking** (*Generative Engine Optimization*) : suivi de la visibilité de votre marque dans les réponses des moteurs IA, avec :
+  - **prompts cibles** + marque + concurrents, interrogés sur **plusieurs moteurs en parallèle** (OpenAI, Claude, Gemini, Ollama) ;
+  - mesure par moteur : **marque citée**, **position** et **part de voix** face aux concurrents ;
+  - **comparaison inter-moteurs**, courbe de tendance et **alertes** quand la visibilité change.
 - **Export** : Markdown, PDF, et sauvegarde / restauration de l'historique au format JSON.
 - **PWA** : installable sur le bureau ou le mobile, fonctionne hors-ligne sur les données déjà stockées.
 
@@ -29,13 +33,13 @@ L'application suit une séparation claire en couches : vues, gestion d'état (Pi
 ```mermaid
 graph TD
     subgraph UI["Interface (Vue 3)"]
-        Views["Vues<br/>(Home, Watchlist, Analysis, History…)"]
+        Views["Vues<br/>(Home, Watchlist, GEO, Analysis, History…)"]
         Components["Composants<br/>(Sparkline, ScoreGauge, charts…)"]
     end
 
     subgraph Logic["Logique applicative"]
-        Composables["Composables<br/>(useWatchlist, useLighthouseParser,<br/>useNotifications, usePromptEngine…)"]
-        Stores["Stores Pinia<br/>(watchlist, scoreHistory,<br/>lighthouse, settings)"]
+        Composables["Composables<br/>(useWatchlist, useGeoTracking,<br/>useLighthouseParser, usePromptEngine…)"]
+        Stores["Stores Pinia<br/>(watchlist, geo, scoreHistory,<br/>lighthouse, settings)"]
     end
 
     subgraph Services["Services"]
@@ -45,8 +49,8 @@ graph TD
     end
 
     subgraph Storage["Stockage navigateur"]
-        IDB[("IndexedDB<br/>historique + rapports")]
-        LS[("localStorage<br/>réglages + watchlist")]
+        IDB[("IndexedDB<br/>historique + rapports + runs GEO")]
+        LS[("localStorage<br/>réglages + watchlist + prompts GEO")]
     end
 
     Views --> Components
@@ -96,6 +100,19 @@ flowchart LR
     E --> G
     G --> H["Mise à jour de la sparkline<br/>et du résumé de santé"]
     F --> H
+```
+
+### Cycle du GEO Tracking
+
+```mermaid
+flowchart LR
+    A["Prompt cible<br/>+ marque + concurrents"] --> B["Exécution en parallèle<br/>sur les moteurs sélectionnés"]
+    B --> C["Analyse de chaque réponse<br/>(mention, position, part de voix)"]
+    C --> D["Comparaison inter-moteurs<br/>+ historique IndexedDB"]
+    D --> E{"Changement vs<br/>exécution précédente ?"}
+    E -->|"Marque perdue / part de voix en baisse"| F["Notification navigateur"]
+    E -->|"Stable"| G["Mise à jour des sparklines<br/>et du comparatif"]
+    F --> G
 ```
 
 ---
@@ -214,14 +231,14 @@ graph TD
     root --> tests["tests/ — tests Vitest (stores, composables, composants, services)"]
     root --> public["public/ — manifeste PWA, service worker, icônes"]
 
-    src --> components["components/ — composants réutilisables (common, history, dashboard…)"]
-    src --> composables["composables/ — logique réutilisable (useWatchlist, useNotifications…)"]
+    src --> components["components/ — composants réutilisables (common, history, geo, dashboard…)"]
+    src --> composables["composables/ — logique réutilisable (useWatchlist, useGeoTracking, useNotifications…)"]
     src --> prompts["prompts/ — moteur et gabarits de prompts (.j2)"]
     src --> router["router/ — définition des routes"]
-    src --> services["services/ — accès API (PageSpeed, Chromium local, LLM)"]
-    src --> stores["stores/ — état Pinia (watchlist, scoreHistory, lighthouse, settings)"]
+    src --> services["services/ — accès API (PageSpeed, Chromium local, fournisseurs LLM)"]
+    src --> stores["stores/ — état Pinia (watchlist, geo, scoreHistory, lighthouse, settings)"]
     src --> utils["utils/ — formatters et helpers (url…)"]
-    src --> views["views/ — pages de l'application"]
+    src --> views["views/ — pages de l'application (dont WatchlistView, GeoView)"]
 ```
 
 ---

@@ -4,20 +4,22 @@ Système de templates et de gestion de prompts pour l'analyseur Lighthouse avec 
 
 ## Architecture
 
-```
-src/prompts/
-├── PromptTemplateEngine.js    # Moteur d'interpolation de templates
-├── PromptRegistry.js           # Catalogue centralisé de prompts
-├── templates/                  # Templates par catégorie
-│   ├── performance.js         # Prompts WPO
-│   ├── seo.js                 # Prompts SEO
-│   ├── accessibility.js       # Prompts A11y
-│   ├── bestPractices.js       # Prompts Sécurité
-│   ├── pwa.js                 # Prompts PWA
-│   ├── comparison.js          # Prompts Comparaison
-│   └── index.js               # Export des templates
-├── index.js                    # Export principal
-└── README.md                   # Documentation
+```mermaid
+graph TD
+    prompts["src/prompts/"]
+    prompts --> engine["PromptTemplateEngine.js — moteur d'interpolation de templates"]
+    prompts --> registry["PromptRegistry.js — catalogue centralisé de prompts"]
+    prompts --> templates["templates/ — templates par catégorie"]
+    prompts --> index["index.js — export principal"]
+    prompts --> readme["README.md — documentation"]
+
+    templates --> t_perf["performance.js — prompts WPO"]
+    templates --> t_seo["seo.js — prompts SEO"]
+    templates --> t_a11y["accessibility.js — prompts A11y"]
+    templates --> t_bp["bestPractices.js — prompts Sécurité"]
+    templates --> t_pwa["pwa.js — prompts PWA"]
+    templates --> t_cmp["comparison.js — prompts Comparaison"]
+    templates --> t_index["index.js — export des templates"]
 ```
 
 ## PromptTemplateEngine

@@ -419,12 +419,13 @@ console.log(info);
 
 ### Class Hierarchy
 
-```
-BaseLLMProvider (Abstract)
-├── GeminiProvider
-├── OpenAIProvider
-├── AnthropicProvider
-└── OllamaProvider
+```mermaid
+graph TD
+    base["BaseLLMProvider (Abstract)"]
+    base --> gemini["GeminiProvider"]
+    base --> openai["OpenAIProvider"]
+    base --> anthropic["AnthropicProvider"]
+    base --> ollama["OllamaProvider"]
 ```
 
 ### Key Methods

@@ -1,5 +1,11 @@
 import {describe, expect, it} from 'vitest'
-import {analyzeResponse, countOccurrences, detectChanges, escapeRegExp} from '@/composables/useGeoTracking'
+import {
+    analyzeResponse,
+    countOccurrences,
+    detectChanges,
+    escapeRegExp,
+    groupRunsByProvider
+} from '@/composables/useGeoTracking'
 
 describe('useGeoTracking - pure logic', () => {
     describe('escapeRegExp', () => {
@@ -84,6 +90,43 @@ describe('useGeoTracking - pure logic', () => {
 
         it('returns no changes for a stable result', () => {
             expect(detectChanges(item, {brandMentioned: true, shareOfVoice: 55}, {brandMentioned: true, shareOfVoice: 60})).toEqual([])
+        })
+    })
+
+    describe('groupRunsByProvider', () => {
+        // newest-first runs across two providers
+        const runs = [
+            {provider: 'openai', timestamp: 40, brandMentioned: true, shareOfVoice: 60, model: 'gpt'},
+            {provider: 'gemini', timestamp: 30, brandMentioned: false, shareOfVoice: 0, model: 'gem'},
+            {provider: 'openai', timestamp: 20, brandMentioned: true, shareOfVoice: 50, model: 'gpt'},
+            {provider: 'gemini', timestamp: 10, brandMentioned: false, shareOfVoice: 0, model: 'gem'}
+        ]
+
+        it('groups runs and exposes latest/previous per provider', () => {
+            const g = groupRunsByProvider(runs)
+            expect(g.providers.sort()).toEqual(['gemini', 'openai'])
+            expect(g.byProvider.openai.latest.shareOfVoice).toBe(60)
+            expect(g.byProvider.openai.previous.shareOfVoice).toBe(50)
+        })
+
+        it('counts engines citing the brand and averages share of voice', () => {
+            const g = groupRunsByProvider(runs)
+            expect(g.engineCount).toBe(2)
+            expect(g.enginesCited).toBe(1)        // only openai's latest mentions
+            expect(g.avgShareOfVoice).toBe(30)    // (60 + 0) / 2
+            expect(g.lastRunAt).toBe(40)
+        })
+
+        it('builds an oldest-first sparkline per provider', () => {
+            const g = groupRunsByProvider(runs)
+            expect(g.byProvider.openai.sparkline).toEqual([50, 60])
+        })
+
+        it('handles no runs', () => {
+            const g = groupRunsByProvider([])
+            expect(g.providers).toEqual([])
+            expect(g.avgShareOfVoice).toBeNull()
+            expect(g.lastRunAt).toBeNull()
         })
     })
 })

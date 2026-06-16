@@ -3,7 +3,7 @@ import {ref} from 'vue'
 import {formatRelativeTime, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 
-const props = defineProps({
+defineProps({
   item: {type: Object, required: true},
   stats: {type: Object, default: null},
   running: {type: Boolean, default: false},
@@ -12,7 +12,9 @@ const props = defineProps({
 
 const emit = defineEmits(['run', 'remove'])
 
-const showResponse = ref(false)
+const PROVIDER_LABELS = {openai: 'OpenAI', anthropic: 'Claude', gemini: 'Gemini', ollama: 'Ollama'}
+
+const showResponses = ref(false)
 </script>
 
 <template>
@@ -20,7 +22,7 @@ const showResponse = ref(false)
     <!-- Header -->
     <div class="flex items-start justify-between gap-2 mb-3">
       <div class="min-w-0">
-        <h3 class="font-semibold text-gray-900 dark:text-white line-clamp-2" :title="item.prompt">
+        <h3 :title="item.prompt" class="font-semibold text-gray-900 dark:text-white line-clamp-2">
           {{ item.prompt }}
         </h3>
         <div class="flex flex-wrap items-center gap-1.5 mt-2">
@@ -46,63 +48,71 @@ const showResponse = ref(false)
       </button>
     </div>
 
-    <!-- Latest result -->
-    <div v-if="stats?.latest" class="mb-3">
+    <template v-if="stats?.providers?.length">
+      <!-- Aggregate across engines -->
       <div class="flex items-center gap-4 mb-3">
-        <!-- Brand visibility -->
         <div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Marque citée</p>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Moteurs citant</p>
           <p
-              :class="stats.latest.brandMentioned ? 'text-emerald-500' : 'text-red-500'"
+              :class="stats.enginesCited > 0 ? 'text-emerald-500' : 'text-red-500'"
               class="text-lg font-bold leading-tight"
-          >
-            {{ stats.latest.brandMentioned ? 'Oui' : 'Non' }}
-            <span v-if="stats.latest.brandMentioned && stats.latest.position" class="text-xs font-medium text-gray-500 dark:text-gray-400">
-              (#{{ stats.latest.position }})
-            </span>
-          </p>
+          >{{ stats.enginesCited }}/{{ stats.engineCount }}</p>
         </div>
-        <!-- Share of voice -->
         <div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Part de voix</p>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Part de voix moy.</p>
           <p
-              :class="getScoreColorClass((stats.latest.shareOfVoice ?? 0) / 100)"
+              :class="getScoreColorClass((stats.avgShareOfVoice ?? 0) / 100)"
               class="text-lg font-bold leading-tight"
-          >
-            {{ stats.latest.shareOfVoice !== null ? stats.latest.shareOfVoice + '%' : '—' }}
-          </p>
+          >{{ stats.avgShareOfVoice !== null ? stats.avgShareOfVoice + '%' : '—' }}</p>
         </div>
       </div>
 
-      <!-- Competitors found -->
-      <div v-if="stats.latest.competitorsFound?.length" class="flex flex-wrap gap-1 mb-3">
-        <span
-            v-for="c in stats.latest.competitorsFound"
-            :key="c.name"
-            class="px-1.5 py-0.5 rounded text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
+      <!-- Per-provider comparison -->
+      <div class="space-y-1.5 mb-3">
+        <div
+            v-for="provider in stats.providers"
+            :key="provider"
+            class="flex items-center gap-2 text-xs"
         >
-          {{ c.name }} ×{{ c.count }}
-        </span>
+          <span class="w-16 shrink-0 font-medium text-gray-700 dark:text-gray-300">{{ PROVIDER_LABELS[provider] || provider }}</span>
+          <span
+              :class="stats.byProvider[provider].latest.brandMentioned ? 'text-emerald-500' : 'text-red-500'"
+              class="w-10 shrink-0 font-semibold"
+          >
+            {{ stats.byProvider[provider].latest.brandMentioned ? 'Oui' : 'Non' }}
+          </span>
+          <span class="w-10 shrink-0 text-gray-500 dark:text-gray-400">
+            <template v-if="stats.byProvider[provider].latest.position">#{{ stats.byProvider[provider].latest.position }}</template>
+          </span>
+          <span
+              :class="getScoreColorClass((stats.byProvider[provider].latest.shareOfVoice ?? 0) / 100)"
+              class="w-10 shrink-0 font-semibold"
+          >
+            {{ stats.byProvider[provider].latest.shareOfVoice !== null ? stats.byProvider[provider].latest.shareOfVoice + '%' : '—' }}
+          </span>
+          <Sparkline
+              v-if="stats.byProvider[provider].sparkline.length > 1"
+              :values="stats.byProvider[provider].sparkline"
+              :width="90"
+              class="ml-auto"
+              color="#6366f1"
+          />
+        </div>
       </div>
 
-      <!-- Sparkline -->
-      <div v-if="stats.sparkline?.length > 1" class="mb-3">
-        <p class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Évolution part de voix</p>
-        <Sparkline :values="stats.sparkline" :width="240" color="#6366f1"/>
-      </div>
-
-      <!-- Response preview -->
-      <button
-          class="text-[11px] text-primary-500 hover:underline"
-          @click="showResponse = !showResponse"
-      >
-        {{ showResponse ? 'Masquer' : 'Voir' }} la réponse ({{ stats.latest.provider }}/{{ stats.latest.model }})
+      <!-- Response previews -->
+      <button class="text-[11px] text-primary-500 hover:underline" @click="showResponses = !showResponses">
+        {{ showResponses ? 'Masquer' : 'Voir' }} les réponses
       </button>
-      <p
-          v-if="showResponse"
-          class="mt-2 text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap max-h-40 overflow-y-auto p-2 rounded bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700"
-      >{{ stats.latest.response }}</p>
-    </div>
+      <div v-if="showResponses" class="mt-2 space-y-2">
+        <div v-for="provider in stats.providers" :key="provider">
+          <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+            {{ PROVIDER_LABELS[provider] || provider }} ({{ stats.byProvider[provider].latest.model }})
+          </p>
+          <p class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap max-h-32 overflow-y-auto p-2 rounded bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">{{ stats.byProvider[provider].latest.response }}</p>
+        </div>
+      </div>
+    </template>
 
     <!-- Never run -->
     <div v-else class="flex-1 flex items-center justify-center py-4 mb-2">
@@ -110,7 +120,7 @@ const showResponse = ref(false)
     </div>
 
     <!-- Error -->
-    <p v-if="error" class="text-xs text-red-500 mb-2">{{ error }}</p>
+    <p v-if="error" class="text-xs text-red-500 mb-2 mt-2">{{ error }}</p>
 
     <!-- Footer -->
     <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">

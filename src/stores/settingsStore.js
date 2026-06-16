@@ -14,6 +14,9 @@ export const useSettingsStore = defineStore('settings', () => {
     const temperature = ref(0.7)
     const maxTokens = ref(2000)
 
+    // State - Per-provider API keys (enables multi-provider GEO tracking)
+    const providerKeys = ref({openai: '', anthropic: '', gemini: ''})
+
     // State - Ollama Configuration
     const ollamaBaseUrl = ref('http://localhost:11434')
     const ollamaModel = ref('llama3.2')
@@ -51,6 +54,21 @@ export const useSettingsStore = defineStore('settings', () => {
         maxTokens: maxTokens.value,
         ollamaBaseUrl: ollamaBaseUrl.value
     }))
+
+    // Default (fast/cheap) models used for GEO multi-provider runs
+    const GEO_PROVIDER_MODELS = {
+        openai: 'gpt-4o-mini',
+        anthropic: 'claude-3-5-haiku-20241022',
+        gemini: 'gemini-1.5-flash'
+    }
+
+    // Providers available for GEO tracking, with readiness based on keys/config
+    const geoProviders = computed(() => [
+        {id: 'openai', label: 'OpenAI', model: GEO_PROVIDER_MODELS.openai, ready: !!providerKeys.value.openai},
+        {id: 'anthropic', label: 'Claude', model: GEO_PROVIDER_MODELS.anthropic, ready: !!providerKeys.value.anthropic},
+        {id: 'gemini', label: 'Gemini', model: GEO_PROVIDER_MODELS.gemini, ready: !!providerKeys.value.gemini},
+        {id: 'ollama', label: 'Ollama', model: ollamaModel.value, ready: !!ollamaBaseUrl.value && !!ollamaModel.value}
+    ])
 
     const modelOptions = computed(() => {
         switch (llmProvider.value) {
@@ -134,6 +152,16 @@ export const useSettingsStore = defineStore('settings', () => {
      */
     function setAPIKey(key) {
         apiKey.value = key
+        saveSettings()
+    }
+
+    /**
+     * Set the API key for a specific provider (used by multi-provider GEO).
+     * @param {string} provider - 'openai' | 'anthropic' | 'gemini'
+     * @param {string} key - API key
+     */
+    function setProviderKey(provider, key) {
+        providerKeys.value = {...providerKeys.value, [provider]: key}
         saveSettings()
     }
 
@@ -242,6 +270,7 @@ export const useSettingsStore = defineStore('settings', () => {
                 llmProvider: llmProvider.value,
                 llmModel: llmModel.value,
                 apiKey: apiKey.value,
+                providerKeys: providerKeys.value,
                 temperature: temperature.value,
                 maxTokens: maxTokens.value,
                 ollamaBaseUrl: ollamaBaseUrl.value,
@@ -270,6 +299,7 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.llmProvider) llmProvider.value = settings.llmProvider
             if (settings.llmModel) llmModel.value = settings.llmModel
             if (settings.apiKey !== undefined) apiKey.value = settings.apiKey
+            if (settings.providerKeys) providerKeys.value = {...providerKeys.value, ...settings.providerKeys}
             if (settings.temperature !== undefined) temperature.value = settings.temperature
             if (settings.maxTokens !== undefined) maxTokens.value = settings.maxTokens
             if (settings.ollamaBaseUrl) ollamaBaseUrl.value = settings.ollamaBaseUrl
@@ -278,6 +308,12 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.showLineNumbers !== undefined) showLineNumbers.value = settings.showLineNumbers
             if (settings.autoAnalyze !== undefined) autoAnalyze.value = settings.autoAnalyze
             if (settings.saveHistory !== undefined) saveHistory.value = settings.saveHistory
+
+            // Seed the per-provider key from the legacy single key when relevant,
+            // so existing users can run GEO without re-entering their key.
+            if (apiKey.value && llmProvider.value in providerKeys.value && !providerKeys.value[llmProvider.value]) {
+                providerKeys.value[llmProvider.value] = apiKey.value
+            }
         } catch (error) {
             console.error('Failed to load settings:', error)
         }
@@ -312,12 +348,13 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Auto-save on changes
     watch(
-        [llmProvider, llmModel, apiKey, temperature, maxTokens,
+        [llmProvider, llmModel, apiKey, providerKeys, temperature, maxTokens,
             ollamaBaseUrl, ollamaModel, theme, showLineNumbers,
             autoAnalyze, saveHistory],
         () => {
             saveSettings()
-        }
+        },
+        {deep: true}
     )
 
     // Initialize
@@ -328,6 +365,7 @@ export const useSettingsStore = defineStore('settings', () => {
         llmProvider,
         llmModel,
         apiKey,
+        providerKeys,
         temperature,
         maxTokens,
         ollamaBaseUrl,
@@ -343,11 +381,13 @@ export const useSettingsStore = defineStore('settings', () => {
         currentModel,
         llmConfig,
         modelOptions,
+        geoProviders,
 
         // Actions
         setLLMProvider,
         setLLMModel,
         setAPIKey,
+        setProviderKey,
         setTemperature,
         setMaxTokens,
         setOllamaBaseUrl,

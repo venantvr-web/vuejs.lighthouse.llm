@@ -1,41 +1,8 @@
 import {defineStore} from 'pinia'
 import {computed, ref, watch} from 'vue'
+import {extractDomain, normalizeUrl} from '@/utils/url'
 
 const STORAGE_KEY = 'lighthouse-watchlist'
-
-/**
- * Extract domain from URL
- * @param {string} url - Full URL
- * @returns {string} Domain name
- */
-function extractDomain(url) {
-    try {
-        return new URL(url).hostname
-    } catch {
-        return url
-    }
-}
-
-/**
- * Normalize a URL for comparison (drop trailing slash, lowercase host)
- * @param {string} url - URL to normalize
- * @returns {string} Normalized URL
- */
-export function normalizeUrl(url) {
-    let normalized = (url || '').trim()
-    if (!normalized) return ''
-    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
-        normalized = 'https://' + normalized
-    }
-    try {
-        const u = new URL(normalized)
-        u.hostname = u.hostname.toLowerCase()
-        let result = u.origin + u.pathname.replace(/\/$/, '') + u.search
-        return result
-    } catch {
-        return normalized.replace(/\/$/, '')
-    }
-}
 
 /**
  * Store for managing the watchlist of monitored URLs.

@@ -1,29 +1,11 @@
 import {beforeEach, describe, expect, it} from 'vitest'
 import {createPinia, setActivePinia} from 'pinia'
-import {normalizeUrl, useWatchlistStore} from '@/stores/watchlistStore'
+import {useWatchlistStore} from '@/stores/watchlistStore'
 
 describe('watchlistStore', () => {
     beforeEach(() => {
         setActivePinia(createPinia())
         localStorage.clear()
-    })
-
-    describe('normalizeUrl', () => {
-        it('adds https protocol when missing', () => {
-            expect(normalizeUrl('example.com')).toBe('https://example.com')
-        })
-
-        it('strips trailing slash and lowercases host', () => {
-            expect(normalizeUrl('https://Example.com/Path/')).toBe('https://example.com/Path')
-        })
-
-        it('preserves query string', () => {
-            expect(normalizeUrl('https://example.com/p?a=1')).toBe('https://example.com/p?a=1')
-        })
-
-        it('returns empty string for blank input', () => {
-            expect(normalizeUrl('   ')).toBe('')
-        })
     })
 
     describe('addItem', () => {

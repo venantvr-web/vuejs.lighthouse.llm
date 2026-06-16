@@ -58,13 +58,13 @@ const statusClass = computed(() => {
 const statusLabel = computed(() => {
   switch (session.value?.status) {
     case CRAWL_STATUS.COMPLETED:
-      return 'Termine'
+      return 'Terminé'
     case CRAWL_STATUS.PARTIAL:
       return 'Partiel'
     case CRAWL_STATUS.FAILED:
       return 'Echec'
     case CRAWL_STATUS.CANCELLED:
-      return 'Annule'
+      return 'Annulé'
     default:
       return session.value?.status || 'Inconnu'
   }
@@ -149,14 +149,14 @@ function exportPDF() {
   y += 7
   doc.text(`Pages analysees: ${session.value.pagesAnalyzed}/${session.value.pageCount}`, margin, y)
   y += 7
-  doc.text(`Service: ${session.value.service} | Strategie: ${session.value.strategy}`, margin, y)
+  doc.text(`Service: ${session.value.service} | Stratégie: ${session.value.strategy}`, margin, y)
   y += 15
 
   // Aggregate scores
   if (session.value.aggregateScores) {
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('Scores agreges', margin, y)
+    doc.text('Scores agrégés', margin, y)
     y += 10
 
     doc.setFontSize(10)
@@ -374,7 +374,7 @@ onMounted(async () => {
                 Service: {{ session.service }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                Strategie: {{ session.strategy }}
+                Stratégie: {{ session.strategy }}
               </span>
             </div>
             <div class="text-lg font-medium text-gray-900 dark:text-white">
@@ -385,7 +385,7 @@ onMounted(async () => {
           <!-- Aggregate scores -->
           <div v-if="aggregateScores" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Scores agreges du domaine
+              Scores agrégés du domaine
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-6">
               <div v-for="(data, category) in aggregateScores" :key="category" class="text-center">

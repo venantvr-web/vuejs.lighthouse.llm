@@ -56,10 +56,10 @@ const filterConfig = [
     key: 'status',
     label: 'Statut',
     options: [
-      {value: CRAWL_STATUS.COMPLETED, label: 'Termine'},
+      {value: CRAWL_STATUS.COMPLETED, label: 'Terminé'},
       {value: CRAWL_STATUS.PARTIAL, label: 'Partiel'},
       {value: CRAWL_STATUS.FAILED, label: 'Echec'},
-      {value: CRAWL_STATUS.CANCELLED, label: 'Annule'}
+      {value: CRAWL_STATUS.CANCELLED, label: 'Annulé'}
     ]
   },
   {
@@ -72,7 +72,7 @@ const filterConfig = [
   },
   {
     key: 'strategy',
-    label: 'Strategie',
+    label: 'Stratégie',
     options: [
       {value: 'mobile', label: 'Mobile'},
       {value: 'desktop', label: 'Desktop'}
@@ -117,13 +117,13 @@ function getStatusClass(status) {
 function getStatusLabel(status) {
   switch (status) {
     case CRAWL_STATUS.COMPLETED:
-      return 'Termine'
+      return 'Terminé'
     case CRAWL_STATUS.PARTIAL:
       return 'Partiel'
     case CRAWL_STATUS.FAILED:
       return 'Echec'
     case CRAWL_STATUS.CANCELLED:
-      return 'Annule'
+      return 'Annulé'
     default:
       return status || 'Inconnu'
   }
@@ -199,7 +199,7 @@ onMounted(async () => {
                   Historique des Crawls
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ sessions.length }} session{{ sessions.length > 1 ? 's' : '' }} enregistree{{ sessions.length > 1 ? 's' : '' }}
+                  {{ sessions.length }} session{{ sessions.length > 1 ? 's' : '' }} enregistrée{{ sessions.length > 1 ? 's' : '' }}
                 </p>
               </div>
             </router-link>
@@ -407,7 +407,7 @@ onMounted(async () => {
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucun crawl enregistre
+            Aucun crawl enregistré
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
             Lancez votre premier crawl pour analyser plusieurs pages de votre site.
@@ -437,7 +437,7 @@ onMounted(async () => {
             Supprimer cette session ?
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Cette action est irreversible. Les donnees de cette session de crawl seront definitivement supprimees.
+            Cette action est irreversible. Les données de cette session de crawl seront definitivement supprimees.
           </p>
           <div class="flex justify-end gap-3">
             <button
@@ -471,7 +471,7 @@ onMounted(async () => {
         >
           <div class="text-sm text-gray-600 dark:text-gray-400">
             <span class="font-semibold text-gray-900 dark:text-white">{{ selectedCount }}</span>
-            session{{ selectedCount > 1 ? 's' : '' }} selectionnee{{ selectedCount > 1 ? 's' : '' }}
+            session{{ selectedCount > 1 ? 's' : '' }} sélectionnée{{ selectedCount > 1 ? 's' : '' }}
           </div>
 
           <div class="flex items-center gap-3">

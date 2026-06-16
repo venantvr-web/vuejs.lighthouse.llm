@@ -12,7 +12,7 @@ export function useExportPDF() {
 
     const categoryLabels = {
         performance: 'Performance',
-        accessibility: 'Accessibilite',
+        accessibility: 'Accessibilité',
         'best-practices': 'Bonnes Pratiques',
         seo: 'SEO',
         pwa: 'PWA'
@@ -62,7 +62,7 @@ export function useExportPDF() {
             yPos += 8
 
             pdf.setFontSize(10)
-            pdf.text(`Genere le ${formatDateTime(Date.now())}`, margin, yPos)
+            pdf.text(`Généré le ${formatDateTime(Date.now())}`, margin, yPos)
             pdf.setTextColor(0)
             yPos += 15
 
@@ -138,7 +138,7 @@ export function useExportPDF() {
 
                     pdf.setFontSize(12)
                     pdf.setFont('helvetica', 'bold')
-                    pdf.text('Evolution des Scores', margin, yPos)
+                    pdf.text('Évolution des Scores', margin, yPos)
                     yPos += 8
 
                     pdf.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight)

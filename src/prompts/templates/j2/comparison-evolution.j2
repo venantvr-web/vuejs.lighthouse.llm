@@ -2,28 +2,28 @@
 # Analyse d'Evolution - {{ url }}
 
 ## Role
-Tu es un Expert en Analyse de Performance Web, specialise dans le suivi d'evolution et l'analyse comparative.
+Tu es un Expert en Analyse de Performance Web, spécialisé dans le suivi d'evolution et l'analyse comparative.
 
 ## Periode Analysee
 
 **Avant:** {{ beforeDate }}
-**Apres:** {{ afterDate }}
+**Après:** {{ afterDate }}
 **Intervalle:** {{ daysBetween | default('N/A') }} jours
 
 ## Evolution des Scores
 
-| Categorie | Avant | Apres | Evolution | Statut |
+| Catégorie | Avant | Après | Evolution | Statut |
 |-----------|-------|-------|-----------|--------|
-| **Performance** | {{ beforeScores.performance | score }} | {{ afterScores.performance | score }} | {% if afterScores.performance > beforeScores.performance %}+{% endif %}{{ ((afterScores.performance - beforeScores.performance) * 100) | round(0) }}% | {% if afterScores.performance > beforeScores.performance %}Amelioration{% elif afterScores.performance < beforeScores.performance %}Regression{% else %}Stable{% endif %} |
-| **Accessibilite** | {{ beforeScores.accessibility | score }} | {{ afterScores.accessibility | score }} | {% if afterScores.accessibility > beforeScores.accessibility %}+{% endif %}{{ ((afterScores.accessibility - beforeScores.accessibility) * 100) | round(0) }}% | {% if afterScores.accessibility > beforeScores.accessibility %}Amelioration{% elif afterScores.accessibility < beforeScores.accessibility %}Regression{% else %}Stable{% endif %} |
-| **Bonnes Pratiques** | {{ beforeScores.bestPractices | score }} | {{ afterScores.bestPractices | score }} | {% if afterScores.bestPractices > beforeScores.bestPractices %}+{% endif %}{{ ((afterScores.bestPractices - beforeScores.bestPractices) * 100) | round(0) }}% | {% if afterScores.bestPractices > beforeScores.bestPractices %}Amelioration{% elif afterScores.bestPractices < beforeScores.bestPractices %}Regression{% else %}Stable{% endif %} |
-| **SEO** | {{ beforeScores.seo | score }} | {{ afterScores.seo | score }} | {% if afterScores.seo > beforeScores.seo %}+{% endif %}{{ ((afterScores.seo - beforeScores.seo) * 100) | round(0) }}% | {% if afterScores.seo > beforeScores.seo %}Amelioration{% elif afterScores.seo < beforeScores.seo %}Regression{% else %}Stable{% endif %} |
-| **PWA** | {{ beforeScores.pwa | score }} | {{ afterScores.pwa | score }} | {% if afterScores.pwa > beforeScores.pwa %}+{% endif %}{{ ((afterScores.pwa - beforeScores.pwa) * 100) | round(0) }}% | {% if afterScores.pwa > beforeScores.pwa %}Amelioration{% elif afterScores.pwa < beforeScores.pwa %}Regression{% else %}Stable{% endif %} |
+| **Performance** | {{ beforeScores.performance | score }} | {{ afterScores.performance | score }} | {% if afterScores.performance > beforeScores.performance %}+{% endif %}{{ ((afterScores.performance - beforeScores.performance) * 100) | round(0) }}% | {% if afterScores.performance > beforeScores.performance %}Amélioration{% elif afterScores.performance < beforeScores.performance %}Regression{% else %}Stable{% endif %} |
+| **Accessibilité** | {{ beforeScores.accessibility | score }} | {{ afterScores.accessibility | score }} | {% if afterScores.accessibility > beforeScores.accessibility %}+{% endif %}{{ ((afterScores.accessibility - beforeScores.accessibility) * 100) | round(0) }}% | {% if afterScores.accessibility > beforeScores.accessibility %}Amélioration{% elif afterScores.accessibility < beforeScores.accessibility %}Regression{% else %}Stable{% endif %} |
+| **Bonnes Pratiques** | {{ beforeScores.bestPractices | score }} | {{ afterScores.bestPractices | score }} | {% if afterScores.bestPractices > beforeScores.bestPractices %}+{% endif %}{{ ((afterScores.bestPractices - beforeScores.bestPractices) * 100) | round(0) }}% | {% if afterScores.bestPractices > beforeScores.bestPractices %}Amélioration{% elif afterScores.bestPractices < beforeScores.bestPractices %}Regression{% else %}Stable{% endif %} |
+| **SEO** | {{ beforeScores.seo | score }} | {{ afterScores.seo | score }} | {% if afterScores.seo > beforeScores.seo %}+{% endif %}{{ ((afterScores.seo - beforeScores.seo) * 100) | round(0) }}% | {% if afterScores.seo > beforeScores.seo %}Amélioration{% elif afterScores.seo < beforeScores.seo %}Regression{% else %}Stable{% endif %} |
+| **PWA** | {{ beforeScores.pwa | score }} | {{ afterScores.pwa | score }} | {% if afterScores.pwa > beforeScores.pwa %}+{% endif %}{{ ((afterScores.pwa - beforeScores.pwa) * 100) | round(0) }}% | {% if afterScores.pwa > beforeScores.pwa %}Amélioration{% elif afterScores.pwa < beforeScores.pwa %}Regression{% else %}Stable{% endif %} |
 
 {% if metrics %}
-## Evolution des Metriques
+## Evolution des Métriques
 
-| Metrique | Avant | Apres | Difference | Analyse |
+| Métrique | Avant | Après | Difference | Analyse |
 |----------|-------|-------|------------|---------|
 {% if metrics.before.lcp and metrics.after.lcp %}| **LCP** | {{ metrics.before.lcp | metric }} | {{ metrics.after.lcp | metric }} | {{ (metrics.after.lcp - metrics.before.lcp) | metric }} | {% if metrics.after.lcp < metrics.before.lcp %}Ameliore{% elif metrics.after.lcp > metrics.before.lcp %}Degrade{% else %}Stable{% endif %} |
 {% endif %}
@@ -61,32 +61,32 @@ Tu es un Expert en Analyse de Performance Web, specialise dans le suivi d'evolut
 
 Analyse comparative approfondie:
 
-### 1. Synthese de l'Evolution
+### 1. Synthèse de l'Evolution
 
 Analyse l'evolution globale:
-- **Points forts:** Quelles sont les principales ameliorations?
+- **Points forts:** Quelles sont les principales améliorations?
 - **Points faibles:** Quelles sont les regressions critiques?
-- **Tendance generale:** Le site s'ameliore-t-il globalement?
+- **Tendance générale:** Le site s'amélioré-t-il globalement?
 
 ### 2. Analyse des Ameliorations
 
-Pour chaque amelioration significative:
-- Quelle optimisation a probablement cause cette amelioration?
+Pour chaque amélioration significative:
+- Quelle optimisation a probablement cause cette amélioration?
 - Impact utilisateur concret
-- Recommandation pour maintenir/amplifier cette amelioration
+- Recommandation pour maintenir/amplifier cette amélioration
 
 **Exemple d'analyse:**
 ```
-Amelioration: LCP reduit de 4.2s a 2.1s (-50%)
+Amélioration: LCP réduit de 4.2s a 2.1s (-50%)
 
 Causes probables:
 - Optimisation des images (format WebP, lazy-loading)
-- Amelioration du code splitting
+- Amélioration du code splitting
 - Utilisation d'un CDN
 
 Impact utilisateur:
 - Contenu principal visible 2x plus rapidement
-- Amelioration de l'experience utilisateur
+- Amélioration de l'experience utilisateur
 - Meilleur ranking Google (Core Web Vitals)
 
 Recommandations:
@@ -108,7 +108,7 @@ Pour chaque regression:
 // Code pour corriger les regressions identifiees
 ```
 {% else %}
-Aucune regression detectee.
+Aucune regression détectée.
 {% endif %}
 
 ### 4. Recommandations Priorisees
@@ -119,7 +119,7 @@ Aucune regression detectee.
 3. [Ajustement mineur]
 
 **Optimisations Moyennes (1-3h):**
-1. [Amelioration substantielle]
+1. [Amélioration substantielle]
 2. [Refactoring cible]
 
 **Optimisations Avancees (> 3h):**
@@ -131,7 +131,7 @@ Aucune regression detectee.
 **KPIs a suivre:**
 - Core Web Vitals (LCP, CLS, INP)
 - Scores Lighthouse
-- Metriques business (taux de conversion, engagement)
+- Métriques business (taux de conversion, engagement)
 
 **Configuration monitoring:**
 ```javascript

@@ -67,7 +67,7 @@ const testConnection = async () => {
               <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
           </button>
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Parametres</h1>
+          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Paramètres</h1>
         </div>
       </div>
     </header>
@@ -109,7 +109,7 @@ const testConnection = async () => {
         <!-- API Key (not for Ollama) -->
         <div v-if="provider !== 'ollama'">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Cle API
+            Clé API
           </label>
           <input
               v-model="apiKey"

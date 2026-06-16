@@ -2,7 +2,7 @@
 # Analyse Performance - {{ url }}
 
 ## Role
-Tu es un Expert Senior en Web Performance Optimization (WPO), specialise dans Vue.js 3 et Vite.
+Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3 et Vite.
 
 ## Score Global
 Performance: {{ score | score }}
@@ -48,9 +48,9 @@ Performance: {{ score | score }}
 **Cible:** < 200ms
 {% endif %}
 
-## Autres Metriques
+## Autres Métriques
 
-| Metrique | Valeur | Cible |
+| Métrique | Valeur | Cible |
 |----------|--------|-------|
 | First Contentful Paint (FCP) | {{ fcpDisplay | default(fcp | metric) }} | < 1.8s |
 | Speed Index (SI) | {{ siDisplay | default(si | metric) }} | < 3.4s |
@@ -65,7 +65,7 @@ Performance: {{ score | score }}
 ### Thread Principal
 **Temps total:** {{ mainThreadWork }}
 {% if mainThreadBreakdown %}
-| Categorie | Duree |
+| Catégorie | Duree |
 |-----------|-------|
 {% for task in mainThreadBreakdown %}| {{ task.group }} | {{ task.duration | round(0) }}ms |
 {% endfor %}{% endif %}
@@ -184,14 +184,14 @@ Performance: {{ score | score }}
 
 ## Demande
 
-Analyse ces donnees et fournis:
+Analyse ces données et fournis:
 
 1. **Diagnostic Prioritaire:** Identifie les 3 problemes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
 
 2. **Plan d'Action:** Pour chaque probleme:
    - Fichier(s) exact(s) a modifier avec le chemin
    - Code Vue.js 3 (Composition API) optimise
-   - Configuration Vite specifique si necessaire
+   - Configuration Vite spécifique si nécessaire
    - Commandes npm/pnpm a executer
 
 3. **Quick Wins:** 3 optimisations implementables en moins de 30 minutes avec les fichiers cibles

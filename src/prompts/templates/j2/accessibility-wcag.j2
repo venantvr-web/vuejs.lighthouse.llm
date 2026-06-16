@@ -1,10 +1,10 @@
-{# WCAG 2.1 AA Compliance Audit - Expert Accessibilite #}
-# Audit Conformite WCAG 2.1 AA - {{ url }}
+{# WCAG 2.1 AA Compliance Audit - Expert Accessibilité #}
+# Audit Conformité WCAG 2.1 AA - {{ url }}
 
 ## Role
-Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
+Tu es un Auditeur Expert en Accessibilité Numérique, certifié WCAG 2.1 et RGAA.
 
-## Score Accessibilite Globale
+## Score Accessibilité Globale
 {{ score | score }}
 
 ## Principes WCAG 2.1
@@ -12,7 +12,7 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 ### 1. Perceptible (Perceivable)
 
 {% if perceivable %}
-**Conformite:** {{ perceivable.score | score }}
+**Conformité:** {{ perceivable.score | score }}
 {% if perceivable.issues %}
 **Problemes identifies:**
 {% for issue in perceivable.issues %}{% if issue.title or issue %}
@@ -30,7 +30,7 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 ### 2. Utilisable (Operable)
 
 {% if operable %}
-**Conformite:** {{ operable.score | score }}
+**Conformité:** {{ operable.score | score }}
 {% if operable.issues %}
 **Problemes identifies:**
 {% for issue in operable.issues %}{% if issue.title or issue %}
@@ -40,7 +40,7 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 {% endif %}
 
 **Criteres concernes:**
-- 2.1 Accessibilite au clavier
+- 2.1 Accessibilité au clavier
 - 2.2 Delai suffisant
 - 2.4 Navigable
 - 2.5 Modalites d'entree
@@ -48,7 +48,7 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 ### 3. Comprehensible (Understandable)
 
 {% if understandable %}
-**Conformite:** {{ understandable.score | score }}
+**Conformité:** {{ understandable.score | score }}
 {% if understandable.issues %}
 **Problemes identifies:**
 {% for issue in understandable.issues %}{% if issue.title or issue %}
@@ -65,7 +65,7 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 ### 4. Robuste (Robust)
 
 {% if robust %}
-**Conformite:** {{ robust.score | score }}
+**Conformité:** {{ robust.score | score }}
 {% if robust.issues %}
 **Problemes identifies:**
 {% for issue in robust.issues %}{% if issue.title or issue %}
@@ -88,16 +88,16 @@ Tu es un Auditeur Expert en Accessibilite Numerique, certifie WCAG 2.1 et RGAA.
 
 ## Demande
 
-Audit approfondi de conformite WCAG 2.1 AA:
+Audit approfondi de conformité WCAG 2.1 AA:
 
 ### 1. Analyse par Principe
 
 Pour chaque principe WCAG, detaille:
 - Criteres non conformes
 - Niveau de gravite
-- Impact utilisateur specifique
+- Impact utilisateur spécifique
 
-### 2. Corrections par Categorie
+### 2. Corrections par Catégorie
 
 #### A. Perceptible
 
@@ -162,11 +162,11 @@ Pour chaque principe WCAG, detaille:
 </template>
 ```
 
-### 3. Plan de Mise en Conformite
+### 3. Plan de Mise en Conformité
 
 Roadmap priorisee:
 - **P0:** Bloqueurs critiques (navigation clavier, alternatives textuelles)
 - **P1:** Violations AA majeures
 - **P2:** Ameliorations et niveau AAA
 
-Fournis un plan d'action detaille pour atteindre la conformite WCAG 2.1 AA complete.
+Fournis un plan d'action detaille pour atteindre la conformité WCAG 2.1 AA complete.

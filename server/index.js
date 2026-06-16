@@ -48,7 +48,7 @@ app.post('/analyze', async (req, res) => {
 
     // Validate strategy
     if (strategy && !['mobile', 'desktop'].includes(strategy)) {
-        return res.status(400).json({error: 'Strategy doit etre "mobile" ou "desktop"'})
+        return res.status(400).json({error: 'Strategy doit être "mobile" ou "desktop"'})
     }
 
     try {
@@ -68,7 +68,7 @@ app.get('/categories', (req, res) => {
     res.json({
         categories: [
             {id: 'performance', name: 'Performance'},
-            {id: 'accessibility', name: 'Accessibilite'},
+            {id: 'accessibility', name: 'Accessibilité'},
             {id: 'best-practices', name: 'Bonnes Pratiques'},
             {id: 'seo', name: 'SEO'},
             {id: 'pwa', name: 'PWA'}

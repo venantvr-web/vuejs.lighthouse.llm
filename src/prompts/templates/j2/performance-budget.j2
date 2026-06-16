@@ -14,7 +14,7 @@ Tu es un Expert en Performance Budgets et optimisation des ressources pour appli
 | **Images** | {{ imageSize | size }} | < 500 KB | {% if imageSize < 500000 %}OK{% elif imageSize < 1000000 %}Attention{% else %}Critique{% endif %} |
 | **Fonts** | {{ fontSize | size }} | < 100 KB | {% if fontSize < 100000 %}OK{% elif fontSize < 200000 %}Attention{% else %}Critique{% endif %} |
 
-**Nombre de requetes:** {{ requests }} (recommande: < 50)
+**Nombre de requêtes:** {{ requests }} (recommande: < 50)
 
 {% if jsBundles %}
 ## Analyse des Bundles JavaScript
@@ -68,12 +68,12 @@ Tu es un Expert en Performance Budgets et optimisation des ressources pour appli
 
 ## Demande
 
-En tant qu'expert en Performance Budgets, analyse ces donnees et fournis:
+En tant qu'expert en Performance Budgets, analyse ces données et fournis:
 
 ### 1. Audit des Depassements
-Identifie tous les depassements de budget avec leur impact sur les metriques Lighthouse.
+Identifie tous les depassements de budget avec leur impact sur les métriques Lighthouse.
 
-### 2. Strategies de Reduction JavaScript
+### 2. Strategies de Réduction JavaScript
 
 ```javascript
 // vite.config.js - Configuration optimisee
@@ -162,4 +162,4 @@ export default {
 }
 ```
 
-Propose des solutions concretes pour respecter les budgets avec du code Vue.js/Vite directement implementable.
+Propose des solutions concrètes pour respecter les budgets avec du code Vue.js/Vite directement implementable.

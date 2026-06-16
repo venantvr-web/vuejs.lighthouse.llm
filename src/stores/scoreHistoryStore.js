@@ -1,26 +1,13 @@
 import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
+import {extractDomain, normalizeUrl} from '@/utils/url'
 
 const DB_NAME = 'lighthouse-history'
 const DB_VERSION = 5
 const STORE_NAME = 'scores'
 const CRAWL_SESSIONS_STORE = 'crawl-sessions'
 const REPORTS_STORE = 'reports'
-
-/**
- * Extract domain from URL
- * @param {string} url - Full URL
- * @returns {string} Domain name
- */
-function extractDomain(url) {
-    try {
-        const urlObj = new URL(url)
-        return urlObj.hostname
-    } catch {
-        return url
-    }
-}
 
 /**
  * Store for managing Lighthouse score history with IndexedDB
@@ -277,6 +264,30 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
             console.error('Failed to load scores for domain:', err)
         } finally {
             loading.value = false
+        }
+    }
+
+    /**
+     * Get all non-crawl scores for a specific URL, sorted newest first.
+     * Matches on normalized URL (ignores trailing slash and host case).
+     * @param {string} url - Full URL
+     * @returns {Promise<Array>} - Sorted score entries for the URL
+     */
+    async function getScoresForUrl(url) {
+        if (!initialized.value) {
+            await initialize()
+        }
+
+        const target = normalizeUrl(url)
+
+        try {
+            const all = await indexedDB.getAllByIndex(STORE_NAME, 'domain', extractDomain(url))
+            return all
+                .filter(s => !s.crawlSessionId && normalizeUrl(s.url) === target)
+                .sort((a, b) => b.timestamp - a.timestamp)
+        } catch (err) {
+            console.error('Failed to get scores for URL:', err)
+            return []
         }
     }
 
@@ -704,6 +715,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         addScore,
         addScoreWithReport,
         loadScoresForDomain,
+        getScoresForUrl,
         deleteDomain,
         deleteScore,
         clearAll,

@@ -219,8 +219,8 @@ describe('categoryMeta', () => {
             expect(meta.id).toBe('best-practices')
             expect(meta.name).toBe('Bonnes Pratiques')
             expect(meta.icon).toBe('🛡️')
-            expect(meta.role).toContain('Securite')
-            expect(meta.description).toContain('Securite')
+            expect(meta.role).toContain('Sécurité')
+            expect(meta.description).toContain('Sécurité')
         })
     })
 

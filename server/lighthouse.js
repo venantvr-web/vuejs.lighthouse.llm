@@ -101,7 +101,7 @@ export async function analyzeUrl(url, options = {}) {
         return result.lhr
     } catch (error) {
         console.error('[Lighthouse] Analysis failed:', error.message)
-        throw new Error(`Analyse echouee: ${error.message}`)
+        throw new Error(`Analyse échouée: ${error.message}`)
     } finally {
         await chrome.kill()
     }

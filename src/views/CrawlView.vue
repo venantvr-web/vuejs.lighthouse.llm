@@ -113,11 +113,11 @@ const statusText = computed(() => {
     case CRAWL_STATUS.ANALYZING:
       return `Analyse en cours... (${analyzedCount.value}/${discoveredUrls.value.length})`
     case CRAWL_STATUS.COMPLETED:
-      return 'Analyse terminee !'
+      return 'Analyse terminée !'
     case CRAWL_STATUS.PARTIAL:
-      return 'Analyse partielle terminee'
+      return 'Analyse partielle terminée'
     case CRAWL_STATUS.CANCELLED:
-      return 'Analyse annulee'
+      return 'Analyse annulée'
     case CRAWL_STATUS.FAILED:
       return 'Echec de l\'analyse'
     default:
@@ -401,7 +401,7 @@ onUnmounted(() => {
               Crawler de site multi-pages
             </h2>
             <p class="text-gray-500 dark:text-gray-400">
-              Analysez plusieurs pages et obtenez des scores agreges par template
+              Analysez plusieurs pages et obtenez des scores agrégés par template
             </p>
           </div>
 
@@ -561,7 +561,7 @@ https://example.com/page-3"
             <!-- Strategy -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Strategie
+                Stratégie
               </label>
               <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1">
                 <button
@@ -639,9 +639,9 @@ https://example.com/page-3"
               <div class="text-sm text-blue-700 dark:text-blue-300">
                 <p class="font-medium mb-1">A propos du mode Crawl</p>
                 <p>
-                  Le crawl analyse plusieurs pages de votre site et detecte automatiquement
+                  Le crawl analyse plusieurs pages de votre site et détecte automatiquement
                   les types de templates (page d'accueil, fiche produit, listing...).
-                  Les scores sont agreges par template et par domaine.
+                  Les scores sont agrégés par template et par domaine.
                 </p>
               </div>
             </div>

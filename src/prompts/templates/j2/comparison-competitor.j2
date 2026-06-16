@@ -7,14 +7,14 @@ Tu es un Expert en Analyse Concurrentielle et Benchmarking Performance Web.
 ## Comparaison des Scores
 
 {% if competitors %}
-| Site | Performance | Accessibilite | SEO | PWA | Bonnes Pratiques |
+| Site | Performance | Accessibilité | SEO | PWA | Bonnes Pratiques |
 |------|-------------|---------------|-----|-----|------------------|
 | **Votre site** | {{ scores.own.performance | score }} | {{ scores.own.accessibility | score }} | {{ scores.own.seo | score }} | {{ scores.own.pwa | score }} | {{ scores.own.bestPractices | score }} |
 {% for competitor in competitors %}| {{ competitor.name }} | {{ competitor.scores.performance | score }} | {{ competitor.scores.accessibility | score }} | {{ competitor.scores.seo | score }} | {{ competitor.scores.pwa | score }} | {{ competitor.scores.bestPractices | score }} |
 {% endfor %}
 {% endif %}
 
-## Metriques Detaillees
+## Métriques Detaillees
 
 {% if metrics %}
 | Site | LCP | FCP | TBT | CLS | SI |
@@ -39,9 +39,9 @@ Analyse concurrentielle approfondie:
 
 ### 1. Position Relative
 
-Classe les sites du meilleur au moins bon pour chaque categorie:
+Classe les sites du meilleur au moins bon pour chaque catégorie:
 - Performance
-- Accessibilite
+- Accessibilité
 - SEO
 - Experience utilisateur
 
@@ -70,7 +70,7 @@ Avantages identifies:
    → Impact estime: +5% performance
 
 3. Service Worker agressif vs notre cache basique
-   → Action: Ameliorer strategie cache
+   → Action: Ameliorer stratégie cache
    → Impact estime: +7% performance
 ```
 
@@ -96,7 +96,7 @@ Objectif: Depasser les meilleurs concurrents
 - Innovations
 
 **Phase 3: Leadership (Long terme)**
-Objectif: Devenir la reference du secteur
+Objectif: Devenir la référence du secteur
 - Fonctionnalites differenciantes
 - Excellence technique
 
@@ -138,7 +138,7 @@ const compareAll = async () => {
     competitors.map(url => runLighthouse(url))
   )
 
-  // Analyser et alerter si concurrent s'ameliore
+  // Analyser et alerter si concurrent s'amélioré
   console.log('Competitor analysis:', results)
 }
 

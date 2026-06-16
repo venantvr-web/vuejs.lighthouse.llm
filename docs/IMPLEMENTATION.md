@@ -4,23 +4,25 @@ This document provides an overview of the Vue.js composables and Pinia stores cr
 
 ## Project Structure
 
-```
-src/
-├── composables/          # Reusable composition functions
-│   ├── index.js         # Composables barrel export
-│   ├── useLighthouseParser.js
-│   ├── useDragDrop.js
-│   ├── useTheme.js
-│   ├── useExport.js
-│   ├── useStreamingResponse.js
-│   └── README.md        # Composables documentation
-│
-└── stores/              # Pinia state management
-    ├── index.js         # Store setup and exports
-    ├── lighthouseStore.js
-    ├── settingsStore.js
-    ├── historyStore.js
-    └── README.md        # Stores documentation
+```mermaid
+graph TD
+    src["src/"]
+    src --> composables["composables/ — reusable composition functions"]
+    src --> stores["stores/ — Pinia state management"]
+
+    composables --> c_index["index.js — barrel export"]
+    composables --> c_parser["useLighthouseParser.js"]
+    composables --> c_drag["useDragDrop.js"]
+    composables --> c_theme["useTheme.js"]
+    composables --> c_export["useExport.js"]
+    composables --> c_stream["useStreamingResponse.js"]
+    composables --> c_readme["README.md — composables documentation"]
+
+    stores --> s_index["index.js — store setup and exports"]
+    stores --> s_lh["lighthouseStore.js"]
+    stores --> s_settings["settingsStore.js"]
+    stores --> s_history["historyStore.js"]
+    stores --> s_readme["README.md — stores documentation"]
 ```
 
 ## Composables

@@ -14,6 +14,12 @@ const emit = defineEmits(['run', 'remove'])
 
 const PROVIDER_LABELS = {openai: 'OpenAI', anthropic: 'Claude', gemini: 'Gemini', ollama: 'Ollama'}
 
+const SENTIMENT = {
+  positive: {label: 'Positif', class: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'},
+  neutral: {label: 'Neutre', class: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'},
+  negative: {label: 'Négatif', class: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}
+}
+
 const showResponses = ref(false)
 </script>
 
@@ -89,6 +95,13 @@ const showResponses = ref(false)
               class="w-10 shrink-0 font-semibold"
           >
             {{ stats.byProvider[provider].latest.shareOfVoice !== null ? stats.byProvider[provider].latest.shareOfVoice + '%' : '—' }}
+          </span>
+          <span
+              v-if="SENTIMENT[stats.byProvider[provider].latest.sentiment]"
+              :class="SENTIMENT[stats.byProvider[provider].latest.sentiment].class"
+              class="px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0"
+          >
+            {{ SENTIMENT[stats.byProvider[provider].latest.sentiment].label }}
           </span>
           <Sparkline
               v-if="stats.byProvider[provider].sparkline.length > 1"

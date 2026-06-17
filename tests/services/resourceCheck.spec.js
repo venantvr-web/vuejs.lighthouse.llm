@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {
+    extractSitemapLocs,
     originFromUrl,
     parseSitemapsFromRobots,
     parseSitemapUrls,
@@ -60,6 +61,23 @@ describe('services/resourceCheck - pure helpers', () => {
 
         it('handles empty input', () => {
             expect(parseSitemapUrls('')).toEqual({type: 'unknown', count: 0})
+        })
+    })
+
+    describe('extractSitemapLocs', () => {
+        it('extracts and trims <loc> URLs', () => {
+            const xml = '<urlset><url><loc> https://x.com/a </loc></url><url><loc>https://x.com/b</loc></url></urlset>'
+            expect(extractSitemapLocs(xml)).toEqual(['https://x.com/a', 'https://x.com/b'])
+        })
+
+        it('decodes XML entities (notably &amp;)', () => {
+            const xml = '<urlset><url><loc>https://x.com/?a=1&amp;b=2</loc></url></urlset>'
+            expect(extractSitemapLocs(xml)).toEqual(['https://x.com/?a=1&b=2'])
+        })
+
+        it('returns empty for no locs', () => {
+            expect(extractSitemapLocs('<urlset></urlset>')).toEqual([])
+            expect(extractSitemapLocs('')).toEqual([])
         })
     })
 })

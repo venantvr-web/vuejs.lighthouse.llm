@@ -7,6 +7,7 @@
  */
 
 const PROXY = 'http://localhost:3001/api/fetch-page'
+const STATUS_PROXY = 'http://localhost:3001/api/check-url'
 
 /**
  * Derive the origin (scheme + host) from a user-supplied URL.
@@ -65,6 +66,57 @@ export function parseSitemapUrls(xml) {
     const count = (xml.match(/<loc>/gi) || []).length
     const type = /<sitemapindex/i.test(xml) ? 'index' : (/<urlset/i.test(xml) ? 'urlset' : 'unknown')
     return {type, count}
+}
+
+/**
+ * Decode the handful of XML entities that appear in sitemap <loc> values.
+ * @param {string} value - Raw value
+ * @returns {string}
+ */
+function unescapeXml(value) {
+    return value
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#0?39;|&apos;/g, "'")
+}
+
+/**
+ * Extract the list of URLs from a sitemap's <loc> tags.
+ * For a urlset these are pages; for an index they are child sitemaps.
+ * @param {string} xml - Sitemap XML
+ * @returns {string[]} URLs
+ */
+export function extractSitemapLocs(xml) {
+    if (!xml) return []
+    const out = []
+    const regex = /<loc>\s*([^<]+?)\s*<\/loc>/gi
+    let match
+    while ((match = regex.exec(xml)) !== null) {
+        out.push(unescapeXml(match[1].trim()))
+    }
+    return out
+}
+
+/**
+ * Check the HTTP status of a URL via the local proxy (for 404 detection).
+ * @param {string} url - URL to check
+ * @returns {Promise<{url: string, ok: boolean, status: number}>}
+ */
+export async function checkUrlStatus(url) {
+    try {
+        const response = await fetch(STATUS_PROXY, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url})
+        })
+        if (!response.ok) return {url, ok: false, status: response.status}
+        const data = await response.json()
+        return {url, ok: !!data.ok, status: data.status ?? 0}
+    } catch {
+        return {url, ok: false, status: 0}
+    }
 }
 
 /**

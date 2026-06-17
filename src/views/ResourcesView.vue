@@ -1,27 +1,58 @@
 <script setup>
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useResourceCheck} from '@/composables/useResourceCheck'
 import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
-import {computeGeoReadiness} from '@/services/resourceCheck'
-import {getScoreColorClass} from '@/utils/formatters'
+import {computeGeoReadiness, detectResourceChanges} from '@/services/resourceCheck'
+import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
+import {useNotifications} from '@/composables/useNotifications'
+import {snapshotSeries} from '@/composables/useSearchConsole'
+import {buildBrokenUrlsCsv} from '@/utils/exporters'
+import {downloadText} from '@/utils/download'
+import {formatDateISO, getScoreColorClass} from '@/utils/formatters'
+import Sparkline from '@/components/common/Sparkline.vue'
 
 const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
+const history = useResourceHistoryStore()
+const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 
 const url = ref('')
 const crawledSitemap = ref('')
+const readinessTrend = ref([])
 
 const brokenPages = computed(() => pages.value.filter(p => !p.ok))
 const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value, {jsonLd: jsonLd.value.present}))
 
-function handleCheck() {
-  crawledSitemap.value = ''
-  check(url.value)
+onMounted(() => history.initialize())
+
+async function saveSnapshotAndAlert(snapshot) {
+  const previous = (await history.getSnapshots(snapshot.origin))[0] || null
+  await history.addSnapshot(snapshot)
+  const changes = detectResourceChanges(snapshot, previous)
+  if (changes.length && notificationPermission.value === 'granted') {
+    notify(`Ressources — ${snapshot.origin}`, {body: changes.join('\n'), tag: `resources-${snapshot.origin}`})
+  }
+  readinessTrend.value = snapshotSeries(await history.getSnapshots(snapshot.origin), 'readiness')
 }
 
-function handleCrawl(sitemapUrl) {
+async function handleCheck() {
+  crawledSitemap.value = ''
+  readinessTrend.value = []
+  await check(url.value)
+  if (!origin.value) return
+  await saveSnapshotAndAlert({origin: origin.value, readiness: readiness.value.score, brokenCount: null})
+}
+
+async function handleCrawl(sitemapUrl) {
   crawledSitemap.value = sitemapUrl
-  crawl(sitemapUrl)
+  await crawl(sitemapUrl)
+  if (origin.value) {
+    await saveSnapshotAndAlert({origin: origin.value, readiness: readiness.value.score, brokenCount: brokenPages.value.length})
+  }
+}
+
+function exportBrokenCsv() {
+  downloadText(`urls-cassees-${formatDateISO()}.csv`, buildBrokenUrlsCsv(pages.value), 'text/csv;charset=utf-8')
 }
 </script>
 
@@ -30,22 +61,32 @@ function handleCrawl(sitemapUrl) {
     <!-- Header -->
     <header class="border-b border-gray-200 dark:border-gray-800">
       <div class="max-w-5xl mx-auto px-4 py-6">
-        <div class="flex items-center gap-3">
-          <router-link
-              class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title="Accueil"
-              to="/"
-          >
-            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </router-link>
-          <div>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Ressources SEO/GEO</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Disponibilité de robots.txt, sitemaps, llms.txt…
-            </p>
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <router-link
+                class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Accueil"
+                to="/"
+            >
+              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </router-link>
+            <div>
+              <h1 class="text-xl font-bold text-gray-900 dark:text-white">Ressources SEO/GEO</h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Disponibilité de robots.txt, sitemaps, llms.txt…
+              </p>
+            </div>
           </div>
+          <button
+              v-if="notificationsSupported && notificationPermission !== 'granted'"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+              title="Être alerté en cas de baisse du score ou de nouvelles URL cassées"
+              @click="requestPermission"
+          >
+            Activer les alertes
+          </button>
         </div>
       </div>
     </header>
@@ -83,6 +124,7 @@ function handleCrawl(sitemapUrl) {
           <div>
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Score GEO-readiness</p>
             <p :class="getScoreColorClass(readiness.score / 100)" class="text-4xl font-bold leading-tight">{{ readiness.score }}</p>
+            <Sparkline v-if="readinessTrend.length > 1" :values="readinessTrend" :width="120" class="mt-1" color="#6366f1"/>
           </div>
           <ul class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
             <li v-for="s in readiness.signals" :key="s.label" class="flex items-center gap-2 text-sm">
@@ -101,6 +143,12 @@ function handleCrawl(sitemapUrl) {
                 class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
             >{{ t }}</span>
           </div>
+          <!-- Validation issues -->
+          <ul v-if="jsonLd.issues.length" class="mt-2 space-y-0.5">
+            <li v-for="(issue, i) in jsonLd.issues" :key="i" class="text-[11px] text-amber-600 dark:text-amber-400">
+              {{ issue.type }} : champ(s) manquant(s) — {{ issue.missing.join(', ') }}
+            </li>
+          </ul>
         </div>
       </div>
 
@@ -188,8 +236,14 @@ function handleCrawl(sitemapUrl) {
           </div>
 
           <div v-if="brokenPages.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-            <div class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-              URL cassées
+            <div class="px-4 py-2 flex items-center justify-between border-b border-gray-100 dark:border-gray-700">
+              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">URL cassées</span>
+              <button
+                  class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
+                  @click="exportBrokenCsv"
+              >
+                Export CSV
+              </button>
             </div>
             <table class="w-full text-sm">
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700">

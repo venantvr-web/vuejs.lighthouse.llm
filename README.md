@@ -24,7 +24,7 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
   - **comparaison inter-moteurs**, courbe de tendance, **alertes** et **export** (CSV / Markdown).
 - **Plan d'action priorisé** : les opportunités Lighthouse sont transformées en tickets triés par **impact / effort**, avec génération de correctifs (extraits de code) par l'IA.
 - **Search Console** : connexion **OAuth navigateur** (BYO Client ID) pour les **données de recherche réelles** (requêtes, clics, impressions, CTR, position), avec **historisation** et tendance des clics.
-- **Ressources SEO/GEO** : disponibilité de **robots.txt**, **sitemaps** (et nombre d'URL), **llms.txt** / **llms-full.txt** ; **crawl du sitemap** avec **détection des 404** ; détection des **données structurées JSON-LD** ; **score de GEO-readiness** combinant ces signaux (via le serveur local pour contourner le CORS).
+- **Ressources SEO/GEO** : disponibilité de **robots.txt**, **sitemaps** (et nombre d'URL), **llms.txt** / **llms-full.txt** ; **crawl du sitemap** avec **détection des 404** et **export CSV** ; détection et **validation des données structurées JSON-LD** (champs recommandés par type) ; **score de GEO-readiness** combinant ces signaux, **historisé** avec tendance et **alertes** (baisse de score, nouvelles URL cassées). Via le serveur local pour contourner le CORS.
 - **Export** : Markdown, PDF, CSV comparatif (GEO / Watchlist), et sauvegarde / restauration de l'historique au format JSON.
 - **PWA** : installable sur le bureau ou le mobile, fonctionne hors-ligne sur les données déjà stockées.
 

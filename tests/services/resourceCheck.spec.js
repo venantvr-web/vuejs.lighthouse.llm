@@ -1,13 +1,15 @@
 import {describe, expect, it} from 'vitest'
 import {
     computeGeoReadiness,
+    detectResourceChanges,
     extractJsonLd,
     extractSitemapLocs,
     jsonLdTypes,
     originFromUrl,
     parseSitemapsFromRobots,
     parseSitemapUrls,
-    standardResources
+    standardResources,
+    validateJsonLd
 } from '@/services/resourceCheck'
 
 describe('services/resourceCheck - pure helpers', () => {
@@ -164,6 +166,39 @@ describe('services/resourceCheck - pure helpers', () => {
 
         it('handles no types', () => {
             expect(jsonLdTypes([{name: 'x'}])).toEqual([])
+        })
+    })
+
+    describe('validateJsonLd', () => {
+        it('flags missing recommended fields for a known type', () => {
+            const issues = validateJsonLd([{'@type': 'Organization', name: 'Acme'}])
+            expect(issues).toEqual([{type: 'Organization', missing: ['url', 'logo']}])
+        })
+
+        it('reports nothing when all recommended fields are present', () => {
+            const issues = validateJsonLd([{'@type': 'WebSite', name: 'X', url: 'https://x.com'}])
+            expect(issues).toEqual([])
+        })
+
+        it('ignores unknown types', () => {
+            expect(validateJsonLd([{'@type': 'Thingamajig'}])).toEqual([])
+        })
+    })
+
+    describe('detectResourceChanges', () => {
+        it('flags a readiness drop', () => {
+            const changes = detectResourceChanges({readiness: 60, brokenCount: 0}, {readiness: 80, brokenCount: 0})
+            expect(changes.some(c => c.includes('baisse'))).toBe(true)
+        })
+
+        it('flags new broken URLs', () => {
+            const changes = detectResourceChanges({readiness: 80, brokenCount: 5}, {readiness: 80, brokenCount: 2})
+            expect(changes.some(c => c.includes('cassées'))).toBe(true)
+        })
+
+        it('returns nothing without a previous snapshot or when stable', () => {
+            expect(detectResourceChanges({readiness: 80, brokenCount: 0}, null)).toEqual([])
+            expect(detectResourceChanges({readiness: 80, brokenCount: 0}, {readiness: 80, brokenCount: 0})).toEqual([])
         })
     })
 })

@@ -6,7 +6,8 @@ import {
     originFromUrl,
     parseSitemapUrls,
     parseSitemapsFromRobots,
-    standardResources
+    standardResources,
+    validateJsonLd
 } from '@/services/resourceCheck'
 
 /**
@@ -19,7 +20,7 @@ export function useResourceCheck() {
     const origin = ref('')
     const resources = ref([])
     const sitemaps = ref([])
-    const jsonLd = ref({present: false, types: []})
+    const jsonLd = ref({present: false, types: [], issues: []})
 
     /**
      * Run all checks for a URL.
@@ -36,7 +37,7 @@ export function useResourceCheck() {
         origin.value = site
         resources.value = []
         sitemaps.value = []
-        jsonLd.value = {present: false, types: []}
+        jsonLd.value = {present: false, types: [], issues: []}
 
         try {
             // Standard resources + homepage (for JSON-LD detection), in parallel
@@ -48,8 +49,9 @@ export function useResourceCheck() {
 
             // Structured data on the homepage
             if (home.available) {
-                const types = jsonLdTypes(extractJsonLd(home.content))
-                jsonLd.value = {present: types.length > 0, types}
+                const blocks = extractJsonLd(home.content)
+                const types = jsonLdTypes(blocks)
+                jsonLd.value = {present: types.length > 0, types, issues: validateJsonLd(blocks)}
             }
 
             // Collect sitemap URLs: those declared in robots.txt + standard ones found

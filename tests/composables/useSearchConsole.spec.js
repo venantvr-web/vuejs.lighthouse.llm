@@ -1,0 +1,46 @@
+import {describe, expect, it} from 'vitest'
+import {dateRangeISO, normalizeRow, summarizeRows} from '@/composables/useSearchConsole'
+
+describe('useSearchConsole - pure helpers', () => {
+    describe('dateRangeISO', () => {
+        it('ends 2 days before the reference date (data lag)', () => {
+            const {endDate} = dateRangeISO(28, new Date('2026-01-31T00:00:00Z'))
+            expect(endDate).toBe('2026-01-29')
+        })
+
+        it('spans the requested number of days inclusively', () => {
+            const {startDate, endDate} = dateRangeISO(7, new Date('2026-01-31T00:00:00Z'))
+            expect(endDate).toBe('2026-01-29')
+            expect(startDate).toBe('2026-01-23') // 7-day window: 23 → 29
+        })
+    })
+
+    describe('normalizeRow', () => {
+        it('flattens the first key and fills defaults', () => {
+            expect(normalizeRow({keys: ['vue seo'], clicks: 5, impressions: 100, ctr: 0.05, position: 3.2}))
+                .toEqual({key: 'vue seo', clicks: 5, impressions: 100, ctr: 0.05, position: 3.2})
+        })
+
+        it('handles missing fields', () => {
+            expect(normalizeRow({})).toEqual({key: '', clicks: 0, impressions: 0, ctr: 0, position: 0})
+        })
+    })
+
+    describe('summarizeRows', () => {
+        it('sums clicks/impressions and weights ctr & position by impressions', () => {
+            const rows = [
+                {keys: ['a'], clicks: 10, impressions: 100, ctr: 0.1, position: 2},
+                {keys: ['b'], clicks: 5, impressions: 100, ctr: 0.05, position: 4}
+            ]
+            const s = summarizeRows(rows)
+            expect(s.clicks).toBe(15)
+            expect(s.impressions).toBe(200)
+            expect(s.ctr).toBeCloseTo(0.075)   // 15 / 200
+            expect(s.position).toBeCloseTo(3)  // (2*100 + 4*100) / 200
+        })
+
+        it('returns zeros for no rows', () => {
+            expect(summarizeRows([])).toEqual({clicks: 0, impressions: 0, ctr: 0, position: 0})
+        })
+    })
+})

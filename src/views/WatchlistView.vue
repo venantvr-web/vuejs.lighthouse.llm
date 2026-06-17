@@ -8,18 +8,12 @@ import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters
 import WatchlistCard from '@/components/history/WatchlistCard.vue'
 import {buildWatchlistCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
+import {breachedCategories as computeBreached} from '@/utils/budgets'
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
 const {statsById, refreshingById, errorById, loadStats, loadItemStats, refreshItem} = useWatchlist()
 const {isSupported: notificationsSupported, permission: notificationPermission, requestPermission, notify} = useNotifications()
-
-const CATEGORIES = [
-  {id: 'performance', label: 'Perf.'},
-  {id: 'accessibility', label: 'A11y'},
-  {id: 'best-practices', label: 'Pratiques'},
-  {id: 'seo', label: 'SEO'}
-]
 
 const CATEGORY_LABELS = {
   performance: 'Performance',
@@ -39,17 +33,9 @@ function handleSetBudget(item, {category, value}) {
   watchlistStore.setBudget(item.id, category, value)
 }
 
-// Categories of a card whose latest score is below its configured budget
+// Categories of an item whose latest score is below its configured budget
 function breachedCategories(item) {
-  const latest = statsById.value[item.id]?.latest
-  if (!latest?.scores || !item.budgets) return []
-  return CATEGORIES
-      .filter(cat => {
-        const budget = item.budgets[cat.id]
-        const score = latest.scores[cat.id]
-        return typeof budget === 'number' && typeof score === 'number' && Math.round(score * 100) < budget
-      })
-      .map(cat => cat.id)
+  return computeBreached(item.budgets, statsById.value[item.id]?.latest?.scores)
 }
 
 // Add form state

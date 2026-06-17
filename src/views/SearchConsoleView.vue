@@ -1,0 +1,181 @@
+<script setup>
+import {computed, ref} from 'vue'
+import {useSettingsStore} from '@/stores/settingsStore'
+import {summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {formatNumber} from '@/utils/formatters'
+
+const settings = useSettingsStore()
+const {connected, loading, error, sites, connect, disconnect, query} = useSearchConsole()
+
+const selectedSite = ref('')
+const days = ref(28)
+const dimension = ref('query')
+const rows = ref([])
+
+const summary = computed(() => summarizeRows(rows.value))
+
+function onClientIdInput(event) {
+  settings.setSearchConsoleClientId(event.target.value)
+}
+
+async function handleConnect() {
+  await connect(settings.searchConsoleClientId)
+  if (sites.value.length && !selectedSite.value) selectedSite.value = sites.value[0]
+}
+
+async function handleQuery() {
+  if (!selectedSite.value) return
+  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], rowLimit: 50})
+}
+
+function formatPercent(ctr) {
+  return `${(ctr * 100).toFixed(1)}%`
+}
+
+function formatPosition(p) {
+  return p ? p.toFixed(1) : '—'
+}
+</script>
+
+<template>
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-gray-200 dark:border-gray-800">
+      <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="flex items-center gap-3">
+          <router-link
+              class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Accueil"
+              to="/"
+          >
+            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+          </router-link>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Search Console</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Données de recherche réelles (requêtes, clics, impressions, position)
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+      <!-- Connection -->
+      <div v-if="!connected" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
+        <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">Connexion à Google Search Console</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Renseignez un <strong>Client ID OAuth 2.0</strong> (type « Application Web ») dont l'origine autorisée
+          est celle de ce site. L'API Search Console doit être activée. Le jeton d'accès reste en mémoire,
+          rien n'est stocké côté serveur.
+        </p>
+        <div class="flex flex-col md:flex-row gap-3">
+          <input
+              :value="settings.searchConsoleClientId"
+              class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              placeholder="xxxxxxxx.apps.googleusercontent.com"
+              type="text"
+              @input="onClientIdInput"
+          />
+          <button
+              :disabled="loading || !settings.searchConsoleClientId"
+              class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              @click="handleConnect"
+          >
+            {{ loading ? 'Connexion…' : 'Se connecter' }}
+          </button>
+        </div>
+        <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
+      </div>
+
+      <!-- Connected controls -->
+      <template v-else>
+        <div class="flex flex-wrap items-end gap-3 mb-6">
+          <label class="text-xs text-gray-600 dark:text-gray-300">
+            <span class="block mb-1">Site</span>
+            <select v-model="selectedSite" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
+              <option v-for="site in sites" :key="site" :value="site">{{ site }}</option>
+            </select>
+          </label>
+          <label class="text-xs text-gray-600 dark:text-gray-300">
+            <span class="block mb-1">Période</span>
+            <select v-model.number="days" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
+              <option :value="7">7 jours</option>
+              <option :value="28">28 jours</option>
+              <option :value="90">90 jours</option>
+            </select>
+          </label>
+          <label class="text-xs text-gray-600 dark:text-gray-300">
+            <span class="block mb-1">Dimension</span>
+            <select v-model="dimension" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
+              <option value="query">Requêtes</option>
+              <option value="page">Pages</option>
+            </select>
+          </label>
+          <button
+              :disabled="loading || !selectedSite"
+              class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              @click="handleQuery"
+          >
+            {{ loading ? 'Chargement…' : 'Analyser' }}
+          </button>
+          <button class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm" @click="disconnect">
+            Déconnexion
+          </button>
+        </div>
+
+        <p v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</p>
+
+        <!-- Summary -->
+        <div v-if="rows.length" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Clics</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatNumber(summary.clicks) }}</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Impressions</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatNumber(summary.impressions) }}</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">CTR moyen</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPercent(summary.ctr) }}</p>
+          </div>
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Position moy.</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPosition(summary.position) }}</p>
+          </div>
+        </div>
+
+        <!-- Rows table -->
+        <div v-if="rows.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400">
+            <tr>
+              <th class="text-left font-medium px-4 py-2">{{ dimension === 'page' ? 'Page' : 'Requête' }}</th>
+              <th class="text-right font-medium px-4 py-2">Clics</th>
+              <th class="text-right font-medium px-4 py-2">Impr.</th>
+              <th class="text-right font-medium px-4 py-2">CTR</th>
+              <th class="text-right font-medium px-4 py-2">Position</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+            <tr v-for="row in rows" :key="row.key">
+              <td class="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs" :title="row.key">{{ row.key }}</td>
+              <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatNumber(row.clicks) }}</td>
+              <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatNumber(row.impressions) }}</td>
+              <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatPercent(row.ctr) }}</td>
+              <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatPosition(row.position) }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-else-if="!loading" class="text-center py-16 text-sm text-gray-500 dark:text-gray-400">
+          Choisissez un site et cliquez sur « Analyser ».
+        </div>
+      </template>
+    </main>
+  </div>
+</template>

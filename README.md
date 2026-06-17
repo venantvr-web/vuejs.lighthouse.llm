@@ -21,6 +21,8 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
   - **prompts cibles** + marque + concurrents, interrogés sur **plusieurs moteurs en parallèle** (OpenAI, Claude, Gemini, Ollama) ;
   - mesure par moteur : **marque citée**, **position** et **part de voix** face aux concurrents ;
   - **comparaison inter-moteurs**, courbe de tendance et **alertes** quand la visibilité change.
+- **Plan d'action priorisé** : les opportunités Lighthouse sont transformées en tickets triés par **impact / effort**, avec génération de correctifs (extraits de code) par l'IA.
+- **Search Console** : connexion **OAuth navigateur** (BYO Client ID) pour afficher les **données de recherche réelles** (requêtes, clics, impressions, CTR, position).
 - **Export** : Markdown, PDF, et sauvegarde / restauration de l'historique au format JSON.
 - **PWA** : installable sur le bureau ou le mobile, fonctionne hors-ligne sur les données déjà stockées.
 
@@ -242,6 +244,16 @@ graph TD
 ```
 
 ---
+
+## 🔎 Search Console (configuration)
+
+La connexion se fait **dans le navigateur** (aucun secret côté serveur). Prérequis :
+
+1. Dans **Google Cloud Console**, activer l'**API Search Console**.
+2. Créer un **ID client OAuth 2.0** de type « Application Web » et ajouter l'origine du site (ex. `https://mon-site.pages.dev`) aux **origines JavaScript autorisées**.
+3. Coller cet ID client dans l'écran **Search Console** de l'application, puis se connecter.
+
+Le jeton d'accès reste **en mémoire** (jamais persisté). Seul l'ID client est conservé localement.
 
 ## 🧪 Tests
 

@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {
+    computeGeoReadiness,
     extractSitemapLocs,
     originFromUrl,
     parseSitemapsFromRobots,
@@ -78,6 +79,49 @@ describe('services/resourceCheck - pure helpers', () => {
         it('returns empty for no locs', () => {
             expect(extractSitemapLocs('<urlset></urlset>')).toEqual([])
             expect(extractSitemapLocs('')).toEqual([])
+        })
+    })
+
+    describe('computeGeoReadiness', () => {
+        it('scores 0 when nothing is available', () => {
+            const resources = [
+                {key: 'robots', available: false},
+                {key: 'llms', available: false},
+                {key: 'llms_full', available: false}
+            ]
+            expect(computeGeoReadiness(resources, []).score).toBe(0)
+        })
+
+        it('scores 100 when every signal is present', () => {
+            const resources = [
+                {key: 'robots', available: true},
+                {key: 'llms', available: true},
+                {key: 'llms_full', available: true}
+            ]
+            const sitemaps = [{available: true, count: 42}]
+            const {score, signals} = computeGeoReadiness(resources, sitemaps)
+            expect(score).toBe(100)
+            expect(signals.every(s => s.ok)).toBe(true)
+        })
+
+        it('counts a sitemap available via the standard resource fallback', () => {
+            const resources = [
+                {key: 'robots', available: false},
+                {key: 'sitemap', available: true},
+                {key: 'llms', available: false},
+                {key: 'llms_full', available: false}
+            ]
+            // sitemap signal (30) only
+            expect(computeGeoReadiness(resources, []).score).toBe(30)
+        })
+
+        it('weights llms.txt at 30', () => {
+            const resources = [
+                {key: 'robots', available: false},
+                {key: 'llms', available: true},
+                {key: 'llms_full', available: false}
+            ]
+            expect(computeGeoReadiness(resources, []).score).toBe(30)
         })
     })
 })

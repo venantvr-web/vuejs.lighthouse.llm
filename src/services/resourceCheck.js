@@ -100,6 +100,28 @@ export function extractSitemapLocs(xml) {
 }
 
 /**
+ * Compute a GEO-readiness score (0-100) from resource checks.
+ * Weights favour the signals that matter for generative engines.
+ * @param {Array} resources - Standard resource results (with key + available)
+ * @param {Array} sitemaps - Inspected sitemaps (with available + count)
+ * @returns {{score: number, signals: Array<{label: string, ok: boolean, weight: number}>}}
+ */
+export function computeGeoReadiness(resources = [], sitemaps = []) {
+    const byKey = Object.fromEntries(resources.map(r => [r.key, r]))
+    const hasSitemap = sitemaps.some(s => s.available && s.count > 0)
+        || !!(byKey.sitemap?.available || byKey.sitemap_index?.available)
+
+    const signals = [
+        {label: 'robots.txt présent', ok: !!byKey.robots?.available, weight: 20},
+        {label: 'Sitemap disponible avec des URL', ok: hasSitemap, weight: 30},
+        {label: 'llms.txt présent', ok: !!byKey.llms?.available, weight: 30},
+        {label: 'llms-full.txt présent', ok: !!byKey.llms_full?.available, weight: 20}
+    ]
+    const score = signals.reduce((sum, s) => sum + (s.ok ? s.weight : 0), 0)
+    return {score, signals}
+}
+
+/**
  * Check the HTTP status of a URL via the local proxy (for 404 detection).
  * @param {string} url - URL to check
  * @returns {Promise<{url: string, ok: boolean, status: number}>}

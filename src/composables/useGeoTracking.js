@@ -1,7 +1,8 @@
 import {ref} from 'vue'
-import LLMProviderFactory from '@/services/llm/LLMProviderFactory'
+import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {toSeries} from '@/utils/series'
 
 // A drop of 15 share-of-voice points between runs counts as a notable change.
 const SOV_DROP_THRESHOLD = 15
@@ -229,11 +230,7 @@ export function groupRunsByProvider(runs) {
     for (const provider of providers) {
         const list = grouped[provider] // newest first
         const latest = list[0]
-        const sparkline = [...list]
-            .reverse()
-            .map(r => (typeof r.shareOfVoice === 'number' ? r.shareOfVoice : null))
-            .filter(v => v !== null)
-            .slice(-12)
+        const sparkline = toSeries(list, r => (typeof r.shareOfVoice === 'number' ? r.shareOfVoice : null))
 
         byProvider[provider] = {latest, previous: list[1] || null, sparkline, lastRunAt: latest.timestamp}
 
@@ -259,25 +256,6 @@ export function groupRunsByProvider(runs) {
     return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, lastRunAt}
 }
 
-/**
- * Build a configured LLM provider for a given GEO provider descriptor.
- * @param {object} settings - settings store
- * @param {{id: string, model: string}} descriptor - provider id + model
- * @returns {import('@/services/llm/BaseLLMProvider').default}
- */
-function buildProviderFor(settings, descriptor) {
-    const cfg = {
-        model: descriptor.model,
-        temperature: settings.temperature,
-        maxTokens: settings.maxTokens
-    }
-    if (descriptor.id === 'ollama') {
-        cfg.baseURL = settings.ollamaBaseUrl
-    } else {
-        cfg.apiKey = settings.providerKeys[descriptor.id]
-    }
-    return LLMProviderFactory.create(descriptor.id, cfg)
-}
 
 /**
  * Composable for GEO tracking: run tracked prompts against the configured LLM
@@ -332,7 +310,7 @@ export function useGeoTracking() {
         const prevByProvider = statsById.value[item.id]?.byProvider || {}
 
         const results = await Promise.allSettled(providers.map(async (descriptor) => {
-            const provider = buildProviderFor(settings, descriptor)
+            const provider = buildLLMProvider(settings, descriptor.id, descriptor.model)
             const answer = await provider.send(item.prompt)
             const analysis = analyzeResponse(answer, item.brand, item.competitors)
 

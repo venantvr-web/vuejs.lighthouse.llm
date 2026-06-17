@@ -17,6 +17,9 @@ export const useSettingsStore = defineStore('settings', () => {
     // State - Per-provider API keys (enables multi-provider GEO tracking)
     const providerKeys = ref({openai: '', anthropic: '', gemini: ''})
 
+    // State - Google Search Console OAuth client id (BYO, browser OAuth)
+    const searchConsoleClientId = ref('')
+
     // State - Ollama Configuration
     const ollamaBaseUrl = ref('http://localhost:11434')
     const ollamaModel = ref('llama3.2')
@@ -166,6 +169,15 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     /**
+     * Set the Google Search Console OAuth client id.
+     * @param {string} id - OAuth 2.0 Web client id
+     */
+    function setSearchConsoleClientId(id) {
+        searchConsoleClientId.value = (id || '').trim()
+        saveSettings()
+    }
+
+    /**
      * Set temperature
      * @param {number} temp - Temperature value (0-2)
      */
@@ -271,6 +283,7 @@ export const useSettingsStore = defineStore('settings', () => {
                 llmModel: llmModel.value,
                 apiKey: apiKey.value,
                 providerKeys: providerKeys.value,
+                searchConsoleClientId: searchConsoleClientId.value,
                 temperature: temperature.value,
                 maxTokens: maxTokens.value,
                 ollamaBaseUrl: ollamaBaseUrl.value,
@@ -300,6 +313,7 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.llmModel) llmModel.value = settings.llmModel
             if (settings.apiKey !== undefined) apiKey.value = settings.apiKey
             if (settings.providerKeys) providerKeys.value = {...providerKeys.value, ...settings.providerKeys}
+            if (settings.searchConsoleClientId) searchConsoleClientId.value = settings.searchConsoleClientId
             if (settings.temperature !== undefined) temperature.value = settings.temperature
             if (settings.maxTokens !== undefined) maxTokens.value = settings.maxTokens
             if (settings.ollamaBaseUrl) ollamaBaseUrl.value = settings.ollamaBaseUrl
@@ -348,7 +362,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Auto-save on changes
     watch(
-        [llmProvider, llmModel, apiKey, providerKeys, temperature, maxTokens,
+        [llmProvider, llmModel, apiKey, providerKeys, searchConsoleClientId, temperature, maxTokens,
             ollamaBaseUrl, ollamaModel, theme, showLineNumbers,
             autoAnalyze, saveHistory],
         () => {
@@ -366,6 +380,7 @@ export const useSettingsStore = defineStore('settings', () => {
         llmModel,
         apiKey,
         providerKeys,
+        searchConsoleClientId,
         temperature,
         maxTokens,
         ollamaBaseUrl,
@@ -388,6 +403,7 @@ export const useSettingsStore = defineStore('settings', () => {
         setLLMModel,
         setAPIKey,
         setProviderKey,
+        setSearchConsoleClientId,
         setTemperature,
         setMaxTokens,
         setOllamaBaseUrl,

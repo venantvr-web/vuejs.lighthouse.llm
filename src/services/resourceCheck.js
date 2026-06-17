@@ -83,6 +83,26 @@ function unescapeXml(value) {
 }
 
 /**
+ * Detect notable changes between two resource snapshots (for alerting).
+ * @param {object} latest - Latest snapshot ({ readiness, brokenCount })
+ * @param {object} previous - Previous snapshot (may be null)
+ * @returns {string[]} Human-readable change messages
+ */
+export function detectResourceChanges(latest, previous) {
+    const changes = []
+    if (!previous) return changes
+    if (typeof latest.readiness === 'number' && typeof previous.readiness === 'number'
+        && latest.readiness < previous.readiness) {
+        changes.push(`Score GEO-readiness en baisse : ${previous.readiness} → ${latest.readiness}`)
+    }
+    if (typeof latest.brokenCount === 'number' && typeof previous.brokenCount === 'number'
+        && latest.brokenCount > previous.brokenCount) {
+        changes.push(`Nouvelles URL cassées : ${previous.brokenCount} → ${latest.brokenCount}`)
+    }
+    return changes
+}
+
+/**
  * Extract the list of URLs from a sitemap's <loc> tags.
  * For a urlset these are pages; for an index they are child sitemaps.
  * @param {string} xml - Sitemap XML
@@ -121,13 +141,13 @@ export function extractJsonLd(html) {
 }
 
 /**
- * Collect the distinct @type values from JSON-LD blocks (handles arrays and
+ * Flatten JSON-LD blocks into the type-bearing nodes (handles arrays and
  * @graph nesting).
  * @param {Array<object>} blocks - Parsed JSON-LD objects
- * @returns {string[]} Distinct schema.org types
+ * @returns {Array<object>} Nodes carrying an @type
  */
-export function jsonLdTypes(blocks = []) {
-    const types = new Set()
+export function jsonLdNodes(blocks = []) {
+    const nodes = []
     const visit = (node) => {
         if (!node || typeof node !== 'object') return
         if (Array.isArray(node)) {
@@ -135,12 +155,60 @@ export function jsonLdTypes(blocks = []) {
             return
         }
         if (node['@graph']) visit(node['@graph'])
+        if (node['@type']) nodes.push(node)
+    }
+    blocks.forEach(visit)
+    return nodes
+}
+
+/**
+ * Collect the distinct @type values from JSON-LD blocks.
+ * @param {Array<object>} blocks - Parsed JSON-LD objects
+ * @returns {string[]} Distinct schema.org types
+ */
+export function jsonLdTypes(blocks = []) {
+    const types = new Set()
+    for (const node of jsonLdNodes(blocks)) {
         const t = node['@type']
         if (typeof t === 'string') types.add(t)
         else if (Array.isArray(t)) t.forEach(x => typeof x === 'string' && types.add(x))
     }
-    blocks.forEach(visit)
     return [...types]
+}
+
+/**
+ * Recommended properties per common schema.org type (for validation hints).
+ */
+const RECOMMENDED_FIELDS = {
+    Organization: ['name', 'url', 'logo'],
+    WebSite: ['name', 'url'],
+    WebPage: ['name'],
+    Article: ['headline', 'author', 'datePublished', 'image'],
+    NewsArticle: ['headline', 'author', 'datePublished', 'image'],
+    BlogPosting: ['headline', 'author', 'datePublished', 'image'],
+    Product: ['name', 'image', 'offers'],
+    BreadcrumbList: ['itemListElement'],
+    LocalBusiness: ['name', 'address', 'telephone'],
+    FAQPage: ['mainEntity']
+}
+
+/**
+ * Validate JSON-LD nodes against recommended fields for their @type.
+ * @param {Array<object>} blocks - Parsed JSON-LD objects
+ * @returns {Array<{type: string, missing: string[]}>} Issues (missing fields)
+ */
+export function validateJsonLd(blocks = []) {
+    const issues = []
+    for (const node of jsonLdNodes(blocks)) {
+        const types = Array.isArray(node['@type']) ? node['@type'] : [node['@type']]
+        for (const type of types) {
+            const required = RECOMMENDED_FIELDS[type]
+            if (!required) continue
+            const missing = required.filter(f => node[f] === undefined || node[f] === null || node[f] === '')
+            if (missing.length) issues.push({type, missing})
+        }
+    }
+    return issues
 }
 
 /**

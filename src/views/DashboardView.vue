@@ -2,10 +2,15 @@
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
+import ActionPlanPanel from '@/components/dashboard/ActionPlanPanel.vue'
+import {useLighthouseParser} from '@/composables/useLighthouseParser'
 
 const router = useRouter()
 const report = ref(null)
 const loading = ref(true)
+const parser = useLighthouseParser()
+
+const opportunities = computed(() => (report.value ? parser.getOpportunities(report.value) : []))
 
 onMounted(() => {
   const stored = localStorage.getItem('current-report')
@@ -175,6 +180,9 @@ const clearReport = () => {
           </div>
         </div>
       </section>
+
+      <!-- Prioritized action plan -->
+      <ActionPlanPanel :opportunities="opportunities" :url="url" class="mb-12"/>
 
       <!-- Quick actions -->
       <section>

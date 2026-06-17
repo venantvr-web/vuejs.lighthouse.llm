@@ -5,14 +5,14 @@ import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
 import {computeGeoReadiness} from '@/services/resourceCheck'
 import {getScoreColorClass} from '@/utils/formatters'
 
-const {checking, error, origin, resources, sitemaps, check} = useResourceCheck()
+const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
 
 const url = ref('')
 const crawledSitemap = ref('')
 
 const brokenPages = computed(() => pages.value.filter(p => !p.ok))
-const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value))
+const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value, {jsonLd: jsonLd.value.present}))
 
 function handleCheck() {
   crawledSitemap.value = ''
@@ -90,6 +90,17 @@ function handleCrawl(sitemapUrl) {
               <span :class="s.ok ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'">{{ s.label }}</span>
             </li>
           </ul>
+        </div>
+        <!-- Detected JSON-LD types -->
+        <div v-if="jsonLd.types.length" class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Types JSON-LD détectés (accueil)</p>
+          <div class="flex flex-wrap gap-1">
+            <span
+                v-for="t in jsonLd.types"
+                :key="t"
+                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
+            >{{ t }}</span>
+          </div>
         </div>
       </div>
 

@@ -100,22 +100,68 @@ export function extractSitemapLocs(xml) {
 }
 
 /**
+ * Extract and parse JSON-LD blocks from an HTML document.
+ * Invalid blocks are skipped.
+ * @param {string} html - HTML content
+ * @returns {Array<object>} Parsed JSON-LD objects
+ */
+export function extractJsonLd(html) {
+    if (!html) return []
+    const blocks = []
+    const regex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi
+    let match
+    while ((match = regex.exec(html)) !== null) {
+        try {
+            blocks.push(JSON.parse(match[1].trim()))
+        } catch {
+            // ignore malformed JSON-LD
+        }
+    }
+    return blocks
+}
+
+/**
+ * Collect the distinct @type values from JSON-LD blocks (handles arrays and
+ * @graph nesting).
+ * @param {Array<object>} blocks - Parsed JSON-LD objects
+ * @returns {string[]} Distinct schema.org types
+ */
+export function jsonLdTypes(blocks = []) {
+    const types = new Set()
+    const visit = (node) => {
+        if (!node || typeof node !== 'object') return
+        if (Array.isArray(node)) {
+            node.forEach(visit)
+            return
+        }
+        if (node['@graph']) visit(node['@graph'])
+        const t = node['@type']
+        if (typeof t === 'string') types.add(t)
+        else if (Array.isArray(t)) t.forEach(x => typeof x === 'string' && types.add(x))
+    }
+    blocks.forEach(visit)
+    return [...types]
+}
+
+/**
  * Compute a GEO-readiness score (0-100) from resource checks.
  * Weights favour the signals that matter for generative engines.
  * @param {Array} resources - Standard resource results (with key + available)
  * @param {Array} sitemaps - Inspected sitemaps (with available + count)
+ * @param {{jsonLd?: boolean}} options - Extra signals (structured data presence)
  * @returns {{score: number, signals: Array<{label: string, ok: boolean, weight: number}>}}
  */
-export function computeGeoReadiness(resources = [], sitemaps = []) {
+export function computeGeoReadiness(resources = [], sitemaps = [], options = {}) {
     const byKey = Object.fromEntries(resources.map(r => [r.key, r]))
     const hasSitemap = sitemaps.some(s => s.available && s.count > 0)
         || !!(byKey.sitemap?.available || byKey.sitemap_index?.available)
 
     const signals = [
-        {label: 'robots.txt présent', ok: !!byKey.robots?.available, weight: 20},
-        {label: 'Sitemap disponible avec des URL', ok: hasSitemap, weight: 30},
-        {label: 'llms.txt présent', ok: !!byKey.llms?.available, weight: 30},
-        {label: 'llms-full.txt présent', ok: !!byKey.llms_full?.available, weight: 20}
+        {label: 'robots.txt présent', ok: !!byKey.robots?.available, weight: 15},
+        {label: 'Sitemap disponible avec des URL', ok: hasSitemap, weight: 25},
+        {label: 'Données structurées JSON-LD', ok: !!options.jsonLd, weight: 20},
+        {label: 'llms.txt présent', ok: !!byKey.llms?.available, weight: 25},
+        {label: 'llms-full.txt présent', ok: !!byKey.llms_full?.available, weight: 15}
     ]
     const score = signals.reduce((sum, s) => sum + (s.ok ? s.weight : 0), 0)
     return {score, signals}

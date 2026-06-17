@@ -1,7 +1,9 @@
 import {describe, expect, it} from 'vitest'
 import {
     computeGeoReadiness,
+    extractJsonLd,
     extractSitemapLocs,
+    jsonLdTypes,
     originFromUrl,
     parseSitemapsFromRobots,
     parseSitemapUrls,
@@ -92,14 +94,14 @@ describe('services/resourceCheck - pure helpers', () => {
             expect(computeGeoReadiness(resources, []).score).toBe(0)
         })
 
-        it('scores 100 when every signal is present', () => {
+        it('scores 100 when every signal is present (incl. JSON-LD)', () => {
             const resources = [
                 {key: 'robots', available: true},
                 {key: 'llms', available: true},
                 {key: 'llms_full', available: true}
             ]
             const sitemaps = [{available: true, count: 42}]
-            const {score, signals} = computeGeoReadiness(resources, sitemaps)
+            const {score, signals} = computeGeoReadiness(resources, sitemaps, {jsonLd: true})
             expect(score).toBe(100)
             expect(signals.every(s => s.ok)).toBe(true)
         })
@@ -111,17 +113,57 @@ describe('services/resourceCheck - pure helpers', () => {
                 {key: 'llms', available: false},
                 {key: 'llms_full', available: false}
             ]
-            // sitemap signal (30) only
-            expect(computeGeoReadiness(resources, []).score).toBe(30)
+            // sitemap signal (25) only
+            expect(computeGeoReadiness(resources, []).score).toBe(25)
         })
 
-        it('weights llms.txt at 30', () => {
+        it('weights JSON-LD at 20', () => {
+            expect(computeGeoReadiness([], [], {jsonLd: true}).score).toBe(20)
+            expect(computeGeoReadiness([], [], {jsonLd: false}).score).toBe(0)
+        })
+
+        it('weights llms.txt at 25', () => {
             const resources = [
                 {key: 'robots', available: false},
                 {key: 'llms', available: true},
                 {key: 'llms_full', available: false}
             ]
-            expect(computeGeoReadiness(resources, []).score).toBe(30)
+            expect(computeGeoReadiness(resources, []).score).toBe(25)
+        })
+    })
+
+    describe('extractJsonLd', () => {
+        it('extracts and parses JSON-LD scripts', () => {
+            const html = `<html><head>
+                <script type="application/ld+json">{"@type":"Organization","name":"Acme"}</script>
+                <script type="application/ld+json">[{"@type":"WebSite"}]</script>
+            </head></html>`
+            const blocks = extractJsonLd(html)
+            expect(blocks).toHaveLength(2)
+            expect(blocks[0].name).toBe('Acme')
+        })
+
+        it('skips malformed JSON-LD', () => {
+            const html = '<script type="application/ld+json">{ not json }</script>'
+            expect(extractJsonLd(html)).toEqual([])
+        })
+
+        it('returns empty when none present', () => {
+            expect(extractJsonLd('<html></html>')).toEqual([])
+        })
+    })
+
+    describe('jsonLdTypes', () => {
+        it('collects distinct @type values across arrays and @graph', () => {
+            const blocks = [
+                {'@type': 'Organization'},
+                {'@graph': [{'@type': 'WebSite'}, {'@type': ['Article', 'NewsArticle']}]}
+            ]
+            expect(jsonLdTypes(blocks).sort()).toEqual(['Article', 'NewsArticle', 'Organization', 'WebSite'])
+        })
+
+        it('handles no types', () => {
+            expect(jsonLdTypes([{name: 'x'}])).toEqual([])
         })
     })
 })

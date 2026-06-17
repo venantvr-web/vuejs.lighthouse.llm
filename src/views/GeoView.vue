@@ -22,6 +22,7 @@ const addError = ref('')
 const runningAll = ref(false)
 const showKeyEditor = ref(false)
 const selectedProviderIds = ref([])
+const detectEmerging = ref(true)
 
 const items = computed(() => geoStore.sortedItems)
 const readyProviders = computed(() => settings.geoProviders.filter(p => p.ready))
@@ -88,7 +89,7 @@ function handleRemove(item) {
 }
 
 async function handleRun(item) {
-  const result = await runPrompt(item, activeProviders.value)
+  const result = await runPrompt(item, activeProviders.value, {detectEmerging: detectEmerging.value})
   if (result.success && result.changes.length && notificationPermission.value === 'granted') {
     notify(`GEO — ${item.brand}`, {body: result.changes.join('\n'), tag: `geo-${item.id}`})
   }
@@ -207,6 +208,10 @@ async function handleRunAll() {
         >
           {{ p.label }}
         </button>
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer" title="Un appel LLM supplémentaire par moteur pour lister les marques citées">
+          <input v-model="detectEmerging" class="rounded" type="checkbox"/>
+          Détecter les concurrents émergents
+        </label>
       </div>
 
       <!-- Add form -->

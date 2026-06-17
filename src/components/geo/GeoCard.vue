@@ -100,6 +100,21 @@ const showResponses = ref(false)
         </div>
       </div>
 
+      <!-- Emerging competitors -->
+      <div v-if="stats.emergingCompetitors?.length" class="mb-3">
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Concurrents émergents</p>
+        <div class="flex flex-wrap gap-1">
+          <span
+              v-for="c in stats.emergingCompetitors"
+              :key="c.name"
+              class="px-1.5 py-0.5 rounded text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
+              :title="`Cité par ${c.engines} moteur(s)`"
+          >
+            {{ c.name }}<span v-if="c.engines > 1" class="opacity-60"> · {{ c.engines }}</span>
+          </span>
+        </div>
+      </div>
+
       <!-- Response previews -->
       <button class="text-[11px] text-primary-500 hover:underline" @click="showResponses = !showResponses">
         {{ showResponses ? 'Masquer' : 'Voir' }} les réponses

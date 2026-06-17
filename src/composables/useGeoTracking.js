@@ -105,6 +105,58 @@ export function detectChanges(item, latest, previous) {
 }
 
 /**
+ * Build a prompt asking the model to extract the brand/product names it cited.
+ * @param {string} answer - The AI engine's answer
+ * @returns {string} Extraction prompt
+ */
+export function buildExtractionPrompt(answer) {
+    return `Voici la réponse d'un assistant. Liste UNIQUEMENT les noms de marques, produits, ` +
+        `outils ou entreprises qui y sont cités. Réponds par un tableau JSON de chaînes, sans aucun ` +
+        `autre texte (exemple : ["Marque A", "Outil B"]).\n\nRéponse :\n${answer}`
+}
+
+/**
+ * Parse a model's JSON list of brand names, tolerating code fences and noise.
+ * @param {string} text - Model output
+ * @returns {string[]} Extracted names
+ */
+export function parseBrandList(text) {
+    if (!text) return []
+    const cleaned = String(text).replace(/```(?:json)?/gi, '').trim()
+    const match = cleaned.match(/\[[\s\S]*]/)
+    if (!match) return []
+    try {
+        const parsed = JSON.parse(match[0])
+        if (!Array.isArray(parsed)) return []
+        return parsed.map(v => String(v).trim()).filter(Boolean)
+    } catch {
+        return []
+    }
+}
+
+/**
+ * Keep only names that are neither the brand nor a known competitor.
+ * Case-insensitive, de-duplicated, ignores 1-character tokens.
+ * @param {string[]} names - Names extracted from the answer
+ * @param {string} brand - Tracked brand
+ * @param {string[]} competitors - Known competitors
+ * @returns {string[]} Emerging competitor names
+ */
+export function extractEmerging(names, brand, competitors = []) {
+    const known = new Set([brand, ...competitors].map(n => (n || '').trim().toLowerCase()).filter(Boolean))
+    const seen = new Set()
+    const result = []
+    for (const raw of names) {
+        const name = (raw || '').trim()
+        const key = name.toLowerCase()
+        if (name.length < 2 || known.has(key) || seen.has(key)) continue
+        seen.add(key)
+        result.push(name)
+    }
+    return result
+}
+
+/**
  * Group a prompt's runs by provider and build a comparison summary.
  * Runs must be sorted newest-first.
  * @param {Array} runs - Run records for a single prompt
@@ -129,6 +181,8 @@ export function groupRunsByProvider(runs) {
     const sovValues = []
     let enginesCited = 0
     let lastRunAt = null
+    // Emerging competitors aggregated across engines: name -> set of engines
+    const emergingMap = new Map()
 
     for (const provider of providers) {
         const list = grouped[provider] // newest first
@@ -144,13 +198,23 @@ export function groupRunsByProvider(runs) {
         if (latest.brandMentioned) enginesCited++
         if (typeof latest.shareOfVoice === 'number') sovValues.push(latest.shareOfVoice)
         if (latest.timestamp > (lastRunAt || 0)) lastRunAt = latest.timestamp
+
+        for (const name of latest.emergingCompetitors || []) {
+            const key = name.toLowerCase()
+            if (!emergingMap.has(key)) emergingMap.set(key, {name, engines: new Set()})
+            emergingMap.get(key).engines.add(provider)
+        }
     }
 
     const avgShareOfVoice = sovValues.length
         ? Math.round(sovValues.reduce((a, b) => a + b, 0) / sovValues.length)
         : null
 
-    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, lastRunAt}
+    const emergingCompetitors = [...emergingMap.values()]
+        .map(e => ({name: e.name, engines: e.engines.size}))
+        .sort((a, b) => b.engines - a.engines)
+
+    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, lastRunAt}
 }
 
 /**
@@ -210,9 +274,10 @@ export function useGeoTracking() {
      * persisting one result per provider.
      * @param {object} item - Tracked prompt
      * @param {Array<{id: string, label: string, model: string}>} providers - Providers to query
+     * @param {{detectEmerging?: boolean}} options - Run options
      * @returns {Promise<{success: boolean, changes: string[]}>}
      */
-    async function runPrompt(item, providers = []) {
+    async function runPrompt(item, providers = [], options = {}) {
         if (!providers.length) {
             errorById.value = {...errorById.value, [item.id]: 'Aucun fournisseur sélectionné (configurez une clé).'}
             return {success: false, changes: []}
@@ -228,11 +293,25 @@ export function useGeoTracking() {
             const provider = buildProviderFor(settings, descriptor)
             const answer = await provider.send(item.prompt)
             const analysis = analyzeResponse(answer, item.brand, item.competitors)
+
+            // Optional second call: ask the model which brands it cited, then
+            // keep the ones that aren't the brand or a known competitor.
+            let emergingCompetitors = []
+            if (options.detectEmerging) {
+                try {
+                    const extraction = await provider.send(buildExtractionPrompt(answer))
+                    emergingCompetitors = extractEmerging(parseBrandList(extraction), item.brand, item.competitors)
+                } catch {
+                    emergingCompetitors = []
+                }
+            }
+
             await geoHistory.addRun({
                 promptId: item.id,
                 provider: descriptor.id,
                 model: descriptor.model,
                 response: answer,
+                emergingCompetitors,
                 ...analysis
             })
             return {descriptor, analysis}

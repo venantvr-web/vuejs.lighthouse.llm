@@ -105,14 +105,18 @@ export function detectChanges(item, latest, previous) {
 }
 
 /**
- * Build a prompt asking the model to extract the brand/product names it cited.
+ * Build a prompt asking the model to extract the brands it cited AND the
+ * sentiment toward the tracked brand, as a single JSON object.
  * @param {string} answer - The AI engine's answer
+ * @param {string} brand - The tracked brand
  * @returns {string} Extraction prompt
  */
-export function buildExtractionPrompt(answer) {
-    return `Voici la réponse d'un assistant. Liste UNIQUEMENT les noms de marques, produits, ` +
-        `outils ou entreprises qui y sont cités. Réponds par un tableau JSON de chaînes, sans aucun ` +
-        `autre texte (exemple : ["Marque A", "Outil B"]).\n\nRéponse :\n${answer}`
+export function buildExtractionPrompt(answer, brand) {
+    return `Analyse la réponse d'un assistant ci-dessous. Renvoie UNIQUEMENT un objet JSON, sans autre texte, ` +
+        `de la forme {"brands": ["..."], "sentiment": "positive|neutral|negative|absent"} où :\n` +
+        `- "brands" liste les marques, produits, outils ou entreprises cités ;\n` +
+        `- "sentiment" décrit la tonalité envers « ${brand} » (positive, neutral, negative, ou absent si non cité).\n\n` +
+        `Réponse :\n${answer}`
 }
 
 /**
@@ -132,6 +136,44 @@ export function parseBrandList(text) {
     } catch {
         return []
     }
+}
+
+/**
+ * Normalize a free-form sentiment value to a fixed vocabulary.
+ * @param {string} value - Raw sentiment string (FR or EN)
+ * @returns {'positive'|'neutral'|'negative'|'absent'|null}
+ */
+export function normalizeSentiment(value) {
+    const v = String(value || '').trim().toLowerCase()
+    if (/(posit)/.test(v)) return 'positive'
+    if (/(négat|negat)/.test(v)) return 'negative'
+    if (/(neutr)/.test(v)) return 'neutral'
+    if (/(absent|none|aucun)/.test(v)) return 'absent'
+    return null
+}
+
+/**
+ * Parse the combined extraction object (brands + sentiment), tolerating code
+ * fences and falling back to a bare array of brand names.
+ * @param {string} text - Model output
+ * @returns {{brands: string[], sentiment: string|null}}
+ */
+export function parseExtraction(text) {
+    if (!text) return {brands: [], sentiment: null}
+    const cleaned = String(text).replace(/```(?:json)?/gi, '').trim()
+    const objMatch = cleaned.match(/\{[\s\S]*}/)
+    if (objMatch) {
+        try {
+            const parsed = JSON.parse(objMatch[0])
+            const brands = Array.isArray(parsed.brands)
+                ? parsed.brands.map(v => String(v).trim()).filter(Boolean)
+                : []
+            return {brands, sentiment: normalizeSentiment(parsed.sentiment)}
+        } catch {
+            // fall through to array parsing
+        }
+    }
+    return {brands: parseBrandList(text), sentiment: null}
 }
 
 /**
@@ -274,7 +316,7 @@ export function useGeoTracking() {
      * persisting one result per provider.
      * @param {object} item - Tracked prompt
      * @param {Array<{id: string, label: string, model: string}>} providers - Providers to query
-     * @param {{detectEmerging?: boolean}} options - Run options
+     * @param {{advancedAnalysis?: boolean}} options - Run options
      * @returns {Promise<{success: boolean, changes: string[]}>}
      */
     async function runPrompt(item, providers = [], options = {}) {
@@ -294,13 +336,16 @@ export function useGeoTracking() {
             const answer = await provider.send(item.prompt)
             const analysis = analyzeResponse(answer, item.brand, item.competitors)
 
-            // Optional second call: ask the model which brands it cited, then
-            // keep the ones that aren't the brand or a known competitor.
+            // Optional second call: ask the model which brands it cited and the
+            // sentiment toward the tracked brand.
             let emergingCompetitors = []
-            if (options.detectEmerging) {
+            let sentiment = null
+            if (options.advancedAnalysis) {
                 try {
-                    const extraction = await provider.send(buildExtractionPrompt(answer))
-                    emergingCompetitors = extractEmerging(parseBrandList(extraction), item.brand, item.competitors)
+                    const extraction = await provider.send(buildExtractionPrompt(answer, item.brand))
+                    const {brands, sentiment: s} = parseExtraction(extraction)
+                    emergingCompetitors = extractEmerging(brands, item.brand, item.competitors)
+                    sentiment = analysis.brandMentioned ? s : 'absent'
                 } catch {
                     emergingCompetitors = []
                 }
@@ -312,6 +357,7 @@ export function useGeoTracking() {
                 model: descriptor.model,
                 response: answer,
                 emergingCompetitors,
+                sentiment,
                 ...analysis
             })
             return {descriptor, analysis}

@@ -6,7 +6,9 @@ import {
     escapeRegExp,
     extractEmerging,
     groupRunsByProvider,
-    parseBrandList
+    normalizeSentiment,
+    parseBrandList,
+    parseExtraction
 } from '@/composables/useGeoTracking'
 
 describe('useGeoTracking - pure logic', () => {
@@ -165,6 +167,39 @@ describe('useGeoTracking - pure logic', () => {
 
         it('ignores 1-character tokens', () => {
             expect(extractEmerging(['X', 'Ok'], 'Acme', [])).toEqual(['Ok'])
+        })
+    })
+
+    describe('normalizeSentiment', () => {
+        it('maps FR and EN variants', () => {
+            expect(normalizeSentiment('positif')).toBe('positive')
+            expect(normalizeSentiment('Positive')).toBe('positive')
+            expect(normalizeSentiment('négatif')).toBe('negative')
+            expect(normalizeSentiment('neutre')).toBe('neutral')
+            expect(normalizeSentiment('absent')).toBe('absent')
+        })
+
+        it('returns null for unknown values', () => {
+            expect(normalizeSentiment('???')).toBeNull()
+            expect(normalizeSentiment('')).toBeNull()
+        })
+    })
+
+    describe('parseExtraction', () => {
+        it('parses the combined object', () => {
+            const out = parseExtraction('```json\n{"brands":["Acme","Foo"],"sentiment":"positive"}\n```')
+            expect(out.brands).toEqual(['Acme', 'Foo'])
+            expect(out.sentiment).toBe('positive')
+        })
+
+        it('falls back to a bare array (no sentiment)', () => {
+            const out = parseExtraction('["Acme", "Bar"]')
+            expect(out.brands).toEqual(['Acme', 'Bar'])
+            expect(out.sentiment).toBeNull()
+        })
+
+        it('handles garbage', () => {
+            expect(parseExtraction('rien')).toEqual({brands: [], sentiment: null})
         })
     })
 })

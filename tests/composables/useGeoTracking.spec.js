@@ -4,7 +4,9 @@ import {
     countOccurrences,
     detectChanges,
     escapeRegExp,
-    groupRunsByProvider
+    extractEmerging,
+    groupRunsByProvider,
+    parseBrandList
 } from '@/composables/useGeoTracking'
 
 describe('useGeoTracking - pure logic', () => {
@@ -127,6 +129,42 @@ describe('useGeoTracking - pure logic', () => {
             expect(g.providers).toEqual([])
             expect(g.avgShareOfVoice).toBeNull()
             expect(g.lastRunAt).toBeNull()
+        })
+
+        it('aggregates emerging competitors across engines', () => {
+            const g = groupRunsByProvider([
+                {provider: 'openai', timestamp: 20, brandMentioned: true, shareOfVoice: 50, emergingCompetitors: ['Zappy', 'Nuxo']},
+                {provider: 'gemini', timestamp: 10, brandMentioned: true, shareOfVoice: 40, emergingCompetitors: ['Zappy']}
+            ])
+            // Zappy cited by 2 engines -> ranked first
+            expect(g.emergingCompetitors[0]).toEqual({name: 'Zappy', engines: 2})
+            expect(g.emergingCompetitors.find(e => e.name === 'Nuxo').engines).toBe(1)
+        })
+    })
+
+    describe('parseBrandList', () => {
+        it('parses a plain JSON array', () => {
+            expect(parseBrandList('["Acme", "Foo"]')).toEqual(['Acme', 'Foo'])
+        })
+
+        it('tolerates code fences and surrounding text', () => {
+            expect(parseBrandList('Voici : ```json\n["Acme", "Bar"]\n``` voilà')).toEqual(['Acme', 'Bar'])
+        })
+
+        it('returns empty on invalid content', () => {
+            expect(parseBrandList('pas de liste ici')).toEqual([])
+            expect(parseBrandList('')).toEqual([])
+        })
+    })
+
+    describe('extractEmerging', () => {
+        it('removes the brand and known competitors (case-insensitive)', () => {
+            const names = ['Acme', 'foo', 'Zappy', 'Nuxo', 'zappy']
+            expect(extractEmerging(names, 'Acme', ['Foo'])).toEqual(['Zappy', 'Nuxo'])
+        })
+
+        it('ignores 1-character tokens', () => {
+            expect(extractEmerging(['X', 'Ok'], 'Acme', [])).toEqual(['Ok'])
         })
     })
 })

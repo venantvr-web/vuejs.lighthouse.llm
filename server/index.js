@@ -126,6 +126,13 @@ app.post('/api/fetch-page', async (req, res) => {
             return res.json({html: xml, contentType, url: response.url})
         }
 
+        // Handle plain text and untyped responses (robots.txt, llms.txt, sitemaps
+        // served as text/plain). Other resources rely on these text bodies.
+        if (contentType.includes('text/') || contentType === '') {
+            const text = await response.text()
+            return res.json({html: text, contentType, url: response.url})
+        }
+
         // Other content types
         return res.status(415).json({error: 'Type de contenu non supporte', contentType})
 

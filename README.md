@@ -19,11 +19,13 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
   - **courbe de tendance** (sparkline) et ré-audit en un clic.
 - **GEO Tracking** (*Generative Engine Optimization*) : suivi de la visibilité de votre marque dans les réponses des moteurs IA, avec :
   - **prompts cibles** + marque + concurrents, interrogés sur **plusieurs moteurs en parallèle** (OpenAI, Claude, Gemini, Ollama) ;
-  - mesure par moteur : **marque citée**, **position** et **part de voix** face aux concurrents ;
-  - **comparaison inter-moteurs**, courbe de tendance et **alertes** quand la visibilité change.
+  - mesure par moteur : **marque citée**, **position**, **part de voix** et **sentiment** de la mention ;
+  - détection des **concurrents émergents** (marques citées par l'IA mais hors de votre liste) ;
+  - **comparaison inter-moteurs**, courbe de tendance, **alertes** et **export** (CSV / Markdown).
 - **Plan d'action priorisé** : les opportunités Lighthouse sont transformées en tickets triés par **impact / effort**, avec génération de correctifs (extraits de code) par l'IA.
-- **Search Console** : connexion **OAuth navigateur** (BYO Client ID) pour afficher les **données de recherche réelles** (requêtes, clics, impressions, CTR, position).
-- **Export** : Markdown, PDF, et sauvegarde / restauration de l'historique au format JSON.
+- **Search Console** : connexion **OAuth navigateur** (BYO Client ID) pour les **données de recherche réelles** (requêtes, clics, impressions, CTR, position), avec **historisation** et tendance des clics.
+- **Ressources SEO/GEO** : vérification de la disponibilité de **robots.txt**, **sitemaps** (et nombre d'URL), **llms.txt** / **llms-full.txt** (via le serveur local pour contourner le CORS).
+- **Export** : Markdown, PDF, CSV comparatif (GEO / Watchlist), et sauvegarde / restauration de l'historique au format JSON.
 - **PWA** : installable sur le bureau ou le mobile, fonctionne hors-ligne sur les données déjà stockées.
 
 ---

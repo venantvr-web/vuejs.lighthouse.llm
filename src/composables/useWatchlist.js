@@ -1,6 +1,7 @@
 import {ref} from 'vue'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useLighthouseParser} from '@/composables/useLighthouseParser'
+import {toSeries} from '@/utils/series'
 import {analyzeUrl as analyzePageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeLocal} from '@/services/localLighthouse'
 
@@ -107,11 +108,7 @@ export function useWatchlist() {
         const previous = entries[1] || null
 
         // Oldest-first performance series for the sparkline (cap to last 12 points).
-        const series = [...entries]
-            .reverse()
-            .map(e => (typeof e.scores?.performance === 'number' ? Math.round(e.scores.performance * 100) : null))
-            .filter(v => v !== null)
-            .slice(-12)
+        const series = toSeries(entries, e => (typeof e.scores?.performance === 'number' ? Math.round(e.scores.performance * 100) : null))
 
         statsById.value = {
             ...statsById.value,

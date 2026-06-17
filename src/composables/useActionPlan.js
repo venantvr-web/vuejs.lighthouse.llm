@@ -1,5 +1,5 @@
 import {ref} from 'vue'
-import LLMProviderFactory from '@/services/llm/LLMProviderFactory'
+import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {useSettingsStore} from '@/stores/settingsStore'
 
 /**
@@ -125,14 +125,7 @@ export function useActionPlan() {
         generating.value = true
         error.value = null
         try {
-            const cfg = {
-                apiKey: settings.apiKey,
-                model: settings.currentModel,
-                temperature: settings.temperature,
-                maxTokens: settings.maxTokens
-            }
-            if (settings.currentProvider === 'ollama') cfg.baseURL = settings.ollamaBaseUrl
-            const provider = LLMProviderFactory.create(settings.currentProvider, cfg)
+            const provider = buildLLMProvider(settings, settings.currentProvider, settings.currentModel)
 
             const list = tickets
                 .map((t, i) => `${i + 1}. ${t.title} (impact ${t.impactLabel}, effort ${t.effortLabel}${t.displayValue ? `, ${t.displayValue}` : ''})`)

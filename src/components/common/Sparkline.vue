@@ -22,6 +22,11 @@ const props = defineProps({
   color: {
     type: String,
     default: '#6366f1'
+  },
+  // When true, scale to the data's own min/max instead of a fixed 0-100 domain.
+  autoScale: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -33,9 +38,10 @@ const points = computed(() => {
   const w = props.width - pad * 2
   const h = props.height - pad * 2
 
-  // Fixed 0-100 domain keeps sparklines comparable across cards.
-  const min = 0
-  const max = 100
+  // Default: fixed 0-100 domain keeps sparklines comparable across cards.
+  // autoScale: fit the data's own range (for unbounded metrics like clicks).
+  const min = props.autoScale ? Math.min(...vals) : 0
+  const max = props.autoScale ? Math.max(...vals) : 100
   const range = max - min || 1
 
   if (vals.length === 1) {

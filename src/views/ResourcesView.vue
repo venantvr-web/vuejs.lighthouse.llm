@@ -2,6 +2,8 @@
 import {computed, ref} from 'vue'
 import {useResourceCheck} from '@/composables/useResourceCheck'
 import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
+import {computeGeoReadiness} from '@/services/resourceCheck'
+import {getScoreColorClass} from '@/utils/formatters'
 
 const {checking, error, origin, resources, sitemaps, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
@@ -10,6 +12,7 @@ const url = ref('')
 const crawledSitemap = ref('')
 
 const brokenPages = computed(() => pages.value.filter(p => !p.ok))
+const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value))
 
 function handleCheck() {
   crawledSitemap.value = ''
@@ -73,6 +76,22 @@ function handleCrawl(sitemapUrl) {
       </div>
 
       <p v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</p>
+
+      <!-- GEO-readiness score -->
+      <div v-if="resources.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
+        <div class="flex items-center gap-4">
+          <div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Score GEO-readiness</p>
+            <p :class="getScoreColorClass(readiness.score / 100)" class="text-4xl font-bold leading-tight">{{ readiness.score }}</p>
+          </div>
+          <ul class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+            <li v-for="s in readiness.signals" :key="s.label" class="flex items-center gap-2 text-sm">
+              <span :class="s.ok ? 'text-emerald-500' : 'text-gray-300 dark:text-gray-600'">{{ s.ok ? '✓' : '○' }}</span>
+              <span :class="s.ok ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'">{{ s.label }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <!-- Resources -->
       <div v-if="resources.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-6">

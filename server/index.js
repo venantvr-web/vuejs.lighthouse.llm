@@ -126,12 +126,50 @@ app.post('/api/fetch-page', async (req, res) => {
             return res.json({html: xml, contentType, url: response.url})
         }
 
+        // Handle plain text and untyped responses (robots.txt, llms.txt, sitemaps
+        // served as text/plain). Other resources rely on these text bodies.
+        if (contentType.includes('text/') || contentType === '') {
+            const text = await response.text()
+            return res.json({html: text, contentType, url: response.url})
+        }
+
         // Other content types
         return res.status(415).json({error: 'Type de contenu non supporte', contentType})
 
     } catch (error) {
         console.error('[Fetch Error]', error.message)
         res.status(500).json({error: error.message})
+    }
+})
+
+/**
+ * Lightweight URL status check (for sitemap crawling / 404 detection).
+ * POST /api/check-url
+ * Body: { url: string }
+ * Always responds 200 with { ok, status, url } so the client can read the
+ * upstream status for any content type (unlike /api/fetch-page).
+ */
+app.post('/api/check-url', async (req, res) => {
+    const {url} = req.body
+
+    if (!url) {
+        return res.status(400).json({error: 'URL requise'})
+    }
+    try {
+        new URL(url)
+    } catch {
+        return res.status(400).json({error: 'URL invalide'})
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow',
+            headers: {'User-Agent': 'Mozilla/5.0 (compatible; LighthouseCrawler/1.0)'}
+        })
+        return res.json({ok: response.ok, status: response.status, url: response.url})
+    } catch (error) {
+        return res.json({ok: false, status: 0, error: error.message})
     }
 })
 

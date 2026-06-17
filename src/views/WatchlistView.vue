@@ -4,8 +4,10 @@ import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useNotifications} from '@/composables/useNotifications'
-import {formatScore, getScoreColorClass} from '@/utils/formatters'
+import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters'
 import WatchlistCard from '@/components/history/WatchlistCard.vue'
+import {buildWatchlistCsv} from '@/utils/exporters'
+import {downloadText} from '@/utils/download'
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
@@ -153,6 +155,10 @@ async function handleRefresh(item) {
   }
 }
 
+function exportCsv() {
+  downloadText(`watchlist-${formatDateISO()}.csv`, buildWatchlistCsv(items.value, statsById.value), 'text/csv;charset=utf-8')
+}
+
 async function handleRefreshAll() {
   refreshingAll.value = true
   try {
@@ -219,6 +225,14 @@ async function handleEnableNotifications() {
               Alertes actives
             </span>
 
+            <button
+                v-if="!watchlistStore.isEmpty"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter en CSV"
+                @click="exportCsv"
+            >
+              CSV
+            </button>
             <button
                 v-if="!watchlistStore.isEmpty"
                 :disabled="refreshingAll"

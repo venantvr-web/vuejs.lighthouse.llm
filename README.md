@@ -19,9 +19,13 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
   - **courbe de tendance** (sparkline) et ré-audit en un clic.
 - **GEO Tracking** (*Generative Engine Optimization*) : suivi de la visibilité de votre marque dans les réponses des moteurs IA, avec :
   - **prompts cibles** + marque + concurrents, interrogés sur **plusieurs moteurs en parallèle** (OpenAI, Claude, Gemini, Ollama) ;
-  - mesure par moteur : **marque citée**, **position** et **part de voix** face aux concurrents ;
-  - **comparaison inter-moteurs**, courbe de tendance et **alertes** quand la visibilité change.
-- **Export** : Markdown, PDF, et sauvegarde / restauration de l'historique au format JSON.
+  - mesure par moteur : **marque citée**, **position**, **part de voix** et **sentiment** de la mention ;
+  - détection des **concurrents émergents** (marques citées par l'IA mais hors de votre liste) ;
+  - **comparaison inter-moteurs**, courbe de tendance, **alertes** et **export** (CSV / Markdown).
+- **Plan d'action priorisé** : les opportunités Lighthouse sont transformées en tickets triés par **impact / effort**, avec génération de correctifs (extraits de code) par l'IA.
+- **Search Console** : connexion **OAuth navigateur** (BYO Client ID) pour les **données de recherche réelles** (requêtes, clics, impressions, CTR, position), avec **historisation** et tendance des clics.
+- **Ressources SEO/GEO** : disponibilité de **robots.txt**, **sitemaps** (et nombre d'URL), **llms.txt** / **llms-full.txt** ; **crawl du sitemap** avec **détection des 404** et **export CSV** ; détection et **validation des données structurées JSON-LD** (champs recommandés par type) ; **score de GEO-readiness** combinant ces signaux, **historisé** avec tendance et **alertes** (baisse de score, nouvelles URL cassées). Via le serveur local pour contourner le CORS.
+- **Export** : Markdown, PDF, CSV comparatif (GEO / Watchlist), et sauvegarde / restauration de l'historique au format JSON.
 - **PWA** : installable sur le bureau ou le mobile, fonctionne hors-ligne sur les données déjà stockées.
 
 ---
@@ -242,6 +246,16 @@ graph TD
 ```
 
 ---
+
+## 🔎 Search Console (configuration)
+
+La connexion se fait **dans le navigateur** (aucun secret côté serveur). Prérequis :
+
+1. Dans **Google Cloud Console**, activer l'**API Search Console**.
+2. Créer un **ID client OAuth 2.0** de type « Application Web » et ajouter l'origine du site (ex. `https://mon-site.pages.dev`) aux **origines JavaScript autorisées**.
+3. Coller cet ID client dans l'écran **Search Console** de l'application, puis se connecter.
+
+Le jeton d'accès reste **en mémoire** (jamais persisté). Seul l'ID client est conservé localement.
 
 ## 🧪 Tests
 

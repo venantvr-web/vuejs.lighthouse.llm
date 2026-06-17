@@ -68,8 +68,8 @@ describe('Lighthouse Server Configuration', () => {
     describe('Lighthouse Settings', () => {
         it('should have maxWaitForLoad timeout configured', () => {
             expect(lighthouseCode).toContain('maxWaitForLoad')
-            // Verify it's set to 45000ms
-            expect(lighthouseCode).toMatch(/maxWaitForLoad:\s*45000/)
+            // Verify it's set to 60000ms
+            expect(lighthouseCode).toMatch(/maxWaitForLoad:\s*60000/)
         })
 
         it('should support mobile and desktop strategies', () => {

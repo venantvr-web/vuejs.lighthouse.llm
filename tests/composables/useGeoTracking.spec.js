@@ -4,7 +4,11 @@ import {
     countOccurrences,
     detectChanges,
     escapeRegExp,
-    groupRunsByProvider
+    extractEmerging,
+    groupRunsByProvider,
+    normalizeSentiment,
+    parseBrandList,
+    parseExtraction
 } from '@/composables/useGeoTracking'
 
 describe('useGeoTracking - pure logic', () => {
@@ -127,6 +131,75 @@ describe('useGeoTracking - pure logic', () => {
             expect(g.providers).toEqual([])
             expect(g.avgShareOfVoice).toBeNull()
             expect(g.lastRunAt).toBeNull()
+        })
+
+        it('aggregates emerging competitors across engines', () => {
+            const g = groupRunsByProvider([
+                {provider: 'openai', timestamp: 20, brandMentioned: true, shareOfVoice: 50, emergingCompetitors: ['Zappy', 'Nuxo']},
+                {provider: 'gemini', timestamp: 10, brandMentioned: true, shareOfVoice: 40, emergingCompetitors: ['Zappy']}
+            ])
+            // Zappy cited by 2 engines -> ranked first
+            expect(g.emergingCompetitors[0]).toEqual({name: 'Zappy', engines: 2})
+            expect(g.emergingCompetitors.find(e => e.name === 'Nuxo').engines).toBe(1)
+        })
+    })
+
+    describe('parseBrandList', () => {
+        it('parses a plain JSON array', () => {
+            expect(parseBrandList('["Acme", "Foo"]')).toEqual(['Acme', 'Foo'])
+        })
+
+        it('tolerates code fences and surrounding text', () => {
+            expect(parseBrandList('Voici : ```json\n["Acme", "Bar"]\n``` voilà')).toEqual(['Acme', 'Bar'])
+        })
+
+        it('returns empty on invalid content', () => {
+            expect(parseBrandList('pas de liste ici')).toEqual([])
+            expect(parseBrandList('')).toEqual([])
+        })
+    })
+
+    describe('extractEmerging', () => {
+        it('removes the brand and known competitors (case-insensitive)', () => {
+            const names = ['Acme', 'foo', 'Zappy', 'Nuxo', 'zappy']
+            expect(extractEmerging(names, 'Acme', ['Foo'])).toEqual(['Zappy', 'Nuxo'])
+        })
+
+        it('ignores 1-character tokens', () => {
+            expect(extractEmerging(['X', 'Ok'], 'Acme', [])).toEqual(['Ok'])
+        })
+    })
+
+    describe('normalizeSentiment', () => {
+        it('maps FR and EN variants', () => {
+            expect(normalizeSentiment('positif')).toBe('positive')
+            expect(normalizeSentiment('Positive')).toBe('positive')
+            expect(normalizeSentiment('négatif')).toBe('negative')
+            expect(normalizeSentiment('neutre')).toBe('neutral')
+            expect(normalizeSentiment('absent')).toBe('absent')
+        })
+
+        it('returns null for unknown values', () => {
+            expect(normalizeSentiment('???')).toBeNull()
+            expect(normalizeSentiment('')).toBeNull()
+        })
+    })
+
+    describe('parseExtraction', () => {
+        it('parses the combined object', () => {
+            const out = parseExtraction('```json\n{"brands":["Acme","Foo"],"sentiment":"positive"}\n```')
+            expect(out.brands).toEqual(['Acme', 'Foo'])
+            expect(out.sentiment).toBe('positive')
+        })
+
+        it('falls back to a bare array (no sentiment)', () => {
+            const out = parseExtraction('["Acme", "Bar"]')
+            expect(out.brands).toEqual(['Acme', 'Bar'])
+            expect(out.sentiment).toBeNull()
+        })
+
+        it('handles garbage', () => {
+            expect(parseExtraction('rien')).toEqual({brands: [], sentiment: null})
         })
     })
 })

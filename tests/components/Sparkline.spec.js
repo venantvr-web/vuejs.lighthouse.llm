@@ -31,4 +31,12 @@ describe('Sparkline', () => {
         const w = mount(Sparkline, {props: {values: [10, 20], color: '#ff0000'}})
         expect(w.find('polyline').attributes('stroke')).toBe('#ff0000')
     })
+
+    it('auto-scales to the data range when autoScale is set', () => {
+        // Values well above 100 would be clipped without autoScale.
+        const w = mount(Sparkline, {props: {values: [1000, 2000, 3000], autoScale: true}})
+        const ys = w.find('polyline').attributes('points').trim().split(/\s+/).map(p => Number(p.split(',')[1]))
+        // First (min) sits at the bottom, last (max) at the top -> distinct, ordered
+        expect(ys[0]).toBeGreaterThan(ys[2])
+    })
 })

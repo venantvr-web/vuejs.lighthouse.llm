@@ -6,6 +6,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
+import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
+import {downloadText} from '@/utils/download'
+import {formatDateISO} from '@/utils/formatters'
 
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
@@ -22,6 +25,7 @@ const addError = ref('')
 const runningAll = ref(false)
 const showKeyEditor = ref(false)
 const selectedProviderIds = ref([])
+const advancedAnalysis = ref(true)
 
 const items = computed(() => geoStore.sortedItems)
 const readyProviders = computed(() => settings.geoProviders.filter(p => p.ready))
@@ -88,10 +92,18 @@ function handleRemove(item) {
 }
 
 async function handleRun(item) {
-  const result = await runPrompt(item, activeProviders.value)
+  const result = await runPrompt(item, activeProviders.value, {advancedAnalysis: advancedAnalysis.value})
   if (result.success && result.changes.length && notificationPermission.value === 'granted') {
     notify(`GEO — ${item.brand}`, {body: result.changes.join('\n'), tag: `geo-${item.id}`})
   }
+}
+
+function exportCsv() {
+  downloadText(`geo-${formatDateISO()}.csv`, buildGeoCsv(items.value, statsById.value), 'text/csv;charset=utf-8')
+}
+
+function exportMarkdown() {
+  downloadText(`geo-${formatDateISO()}.md`, buildGeoMarkdown(items.value, statsById.value), 'text/markdown;charset=utf-8')
 }
 
 async function handleRunAll() {
@@ -143,6 +155,22 @@ async function handleRunAll() {
                 @click="requestPermission"
             >
               Activer les alertes
+            </button>
+            <button
+                v-if="!geoStore.isEmpty"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter le comparatif en CSV"
+                @click="exportCsv"
+            >
+              CSV
+            </button>
+            <button
+                v-if="!geoStore.isEmpty"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter le comparatif en Markdown"
+                @click="exportMarkdown"
+            >
+              MD
             </button>
             <button
                 v-if="!geoStore.isEmpty"
@@ -207,6 +235,10 @@ async function handleRunAll() {
         >
           {{ p.label }}
         </button>
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer" title="Un appel LLM supplémentaire par moteur : concurrents cités + sentiment de la mention">
+          <input v-model="advancedAnalysis" class="rounded" type="checkbox"/>
+          Analyse avancée (concurrents + sentiment)
+        </label>
       </div>
 
       <!-- Add form -->

@@ -59,6 +59,16 @@ const routes = [
         component: () => import('@/views/GeoView.vue')
     },
     {
+        path: '/search-console',
+        name: 'search-console',
+        component: () => import('@/views/SearchConsoleView.vue')
+    },
+    {
+        path: '/resources',
+        name: 'resources',
+        component: () => import('@/views/ResourcesView.vue')
+    },
+    {
         path: '/crawl',
         name: 'crawl',
         component: () => import('@/views/CrawlView.vue')

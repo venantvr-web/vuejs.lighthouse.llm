@@ -142,6 +142,37 @@ app.post('/api/fetch-page', async (req, res) => {
     }
 })
 
+/**
+ * Lightweight URL status check (for sitemap crawling / 404 detection).
+ * POST /api/check-url
+ * Body: { url: string }
+ * Always responds 200 with { ok, status, url } so the client can read the
+ * upstream status for any content type (unlike /api/fetch-page).
+ */
+app.post('/api/check-url', async (req, res) => {
+    const {url} = req.body
+
+    if (!url) {
+        return res.status(400).json({error: 'URL requise'})
+    }
+    try {
+        new URL(url)
+    } catch {
+        return res.status(400).json({error: 'URL invalide'})
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow',
+            headers: {'User-Agent': 'Mozilla/5.0 (compatible; LighthouseCrawler/1.0)'}
+        })
+        return res.json({ok: response.ok, status: response.status, url: response.url})
+    } catch (error) {
+        return res.json({ok: false, status: 0, error: error.message})
+    }
+})
+
 // Error handler
 app.use((err, req, res, next) => {
     console.error('[Error]', err)

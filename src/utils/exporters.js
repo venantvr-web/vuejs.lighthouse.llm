@@ -111,3 +111,15 @@ export function buildWatchlistRows(items, statsById) {
 export function buildWatchlistCsv(items, statsById) {
     return toCsv(WATCHLIST_HEADERS, buildWatchlistRows(items, statsById))
 }
+
+/**
+ * Build a CSV of broken (non-2xx) URLs from a sitemap crawl.
+ * @param {Array} pages - Crawl results ({ url, ok, status })
+ * @returns {string} CSV text
+ */
+export function buildBrokenUrlsCsv(pages = []) {
+    const rows = pages
+        .filter(p => !p.ok)
+        .map(p => ({url: p.url, statut: p.status || 'erreur'}))
+    return toCsv(['url', 'statut'], rows)
+}

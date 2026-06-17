@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {
+    buildBrokenUrlsCsv,
     buildGeoCsv,
     buildGeoRows,
     buildWatchlistRows,
@@ -60,6 +61,22 @@ describe('utils/exporters', () => {
 
         it('buildGeoCsv includes the header', () => {
             expect(buildGeoCsv(items, statsById).split('\n')[0]).toContain('prompt,marque,moteur')
+        })
+    })
+
+    describe('buildBrokenUrlsCsv', () => {
+        it('includes only broken URLs with their status', () => {
+            const pages = [
+                {url: 'https://x.com/a', ok: true, status: 200},
+                {url: 'https://x.com/b', ok: false, status: 404},
+                {url: 'https://x.com/c', ok: false, status: 0}
+            ]
+            const csv = buildBrokenUrlsCsv(pages)
+            const lines = csv.split('\n')
+            expect(lines[0]).toBe('url,statut')
+            expect(lines).toHaveLength(3) // header + 2 broken
+            expect(csv).toContain('https://x.com/b,404')
+            expect(csv).toContain('https://x.com/c,erreur')
         })
     })
 

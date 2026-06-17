@@ -1,6 +1,8 @@
 import {ref} from 'vue'
 import {
+    extractJsonLd,
     fetchResource,
+    jsonLdTypes,
     originFromUrl,
     parseSitemapUrls,
     parseSitemapsFromRobots,
@@ -17,6 +19,7 @@ export function useResourceCheck() {
     const origin = ref('')
     const resources = ref([])
     const sitemaps = ref([])
+    const jsonLd = ref({present: false, types: []})
 
     /**
      * Run all checks for a URL.
@@ -33,13 +36,21 @@ export function useResourceCheck() {
         origin.value = site
         resources.value = []
         sitemaps.value = []
+        jsonLd.value = {present: false, types: []}
 
         try {
-            // Standard resources
-            const checked = await Promise.all(
-                standardResources(site).map(async (r) => ({...r, ...(await fetchResource(r.url))}))
-            )
+            // Standard resources + homepage (for JSON-LD detection), in parallel
+            const [checked, home] = await Promise.all([
+                Promise.all(standardResources(site).map(async (r) => ({...r, ...(await fetchResource(r.url))}))),
+                fetchResource(site)
+            ])
             resources.value = checked
+
+            // Structured data on the homepage
+            if (home.available) {
+                const types = jsonLdTypes(extractJsonLd(home.content))
+                jsonLd.value = {present: types.length > 0, types}
+            }
 
             // Collect sitemap URLs: those declared in robots.txt + standard ones found
             const urls = new Set()
@@ -64,7 +75,7 @@ export function useResourceCheck() {
         }
     }
 
-    return {checking, error, origin, resources, sitemaps, check}
+    return {checking, error, origin, resources, sitemaps, jsonLd, check}
 }
 
 export default useResourceCheck

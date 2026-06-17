@@ -1,16 +1,20 @@
 <script setup>
 import {computed, ref} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {formatNumber} from '@/utils/formatters'
+import Sparkline from '@/components/common/Sparkline.vue'
 
 const settings = useSettingsStore()
+const history = useSearchConsoleHistoryStore()
 const {connected, loading, error, sites, connect, disconnect, query} = useSearchConsole()
 
 const selectedSite = ref('')
 const days = ref(28)
 const dimension = ref('query')
 const rows = ref([])
+const clicksTrend = ref([])
 
 const summary = computed(() => summarizeRows(rows.value))
 
@@ -26,6 +30,24 @@ async function handleConnect() {
 async function handleQuery() {
   if (!selectedSite.value) return
   rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], rowLimit: 50})
+  if (rows.value.length) {
+    const s = summarizeRows(rows.value)
+    await history.addSnapshot({
+      site: selectedSite.value,
+      days: days.value,
+      dimension: dimension.value,
+      clicks: s.clicks,
+      impressions: s.impressions,
+      ctr: s.ctr,
+      position: s.position
+    })
+    await loadTrend()
+  }
+}
+
+async function loadTrend() {
+  const snapshots = await history.getSnapshots(selectedSite.value)
+  clicksTrend.value = snapshotSeries(snapshots, 'clicks')
 }
 
 function formatPercent(ctr) {
@@ -146,6 +168,12 @@ function formatPosition(p) {
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Position moy.</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPosition(summary.position) }}</p>
           </div>
+        </div>
+
+        <!-- Clicks trend across saved snapshots -->
+        <div v-if="clicksTrend.length > 1" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tendance des clics (analyses enregistrées)</p>
+          <Sparkline :auto-scale="true" :values="clicksTrend" :width="320" color="#6366f1"/>
         </div>
 
         <!-- Rows table -->

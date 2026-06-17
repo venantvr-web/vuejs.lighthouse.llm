@@ -61,6 +61,22 @@ export function summarizeRows(rows = []) {
     }
 }
 
+/**
+ * Build an oldest-first metric series from snapshots (newest-first), for a
+ * trend sparkline. Caps to the most recent `limit` points.
+ * @param {Array} snapshots - Snapshots (newest first)
+ * @param {string} metric - Metric key (e.g. 'clicks')
+ * @param {number} limit - Max points
+ * @returns {number[]}
+ */
+export function snapshotSeries(snapshots = [], metric = 'clicks', limit = 12) {
+    return [...snapshots]
+        .reverse()
+        .map(s => (typeof s[metric] === 'number' ? Math.round(s[metric]) : null))
+        .filter(v => v !== null)
+        .slice(-limit)
+}
+
 // ── Browser OAuth + API (not unit-testable; needs a real browser + Google) ────
 
 /**

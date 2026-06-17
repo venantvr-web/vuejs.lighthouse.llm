@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {dateRangeISO, normalizeRow, summarizeRows} from '@/composables/useSearchConsole'
+import {dateRangeISO, normalizeRow, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
 
 describe('useSearchConsole - pure helpers', () => {
     describe('dateRangeISO', () => {
@@ -41,6 +41,23 @@ describe('useSearchConsole - pure helpers', () => {
 
         it('returns zeros for no rows', () => {
             expect(summarizeRows([])).toEqual({clicks: 0, impressions: 0, ctr: 0, position: 0})
+        })
+    })
+
+    describe('snapshotSeries', () => {
+        it('returns an oldest-first series of a metric', () => {
+            // snapshots are newest-first
+            const snapshots = [
+                {timestamp: 30, clicks: 30},
+                {timestamp: 20, clicks: 20},
+                {timestamp: 10, clicks: 10}
+            ]
+            expect(snapshotSeries(snapshots, 'clicks')).toEqual([10, 20, 30])
+        })
+
+        it('caps to the most recent points and ignores non-numerics', () => {
+            const snapshots = Array.from({length: 15}, (_, i) => ({clicks: i}))
+            expect(snapshotSeries(snapshots, 'clicks', 12)).toHaveLength(12)
         })
     })
 })

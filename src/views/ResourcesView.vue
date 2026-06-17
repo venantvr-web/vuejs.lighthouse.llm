@@ -1,13 +1,24 @@
 <script setup>
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 import {useResourceCheck} from '@/composables/useResourceCheck'
+import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
 
 const {checking, error, origin, resources, sitemaps, check} = useResourceCheck()
+const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
 
 const url = ref('')
+const crawledSitemap = ref('')
+
+const brokenPages = computed(() => pages.value.filter(p => !p.ok))
 
 function handleCheck() {
+  crawledSitemap.value = ''
   check(url.value)
+}
+
+function handleCrawl(sitemapUrl) {
+  crawledSitemap.value = sitemapUrl
+  crawl(sitemapUrl)
 }
 </script>
 
@@ -97,6 +108,7 @@ function handleCheck() {
             <th class="text-left font-medium px-4 py-2">URL</th>
             <th class="text-left font-medium px-4 py-2">Type</th>
             <th class="text-right font-medium px-4 py-2">Entrées</th>
+            <th class="px-4 py-2"></th>
           </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -106,9 +118,64 @@ function handleCheck() {
               {{ s.available ? (s.type === 'index' ? 'Index' : s.type === 'urlset' ? 'URLs' : '—') : 'Absent' }}
             </td>
             <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ s.available ? s.count : '—' }}</td>
+            <td class="px-4 py-2 text-right">
+              <button
+                  v-if="s.available"
+                  :disabled="crawling"
+                  class="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium transition-colors disabled:opacity-50"
+                  @click="handleCrawl(s.url)"
+              >
+                {{ crawling && crawledSitemap === s.url ? 'Crawl…' : 'Crawler' }}
+              </button>
+            </td>
           </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Crawl results -->
+      <div v-if="crawledSitemap" class="mt-6">
+        <p v-if="crawlError" class="text-sm text-red-500 mb-2">{{ crawlError }}</p>
+
+        <div v-if="crawling" class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+          Vérification {{ progress.done }} / {{ progress.total }} URL…
+        </div>
+
+        <template v-else-if="pages.length">
+          <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">URL vérifiées</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ pages.length }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">OK</p>
+              <p class="text-2xl font-bold text-emerald-500 mt-1">{{ pages.length - brokenPages.length }}</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cassées (404…)</p>
+              <p :class="brokenPages.length > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">{{ brokenPages.length }}</p>
+            </div>
+          </div>
+
+          <div v-if="brokenPages.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+            <div class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+              URL cassées
+            </div>
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+              <tr v-for="p in brokenPages" :key="p.url">
+                <td class="px-4 py-2 text-gray-900 dark:text-white truncate max-w-lg" :title="p.url">{{ p.url }}</td>
+                <td class="px-4 py-2 text-right">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                    {{ p.status || 'Erreur' }}
+                  </span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <p v-else class="text-sm text-emerald-600 dark:text-emerald-400">Aucune URL cassée détectée 🎉</p>
+        </template>
       </div>
     </main>
   </div>

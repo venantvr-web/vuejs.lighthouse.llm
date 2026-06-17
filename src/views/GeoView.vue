@@ -6,6 +6,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
+import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
+import {downloadText} from '@/utils/download'
+import {formatDateISO} from '@/utils/formatters'
 
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
@@ -95,6 +98,14 @@ async function handleRun(item) {
   }
 }
 
+function exportCsv() {
+  downloadText(`geo-${formatDateISO()}.csv`, buildGeoCsv(items.value, statsById.value), 'text/csv;charset=utf-8')
+}
+
+function exportMarkdown() {
+  downloadText(`geo-${formatDateISO()}.md`, buildGeoMarkdown(items.value, statsById.value), 'text/markdown;charset=utf-8')
+}
+
 async function handleRunAll() {
   runningAll.value = true
   try {
@@ -144,6 +155,22 @@ async function handleRunAll() {
                 @click="requestPermission"
             >
               Activer les alertes
+            </button>
+            <button
+                v-if="!geoStore.isEmpty"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter le comparatif en CSV"
+                @click="exportCsv"
+            >
+              CSV
+            </button>
+            <button
+                v-if="!geoStore.isEmpty"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter le comparatif en Markdown"
+                @click="exportMarkdown"
+            >
+              MD
             </button>
             <button
                 v-if="!geoStore.isEmpty"

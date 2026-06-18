@@ -3,7 +3,9 @@ import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useGeoStore} from '@/stores/geoStore'
 import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
+import {useBriefingHistoryStore} from '@/stores/briefingHistoryStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {toSeries} from '@/utils/series'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useResourceCheck} from '@/composables/useResourceCheck'
@@ -90,6 +92,16 @@ export function buildDigest({items = [], watchStats = {}, resourceByOrigin = {},
 }
 
 /**
+ * Summarize a digest into alert counts (for historisation).
+ * @param {Array} digest - Alerts ({ level })
+ * @returns {{total: number, critical: number, warning: number}}
+ */
+export function summarizeDigest(digest = []) {
+    const critical = digest.filter(a => a.level === 'critical').length
+    return {total: digest.length, critical, warning: digest.length - critical}
+}
+
+/**
  * Morning briefing: aggregates watchlist, resources and GEO into one view and
  * runs the daily checks in one click. Local-first (runs on demand).
  */
@@ -98,6 +110,7 @@ export function useMorningBriefing() {
     const geoStore = useGeoStore()
     const resourceHistory = useResourceHistoryStore()
     const searchConsoleHistory = useSearchConsoleHistoryStore()
+    const briefingHistory = useBriefingHistoryStore()
     const settings = useSettingsStore()
     const watch = useWatchlist()
     const geo = useGeoTracking()
@@ -105,6 +118,7 @@ export function useMorningBriefing() {
 
     const resourceByOrigin = ref({})
     const searchConsole = ref({})
+    const history = ref([])
     const running = ref(false)
     const progress = ref({done: 0, total: 0})
     const lastRunAt = ref(null)
@@ -126,12 +140,16 @@ export function useMorningBriefing() {
         searchConsole: searchConsole.value
     }))
 
+    // Total-alerts trend across saved runs (oldest-first, for a sparkline)
+    const digestTrend = computed(() => toSeries(history.value, s => (typeof s.total === 'number' ? s.total : null)))
+
     /**
      * Load the latest stored data (no network) to render the briefing.
      */
     async function load() {
         await resourceHistory.initialize()
         await searchConsoleHistory.initialize()
+        await briefingHistory.initialize()
         await watch.loadStats(items.value)
         await geo.loadStats(geoItems.value)
 
@@ -142,6 +160,7 @@ export function useMorningBriefing() {
         }
         resourceByOrigin.value = byOrigin
         searchConsole.value = await searchConsoleHistory.getSnapshotsBySite()
+        history.value = await briefingHistory.getSnapshots()
     }
 
     /**
@@ -187,6 +206,9 @@ export function useMorningBriefing() {
             }
 
             await load()
+            // Record the digest snapshot so the alert trend builds over runs
+            await briefingHistory.addSnapshot(summarizeDigest(digest.value))
+            history.value = await briefingHistory.getSnapshots()
             lastRunAt.value = Date.now()
         } finally {
             running.value = false
@@ -201,6 +223,8 @@ export function useMorningBriefing() {
         resourceByOrigin,
         searchConsole,
         digest,
+        digestTrend,
+        history,
         running,
         progress,
         lastRunAt,

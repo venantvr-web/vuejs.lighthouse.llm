@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {buildDigest} from '@/composables/useMorningBriefing'
+import {buildDigest, summarizeDigest} from '@/composables/useMorningBriefing'
 
 describe('useMorningBriefing - buildDigest', () => {
     it('flags a performance regression as critical', () => {
@@ -66,5 +66,20 @@ describe('useMorningBriefing - buildDigest', () => {
         const items = [{id: 'a', label: 'A', budgets: {performance: 50}}]
         const watchStats = {a: {latest: {scores: {performance: 0.95}}, deltas: {performance: 0.01}}}
         expect(buildDigest({items, watchStats})).toEqual([])
+    })
+})
+
+describe('useMorningBriefing - summarizeDigest', () => {
+    it('counts total, critical and warning', () => {
+        const digest = [
+            {level: 'critical', message: 'a'},
+            {level: 'warning', message: 'b'},
+            {level: 'warning', message: 'c'}
+        ]
+        expect(summarizeDigest(digest)).toEqual({total: 3, critical: 1, warning: 2})
+    })
+
+    it('handles an empty digest', () => {
+        expect(summarizeDigest([])).toEqual({total: 0, critical: 0, warning: 0})
     })
 })

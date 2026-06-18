@@ -60,8 +60,10 @@ const loadModels = async () => {
   }
   loadingModels.value = true
   try {
-    // Persist the entered key so the provider is built with it
-    if (provider.value !== 'ollama') {
+    // Persist what the provider needs to be built (key or Ollama URL)
+    if (provider.value === 'ollama') {
+      settings.setOllamaBaseUrl(ollamaUrl.value)
+    } else {
       settings.setAPIKey(apiKey.value)
       settings.setProviderKey(provider.value, apiKey.value)
     }
@@ -192,7 +194,6 @@ const testConnection = async () => {
               Modèle
             </label>
             <button
-                v-if="provider !== 'ollama'"
                 :disabled="loadingModels"
                 class="text-xs text-primary-600 dark:text-primary-400 hover:underline disabled:opacity-50"
                 type="button"

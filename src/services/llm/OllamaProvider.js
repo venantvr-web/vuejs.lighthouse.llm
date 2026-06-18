@@ -18,6 +18,16 @@ export default class OllamaProvider extends BaseLLMProvider {
     }
 
     /**
+     * List models installed on the local Ollama server.
+     * @returns {Promise<Array<{value: string, label: string}>>}
+     */
+    async listModels() {
+        const response = await this._fetch(`${this.baseURL}/api/tags`, {method: 'GET'});
+        const data = await response.json();
+        return (data.models || []).map(m => ({value: m.name, label: m.name}));
+    }
+
+    /**
      * @override
      */
     requiresApiKey() {

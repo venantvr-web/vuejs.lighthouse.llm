@@ -3,6 +3,8 @@
  * Discovers URLs from a website using various methods
  */
 
+import {getUserAgent} from './requestConfig'
+
 const MAX_PAGES = 20
 const DEFAULT_PROXY_ENDPOINT = 'http://localhost:3001/api/fetch-page'
 
@@ -161,7 +163,7 @@ async function fetchPage(url, proxyEndpoint, signal) {
     const response = await fetch(proxyEndpoint, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({url}),
+        body: JSON.stringify({url, userAgent: getUserAgent()}),
         signal
     })
 

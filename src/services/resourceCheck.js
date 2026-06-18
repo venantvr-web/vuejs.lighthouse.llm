@@ -6,6 +6,8 @@
  * helpers below are unit-tested.
  */
 
+import {getUserAgent} from './requestConfig'
+
 const PROXY = 'http://localhost:3001/api/fetch-page'
 const STATUS_PROXY = 'http://localhost:3001/api/check-url'
 
@@ -245,7 +247,7 @@ export async function checkUrlStatus(url) {
         const response = await fetch(STATUS_PROXY, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({url})
+            body: JSON.stringify({url, userAgent: getUserAgent()})
         })
         if (!response.ok) return {url, ok: false, status: response.status}
         const data = await response.json()
@@ -265,7 +267,7 @@ export async function fetchResource(url) {
         const response = await fetch(PROXY, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({url})
+            body: JSON.stringify({url, userAgent: getUserAgent()})
         })
         if (!response.ok) {
             return {available: false, status: response.status, content: '', contentType: ''}

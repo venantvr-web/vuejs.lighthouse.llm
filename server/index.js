@@ -6,7 +6,7 @@
 import express from 'express'
 import cors from 'cors'
 import {analyzeUrl, checkChrome} from './lighthouse.js'
-import {FETCH_HEADERS, USER_AGENT} from './config.js'
+import {FETCH_HEADERS, resolveUserAgent} from './config.js'
 
 const app = express()
 const PORT = process.env.LIGHTHOUSE_PORT || 3001
@@ -83,7 +83,7 @@ app.get('/categories', (req, res) => {
  * Body: { url: string }
  */
 app.post('/api/fetch-page', async (req, res) => {
-    const {url} = req.body
+    const {url, userAgent} = req.body
 
     if (!url) {
         return res.status(400).json({error: 'URL requise'})
@@ -98,7 +98,7 @@ app.post('/api/fetch-page', async (req, res) => {
 
     try {
         const response = await fetch(url, {
-            headers: FETCH_HEADERS,
+            headers: {...FETCH_HEADERS, 'User-Agent': resolveUserAgent(userAgent)},
             redirect: 'follow'
         })
 
@@ -147,7 +147,7 @@ app.post('/api/fetch-page', async (req, res) => {
  * upstream status for any content type (unlike /api/fetch-page).
  */
 app.post('/api/check-url', async (req, res) => {
-    const {url} = req.body
+    const {url, userAgent} = req.body
 
     if (!url) {
         return res.status(400).json({error: 'URL requise'})
@@ -162,7 +162,7 @@ app.post('/api/check-url', async (req, res) => {
         const response = await fetch(url, {
             method: 'GET',
             redirect: 'follow',
-            headers: {'User-Agent': USER_AGENT}
+            headers: {'User-Agent': resolveUserAgent(userAgent)}
         })
         return res.json({ok: response.ok, status: response.status, url: response.url})
     } catch (error) {

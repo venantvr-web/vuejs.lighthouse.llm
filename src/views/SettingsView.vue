@@ -2,15 +2,18 @@
 import {computed, onMounted, ref, watch} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
+import {DEFAULT_USER_AGENT, getRawUserAgent, setUserAgent} from '@/services/requestConfig'
 import AppHeader from '@/components/common/AppHeader.vue'
 
 const settings = useSettingsStore()
+const DEFAULT_UA = DEFAULT_USER_AGENT
 
 const provider = ref('gemini')
 const apiKey = ref('')
 const model = ref('')
 const ollamaUrl = ref('http://localhost:11434')
 const pageSpeedKey = ref('')
+const userAgent = ref('')
 const saved = ref(false)
 
 const providers = [
@@ -39,6 +42,7 @@ onMounted(() => {
   }
   ollamaUrl.value = settings.ollamaBaseUrl
   pageSpeedKey.value = settings.pageSpeedApiKey
+  userAgent.value = getRawUserAgent()
 })
 
 watch(provider, (newProvider) => {
@@ -97,8 +101,14 @@ const saveSettings = () => {
     settings.setProviderKey(provider.value, apiKey.value)
   }
   settings.setPageSpeedApiKey(pageSpeedKey.value)
+  setUserAgent(userAgent.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
+}
+
+const resetUserAgent = () => {
+  userAgent.value = ''
+  setUserAgent('')
 }
 
 const testConnection = async () => {
@@ -236,6 +246,43 @@ const testConnection = async () => {
             <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">
               Obtenir une clé
             </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Requêtes sortantes (proxy) -->
+      <div class="card p-6 mt-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Requêtes sortantes</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            User-Agent utilisé par le serveur local pour récupérer robots.txt, sitemaps, llms.txt et vérifier les
+            URLs (Ressources et Crawl). Laissez vide pour la valeur par défaut.
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            User-Agent (optionnel)
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+                v-model="userAgent"
+                :placeholder="DEFAULT_UA"
+                class="input flex-1"
+                type="text"
+            />
+            <button
+                :disabled="!userAgent"
+                class="btn btn-secondary text-sm whitespace-nowrap disabled:opacity-50"
+                type="button"
+                @click="resetUserAgent"
+            >
+              Réinitialiser
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Par défaut : <code class="text-[11px]">{{ DEFAULT_UA }}</code>.
+            Un User-Agent transparent et identifiable est recommandé ; n'utilisez un User-Agent de navigateur que si
+            un site bloque le robot.
           </p>
         </div>
       </div>

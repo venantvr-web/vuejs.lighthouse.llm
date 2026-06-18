@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {readFileSync} from 'fs'
 import {join} from 'path'
-import {APP_NAME, APP_VERSION, FETCH_HEADERS, USER_AGENT} from '../../server/config.js'
+import {APP_NAME, APP_VERSION, FETCH_HEADERS, resolveUserAgent, USER_AGENT} from '../../server/config.js'
 
 describe('Server outbound User-Agent', () => {
     it('is a well-formed, identifiable "good bot" User-Agent', () => {
@@ -37,6 +37,31 @@ describe('Server outbound User-Agent', () => {
         expect(code).not.toContain('LighthouseCrawler')
         // both endpoints route through the centralized config
         expect(code).toContain('FETCH_HEADERS')
-        expect(code).toContain('USER_AGENT')
+        expect(code).toContain('resolveUserAgent')
+    })
+
+    describe('resolveUserAgent (per-request, parameterizable)', () => {
+        it('uses a valid client-supplied User-Agent', () => {
+            expect(resolveUserAgent('MyBot/2.0 (+https://me.example)')).toBe('MyBot/2.0 (+https://me.example)')
+        })
+
+        it('falls back to the default for empty or non-string input', () => {
+            expect(resolveUserAgent('')).toBe(USER_AGENT)
+            expect(resolveUserAgent('   ')).toBe(USER_AGENT)
+            expect(resolveUserAgent(undefined)).toBe(USER_AGENT)
+            expect(resolveUserAgent(null)).toBe(USER_AGENT)
+            expect(resolveUserAgent(42)).toBe(USER_AGENT)
+        })
+
+        it('strips control characters to prevent header injection', () => {
+            const injected = 'Evil/1.0\r\nX-Injected: 1'
+            const out = resolveUserAgent(injected)
+            expect(out).not.toMatch(/[\r\n]/)
+            expect(out).toBe('Evil/1.0X-Injected: 1')
+        })
+
+        it('caps the length at 256 characters', () => {
+            expect(resolveUserAgent('a'.repeat(500))).toHaveLength(256)
+        })
     })
 })

@@ -143,6 +143,46 @@ export function extractJsonLd(html) {
 }
 
 /**
+ * Read the `content` attribute of a `<meta name="…">` tag (order-independent).
+ * @param {string} html - HTML source
+ * @param {string} name - meta name (e.g. 'robots', 'googlebot')
+ * @returns {string} content value, or '' if absent
+ */
+export function extractMetaContent(html = '', name = '') {
+    if (!html || !name) return ''
+    const tag = html.match(new RegExp(`<meta\\b[^>]*\\bname=["']${name}["'][^>]*>`, 'i'))
+    if (!tag) return ''
+    const content = tag[0].match(/\bcontent=["']([^"']*)["']/i)
+    return content ? content[1].trim() : ''
+}
+
+/**
+ * Read the href of `<link rel="canonical">`.
+ * @param {string} html - HTML source
+ * @returns {string} canonical URL, or '' if absent
+ */
+export function extractCanonical(html = '') {
+    if (!html) return ''
+    const tag = html.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/i)
+    if (!tag) return ''
+    const href = tag[0].match(/\bhref=["']([^"']+)["']/i)
+    return href ? href[1].trim() : ''
+}
+
+/**
+ * Extract the indexing-relevant directives from a page's HTML.
+ * @param {string} html - HTML source
+ * @returns {{robots: string, googlebot: string, canonical: string}}
+ */
+export function extractIndexingMeta(html = '') {
+    return {
+        robots: extractMetaContent(html, 'robots'),
+        googlebot: extractMetaContent(html, 'googlebot'),
+        canonical: extractCanonical(html)
+    }
+}
+
+/**
  * Flatten JSON-LD blocks into the type-bearing nodes (handles arrays and
  * @graph nesting).
  * @param {Array<object>} blocks - Parsed JSON-LD objects
@@ -273,7 +313,7 @@ export async function fetchResource(url) {
             return {available: false, status: response.status, content: '', contentType: ''}
         }
         const data = await response.json()
-        return {available: true, status: 200, content: data.html || '', contentType: data.contentType || ''}
+        return {available: true, status: 200, content: data.html || '', contentType: data.contentType || '', xRobotsTag: data.xRobotsTag || ''}
     } catch (error) {
         return {available: false, status: 0, content: '', contentType: '', error: error.message}
     }

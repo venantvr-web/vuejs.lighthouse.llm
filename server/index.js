@@ -110,24 +110,26 @@ app.post('/api/fetch-page', async (req, res) => {
         }
 
         const contentType = response.headers.get('content-type') || ''
+        // X-Robots-Tag est un signal d'indexabilité porté par l'en-tête HTTP
+        const xRobotsTag = response.headers.get('x-robots-tag') || ''
 
         // Handle HTML content
         if (contentType.includes('text/html') || contentType.includes('application/xhtml')) {
             const html = await response.text()
-            return res.json({html, contentType, url: response.url})
+            return res.json({html, contentType, url: response.url, xRobotsTag})
         }
 
         // Handle XML (sitemap)
         if (contentType.includes('xml')) {
             const xml = await response.text()
-            return res.json({html: xml, contentType, url: response.url})
+            return res.json({html: xml, contentType, url: response.url, xRobotsTag})
         }
 
         // Handle plain text and untyped responses (robots.txt, llms.txt, sitemaps
         // served as text/plain). Other resources rely on these text bodies.
         if (contentType.includes('text/') || contentType === '') {
             const text = await response.text()
-            return res.json({html: text, contentType, url: response.url})
+            return res.json({html: text, contentType, url: response.url, xRobotsTag})
         }
 
         // Other content types

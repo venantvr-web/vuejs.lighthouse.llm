@@ -2,7 +2,10 @@ import {describe, expect, it} from 'vitest'
 import {
     computeGeoReadiness,
     detectResourceChanges,
+    extractCanonical,
+    extractIndexingMeta,
     extractJsonLd,
+    extractMetaContent,
     extractSitemapLocs,
     jsonLdTypes,
     originFromUrl,
@@ -199,6 +202,33 @@ describe('services/resourceCheck - pure helpers', () => {
         it('returns nothing without a previous snapshot or when stable', () => {
             expect(detectResourceChanges({readiness: 80, brokenCount: 0}, null)).toEqual([])
             expect(detectResourceChanges({readiness: 80, brokenCount: 0}, {readiness: 80, brokenCount: 0})).toEqual([])
+        })
+    })
+
+    describe('indexing meta extraction', () => {
+        it('reads meta robots regardless of attribute order', () => {
+            expect(extractMetaContent('<meta name="robots" content="noindex, nofollow">', 'robots')).toBe('noindex, nofollow')
+            expect(extractMetaContent('<meta content="index" name="robots">', 'robots')).toBe('index')
+        })
+
+        it('is case-insensitive and supports single quotes', () => {
+            expect(extractMetaContent("<META NAME='googlebot' CONTENT='noindex'>", 'googlebot')).toBe('noindex')
+        })
+
+        it('returns empty string when the meta is absent', () => {
+            expect(extractMetaContent('<meta name="description" content="x">', 'robots')).toBe('')
+            expect(extractMetaContent('', 'robots')).toBe('')
+        })
+
+        it('extracts the canonical href', () => {
+            expect(extractCanonical('<link rel="canonical" href="https://example.com/page"/>')).toBe('https://example.com/page')
+            expect(extractCanonical('<link href="https://example.com/" rel="canonical">')).toBe('https://example.com/')
+            expect(extractCanonical('<link rel="stylesheet" href="/a.css">')).toBe('')
+        })
+
+        it('combines directives via extractIndexingMeta', () => {
+            const html = '<head><meta name="robots" content="noindex"><link rel="canonical" href="https://x.com/"></head>'
+            expect(extractIndexingMeta(html)).toEqual({robots: 'noindex', googlebot: '', canonical: 'https://x.com/'})
         })
     })
 })

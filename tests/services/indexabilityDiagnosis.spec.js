@@ -66,6 +66,17 @@ describe('buildIndexabilitySignals', () => {
         expect(s.totalSitemapUrls).toBe(0)
         expect(s.brokenPages.count).toBe(0)
         expect(s.readiness.score).toBeNull()
+        expect(s.meta).toEqual({robots: '', googlebot: '', xRobotsTag: '', canonical: '', noindex: false})
+    })
+
+    it('captures indexing directives and flags noindex', () => {
+        const s = buildIndexabilitySignals({
+            pageMeta: {robots: 'index, follow', googlebot: '', canonical: 'https://example.com/', xRobotsTag: 'noindex'}
+        })
+        expect(s.meta.robots).toBe('index, follow')
+        expect(s.meta.canonical).toBe('https://example.com/')
+        expect(s.meta.xRobotsTag).toBe('noindex')
+        expect(s.meta.noindex).toBe(true) // détecté via X-Robots-Tag
     })
 })
 
@@ -84,6 +95,9 @@ describe('buildIndexabilityPrompt', () => {
         expect(prompt).toContain('robots.txt : présent')
         expect(prompt).toContain('OUI') // blocage global détecté
         expect(prompt).toContain('GEO-readiness interne : 30/100')
+        expect(prompt).toContain('meta robots :')
+        expect(prompt).toContain('X-Robots-Tag :')
+        expect(prompt).toContain('lien canonical :')
         expect(prompt).toContain('Verdict')
         // déterministe : pas d'horodatage, deux appels identiques
         expect(buildIndexabilityPrompt(signals)).toBe(prompt)

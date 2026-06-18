@@ -16,7 +16,7 @@ import Sparkline from '@/components/common/Sparkline.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 
-const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourceCheck()
+const {checking, error, origin, resources, sitemaps, jsonLd, pageMeta, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
 const history = useResourceHistoryStore()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
@@ -38,6 +38,7 @@ const readinessTrend = ref([])
 
 const brokenPages = computed(() => pages.value.filter(p => !p.ok))
 const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value, {jsonLd: jsonLd.value.present}))
+const isNoindex = computed(() => /noindex/i.test([pageMeta.value.robots, pageMeta.value.googlebot, pageMeta.value.xRobotsTag].join(' ')))
 
 onMounted(() => history.initialize())
 
@@ -80,7 +81,8 @@ function handleDiagnose() {
     sitemaps: sitemaps.value,
     jsonLd: jsonLd.value,
     readiness: readiness.value,
-    brokenPages: brokenPages.value
+    brokenPages: brokenPages.value,
+    pageMeta: pageMeta.value
   })
 }
 
@@ -163,6 +165,17 @@ function exportDiagnosis() {
               {{ issue.type }} : champ(s) manquant(s) — {{ issue.missing.join(', ') }}
             </li>
           </ul>
+        </div>
+        <!-- Indexing directives (homepage) -->
+        <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Directives d'indexation (accueil)</p>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5 text-[11px]">
+            <li><span class="text-gray-400 dark:text-gray-500">meta robots :</span> <span class="text-gray-700 dark:text-gray-300">{{ pageMeta.robots || '—' }}</span></li>
+            <li><span class="text-gray-400 dark:text-gray-500">X-Robots-Tag :</span> <span class="text-gray-700 dark:text-gray-300">{{ pageMeta.xRobotsTag || '—' }}</span></li>
+            <li><span class="text-gray-400 dark:text-gray-500">meta googlebot :</span> <span class="text-gray-700 dark:text-gray-300">{{ pageMeta.googlebot || '—' }}</span></li>
+            <li class="truncate" :title="pageMeta.canonical"><span class="text-gray-400 dark:text-gray-500">canonical :</span> <span class="text-gray-700 dark:text-gray-300">{{ pageMeta.canonical || '—' }}</span></li>
+          </ul>
+          <p v-if="isNoindex" class="mt-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">⚠️ noindex détecté sur la page d'accueil</p>
         </div>
       </div>
 

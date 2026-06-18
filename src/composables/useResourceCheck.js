@@ -1,5 +1,6 @@
 import {ref} from 'vue'
 import {
+    extractIndexingMeta,
     extractJsonLd,
     fetchResource,
     jsonLdTypes,
@@ -21,6 +22,7 @@ export function useResourceCheck() {
     const resources = ref([])
     const sitemaps = ref([])
     const jsonLd = ref({present: false, types: [], issues: []})
+    const pageMeta = ref({robots: '', googlebot: '', canonical: '', xRobotsTag: ''})
 
     /**
      * Run all checks for a URL.
@@ -38,6 +40,7 @@ export function useResourceCheck() {
         resources.value = []
         sitemaps.value = []
         jsonLd.value = {present: false, types: [], issues: []}
+        pageMeta.value = {robots: '', googlebot: '', canonical: '', xRobotsTag: ''}
 
         try {
             // Standard resources + homepage (for JSON-LD detection), in parallel
@@ -47,11 +50,12 @@ export function useResourceCheck() {
             ])
             resources.value = checked
 
-            // Structured data on the homepage
+            // Structured data + indexing directives on the homepage
             if (home.available) {
                 const blocks = extractJsonLd(home.content)
                 const types = jsonLdTypes(blocks)
                 jsonLd.value = {present: types.length > 0, types, issues: validateJsonLd(blocks)}
+                pageMeta.value = {...extractIndexingMeta(home.content), xRobotsTag: home.xRobotsTag || ''}
             }
 
             // Collect sitemap URLs: those declared in robots.txt + standard ones found
@@ -77,7 +81,7 @@ export function useResourceCheck() {
         }
     }
 
-    return {checking, error, origin, resources, sitemaps, jsonLd, check}
+    return {checking, error, origin, resources, sitemaps, jsonLd, pageMeta, check}
 }
 
 export default useResourceCheck

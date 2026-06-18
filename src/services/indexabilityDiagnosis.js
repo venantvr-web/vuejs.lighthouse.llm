@@ -60,7 +60,8 @@ export function buildIndexabilitySignals(state = {}) {
         sitemaps = [],
         jsonLd = {},
         readiness = {},
-        brokenPages = []
+        brokenPages = [],
+        pageMeta = {}
     } = state
 
     const byKey = Object.fromEntries(resources.map((r) => [r.key, r]))
@@ -68,6 +69,11 @@ export function buildIndexabilitySignals(state = {}) {
     const robotsContent = robots.content || ''
     const availableSitemaps = sitemaps.filter((s) => s.available)
     const totalSitemapUrls = availableSitemaps.reduce((sum, s) => sum + (s.count || 0), 0)
+
+    const metaRobots = pageMeta.robots || ''
+    const metaGooglebot = pageMeta.googlebot || ''
+    const xRobotsTag = pageMeta.xRobotsTag || ''
+    const noindex = /noindex/i.test(`${metaRobots} ${metaGooglebot} ${xRobotsTag}`)
 
     return {
         origin,
@@ -94,6 +100,13 @@ export function buildIndexabilitySignals(state = {}) {
             issues: jsonLd.issues || []
         },
         readiness: {score: readiness.score ?? null, signals: readiness.signals || []},
+        meta: {
+            robots: metaRobots,
+            googlebot: metaGooglebot,
+            xRobotsTag,
+            canonical: pageMeta.canonical || '',
+            noindex
+        },
         brokenPages: {
             count: brokenPages.length,
             sample: brokenPages.slice(0, 20).map((p) => ({url: p.url, status: p.status || 0}))
@@ -127,6 +140,12 @@ export function buildIndexabilityPrompt(signals) {
     lines.push(`- llms.txt : ${s.llms.present ? 'présent' : 'absent'} ; llms-full.txt : ${s.llmsFull.present ? 'présent' : 'absent'}`)
     lines.push(`- Données structurées JSON-LD (accueil) : ${s.jsonLd.present ? `présentes (${s.jsonLd.types.join(', ') || 'types non identifiés'})` : 'absentes'}`)
     s.jsonLd.issues.forEach((i) => lines.push(`  - Problème JSON-LD : ${i.type} — champs manquants : ${(i.missing || []).join(', ')}`))
+    lines.push('- Directives d\'indexation de la page d\'accueil :')
+    lines.push(`  - meta robots : ${s.meta.robots || '(absente)'}`)
+    lines.push(`  - meta googlebot : ${s.meta.googlebot || '(absente)'}`)
+    lines.push(`  - en-tête X-Robots-Tag : ${s.meta.xRobotsTag || '(absent)'}`)
+    lines.push(`  - lien canonical : ${s.meta.canonical || '(absent)'}`)
+    lines.push(`  - noindex détecté : ${s.meta.noindex ? 'OUI ⚠️' : 'non'}`)
     if (s.readiness.score != null) lines.push(`- Score GEO-readiness interne : ${s.readiness.score}/100`)
     lines.push(`- URL cassées détectées (crawl sitemap) : ${s.brokenPages.count}`)
     s.brokenPages.sample.forEach((p) => lines.push(`  - ${p.url} (${p.status || 'erreur'})`))
@@ -147,7 +166,7 @@ export function buildIndexabilityPrompt(signals) {
     lines.push('2. **Points bloquants** : liste priorisée (impact, effort), du plus grave au moins grave.')
     lines.push('3. **Recommandations** : actions concrètes et vérifiables pour chaque problème.')
     lines.push('4. **Points positifs** : ce qui est déjà correct.')
-    lines.push("Ne te base que sur les éléments fournis, n'invente pas de données, et signale les angles morts non mesurés ici (par ex. balises meta robots / canonical, en-têtes X-Robots-Tag, statut d'indexation réel).")
+    lines.push("Ne te base que sur les éléments fournis, n'invente pas de données, et signale les angles morts non mesurés ici (par ex. directives au-delà de la page d'accueil, balises hreflang, statut d'indexation réel en Search Console).")
 
     return lines.join('\n')
 }

@@ -1,4 +1,5 @@
 <script setup>
+import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
@@ -93,40 +94,7 @@ function handleDismissError() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-5xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link class="flex items-center gap-3" to="/">
-              <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Lighthouse AI Analyzer
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Analyse locale via Chromium
-                </p>
-              </div>
-            </router-link>
-          </div>
-
-          <router-link
-              class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              to="/settings"
-          >
-            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
-                    stroke-width="2"/>
-              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </router-link>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Analyse locale via Chromium" title="Lighthouse local"/>
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center p-4">

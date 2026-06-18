@@ -1,4 +1,5 @@
 <script setup>
+import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
@@ -224,69 +225,31 @@ onUnmounted(() => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-5xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link class="flex items-center gap-3" to="/">
-              <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Mode Crawl
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Analyse multi-pages par templates
-                </p>
-              </div>
-            </router-link>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <!-- Onboarding button -->
-            <button
-                class="header-btn"
-                title="Guide d'utilisation"
-                type="button"
-                @click="showOnboarding = true"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              <span class="hidden sm:inline">Guide</span>
-            </button>
-
-            <!-- History button -->
-            <router-link
-                class="header-btn"
-                title="Historique des crawls"
-                to="/crawl/history"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              <span class="hidden sm:inline">Historique</span>
-            </router-link>
-
-            <!-- Settings button -->
-            <router-link
-                class="header-btn"
-                title="Paramètres"
-                to="/settings"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              <span class="hidden sm:inline">Paramètres</span>
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Analyse multi-pages par templates" title="Mode Crawl">
+      <template #actions>
+        <button
+            class="header-btn"
+            title="Guide d'utilisation"
+            type="button"
+            @click="showOnboarding = true"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          <span class="hidden sm:inline">Guide</span>
+        </button>
+        <router-link
+            class="header-btn"
+            title="Historique des crawls"
+            to="/crawl/history"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          <span class="hidden sm:inline">Historique</span>
+        </router-link>
+      </template>
+    </AppHeader>
 
     <!-- Main content -->
     <main class="flex-1 p-4">

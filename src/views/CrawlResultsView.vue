@@ -1,4 +1,5 @@
 <script setup>
+import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
@@ -276,68 +277,47 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link class="flex items-center gap-3" to="/crawl">
-              <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Resultats du Crawl
-                </h1>
-                <p v-if="session" class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ session.domain }} - {{ session.pagesAnalyzed }} pages analysees
-                </p>
-              </div>
-            </router-link>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <!-- Export buttons -->
-            <div v-if="session" class="flex items-center gap-1 mr-2">
-              <button
-                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-                  title="Exporter en JSON"
-                  @click="exportJSON"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-                JSON
-              </button>
-              <button
-                  class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-                  title="Exporter en PDF"
-                  @click="exportPDF"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-                PDF
-              </button>
-            </div>
-
-            <router-link
-                class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                to="/crawl/history"
-            >
-              Historique
-            </router-link>
-            <router-link
-                class="px-3 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-                to="/crawl"
-            >
-              Nouveau crawl
-            </router-link>
-          </div>
+    <AppHeader
+        :subtitle="session ? `${session.domain} - ${session.pagesAnalyzed} pages analysées` : ''"
+        title="Résultats du crawl"
+    >
+      <template #actions>
+        <div v-if="session" class="flex items-center gap-1 mr-2">
+          <button
+              class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+              title="Exporter en JSON"
+              @click="exportJSON"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            JSON
+          </button>
+          <button
+              class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+              title="Exporter en PDF"
+              @click="exportPDF"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            PDF
+          </button>
         </div>
-      </div>
-    </header>
+        <router-link
+            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            to="/crawl/history"
+        >
+          Historique
+        </router-link>
+        <router-link
+            class="px-3 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+            to="/crawl"
+        >
+          Nouveau crawl
+        </router-link>
+      </template>
+    </AppHeader>
 
     <!-- Main content -->
     <main class="flex-1 p-4">

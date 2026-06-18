@@ -1,4 +1,5 @@
 <script setup>
+import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
@@ -83,43 +84,13 @@ const clearReport = () => {
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-6xl mx-auto px-4 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <router-link class="flex items-center gap-2" to="/">
-              <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span class="font-bold text-gray-900 dark:text-white">Lighthouse AI</span>
-            </router-link>
-
-            <!-- URL badge -->
-            <div v-if="url" class="hidden sm:flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm">
-              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              <span class="text-gray-600 dark:text-gray-300 truncate max-w-xs">{{ url }}</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <router-link class="btn btn-ghost" to="/settings">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2"/>
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </router-link>
-            <button class="btn btn-secondary text-sm" @click="clearReport">
-              Nouveau rapport
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader :subtitle="url || ''" title="Tableau de bord">
+      <template #actions>
+        <button class="btn btn-secondary text-sm" @click="clearReport">
+          Nouveau rapport
+        </button>
+      </template>
+    </AppHeader>
 
     <!-- Loading state -->
     <div v-if="loading" class="flex items-center justify-center h-64">

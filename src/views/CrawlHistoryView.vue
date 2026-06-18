@@ -1,4 +1,5 @@
 <script setup>
+import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
@@ -184,56 +185,36 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-5xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link class="flex items-center gap-3" to="/crawl">
-              <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                  Historique des Crawls
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ sessions.length }} session{{ sessions.length > 1 ? 's' : '' }} enregistrée{{ sessions.length > 1 ? 's' : '' }}
-                </p>
-              </div>
-            </router-link>
-          </div>
-
-          <!-- Compare button -->
-          <button
-              v-if="!selectionMode && sessions.length >= 2"
-              class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
-              @click="enterSelectionMode"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-            Comparer
-          </button>
-
-          <button
-              v-if="selectionMode"
-              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
-              @click="exitSelectionMode"
-          >
-            Annuler
-          </button>
-
-          <router-link
-              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-              to="/crawl"
-          >
-            Nouveau crawl
-          </router-link>
-        </div>
-      </div>
-    </header>
+    <AppHeader
+        :subtitle="`${sessions.length} session${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}`"
+        title="Historique des crawls"
+    >
+      <template #actions>
+        <button
+            v-if="!selectionMode && sessions.length >= 2"
+            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
+            @click="enterSelectionMode"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          Comparer
+        </button>
+        <button
+            v-if="selectionMode"
+            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
+            @click="exitSelectionMode"
+        >
+          Annuler
+        </button>
+        <router-link
+            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+            to="/crawl"
+        >
+          Nouveau crawl
+        </router-link>
+      </template>
+    </AppHeader>
 
     <!-- Main content -->
     <main class="flex-1 p-4">

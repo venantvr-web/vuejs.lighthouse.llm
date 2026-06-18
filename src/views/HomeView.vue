@@ -25,6 +25,18 @@
 
           <!-- Header actions -->
           <div class="flex items-center gap-2">
+            <!-- Morning briefing -->
+            <router-link
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+                title="Briefing du matin"
+                to="/briefing"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36 6.36l-.7-.7M6.34 6.34l-.7-.7m12.72 0l-.7.7M6.34 17.66l-.7.7M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              Briefing
+            </router-link>
+
             <!-- Resources link -->
             <router-link
                 class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"

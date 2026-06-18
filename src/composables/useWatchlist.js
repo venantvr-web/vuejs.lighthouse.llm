@@ -1,5 +1,6 @@
 import {ref} from 'vue'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
+import {useSettingsStore} from '@/stores/settingsStore'
 import {useLighthouseParser} from '@/composables/useLighthouseParser'
 import {toSeries} from '@/utils/series'
 import {analyzeUrl as analyzePageSpeed} from '@/services/pageSpeedInsights'
@@ -89,6 +90,7 @@ export function analyzeAudit(item, latest, previous) {
  */
 export function useWatchlist() {
     const scoreHistory = useScoreHistoryStore()
+    const settings = useSettingsStore()
     const parser = useLighthouseParser()
 
     // Per-item enriched stats keyed by watchlist item id
@@ -150,7 +152,10 @@ export function useWatchlist() {
 
         try {
             const analyze = item.source === 'local' ? analyzeLocal : analyzePageSpeed
-            const report = await analyze(item.url, {strategy: item.strategy})
+            const report = await analyze(item.url, {
+                strategy: item.strategy,
+                apiKey: item.source === 'local' ? undefined : (settings.pageSpeedApiKey || null)
+            })
 
             const scores = extractScores(report)
             const coreWebVitals = parser.getCoreWebVitals(report)

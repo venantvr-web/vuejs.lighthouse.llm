@@ -36,6 +36,17 @@ describe('settingsStore - multi-provider keys', () => {
         expect(reloaded.providerKeys.gemini).toBe('g-key')
     })
 
+    it('stores and persists the PageSpeed API key', () => {
+        const store = useSettingsStore()
+        expect(store.pageSpeedApiKey).toBe('')
+        store.setPageSpeedApiKey('  AIza-test  ')
+        expect(store.pageSpeedApiKey).toBe('AIza-test')
+
+        setActivePinia(createPinia())
+        const reloaded = useSettingsStore()
+        expect(reloaded.pageSpeedApiKey).toBe('AIza-test')
+    })
+
     it('seeds the provider key from the legacy single key on load', () => {
         // Simulate a legacy settings blob with only the single apiKey set
         localStorage.setItem('lighthouse-settings', JSON.stringify({

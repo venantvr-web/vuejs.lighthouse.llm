@@ -1,51 +1,54 @@
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
+import {useSettingsStore} from '@/stores/settingsStore'
 
 const router = useRouter()
+const settings = useSettingsStore()
 
 const provider = ref('gemini')
 const apiKey = ref('')
 const model = ref('')
 const ollamaUrl = ref('http://localhost:11434')
+const pageSpeedKey = ref('')
 const saved = ref(false)
 
 const providers = [
-  {id: 'gemini', name: 'Google Gemini', models: ['gemini-1.5-flash', 'gemini-1.5-pro'], keyPlaceholder: 'AIza...'},
-  {id: 'openai', name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], keyPlaceholder: 'sk-...'},
-  {id: 'anthropic', name: 'Anthropic Claude', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], keyPlaceholder: 'sk-ant-...'},
-  {id: 'ollama', name: 'Ollama (Local)', models: ['llama3', 'mistral', 'codellama'], keyPlaceholder: ''}
+  {id: 'gemini', name: 'Google Gemini', keyPlaceholder: 'AIza...'},
+  {id: 'openai', name: 'OpenAI', keyPlaceholder: 'sk-...'},
+  {id: 'anthropic', name: 'Anthropic Claude', keyPlaceholder: 'sk-ant-...'},
+  {id: 'ollama', name: 'Ollama (Local)', keyPlaceholder: ''}
 ]
 
-const currentProvider = ref(providers[0])
+const currentProvider = computed(() => providers.find(p => p.id === provider.value) || providers[0])
+// Model choices come from the unified store (kept in sync with the provider)
+const models = computed(() => settings.modelOptions.map(m => m.value))
 
 onMounted(() => {
-  const settings = localStorage.getItem('llm-settings')
-  if (settings) {
-    const parsed = JSON.parse(settings)
-    provider.value = parsed.provider || 'gemini'
-    apiKey.value = parsed.apiKey || ''
-    model.value = parsed.model || ''
-    ollamaUrl.value = parsed.ollamaUrl || 'http://localhost:11434'
-  }
-  currentProvider.value = providers.find(p => p.id === provider.value) || providers[0]
-  if (!model.value) {
-    model.value = currentProvider.value.models[0]
-  }
+  provider.value = settings.llmProvider
+  apiKey.value = settings.providerKeys[settings.llmProvider] || settings.apiKey || ''
+  model.value = settings.currentModel
+  ollamaUrl.value = settings.ollamaBaseUrl
+  pageSpeedKey.value = settings.pageSpeedApiKey
 })
 
 watch(provider, (newProvider) => {
-  currentProvider.value = providers.find(p => p.id === newProvider) || providers[0]
-  model.value = currentProvider.value.models[0]
+  // Reflect the provider in the store so model options update, then preload its key
+  settings.setLLMProvider(newProvider)
+  model.value = settings.currentModel
+  apiKey.value = settings.providerKeys[newProvider] || (newProvider === settings.currentProvider ? settings.apiKey : '') || ''
 })
 
 const saveSettings = () => {
-  localStorage.setItem('llm-settings', JSON.stringify({
-    provider: provider.value,
-    apiKey: apiKey.value,
-    model: model.value,
-    ollamaUrl: ollamaUrl.value
-  }))
+  settings.setLLMProvider(provider.value)
+  settings.setLLMModel(model.value)
+  if (provider.value === 'ollama') {
+    settings.setOllamaBaseUrl(ollamaUrl.value)
+  } else {
+    settings.setAPIKey(apiKey.value)
+    settings.setProviderKey(provider.value, apiKey.value)
+  }
+  settings.setPageSpeedApiKey(pageSpeedKey.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
 }
@@ -141,7 +144,7 @@ const testConnection = async () => {
             Modele
           </label>
           <select v-model="model" class="input">
-            <option v-for="m in currentProvider.models" :key="m" :value="m">
+            <option v-for="m in models" :key="m" :value="m">
               {{ m }}
             </option>
           </select>
@@ -158,6 +161,34 @@ const testConnection = async () => {
           <button class="btn btn-secondary" @click="testConnection">
             Tester la connexion
           </button>
+        </div>
+      </div>
+
+      <!-- PageSpeed Insights -->
+      <div class="card p-6 mt-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Analyse PageSpeed</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            L'API PageSpeed Insights fonctionne sans clé, mais avec un quota très limité.
+            Une clé est recommandée pour la Watchlist et les analyses répétées.
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Clé API PageSpeed (optionnelle)
+          </label>
+          <input
+              v-model="pageSpeedKey"
+              class="input"
+              placeholder="AIza..."
+              type="password"
+          />
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Stockée localement.
+            <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">
+              Obtenir une clé
+            </a>
+          </p>
         </div>
       </div>
 

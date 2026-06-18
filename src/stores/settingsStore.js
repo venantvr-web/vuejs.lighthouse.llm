@@ -20,6 +20,9 @@ export const useSettingsStore = defineStore('settings', () => {
     // State - Google Search Console OAuth client id (BYO, browser OAuth)
     const searchConsoleClientId = ref('')
 
+    // State - PageSpeed Insights API key (optional; raises the request quota)
+    const pageSpeedApiKey = ref('')
+
     // State - Ollama Configuration
     const ollamaBaseUrl = ref('http://localhost:11434')
     const ollamaModel = ref('llama3.2')
@@ -39,7 +42,7 @@ export const useSettingsStore = defineStore('settings', () => {
         if (llmProvider.value === 'ollama') {
             return !!ollamaBaseUrl.value && !!ollamaModel.value
         }
-        return !!apiKey.value
+        return !!apiKey.value || !!providerKeys.value[llmProvider.value]
     })
 
     const currentModel = computed(() => {
@@ -75,6 +78,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
     const modelOptions = computed(() => {
         switch (llmProvider.value) {
+            case 'gemini':
+                return [
+                    {value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash'},
+                    {value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
+                ]
             case 'openai':
                 return [
                     {value: 'gpt-4o', label: 'GPT-4o'},
@@ -107,7 +115,7 @@ export const useSettingsStore = defineStore('settings', () => {
      * @param {string} provider - 'openai' | 'anthropic' | 'ollama'
      */
     function setLLMProvider(provider) {
-        if (!['openai', 'anthropic', 'ollama'].includes(provider)) {
+        if (!['gemini', 'openai', 'anthropic', 'ollama'].includes(provider)) {
             console.error('Invalid LLM provider:', provider)
             return
         }
@@ -116,6 +124,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
         // Set default model for provider
         switch (provider) {
+            case 'gemini':
+                if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
+                    llmModel.value = 'gemini-1.5-flash'
+                }
+                break
             case 'openai':
                 if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
                     llmModel.value = 'gpt-4o'
@@ -174,6 +187,15 @@ export const useSettingsStore = defineStore('settings', () => {
      */
     function setSearchConsoleClientId(id) {
         searchConsoleClientId.value = (id || '').trim()
+        saveSettings()
+    }
+
+    /**
+     * Set the PageSpeed Insights API key (optional, raises the quota).
+     * @param {string} key - API key
+     */
+    function setPageSpeedApiKey(key) {
+        pageSpeedApiKey.value = (key || '').trim()
         saveSettings()
     }
 
@@ -284,6 +306,7 @@ export const useSettingsStore = defineStore('settings', () => {
                 apiKey: apiKey.value,
                 providerKeys: providerKeys.value,
                 searchConsoleClientId: searchConsoleClientId.value,
+                pageSpeedApiKey: pageSpeedApiKey.value,
                 temperature: temperature.value,
                 maxTokens: maxTokens.value,
                 ollamaBaseUrl: ollamaBaseUrl.value,
@@ -314,6 +337,7 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.apiKey !== undefined) apiKey.value = settings.apiKey
             if (settings.providerKeys) providerKeys.value = {...providerKeys.value, ...settings.providerKeys}
             if (settings.searchConsoleClientId) searchConsoleClientId.value = settings.searchConsoleClientId
+            if (settings.pageSpeedApiKey) pageSpeedApiKey.value = settings.pageSpeedApiKey
             if (settings.temperature !== undefined) temperature.value = settings.temperature
             if (settings.maxTokens !== undefined) maxTokens.value = settings.maxTokens
             if (settings.ollamaBaseUrl) ollamaBaseUrl.value = settings.ollamaBaseUrl
@@ -330,6 +354,36 @@ export const useSettingsStore = defineStore('settings', () => {
             }
         } catch (error) {
             console.error('Failed to load settings:', error)
+        }
+    }
+
+    /**
+     * One-time migration from the legacy standalone Settings storage
+     * ('llm-settings') into this unified store. Runs only if not migrated yet.
+     */
+    function migrateLegacyLlmSettings() {
+        const FLAG = `${STORAGE_KEY}-llm-migrated`
+        try {
+            if (localStorage.getItem(FLAG)) return
+            const legacy = localStorage.getItem('llm-settings')
+            if (legacy) {
+                const parsed = JSON.parse(legacy)
+                if (parsed.provider && ['gemini', 'openai', 'anthropic', 'ollama'].includes(parsed.provider)) {
+                    llmProvider.value = parsed.provider
+                }
+                if (parsed.model) llmModel.value = parsed.model
+                if (parsed.ollamaUrl) ollamaBaseUrl.value = parsed.ollamaUrl
+                if (parsed.apiKey) {
+                    apiKey.value = parsed.apiKey
+                    if (llmProvider.value !== 'ollama' && llmProvider.value in providerKeys.value) {
+                        providerKeys.value[llmProvider.value] = parsed.apiKey
+                    }
+                }
+                saveSettings()
+            }
+            localStorage.setItem(FLAG, 'true')
+        } catch (error) {
+            console.error('Failed to migrate legacy LLM settings:', error)
         }
     }
 
@@ -362,7 +416,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Auto-save on changes
     watch(
-        [llmProvider, llmModel, apiKey, providerKeys, searchConsoleClientId, temperature, maxTokens,
+        [llmProvider, llmModel, apiKey, providerKeys, searchConsoleClientId, pageSpeedApiKey, temperature, maxTokens,
             ollamaBaseUrl, ollamaModel, theme, showLineNumbers,
             autoAnalyze, saveHistory],
         () => {
@@ -373,6 +427,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Initialize
     loadSettings()
+    migrateLegacyLlmSettings()
 
     return {
         // State
@@ -381,6 +436,7 @@ export const useSettingsStore = defineStore('settings', () => {
         apiKey,
         providerKeys,
         searchConsoleClientId,
+        pageSpeedApiKey,
         temperature,
         maxTokens,
         ollamaBaseUrl,
@@ -404,6 +460,7 @@ export const useSettingsStore = defineStore('settings', () => {
         setAPIKey,
         setProviderKey,
         setSearchConsoleClientId,
+        setPageSpeedApiKey,
         setTemperature,
         setMaxTokens,
         setOllamaBaseUrl,
@@ -415,6 +472,7 @@ export const useSettingsStore = defineStore('settings', () => {
         updateLLMConfig,
         saveSettings,
         loadSettings,
+        migrateLegacyLlmSettings,
         resetSettings,
         clearAPIKey
     }

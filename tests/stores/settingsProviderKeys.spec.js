@@ -36,6 +36,17 @@ describe('settingsStore - multi-provider keys', () => {
         expect(reloaded.providerKeys.gemini).toBe('g-key')
     })
 
+    it('stores and persists the PageSpeed API key', () => {
+        const store = useSettingsStore()
+        expect(store.pageSpeedApiKey).toBe('')
+        store.setPageSpeedApiKey('  AIza-test  ')
+        expect(store.pageSpeedApiKey).toBe('AIza-test')
+
+        setActivePinia(createPinia())
+        const reloaded = useSettingsStore()
+        expect(reloaded.pageSpeedApiKey).toBe('AIza-test')
+    })
+
     it('seeds the provider key from the legacy single key on load', () => {
         // Simulate a legacy settings blob with only the single apiKey set
         localStorage.setItem('lighthouse-settings', JSON.stringify({
@@ -45,5 +56,35 @@ describe('settingsStore - multi-provider keys', () => {
         const store = useSettingsStore()
         expect(store.providerKeys.openai).toBe('sk-legacy')
         expect(store.geoProviders.find(p => p.id === 'openai').ready).toBe(true)
+    })
+
+    it('supports gemini as a provider', () => {
+        const store = useSettingsStore()
+        store.setLLMProvider('gemini')
+        expect(store.llmProvider).toBe('gemini')
+        expect(store.currentModel).toBe('gemini-1.5-flash')
+        expect(store.modelOptions.length).toBeGreaterThan(0)
+    })
+
+    it('migrates the legacy llm-settings storage into the store', () => {
+        localStorage.setItem('llm-settings', JSON.stringify({
+            provider: 'gemini',
+            apiKey: 'AIza-legacy',
+            model: 'gemini-1.5-pro',
+            ollamaUrl: 'http://localhost:11434'
+        }))
+        const store = useSettingsStore()
+        expect(store.llmProvider).toBe('gemini')
+        expect(store.llmModel).toBe('gemini-1.5-pro')
+        expect(store.apiKey).toBe('AIza-legacy')
+        expect(store.providerKeys.gemini).toBe('AIza-legacy')
+        expect(store.isConfigured).toBe(true)
+    })
+
+    it('treats a provider key alone as configured', () => {
+        const store = useSettingsStore()
+        store.setLLMProvider('openai')
+        store.setProviderKey('openai', 'sk-only-in-providerkeys')
+        expect(store.isConfigured).toBe(true)
     })
 })

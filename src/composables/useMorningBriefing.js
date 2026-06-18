@@ -2,6 +2,8 @@ import {computed, ref} from 'vue'
 import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useGeoStore} from '@/stores/geoStore'
 import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
+import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
+import {useSettingsStore} from '@/stores/settingsStore'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useResourceCheck} from '@/composables/useResourceCheck'
@@ -10,6 +12,8 @@ import {computeGeoReadiness, originFromUrl} from '@/services/resourceCheck'
 import {checkServerHealth} from '@/services/localLighthouse'
 
 const PERF_REGRESSION = 0.03
+// A clicks drop of 20% or more between two GSC snapshots is worth surfacing.
+const CLICKS_DROP_RATIO = 0.2
 
 const CATEGORY_LABELS = {
     performance: 'Performance',
@@ -28,9 +32,10 @@ const CATEGORY_LABELS = {
  * @param {object} data.resourceByOrigin - { origin: { latest, previous } } snapshots
  * @param {Array} data.geoItems - GEO tracked prompts
  * @param {object} data.geoStats - Per-prompt GEO stats (statsById)
+ * @param {object} data.searchConsole - { site: [snapshots newest-first] }
  * @returns {Array<{level: 'critical'|'warning', site: string, message: string}>}
  */
-export function buildDigest({items = [], watchStats = {}, resourceByOrigin = {}, geoItems = [], geoStats = {}} = {}) {
+export function buildDigest({items = [], watchStats = {}, resourceByOrigin = {}, geoItems = [], geoStats = {}, searchConsole = {}} = {}) {
     const alerts = []
 
     // Watchlist: regressions and budget breaches
@@ -62,6 +67,16 @@ export function buildDigest({items = [], watchStats = {}, resourceByOrigin = {},
         }
     }
 
+    // Search Console: clicks dropping between the two latest snapshots
+    for (const [site, snaps] of Object.entries(searchConsole)) {
+        const latest = snaps?.[0]
+        const previous = snaps?.[1]
+        if (!latest || !previous || !previous.clicks) continue
+        if (latest.clicks <= previous.clicks * (1 - CLICKS_DROP_RATIO)) {
+            alerts.push({level: 'warning', site, message: `Clics Search Console en baisse (${previous.clicks} → ${latest.clicks})`})
+        }
+    }
+
     // GEO: brand absent from every engine
     for (const item of geoItems) {
         const stats = geoStats[item.id]
@@ -82,25 +97,33 @@ export function useMorningBriefing() {
     const watchlistStore = useWatchlistStore()
     const geoStore = useGeoStore()
     const resourceHistory = useResourceHistoryStore()
+    const searchConsoleHistory = useSearchConsoleHistoryStore()
+    const settings = useSettingsStore()
     const watch = useWatchlist()
     const geo = useGeoTracking()
     const resourceCheck = useResourceCheck()
 
     const resourceByOrigin = ref({})
+    const searchConsole = ref({})
     const running = ref(false)
     const progress = ref({done: 0, total: 0})
     const lastRunAt = ref(null)
+    // GEO runs cost LLM calls, so it is opt-in for the morning run.
+    const includeGeo = ref(false)
 
     const items = computed(() => watchlistStore.sortedItems)
     const geoItems = computed(() => geoStore.sortedItems)
     const origins = computed(() => [...new Set(items.value.map(i => originFromUrl(i.url)).filter(Boolean))])
+    const geoProviders = computed(() => settings.geoProviders.filter(p => p.ready))
+    const geoAvailable = computed(() => geoItems.value.length > 0 && geoProviders.value.length > 0)
 
     const digest = computed(() => buildDigest({
         items: items.value,
         watchStats: watch.statsById.value,
         resourceByOrigin: resourceByOrigin.value,
         geoItems: geoItems.value,
-        geoStats: geo.statsById.value
+        geoStats: geo.statsById.value,
+        searchConsole: searchConsole.value
     }))
 
     /**
@@ -108,6 +131,7 @@ export function useMorningBriefing() {
      */
     async function load() {
         await resourceHistory.initialize()
+        await searchConsoleHistory.initialize()
         await watch.loadStats(items.value)
         await geo.loadStats(geoItems.value)
 
@@ -117,6 +141,7 @@ export function useMorningBriefing() {
             byOrigin[origin] = {latest: snaps[0] || null, previous: snaps[1] || null}
         }
         resourceByOrigin.value = byOrigin
+        searchConsole.value = await searchConsoleHistory.getSnapshotsBySite()
     }
 
     /**
@@ -126,7 +151,13 @@ export function useMorningBriefing() {
     async function runChecks() {
         running.value = true
         const serverHealthy = (await checkServerHealth().catch(() => ({available: false}))).available
-        progress.value = {done: 0, total: items.value.length + (serverHealthy ? origins.value.length : 0)}
+        const runGeo = includeGeo.value && geoAvailable.value
+        progress.value = {
+            done: 0,
+            total: items.value.length
+                + (serverHealthy ? origins.value.length : 0)
+                + (runGeo ? geoItems.value.length : 0)
+        }
 
         try {
             for (const item of items.value) {
@@ -147,6 +178,14 @@ export function useMorningBriefing() {
                 }
             }
 
+            // GEO (opt-in): keep it cheap — no advanced second call
+            if (runGeo) {
+                for (const item of geoItems.value) {
+                    await geo.runPrompt(item, geoProviders.value, {advancedAnalysis: false})
+                    progress.value = {...progress.value, done: progress.value.done + 1}
+                }
+            }
+
             await load()
             lastRunAt.value = Date.now()
         } finally {
@@ -160,10 +199,13 @@ export function useMorningBriefing() {
         watchStats: watch.statsById,
         geoStats: geo.statsById,
         resourceByOrigin,
+        searchConsole,
         digest,
         running,
         progress,
         lastRunAt,
+        includeGeo,
+        geoAvailable,
         load,
         runChecks
     }

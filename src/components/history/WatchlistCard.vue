@@ -1,6 +1,7 @@
 <script setup>
 import {computed} from 'vue'
 import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
+import {breachedCategories as computeBreached} from '@/utils/budgets'
 import Sparkline from '@/components/common/Sparkline.vue'
 
 const props = defineProps({
@@ -21,18 +22,7 @@ const CATEGORIES = [
 ]
 
 // Category ids whose latest score is below the item's configured budget
-const breachedCategories = computed(() => {
-  const scores = props.stats?.latest?.scores
-  const budgets = props.item.budgets
-  if (!scores || !budgets) return []
-  return CATEGORIES
-      .filter(cat => {
-        const budget = budgets[cat.id]
-        const score = scores[cat.id]
-        return typeof budget === 'number' && typeof score === 'number' && Math.round(score * 100) < budget
-      })
-      .map(cat => cat.id)
-})
+const breachedCategories = computed(() => computeBreached(props.item.budgets, props.stats?.latest?.scores))
 
 function deltaPoints(delta) {
   if (typeof delta !== 'number') return null

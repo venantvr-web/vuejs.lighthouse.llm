@@ -1,4 +1,5 @@
 import {ref} from 'vue'
+import {toSeries} from '@/utils/series'
 
 const SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
@@ -70,11 +71,7 @@ export function summarizeRows(rows = []) {
  * @returns {number[]}
  */
 export function snapshotSeries(snapshots = [], metric = 'clicks', limit = 12) {
-    return [...snapshots]
-        .reverse()
-        .map(s => (typeof s[metric] === 'number' ? Math.round(s[metric]) : null))
-        .filter(v => v !== null)
-        .slice(-limit)
+    return toSeries(snapshots, s => (typeof s[metric] === 'number' ? Math.round(s[metric]) : null), {limit})
 }
 
 // ── Browser OAuth + API (not unit-testable; needs a real browser + Google) ────

@@ -2,6 +2,7 @@
 import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {buildLLMProvider} from '@/services/llm/buildProvider'
 
 const router = useRouter()
 const settings = useSettingsStore()
@@ -21,13 +22,22 @@ const providers = [
 ]
 
 const currentProvider = computed(() => providers.find(p => p.id === provider.value) || providers[0])
-// Model choices come from the unified store (kept in sync with the provider)
-const models = computed(() => settings.modelOptions.map(m => m.value))
+
+// Model choices: live list fetched from the provider if available, else the
+// store's curated list. Each entry is { value, label }.
+const dynamicModels = ref(null)
+const loadingModels = ref(false)
+const modelError = ref('')
+const modelOptions = computed(() => dynamicModels.value || settings.modelOptions)
 
 onMounted(() => {
   provider.value = settings.llmProvider
   apiKey.value = settings.providerKeys[settings.llmProvider] || settings.apiKey || ''
   model.value = settings.currentModel
+  // Fall back to a valid model if the stored one is no longer offered
+  if (!modelOptions.value.some(m => m.value === model.value)) {
+    model.value = modelOptions.value[0]?.value || ''
+  }
   ollamaUrl.value = settings.ollamaBaseUrl
   pageSpeedKey.value = settings.pageSpeedApiKey
 })
@@ -35,9 +45,46 @@ onMounted(() => {
 watch(provider, (newProvider) => {
   // Reflect the provider in the store so model options update, then preload its key
   settings.setLLMProvider(newProvider)
+  dynamicModels.value = null
+  modelError.value = ''
   model.value = settings.currentModel
   apiKey.value = settings.providerKeys[newProvider] || (newProvider === settings.currentProvider ? settings.apiKey : '') || ''
 })
+
+// Fetch the live model list from the provider (Gemini supports ListModels)
+const loadModels = async () => {
+  modelError.value = ''
+  if (provider.value !== 'ollama' && !apiKey.value) {
+    modelError.value = 'Renseignez une clé API d\'abord.'
+    return
+  }
+  loadingModels.value = true
+  try {
+    // Persist the entered key so the provider is built with it
+    if (provider.value !== 'ollama') {
+      settings.setAPIKey(apiKey.value)
+      settings.setProviderKey(provider.value, apiKey.value)
+    }
+    const instance = buildLLMProvider(settings, provider.value, model.value)
+    if (typeof instance.listModels !== 'function') {
+      modelError.value = 'Liste dynamique non disponible pour ce fournisseur.'
+      return
+    }
+    const list = await instance.listModels()
+    if (!list.length) {
+      modelError.value = 'Aucun modèle retourné.'
+      return
+    }
+    dynamicModels.value = list
+    if (!list.some(m => m.value === model.value)) {
+      model.value = list[0].value
+    }
+  } catch (e) {
+    modelError.value = `Échec du chargement : ${e.message}`
+  } finally {
+    loadingModels.value = false
+  }
+}
 
 const saveSettings = () => {
   settings.setLLMProvider(provider.value)
@@ -140,14 +187,26 @@ const testConnection = async () => {
 
         <!-- Model selection -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Modele
-          </label>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Modèle
+            </label>
+            <button
+                v-if="provider !== 'ollama'"
+                :disabled="loadingModels"
+                class="text-xs text-primary-600 dark:text-primary-400 hover:underline disabled:opacity-50"
+                type="button"
+                @click="loadModels"
+            >
+              {{ loadingModels ? 'Chargement…' : 'Charger les modèles disponibles' }}
+            </button>
+          </div>
           <select v-model="model" class="input">
-            <option v-for="m in models" :key="m" :value="m">
-              {{ m }}
+            <option v-for="m in modelOptions" :key="m.value" :value="m.value">
+              {{ m.label }}
             </option>
           </select>
+          <p v-if="modelError" class="mt-2 text-xs text-red-500">{{ modelError }}</p>
         </div>
 
         <!-- Actions -->

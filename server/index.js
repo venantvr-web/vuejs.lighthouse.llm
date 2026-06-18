@@ -6,6 +6,7 @@
 import express from 'express'
 import cors from 'cors'
 import {analyzeUrl, checkChrome} from './lighthouse.js'
+import {FETCH_HEADERS, USER_AGENT} from './config.js'
 
 const app = express()
 const PORT = process.env.LIGHTHOUSE_PORT || 3001
@@ -97,11 +98,7 @@ app.post('/api/fetch-page', async (req, res) => {
 
     try {
         const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; LighthouseCrawler/1.0)',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8'
-            },
+            headers: FETCH_HEADERS,
             redirect: 'follow'
         })
 
@@ -165,7 +162,7 @@ app.post('/api/check-url', async (req, res) => {
         const response = await fetch(url, {
             method: 'GET',
             redirect: 'follow',
-            headers: {'User-Agent': 'Mozilla/5.0 (compatible; LighthouseCrawler/1.0)'}
+            headers: {'User-Agent': USER_AGENT}
         })
         return res.json({ok: response.ok, status: response.status, url: response.url})
     } catch (error) {

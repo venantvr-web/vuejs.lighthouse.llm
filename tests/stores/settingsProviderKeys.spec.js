@@ -62,7 +62,7 @@ describe('settingsStore - multi-provider keys', () => {
         const store = useSettingsStore()
         store.setLLMProvider('gemini')
         expect(store.llmProvider).toBe('gemini')
-        expect(store.currentModel).toBe('gemini-1.5-flash')
+        expect(store.currentModel).toBe('gemini-2.5-flash')
         expect(store.modelOptions.length).toBeGreaterThan(0)
     })
 

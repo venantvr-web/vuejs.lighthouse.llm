@@ -65,7 +65,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const GEO_PROVIDER_MODELS = {
         openai: 'gpt-4o-mini',
         anthropic: 'claude-3-5-haiku-20241022',
-        gemini: 'gemini-1.5-flash'
+        gemini: 'gemini-2.5-flash'
     }
 
     // Providers available for GEO tracking, with readiness based on keys/config
@@ -80,8 +80,10 @@ export const useSettingsStore = defineStore('settings', () => {
         switch (llmProvider.value) {
             case 'gemini':
                 return [
-                    {value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash'},
-                    {value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
+                    {value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash'},
+                    {value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro'},
+                    {value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite'},
+                    {value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash'}
                 ]
             case 'openai':
                 return [
@@ -126,7 +128,7 @@ export const useSettingsStore = defineStore('settings', () => {
         switch (provider) {
             case 'gemini':
                 if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
-                    llmModel.value = 'gemini-1.5-flash'
+                    llmModel.value = 'gemini-2.5-flash'
                 }
                 break
             case 'openai':

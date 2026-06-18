@@ -8,6 +8,7 @@ L'application est **« local-first »** : aucune donnée n'est envoyée à un se
 
 ## ✨ Fonctionnalités
 
+- **Briefing du matin** : tableau de bord unifié qui agrège Watchlist, Ressources et GEO ; un fil **« à traiter aujourd'hui »** (diff depuis la veille : régressions, budgets, 404, baisse de readiness, marque absente des IA) et un bouton **« Lancer les contrôles du matin »** qui relance tout en un clic.
 - **Trois sources d'audit** : API Google PageSpeed Insights, Chromium local (via un serveur Node), ou import d'un fichier JSON Lighthouse.
 - **Analyse par IA** : recommandations générées via Gemini, OpenAI, Claude (Anthropic) ou Ollama, à partir de gabarits de prompts versionnés.
 - **Mode Crawl** : analyse de plusieurs pages d'un site avec agrégation des scores par gabarit (template).

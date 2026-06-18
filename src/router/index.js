@@ -49,6 +49,11 @@ const routes = [
         component: () => import('@/views/HistoryView.vue')
     },
     {
+        path: '/briefing',
+        name: 'briefing',
+        component: () => import('@/views/BriefingView.vue')
+    },
+    {
         path: '/watchlist',
         name: 'watchlist',
         component: () => import('@/views/WatchlistView.vue')

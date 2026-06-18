@@ -140,8 +140,10 @@ export function useMorningBriefing() {
         searchConsole: searchConsole.value
     }))
 
-    // Total-alerts trend across saved runs (oldest-first, for a sparkline)
+    // Alert trends across saved runs (oldest-first, for sparklines)
     const digestTrend = computed(() => toSeries(history.value, s => (typeof s.total === 'number' ? s.total : null)))
+    const criticalTrend = computed(() => toSeries(history.value, s => (typeof s.critical === 'number' ? s.critical : null)))
+    const warningTrend = computed(() => toSeries(history.value, s => (typeof s.warning === 'number' ? s.warning : null)))
 
     /**
      * Load the latest stored data (no network) to render the briefing.
@@ -224,6 +226,8 @@ export function useMorningBriefing() {
         searchConsole,
         digest,
         digestTrend,
+        criticalTrend,
+        warningTrend,
         history,
         running,
         progress,

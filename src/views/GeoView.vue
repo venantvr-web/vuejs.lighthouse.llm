@@ -3,6 +3,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useGeoStore} from '@/stores/geoStore'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
@@ -29,7 +30,7 @@ const addError = ref('')
 const runningAll = ref(false)
 const showKeyEditor = ref(false)
 const selectedProviderIds = ref([])
-const advancedAnalysis = ref(true)
+const advancedAnalysis = usePersistentRef('geo.advancedAnalysis', true)
 
 const items = computed(() => geoStore.sortedItems)
 const readyProviders = computed(() => settings.geoProviders.filter(p => p.ready))

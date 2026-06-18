@@ -5,6 +5,7 @@ import {snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/use
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
@@ -21,8 +22,8 @@ function siteHost(s) {
 }
 
 const selectedSite = ref('')
-const days = ref(28)
-const dimension = ref('query')
+const days = usePersistentRef('searchconsole.days', 28)
+const dimension = usePersistentRef('searchconsole.dimension', 'query')
 const rows = ref([])
 const clicksTrend = ref([])
 

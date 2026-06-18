@@ -3,6 +3,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useNotifications} from '@/composables/useNotifications'
 import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters'
@@ -45,8 +46,8 @@ function breachedCategories(item) {
 // Préremplissage silencieux à partir du site actif
 const newUrl = ref(site.origin)
 const newLabel = ref('')
-const newStrategy = ref('mobile')
-const newSource = ref('pagespeed')
+const newStrategy = usePersistentRef('watchlist.newStrategy', 'mobile')
+const newSource = usePersistentRef('watchlist.newSource', 'pagespeed')
 const addError = ref('')
 
 const refreshingAll = ref(false)

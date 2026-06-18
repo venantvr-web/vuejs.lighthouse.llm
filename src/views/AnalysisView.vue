@@ -6,6 +6,7 @@ import CategoryTabs from '@/components/analysis/CategoryTabs.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import {usePromptEngine} from '@/composables/usePromptEngine.js'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 
@@ -20,7 +21,7 @@ const analysisResult = ref('')
 const isStreaming = ref(false)
 const tokenCount = ref(0)
 const error = ref(null)
-const selectedTemplate = ref('quickAnalysis')
+const selectedTemplate = usePersistentRef('analysis.template', 'quickAnalysis')
 const availableTemplates = ref([])
 const selectedAudit = ref(null)
 const showPromptPreview = ref(false)

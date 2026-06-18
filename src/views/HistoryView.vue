@@ -9,6 +9,7 @@ import DomainList from '@/components/history/DomainList.vue'
 import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
@@ -50,7 +51,7 @@ watch(() => historyStore.currentScores, (scores) => {
 const chartsRef = ref(null)
 
 // Slug filter for charts
-const selectedSlugFilter = ref(null)
+const selectedSlugFilter = usePersistentRef('history.slugFilter', null)
 
 // Strategy filter for charts (mobile/desktop)
 const selectedStrategyFilter = ref('mobile')

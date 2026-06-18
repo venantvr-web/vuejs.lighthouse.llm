@@ -4,6 +4,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
 import {useSiteStore} from '@/stores/siteStore'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -18,7 +19,7 @@ const url = ref(site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)
-const strategy = ref(STRATEGIES.MOBILE)
+const strategy = usePersistentRef('local.strategy', STRATEGIES.MOBILE)
 
 // Server health state
 const serverAvailable = ref(false)

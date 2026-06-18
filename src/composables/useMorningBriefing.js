@@ -5,6 +5,7 @@ import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useBriefingHistoryStore} from '@/stores/briefingHistoryStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {toSeries} from '@/utils/series'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useGeoTracking} from '@/composables/useGeoTracking'
@@ -123,7 +124,7 @@ export function useMorningBriefing() {
     const progress = ref({done: 0, total: 0})
     const lastRunAt = ref(null)
     // GEO runs cost LLM calls, so it is opt-in for the morning run.
-    const includeGeo = ref(false)
+    const includeGeo = usePersistentRef('briefing.includeGeo', false)
 
     const items = computed(() => watchlistStore.sortedItems)
     const geoItems = computed(() => geoStore.sortedItems)

@@ -12,7 +12,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const llmModel = ref('gpt-4o')
     const apiKey = ref('')
     const temperature = ref(0.7)
-    const maxTokens = ref(2000)
+    const maxTokens = ref(8192)
 
     // State - Per-provider API keys (enables multi-provider GEO tracking)
     const providerKeys = ref({openai: '', anthropic: '', gemini: ''})
@@ -397,7 +397,7 @@ export const useSettingsStore = defineStore('settings', () => {
         llmModel.value = 'gpt-4o'
         apiKey.value = ''
         temperature.value = 0.7
-        maxTokens.value = 2000
+        maxTokens.value = 8192
         ollamaBaseUrl.value = 'http://localhost:11434'
         ollamaModel.value = 'llama3.2'
         theme.value = 'system'

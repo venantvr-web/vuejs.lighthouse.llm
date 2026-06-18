@@ -6,6 +6,7 @@ import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import {usePromptEngine} from '@/composables/usePromptEngine.js'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {buildLLMProvider} from '@/services/llm/buildProvider'
 
 const router = useRouter()
 const route = useRoute()
@@ -17,8 +18,6 @@ const activeCategory = ref('performance')
 const analysisResult = ref('')
 const isStreaming = ref(false)
 const tokenCount = ref(0)
-const apiKey = ref('')
-const selectedProvider = ref('gemini')
 const error = ref(null)
 const selectedTemplate = ref('quickAnalysis')
 const availableTemplates = ref([])
@@ -40,10 +39,6 @@ onMounted(async () => {
     router.push('/')
     return
   }
-
-  // Load LLM settings from the unified store
-  apiKey.value = settings.providerKeys[settings.llmProvider] || settings.apiKey || ''
-  selectedProvider.value = settings.currentProvider
 
   // Set category from route
   if (route.params.category) {
@@ -187,102 +182,12 @@ Réponds en français avec une structure Markdown claire.`
   }
 }
 
-const analyzeWithGemini = async (prompt) => {
-  const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?key=${apiKey.value}`,
-      {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          contents: [{parts: [{text: prompt}]}],
-          generationConfig: {temperature: 0.7, maxOutputTokens: 8192}
-        })
-      }
-  )
-
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
-
-  while (true) {
-    const {done, value} = await reader.read()
-    if (done) break
-
-    buffer += decoder.decode(value, {stream: true})
-
-    // Parse JSON chunks
-    const lines = buffer.split('\n')
-    buffer = lines.pop() || ''
-
-    for (const line of lines) {
-      if (line.trim()) {
-        try {
-          // Handle array format from Gemini streaming
-          const cleaned = line.replace(/^\[|\]$/g, '').replace(/^,/, '')
-          if (cleaned.trim()) {
-            const json = JSON.parse(cleaned)
-            const text = json.candidates?.[0]?.content?.parts?.[0]?.text
-            if (text) {
-              analysisResult.value += text
-              tokenCount.value += text.split(/\s+/).length
-            }
-          }
-        } catch (e) {
-          // Ignore parse errors for partial chunks
-        }
-      }
-    }
-  }
-}
-
-const analyzeWithOpenAI = async (prompt) => {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey.value}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {role: 'system', content: 'Tu es un expert technique. Réponds en Markdown.'},
-        {role: 'user', content: prompt}
-      ],
-      stream: true,
-      temperature: 0.7
-    })
-  })
-
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-
-  while (true) {
-    const {done, value} = await reader.read()
-    if (done) break
-
-    const chunk = decoder.decode(value)
-    const lines = chunk.split('\n').filter(line => line.startsWith('data: '))
-
-    for (const line of lines) {
-      const data = line.replace('data: ', '')
-      if (data === '[DONE]') return
-
-      try {
-        const parsed = JSON.parse(data)
-        const content = parsed.choices?.[0]?.delta?.content
-        if (content) {
-          analysisResult.value += content
-          tokenCount.value += 1
-        }
-      } catch (e) {
-      }
-    }
-  }
-}
+// Active provider instance, kept so the analysis can be aborted on cancel
+let activeProvider = null
 
 const startAnalysis = async () => {
-  if (!apiKey.value) {
-    error.value = 'Veuillez configurer votre clé API dans les paramètres'
+  if (!settings.isConfigured) {
+    error.value = 'Veuillez configurer un fournisseur LLM dans les paramètres'
     return
   }
 
@@ -294,20 +199,26 @@ const startAnalysis = async () => {
   const prompt = await buildPrompt()
 
   try {
-    if (selectedProvider.value === 'gemini') {
-      await analyzeWithGemini(prompt)
-    } else if (selectedProvider.value === 'openai') {
-      await analyzeWithOpenAI(prompt)
+    activeProvider = buildLLMProvider(settings, settings.currentProvider, settings.currentModel)
+    for await (const chunk of activeProvider.stream(prompt, {
+      systemMessage: 'Tu es un expert technique. Réponds en français, en Markdown.'
+    })) {
+      if (!isStreaming.value) break // cancelled
+      analysisResult.value += chunk
+      tokenCount.value += chunk.split(/\s+/).filter(Boolean).length
     }
   } catch (e) {
-    error.value = `Erreur: ${e.message}`
+    // Don't surface an error when the user cancelled the stream
+    if (isStreaming.value) error.value = `Erreur: ${e.message}`
   } finally {
     isStreaming.value = false
+    activeProvider = null
   }
 }
 
 const cancelAnalysis = () => {
   isStreaming.value = false
+  if (activeProvider) activeProvider.abort()
 }
 
 const exportAnalysis = () => {

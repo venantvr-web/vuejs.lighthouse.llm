@@ -5,10 +5,12 @@ import CategoryTabs from '@/components/analysis/CategoryTabs.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import {usePromptEngine} from '@/composables/usePromptEngine.js'
+import {useSettingsStore} from '@/stores/settingsStore'
 
 const router = useRouter()
 const route = useRoute()
 const promptEngine = usePromptEngine()
+const settings = useSettingsStore()
 
 const report = ref(null)
 const activeCategory = ref('performance')
@@ -39,13 +41,9 @@ onMounted(async () => {
     return
   }
 
-  // Load settings
-  const settings = localStorage.getItem('llm-settings')
-  if (settings) {
-    const parsed = JSON.parse(settings)
-    apiKey.value = parsed.apiKey || ''
-    selectedProvider.value = parsed.provider || 'gemini'
-  }
+  // Load LLM settings from the unified store
+  apiKey.value = settings.providerKeys[settings.llmProvider] || settings.apiKey || ''
+  selectedProvider.value = settings.currentProvider
 
   // Set category from route
   if (route.params.category) {

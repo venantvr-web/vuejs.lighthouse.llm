@@ -42,7 +42,7 @@ export const useSettingsStore = defineStore('settings', () => {
         if (llmProvider.value === 'ollama') {
             return !!ollamaBaseUrl.value && !!ollamaModel.value
         }
-        return !!apiKey.value
+        return !!apiKey.value || !!providerKeys.value[llmProvider.value]
     })
 
     const currentModel = computed(() => {
@@ -78,6 +78,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
     const modelOptions = computed(() => {
         switch (llmProvider.value) {
+            case 'gemini':
+                return [
+                    {value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash'},
+                    {value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
+                ]
             case 'openai':
                 return [
                     {value: 'gpt-4o', label: 'GPT-4o'},
@@ -110,7 +115,7 @@ export const useSettingsStore = defineStore('settings', () => {
      * @param {string} provider - 'openai' | 'anthropic' | 'ollama'
      */
     function setLLMProvider(provider) {
-        if (!['openai', 'anthropic', 'ollama'].includes(provider)) {
+        if (!['gemini', 'openai', 'anthropic', 'ollama'].includes(provider)) {
             console.error('Invalid LLM provider:', provider)
             return
         }
@@ -119,6 +124,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
         // Set default model for provider
         switch (provider) {
+            case 'gemini':
+                if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
+                    llmModel.value = 'gemini-1.5-flash'
+                }
+                break
             case 'openai':
                 if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
                     llmModel.value = 'gpt-4o'
@@ -348,6 +358,36 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     /**
+     * One-time migration from the legacy standalone Settings storage
+     * ('llm-settings') into this unified store. Runs only if not migrated yet.
+     */
+    function migrateLegacyLlmSettings() {
+        const FLAG = `${STORAGE_KEY}-llm-migrated`
+        try {
+            if (localStorage.getItem(FLAG)) return
+            const legacy = localStorage.getItem('llm-settings')
+            if (legacy) {
+                const parsed = JSON.parse(legacy)
+                if (parsed.provider && ['gemini', 'openai', 'anthropic', 'ollama'].includes(parsed.provider)) {
+                    llmProvider.value = parsed.provider
+                }
+                if (parsed.model) llmModel.value = parsed.model
+                if (parsed.ollamaUrl) ollamaBaseUrl.value = parsed.ollamaUrl
+                if (parsed.apiKey) {
+                    apiKey.value = parsed.apiKey
+                    if (llmProvider.value !== 'ollama' && llmProvider.value in providerKeys.value) {
+                        providerKeys.value[llmProvider.value] = parsed.apiKey
+                    }
+                }
+                saveSettings()
+            }
+            localStorage.setItem(FLAG, 'true')
+        } catch (error) {
+            console.error('Failed to migrate legacy LLM settings:', error)
+        }
+    }
+
+    /**
      * Reset all settings to defaults
      */
     function resetSettings() {
@@ -387,6 +427,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Initialize
     loadSettings()
+    migrateLegacyLlmSettings()
 
     return {
         // State
@@ -431,6 +472,7 @@ export const useSettingsStore = defineStore('settings', () => {
         updateLLMConfig,
         saveSettings,
         loadSettings,
+        migrateLegacyLlmSettings,
         resetSettings,
         clearAPIKey
     }

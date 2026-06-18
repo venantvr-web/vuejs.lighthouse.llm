@@ -10,6 +10,7 @@ import {buildBrokenUrlsCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
@@ -59,37 +60,18 @@ function exportBrokenCsv() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-5xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <router-link
-                class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                title="Accueil"
-                to="/"
-            >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </router-link>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 dark:text-white">Ressources SEO/GEO</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Disponibilité de robots.txt, sitemaps, llms.txt…
-              </p>
-            </div>
-          </div>
-          <button
-              v-if="notificationsSupported && notificationPermission !== 'granted'"
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-              title="Être alerté en cas de baisse du score ou de nouvelles URL cassées"
-              @click="requestPermission"
-          >
-            Activer les alertes
-          </button>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Disponibilité de robots.txt, sitemaps, llms.txt…" title="Ressources SEO/GEO">
+      <template #actions>
+        <button
+            v-if="notificationsSupported && notificationPermission !== 'granted'"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            title="Être alerté en cas de baisse du score ou de nouvelles URL cassées"
+            @click="requestPermission"
+        >
+          Activer les alertes
+        </button>
+      </template>
+    </AppHeader>
 
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
       <!-- Local server notice -->

@@ -7,6 +7,7 @@ import {downloadText} from '@/utils/download'
 import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
 import {usePeriodicSync} from '@/composables/usePeriodicSync'
 import Sparkline from '@/components/common/Sparkline.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const {
   items, geoItems, watchStats, resourceByOrigin, digest, criticalTrend, warningTrend, running, progress, lastRunAt,
@@ -62,69 +63,52 @@ const overview = computed(() => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <router-link
-                class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                title="Accueil"
-                to="/"
+    <AppHeader
+        :subtitle="lastRunAt ? `Derniers contrôles ${formatRelativeTime(lastRunAt)}` : 'Tout ce qui a bougé, en un coup d\'œil'"
+        title="Briefing du matin"
+    >
+      <template #actions>
+        <template v-if="!isEmpty">
+          <label
+              v-if="geoAvailable"
+              class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer"
+              title="Relance aussi le GEO (appels LLM facturés)"
+          >
+            <input v-model="includeGeo" class="rounded" type="checkbox"/>
+            Inclure GEO
+          </label>
+          <button
+              v-if="reminder.available"
+              :class="reminder.enabled.value ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'"
+              :title="reminder.status.value || 'Rappel quotidien (PWA installée, best-effort)'"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+              @click="reminder.toggle()"
+          >
+            {{ reminder.enabled.value ? '🔔 Rappel activé' : '🔔 Rappel quotidien' }}
+          </button>
+          <button
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+              title="Exporter le rapport (Markdown)"
+              @click="exportReport"
+          >
+            Rapport
+          </button>
+          <button
+              :disabled="running"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              @click="runChecks"
+          >
+            <svg
+                :class="{ 'animate-spin': running }"
+                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </router-link>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 dark:text-white">Briefing du matin</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                <template v-if="lastRunAt">Derniers contrôles {{ formatRelativeTime(lastRunAt) }}</template>
-                <template v-else>Tout ce qui a bougé, en un coup d'œil</template>
-              </p>
-            </div>
-          </div>
-          <div v-if="!isEmpty" class="flex items-center gap-3">
-            <label
-                v-if="geoAvailable"
-                class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer"
-                title="Relance aussi le GEO (appels LLM facturés)"
-            >
-              <input v-model="includeGeo" class="rounded" type="checkbox"/>
-              Inclure GEO
-            </label>
-            <button
-                v-if="reminder.available"
-                :class="reminder.enabled.value ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'"
-                :title="reminder.status.value || 'Rappel quotidien (PWA installée, best-effort)'"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
-                @click="reminder.toggle()"
-            >
-              {{ reminder.enabled.value ? '🔔 Rappel activé' : '🔔 Rappel quotidien' }}
-            </button>
-            <button
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                title="Exporter le rapport (Markdown)"
-                @click="exportReport"
-            >
-              Rapport
-            </button>
-            <button
-                :disabled="running"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                @click="runChecks"
-            >
-              <svg
-                  :class="{ 'animate-spin': running }"
-                  class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              {{ running ? `Contrôles… ${progress.done}/${progress.total}` : 'Lancer les contrôles du matin' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            {{ running ? `Contrôles… ${progress.done}/${progress.total}` : 'Lancer les contrôles du matin' }}
+          </button>
+        </template>
+      </template>
+    </AppHeader>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Empty state -->

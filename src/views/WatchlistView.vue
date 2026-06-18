@@ -8,6 +8,7 @@ import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters
 import WatchlistCard from '@/components/history/WatchlistCard.vue'
 import {buildWatchlistCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
+import AppHeader from '@/components/common/AppHeader.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 
 const watchlistStore = useWatchlistStore()
@@ -164,79 +165,53 @@ async function handleEnableNotifications() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link
-                class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                title="Accueil"
-                to="/"
-            >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </router-link>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                Watchlist
-              </h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Suivi quotidien de la santé de vos pages
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <!-- Notifications toggle -->
-            <button
-                v-if="notificationsSupported && notificationPermission !== 'granted'"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                title="Recevoir une alerte navigateur en cas de régression ou de budget dépassé"
-                @click="handleEnableNotifications"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              Activer les alertes
-            </button>
-            <span
-                v-else-if="notificationsSupported && notificationPermission === 'granted'"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-emerald-600 dark:text-emerald-400 text-sm font-medium"
-                title="Les alertes navigateur sont activées"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              Alertes actives
-            </span>
-
-            <button
-                v-if="!watchlistStore.isEmpty"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                title="Exporter en CSV"
-                @click="exportCsv"
-            >
-              CSV
-            </button>
-            <button
-                v-if="!watchlistStore.isEmpty"
-                :disabled="refreshingAll"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                @click="handleRefreshAll"
-            >
-              <svg
-                  :class="{ 'animate-spin': refreshingAll }"
-                  class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              {{ refreshingAll ? 'Analyse en cours…' : 'Tout ré-auditer' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Suivi quotidien de la santé de vos pages" title="Watchlist">
+      <template #actions>
+        <button
+            v-if="notificationsSupported && notificationPermission !== 'granted'"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            title="Recevoir une alerte navigateur en cas de régression ou de budget dépassé"
+            @click="handleEnableNotifications"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          Activer les alertes
+        </button>
+        <span
+            v-else-if="notificationsSupported && notificationPermission === 'granted'"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-emerald-600 dark:text-emerald-400 text-sm font-medium"
+            title="Les alertes navigateur sont activées"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          Alertes actives
+        </span>
+        <button
+            v-if="!watchlistStore.isEmpty"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            title="Exporter en CSV"
+            @click="exportCsv"
+        >
+          CSV
+        </button>
+        <button
+            v-if="!watchlistStore.isEmpty"
+            :disabled="refreshingAll"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+            @click="handleRefreshAll"
+        >
+          <svg
+              :class="{ 'animate-spin': refreshingAll }"
+              class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          {{ refreshingAll ? 'Analyse en cours…' : 'Tout ré-auditer' }}
+        </button>
+      </template>
+    </AppHeader>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Add form -->

@@ -5,6 +5,7 @@ import {snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/use
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
@@ -62,27 +63,7 @@ function formatPosition(p) {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center gap-3">
-          <router-link
-              class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title="Accueil"
-              to="/"
-          >
-            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </router-link>
-          <div>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Search Console</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Données de recherche réelles (requêtes, clics, impressions, position)
-            </p>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Données de recherche réelles (requêtes, clics, impressions, position)" title="Search Console"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Connection -->

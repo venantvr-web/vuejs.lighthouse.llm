@@ -6,6 +6,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO} from '@/utils/formatters'
@@ -121,75 +122,53 @@ async function handleRunAll() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="border-b border-gray-200 dark:border-gray-800">
-      <div class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <router-link
-                class="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                title="Accueil"
-                to="/"
-            >
-              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-            </router-link>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 dark:text-white">GEO Tracking</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Visibilité de votre marque dans les réponses des moteurs IA
-              </p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                @click="showKeyEditor = !showKeyEditor"
-            >
-              Clés API
-            </button>
-            <button
-                v-if="notificationsSupported && notificationPermission !== 'granted'"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                @click="requestPermission"
-            >
-              Activer les alertes
-            </button>
-            <button
-                v-if="!geoStore.isEmpty"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                title="Exporter le comparatif en CSV"
-                @click="exportCsv"
-            >
-              CSV
-            </button>
-            <button
-                v-if="!geoStore.isEmpty"
-                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-                title="Exporter le comparatif en Markdown"
-                @click="exportMarkdown"
-            >
-              MD
-            </button>
-            <button
-                v-if="!geoStore.isEmpty"
-                :disabled="runningAll || !activeProviders.length"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-                @click="handleRunAll"
-            >
-              <svg
-                  :class="{ 'animate-spin': runningAll }"
-                  class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-              </svg>
-              {{ runningAll ? 'Analyse en cours…' : 'Tout exécuter' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Visibilité de votre marque dans les réponses des moteurs IA" title="GEO Tracking">
+      <template #actions>
+        <button
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            @click="showKeyEditor = !showKeyEditor"
+        >
+          Clés API
+        </button>
+        <button
+            v-if="notificationsSupported && notificationPermission !== 'granted'"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            @click="requestPermission"
+        >
+          Activer les alertes
+        </button>
+        <button
+            v-if="!geoStore.isEmpty"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            title="Exporter le comparatif en CSV"
+            @click="exportCsv"
+        >
+          CSV
+        </button>
+        <button
+            v-if="!geoStore.isEmpty"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            title="Exporter le comparatif en Markdown"
+            @click="exportMarkdown"
+        >
+          MD
+        </button>
+        <button
+            v-if="!geoStore.isEmpty"
+            :disabled="runningAll || !activeProviders.length"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+            @click="handleRunAll"
+        >
+          <svg
+              :class="{ 'animate-spin': runningAll }"
+              class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          {{ runningAll ? 'Analyse en cours…' : 'Tout exécuter' }}
+        </button>
+      </template>
+    </AppHeader>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Key editor -->

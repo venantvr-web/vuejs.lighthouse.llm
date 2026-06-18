@@ -1,10 +1,9 @@
 <script setup>
 import {computed, onMounted, ref, watch} from 'vue'
-import {useRouter} from 'vue-router'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
+import AppHeader from '@/components/common/AppHeader.vue'
 
-const router = useRouter()
 const settings = useSettingsStore()
 
 const provider = ref('gemini')
@@ -111,18 +110,7 @@ const testConnection = async () => {
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-2xl mx-auto px-4 py-4">
-        <div class="flex items-center gap-4">
-          <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" @click="router.back()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </button>
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Paramètres</h1>
-        </div>
-      </div>
-    </header>
+    <AppHeader subtitle="Fournisseurs LLM, clés API et préférences" title="Paramètres"/>
 
     <!-- Main -->
     <main class="max-w-2xl mx-auto px-4 py-8">

@@ -8,6 +8,7 @@ import {useComparison} from '@/composables/useComparison'
 import DomainList from '@/components/history/DomainList.vue'
 import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
+import AppHeader from '@/components/common/AppHeader.vue'
 
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
@@ -210,33 +211,22 @@ function compareSelected() {
 <template>
   <div class="history-view">
     <!-- Header -->
-    <header class="history-header">
-      <div class="header-left">
-        <button class="back-btn" title="Retour" @click="goHome">
-          <svg fill="none" height="20" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-        <h1>Historique des Analyses</h1>
-      </div>
-
-      <!-- Crawl toggle -->
-      <label class="crawl-toggle">
-        <input
-            :checked="historyStore.includeCrawl"
-            type="checkbox"
-            @change="historyStore.toggleIncludeCrawl()"
-        />
-        <span class="toggle-slider"></span>
-        <span class="toggle-label">
-          <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
-            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-          </svg>
-          Inclure les crawls
-        </span>
-      </label>
-
-      <div class="header-actions">
+    <AppHeader subtitle="Évolution de vos scores dans le temps" title="Historique des analyses">
+      <template #actions>
+        <label class="crawl-toggle">
+          <input
+              :checked="historyStore.includeCrawl"
+              type="checkbox"
+              @change="historyStore.toggleIncludeCrawl()"
+          />
+          <span class="toggle-slider"></span>
+          <span class="toggle-label">
+            <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+              <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+            </svg>
+            Inclure les crawls
+          </span>
+        </label>
         <button
             :disabled="historyStore.isEmpty || exportLoading"
             class="btn btn-secondary"
@@ -257,8 +247,8 @@ function compareSelected() {
           </svg>
           Tout supprimer
         </button>
-      </div>
-    </header>
+      </template>
+    </AppHeader>
 
     <!-- Main Content -->
     <div class="history-content">

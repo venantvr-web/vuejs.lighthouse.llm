@@ -5,14 +5,20 @@ import {originFromUrl} from '@/services/resourceCheck'
 import {buildBriefingMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
+import {usePeriodicSync} from '@/composables/usePeriodicSync'
 import Sparkline from '@/components/common/Sparkline.vue'
 
 const {
-  items, geoItems, watchStats, resourceByOrigin, digest, digestTrend, running, progress, lastRunAt,
+  items, geoItems, watchStats, resourceByOrigin, digest, criticalTrend, warningTrend, running, progress, lastRunAt,
   includeGeo, geoAvailable, load, runChecks
 } = useMorningBriefing()
 
-onMounted(load)
+const reminder = usePeriodicSync()
+
+onMounted(() => {
+  load()
+  reminder.refresh()
+})
 
 function exportReport() {
   const md = buildBriefingMarkdown({
@@ -87,6 +93,15 @@ const overview = computed(() => {
               Inclure GEO
             </label>
             <button
+                v-if="reminder.available"
+                :class="reminder.enabled.value ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'"
+                :title="reminder.status.value || 'Rappel quotidien (PWA installée, best-effort)'"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+                @click="reminder.toggle()"
+            >
+              {{ reminder.enabled.value ? '🔔 Rappel activé' : '🔔 Rappel quotidien' }}
+            </button>
+            <button
                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
                 title="Exporter le rapport (Markdown)"
                 @click="exportReport"
@@ -149,9 +164,15 @@ const overview = computed(() => {
         <section class="mb-8">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">À traiter aujourd'hui</h2>
-            <div v-if="digestTrend.length > 1" class="flex items-center gap-2" title="Évolution du nombre d'alertes au fil des contrôles">
-              <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Tendance alertes</span>
-              <Sparkline :auto-scale="true" :values="digestTrend" :width="120" color="#ef4444"/>
+            <div v-if="criticalTrend.length > 1" class="flex items-center gap-4" title="Évolution des alertes au fil des contrôles">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-red-500 uppercase tracking-wide">Critiques</span>
+                <Sparkline :auto-scale="true" :values="criticalTrend" :width="90" color="#ef4444"/>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-amber-500 uppercase tracking-wide">Avert.</span>
+                <Sparkline :auto-scale="true" :values="warningTrend" :width="90" color="#f59e0b"/>
+              </div>
             </div>
           </div>
           <div v-if="!digest.length" class="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4">

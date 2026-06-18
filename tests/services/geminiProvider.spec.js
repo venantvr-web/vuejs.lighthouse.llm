@@ -32,4 +32,31 @@ describe('GeminiProvider.listModels', () => {
         const provider = new GeminiProvider({apiKey: 'k'})
         expect(provider.getDefaultModel()).toBe('gemini-2.5-flash')
     })
+
+    it('disables thinking on 2.5 Flash so output is not truncated', () => {
+        const provider = new GeminiProvider({apiKey: 'k', model: 'gemini-2.5-flash'})
+        const payload = provider._buildPayload('hello', {model: 'gemini-2.5-flash', maxTokens: 100, temperature: 0.7})
+        expect(payload.generationConfig.thinkingConfig).toEqual({thinkingBudget: 0})
+    })
+
+    it('does not set thinkingConfig on 2.5 Pro (cannot be disabled)', () => {
+        const provider = new GeminiProvider({apiKey: 'k', model: 'gemini-2.5-pro'})
+        const payload = provider._buildPayload('hello', {model: 'gemini-2.5-pro', maxTokens: 100, temperature: 0.7})
+        expect(payload.generationConfig.thinkingConfig).toBeUndefined()
+    })
+
+    it('excludes internal thought parts from extracted content', () => {
+        const provider = new GeminiProvider({apiKey: 'k'})
+        const data = {
+            candidates: [{
+                content: {
+                    parts: [
+                        {text: 'réflexion interne', thought: true},
+                        {text: 'Réponse visible'}
+                    ]
+                }
+            }]
+        }
+        expect(provider._extractContent(data)).toBe('Réponse visible')
+    })
 })

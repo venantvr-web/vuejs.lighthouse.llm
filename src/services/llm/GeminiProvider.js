@@ -103,6 +103,7 @@ export default class GeminiProvider extends BaseLLMProvider {
      * @private
      */
     _buildPayload(prompt, options) {
+        const model = options.model || this.config.model || ''
         const payload = {
             contents: [{
                 parts: [{
@@ -116,6 +117,13 @@ export default class GeminiProvider extends BaseLLMProvider {
                 topK: options.topK || 40
             }
         };
+
+        // Gemini 2.5 Flash enables "thinking" by default, which consumes the
+        // output token budget and can truncate the visible answer. Disable it
+        // so maxOutputTokens is spent on the response. (2.5 Pro can't disable.)
+        if (/gemini-2\.5-flash/.test(model)) {
+            payload.generationConfig.thinkingConfig = {thinkingBudget: 0};
+        }
 
         // Add safety settings if provided
         if (options.safetySettings) {
@@ -150,9 +158,9 @@ export default class GeminiProvider extends BaseLLMProvider {
                 return '';
             }
 
-            // Extract text from all parts
+            // Extract text from all parts, excluding internal "thought" parts
             return candidate.content.parts
-                .filter(part => part.text)
+                .filter(part => part.text && !part.thought)
                 .map(part => part.text)
                 .join('');
         } catch (error) {

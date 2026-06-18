@@ -3,6 +3,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
+import {useSiteStore} from '@/stores/siteStore'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -10,8 +11,10 @@ import {analyzeUrl, checkServerHealth, getEstimatedTime, STRATEGIES} from '@/ser
 
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
+const site = useSiteStore()
 
-const url = ref('')
+// Préremplissage silencieux à partir du site actif
+const url = ref(site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)
@@ -38,6 +41,8 @@ async function checkServer() {
 }
 
 async function handleSubmit(inputUrl) {
+  // Mémorise le domaine pour les autres écrans
+  site.setFromUrl(inputUrl)
   loading.value = true
   error.value = ''
   progress.value = 0

@@ -4,6 +4,7 @@ import {useResourceCheck} from '@/composables/useResourceCheck'
 import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
 import {computeGeoReadiness, detectResourceChanges} from '@/services/resourceCheck'
 import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {useNotifications} from '@/composables/useNotifications'
 import {snapshotSeries} from '@/composables/useSearchConsole'
 import {buildBrokenUrlsCsv} from '@/utils/exporters'
@@ -16,8 +17,10 @@ const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourc
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
 const history = useResourceHistoryStore()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
+const site = useSiteStore()
 
-const url = ref('')
+// Préremplissage silencieux à partir du site actif
+const url = ref(site.origin)
 const crawledSitemap = ref('')
 const readinessTrend = ref([])
 
@@ -37,6 +40,8 @@ async function saveSnapshotAndAlert(snapshot) {
 }
 
 async function handleCheck() {
+  // Mémorise le domaine pour les autres écrans
+  site.setFromUrl(url.value)
   crawledSitemap.value = ''
   readinessTrend.value = []
   await check(url.value)

@@ -3,6 +3,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {DISCOVERY_MODES} from '@/services/urlDiscovery'
 import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
@@ -11,6 +12,7 @@ import ErrorAlert from '@/components/common/ErrorAlert.vue'
 
 const router = useRouter()
 const crawlStore = useCrawlStore()
+const site = useSiteStore()
 
 // Form state
 const baseUrl = ref('')
@@ -165,6 +167,8 @@ async function checkProxyServer() {
 async function handleSubmit() {
   if (!canSubmit.value) return
 
+  // Mémorise le domaine pour les autres écrans
+  site.setFromUrl(baseUrl.value)
   error.value = ''
 
   // For Auto and Sitemap modes, check if proxy server is available
@@ -210,6 +214,8 @@ function handleDismissError() {
 // Initialize
 onMounted(async () => {
   loadPreferences()
+  // Préremplissage silencieux : à défaut de préférence enregistrée, on part du site actif
+  if (!baseUrl.value) baseUrl.value = site.origin
   await crawlStore.initialize()
   await checkLocalServer()
 })

@@ -3,13 +3,22 @@ import {computed, ref} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
+import {extractDomain} from '@/utils/url'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 
 const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
+const site = useSiteStore()
 const {connected, loading, error, sites, connect, disconnect, query} = useSearchConsole()
+
+// Nom d'hôte d'une propriété Search Console ("https://ex.com/" ou "sc-domain:ex.com")
+function siteHost(s) {
+  if (!s) return ''
+  return s.startsWith('sc-domain:') ? s.slice('sc-domain:'.length) : extractDomain(s)
+}
 
 const selectedSite = ref('')
 const days = ref(28)
@@ -25,11 +34,18 @@ function onClientIdInput(event) {
 
 async function handleConnect() {
   await connect(settings.searchConsoleClientId)
-  if (sites.value.length && !selectedSite.value) selectedSite.value = sites.value[0]
+  if (sites.value.length && !selectedSite.value) {
+    // Présélectionne la propriété qui correspond au site actif, sinon la première
+    const match = site.domain ? sites.value.find(s => siteHost(s) === site.domain) : null
+    selectedSite.value = match || sites.value[0]
+  }
 }
 
 async function handleQuery() {
   if (!selectedSite.value) return
+  // Mémorise le domaine de la propriété interrogée pour les autres écrans
+  const host = siteHost(selectedSite.value)
+  if (host) site.setFromUrl(`https://${host}`)
   rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], rowLimit: 50})
   if (rows.value.length) {
     const s = summarizeRows(rows.value)

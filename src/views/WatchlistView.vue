@@ -2,6 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useNotifications} from '@/composables/useNotifications'
 import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters'
@@ -13,6 +14,7 @@ import {breachedCategories as computeBreached} from '@/utils/budgets'
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
+const site = useSiteStore()
 const {statsById, refreshingById, errorById, loadStats, loadItemStats, refreshItem} = useWatchlist()
 const {isSupported: notificationsSupported, permission: notificationPermission, requestPermission, notify} = useNotifications()
 
@@ -40,7 +42,8 @@ function breachedCategories(item) {
 }
 
 // Add form state
-const newUrl = ref('')
+// Préremplissage silencieux à partir du site actif
+const newUrl = ref(site.origin)
 const newLabel = ref('')
 const newStrategy = ref('mobile')
 const newSource = ref('pagespeed')
@@ -106,7 +109,9 @@ async function handleAdd() {
     return
   }
 
-  newUrl.value = ''
+  // Mémorise le domaine ; on repart de l'origine pour enchaîner les pages du même site
+  site.setFromUrl(newUrl.value)
+  newUrl.value = site.origin
   newLabel.value = ''
   await loadItemStats(item)
 }

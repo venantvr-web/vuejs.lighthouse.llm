@@ -4,6 +4,7 @@ import {computed, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {useSiteStore} from '@/stores/siteStore'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -12,8 +13,10 @@ import {analyzeUrl, getEstimatedTime, STRATEGIES} from '@/services/pageSpeedInsi
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
 const settings = useSettingsStore()
+const site = useSiteStore()
 
-const url = ref('')
+// Préremplissage silencieux à partir du site actif
+const url = ref(site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)
@@ -24,6 +27,8 @@ const estimatedTime = computed(() => getEstimatedTime())
 let abortController = null
 
 async function handleSubmit(inputUrl) {
+  // Mémorise le domaine pour les autres écrans
+  site.setFromUrl(inputUrl)
   loading.value = true
   error.value = ''
   progress.value = 0

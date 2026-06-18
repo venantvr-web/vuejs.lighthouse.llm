@@ -2,6 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import {useGeoStore} from '@/stores/geoStore'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
@@ -14,12 +15,14 @@ import {formatDateISO} from '@/utils/formatters'
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
 const settings = useSettingsStore()
+const site = useSiteStore()
 const {statsById, runningById, errorById, loadStats, loadItemStats, runPrompt} = useGeoTracking()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 
 // Add form state
 const newPrompt = ref('')
-const newBrand = ref('')
+// Suggestion de marque dérivée du domaine du site actif (modifiable)
+const newBrand = ref(site.brandGuess)
 const newCompetitors = ref('')
 const addError = ref('')
 
@@ -80,7 +83,7 @@ async function handleAdd() {
     return
   }
   newPrompt.value = ''
-  newBrand.value = ''
+  newBrand.value = site.brandGuess
   newCompetitors.value = ''
   await loadItemStats(item)
 }

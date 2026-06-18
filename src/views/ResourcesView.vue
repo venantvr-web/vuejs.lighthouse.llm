@@ -5,12 +5,15 @@ import {useSitemapCrawl} from '@/composables/useSitemapCrawl'
 import {computeGeoReadiness, detectResourceChanges} from '@/services/resourceCheck'
 import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
+import {useSettingsStore} from '@/stores/settingsStore'
+import {useIndexabilityDiagnosis} from '@/composables/useIndexabilityDiagnosis'
 import {useNotifications} from '@/composables/useNotifications'
 import {snapshotSeries} from '@/composables/useSearchConsole'
 import {buildBrokenUrlsCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
+import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 
 const {checking, error, origin, resources, sitemaps, jsonLd, check} = useResourceCheck()
@@ -18,6 +21,15 @@ const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
 const history = useResourceHistoryStore()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 const site = useSiteStore()
+const settings = useSettingsStore()
+const {
+  diagnosing,
+  diagnosis,
+  error: diagError,
+  tokenCount: diagTokens,
+  run: runDiagnosis,
+  cancel: cancelDiagnosis
+} = useIndexabilityDiagnosis()
 
 // Préremplissage silencieux à partir du site actif
 const url = ref(site.origin)
@@ -59,6 +71,21 @@ async function handleCrawl(sitemapUrl) {
 
 function exportBrokenCsv() {
   downloadText(`urls-cassees-${formatDateISO()}.csv`, buildBrokenUrlsCsv(pages.value), 'text/csv;charset=utf-8')
+}
+
+function handleDiagnose() {
+  runDiagnosis({
+    origin: origin.value,
+    resources: resources.value,
+    sitemaps: sitemaps.value,
+    jsonLd: jsonLd.value,
+    readiness: readiness.value,
+    brokenPages: brokenPages.value
+  })
+}
+
+function exportDiagnosis() {
+  downloadText(`indexabilite-${formatDateISO()}.md`, diagnosis.value, 'text/markdown;charset=utf-8')
 }
 </script>
 
@@ -137,6 +164,36 @@ function exportBrokenCsv() {
             </li>
           </ul>
         </div>
+      </div>
+
+      <!-- Diagnostic IA d'indexabilité -->
+      <div v-if="resources.length" class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Diagnostic IA d'indexabilité</h2>
+          <button
+              v-if="!diagnosing"
+              :disabled="!settings.isConfigured"
+              :title="settings.isConfigured ? '' : 'Configurez un fournisseur LLM dans les paramètres'"
+              class="px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              @click="handleDiagnose"
+          >
+            {{ diagnosis ? 'Relancer le diagnostic' : 'Diagnostiquer avec l\'IA' }}
+          </button>
+        </div>
+        <p v-if="!settings.isConfigured" class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          Configurez un fournisseur LLM dans les
+          <router-link class="text-primary-600 dark:text-primary-400 hover:underline" to="/settings">paramètres</router-link>
+          pour activer le diagnostic.
+        </p>
+        <p v-if="diagError" class="text-sm text-red-500 mb-2">{{ diagError }}</p>
+        <StreamingOutput
+            v-if="diagnosis || diagnosing"
+            :content="diagnosis"
+            :is-streaming="diagnosing"
+            :token-count="diagTokens"
+            @cancel="cancelDiagnosis"
+            @export="exportDiagnosis"
+        />
       </div>
 
       <!-- Resources -->

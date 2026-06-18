@@ -5,9 +5,10 @@ import {originFromUrl} from '@/services/resourceCheck'
 import {buildBriefingMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
+import Sparkline from '@/components/common/Sparkline.vue'
 
 const {
-  items, geoItems, watchStats, resourceByOrigin, digest, running, progress, lastRunAt,
+  items, geoItems, watchStats, resourceByOrigin, digest, digestTrend, running, progress, lastRunAt,
   includeGeo, geoAvailable, load, runChecks
 } = useMorningBriefing()
 
@@ -146,7 +147,13 @@ const overview = computed(() => {
 
         <!-- To handle today -->
         <section class="mb-8">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">À traiter aujourd'hui</h2>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">À traiter aujourd'hui</h2>
+            <div v-if="digestTrend.length > 1" class="flex items-center gap-2" title="Évolution du nombre d'alertes au fil des contrôles">
+              <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">Tendance alertes</span>
+              <Sparkline :auto-scale="true" :values="digestTrend" :width="120" color="#ef4444"/>
+            </div>
+          </div>
           <div v-if="!digest.length" class="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4">
             Rien à signaler 🎉
           </div>

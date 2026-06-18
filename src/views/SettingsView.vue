@@ -1,13 +1,16 @@
 <script setup>
 import {onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
+import {useSettingsStore} from '@/stores/settingsStore'
 
 const router = useRouter()
+const settings = useSettingsStore()
 
 const provider = ref('gemini')
 const apiKey = ref('')
 const model = ref('')
 const ollamaUrl = ref('http://localhost:11434')
+const pageSpeedKey = ref('')
 const saved = ref(false)
 
 const providers = [
@@ -32,6 +35,7 @@ onMounted(() => {
   if (!model.value) {
     model.value = currentProvider.value.models[0]
   }
+  pageSpeedKey.value = settings.pageSpeedApiKey
 })
 
 watch(provider, (newProvider) => {
@@ -46,6 +50,7 @@ const saveSettings = () => {
     model: model.value,
     ollamaUrl: ollamaUrl.value
   }))
+  settings.setPageSpeedApiKey(pageSpeedKey.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
 }
@@ -158,6 +163,34 @@ const testConnection = async () => {
           <button class="btn btn-secondary" @click="testConnection">
             Tester la connexion
           </button>
+        </div>
+      </div>
+
+      <!-- PageSpeed Insights -->
+      <div class="card p-6 mt-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Analyse PageSpeed</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            L'API PageSpeed Insights fonctionne sans clé, mais avec un quota très limité.
+            Une clé est recommandée pour la Watchlist et les analyses répétées.
+          </p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Clé API PageSpeed (optionnelle)
+          </label>
+          <input
+              v-model="pageSpeedKey"
+              class="input"
+              placeholder="AIza..."
+              type="password"
+          />
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Stockée localement.
+            <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">
+              Obtenir une clé
+            </a>
+          </p>
         </div>
       </div>
 

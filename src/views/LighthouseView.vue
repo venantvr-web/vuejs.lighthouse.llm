@@ -2,6 +2,7 @@
 import {computed, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
+import {useSettingsStore} from '@/stores/settingsStore'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -9,6 +10,7 @@ import {analyzeUrl, getEstimatedTime, STRATEGIES} from '@/services/pageSpeedInsi
 
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
+const settings = useSettingsStore()
 
 const url = ref('')
 const loading = ref(false)
@@ -38,6 +40,7 @@ async function handleSubmit(inputUrl) {
   try {
     const report = await analyzeUrl(inputUrl, {
       strategy: strategy.value,
+      apiKey: settings.pageSpeedApiKey || null,
       signal: abortController.signal
     })
 

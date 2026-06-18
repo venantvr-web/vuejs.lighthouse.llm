@@ -19,6 +19,23 @@ export default class OpenAIProvider extends BaseLLMProvider {
     }
 
     /**
+     * List chat-capable models available for this API key.
+     * @returns {Promise<Array<{value: string, label: string}>>}
+     */
+    async listModels() {
+        const response = await this._fetch(`${this.baseURL}/models`, {
+            method: 'GET',
+            headers: this._buildHeaders()
+        });
+        const data = await response.json();
+        return (data.data || [])
+            .map(m => m.id)
+            .filter(id => /^(gpt|chatgpt|o[0-9])/i.test(id))
+            .sort()
+            .map(id => ({value: id, label: id}));
+    }
+
+    /**
      * Send a prompt and receive complete response
      * @override
      */

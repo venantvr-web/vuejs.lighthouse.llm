@@ -19,6 +19,19 @@ export default class AnthropicProvider extends BaseLLMProvider {
     }
 
     /**
+     * List models available for this API key.
+     * @returns {Promise<Array<{value: string, label: string}>>}
+     */
+    async listModels() {
+        const response = await this._fetch(`${this.baseURL}/models`, {
+            method: 'GET',
+            headers: this._buildHeaders()
+        });
+        const data = await response.json();
+        return (data.data || []).map(m => ({value: m.id, label: m.display_name || m.id}));
+    }
+
+    /**
      * Send a prompt and receive complete response
      * @override
      */

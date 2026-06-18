@@ -57,4 +57,34 @@ describe('settingsStore - multi-provider keys', () => {
         expect(store.providerKeys.openai).toBe('sk-legacy')
         expect(store.geoProviders.find(p => p.id === 'openai').ready).toBe(true)
     })
+
+    it('supports gemini as a provider', () => {
+        const store = useSettingsStore()
+        store.setLLMProvider('gemini')
+        expect(store.llmProvider).toBe('gemini')
+        expect(store.currentModel).toBe('gemini-1.5-flash')
+        expect(store.modelOptions.length).toBeGreaterThan(0)
+    })
+
+    it('migrates the legacy llm-settings storage into the store', () => {
+        localStorage.setItem('llm-settings', JSON.stringify({
+            provider: 'gemini',
+            apiKey: 'AIza-legacy',
+            model: 'gemini-1.5-pro',
+            ollamaUrl: 'http://localhost:11434'
+        }))
+        const store = useSettingsStore()
+        expect(store.llmProvider).toBe('gemini')
+        expect(store.llmModel).toBe('gemini-1.5-pro')
+        expect(store.apiKey).toBe('AIza-legacy')
+        expect(store.providerKeys.gemini).toBe('AIza-legacy')
+        expect(store.isConfigured).toBe(true)
+    })
+
+    it('treats a provider key alone as configured', () => {
+        const store = useSettingsStore()
+        store.setLLMProvider('openai')
+        store.setProviderKey('openai', 'sk-only-in-providerkeys')
+        expect(store.isConfigured).toBe(true)
+    })
 })

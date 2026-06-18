@@ -7,6 +7,7 @@ import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {useIndexabilityDiagnosis} from '@/composables/useIndexabilityDiagnosis'
+import {buildIndexabilitySignals, detectInconsistencies} from '@/services/indexabilityDiagnosis'
 import {useNotifications} from '@/composables/useNotifications'
 import {snapshotSeries} from '@/composables/useSearchConsole'
 import {buildBrokenUrlsCsv} from '@/utils/exporters'
@@ -39,6 +40,21 @@ const readinessTrend = ref([])
 const brokenPages = computed(() => pages.value.filter(p => !p.ok))
 const readiness = computed(() => computeGeoReadiness(resources.value, sitemaps.value, {jsonLd: jsonLd.value.present}))
 const isNoindex = computed(() => /noindex/i.test([pageMeta.value.robots, pageMeta.value.googlebot, pageMeta.value.xRobotsTag].join(' ')))
+const diagnosisState = computed(() => ({
+  origin: origin.value,
+  resources: resources.value,
+  sitemaps: sitemaps.value,
+  jsonLd: jsonLd.value,
+  readiness: readiness.value,
+  brokenPages: brokenPages.value,
+  pageMeta: pageMeta.value
+}))
+const inconsistencies = computed(() => detectInconsistencies(buildIndexabilitySignals(diagnosisState.value)))
+const inconsistencyClass = {
+  critique: 'text-red-600 dark:text-red-400',
+  attention: 'text-amber-600 dark:text-amber-400',
+  info: 'text-gray-500 dark:text-gray-400'
+}
 
 onMounted(() => history.initialize())
 
@@ -75,15 +91,7 @@ function exportBrokenCsv() {
 }
 
 function handleDiagnose() {
-  runDiagnosis({
-    origin: origin.value,
-    resources: resources.value,
-    sitemaps: sitemaps.value,
-    jsonLd: jsonLd.value,
-    readiness: readiness.value,
-    brokenPages: brokenPages.value,
-    pageMeta: pageMeta.value
-  })
+  runDiagnosis(diagnosisState.value)
 }
 
 function exportDiagnosis() {
@@ -197,6 +205,23 @@ function exportDiagnosis() {
           Configurez un fournisseur LLM dans les
           <router-link class="text-primary-600 dark:text-primary-400 hover:underline" to="/settings">paramètres</router-link>
           pour activer le diagnostic.
+        </p>
+
+        <!-- Incohérences détectées automatiquement -->
+        <div
+            v-if="inconsistencies.length"
+            class="mb-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+        >
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Incohérences détectées</p>
+          <ul class="space-y-1">
+            <li v-for="(item, i) in inconsistencies" :key="i" class="flex items-start gap-2 text-[13px]">
+              <span :class="inconsistencyClass[item.level]" class="font-medium uppercase text-[10px] mt-0.5 shrink-0">{{ item.level }}</span>
+              <span class="text-gray-700 dark:text-gray-300">{{ item.message }}</span>
+            </li>
+          </ul>
+        </div>
+        <p v-else-if="resources.length" class="mb-3 text-[13px] text-emerald-600 dark:text-emerald-400">
+          Aucune incohérence évidente détectée. Lancez le diagnostic IA pour l'analyse qualitative détaillée.
         </p>
         <p v-if="diagError" class="text-sm text-red-500 mb-2">{{ diagError }}</p>
         <StreamingOutput

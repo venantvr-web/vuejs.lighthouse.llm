@@ -114,6 +114,77 @@ export function buildIndexabilitySignals(state = {}) {
     }
 }
 
+function hostOf(url) {
+    try {
+        return new URL(url).hostname.toLowerCase()
+    } catch {
+        return ''
+    }
+}
+
+/**
+ * Détecte des incohérences vérifiables entre les micro-données (contrôles
+ * déterministes qui servent de base à l'analyse qualitative du LLM).
+ * @param {object} signals - Sortie de buildIndexabilitySignals
+ * @returns {Array<{level: 'critique'|'attention'|'info', message: string}>}
+ */
+export function detectInconsistencies(signals) {
+    const s = signals
+    const out = []
+    const add = (level, message) => out.push({level, message})
+
+    // noindex sur la page d'accueil
+    if (s.meta.noindex) {
+        add('critique', "La page d'accueil est en noindex : elle sera exclue de l'index des moteurs.")
+    }
+
+    // meta robots autorise l'index mais X-Robots-Tag impose noindex
+    const metaSaysIndex = /\bindex\b/i.test(s.meta.robots) && !/noindex/i.test(s.meta.robots)
+    if (s.meta.xRobotsTag && /noindex/i.test(s.meta.xRobotsTag) && metaSaysIndex) {
+        add('attention', "Contradiction : la balise meta robots autorise l'indexation mais l'en-tête X-Robots-Tag impose noindex.")
+    }
+
+    // canonical : URL relative ou domaine différent
+    if (s.meta.canonical) {
+        if (!/^https?:\/\//i.test(s.meta.canonical)) {
+            add('attention', `Le lien canonical n'est pas une URL absolue : « ${s.meta.canonical} ».`)
+        } else if (s.origin) {
+            const ch = hostOf(s.meta.canonical)
+            const oh = hostOf(s.origin)
+            if (ch && oh && ch !== oh) {
+                add('attention', `Le canonical pointe vers un autre domaine (${ch}) que le site analysé (${oh}).`)
+            }
+        }
+        if (s.meta.noindex) {
+            add('info', "Signal mixte : un canonical est défini alors que la page est en noindex (le canonical sera ignoré).")
+        }
+    }
+
+    // robots.txt bloque tout mais un sitemap est publié
+    const hasSitemap = s.totalSitemapUrls > 0 || s.sitemaps.some((x) => x.available)
+    if (s.robots.blocksAll && hasSitemap) {
+        add('critique', "robots.txt bloque tout (Disallow: /) alors qu'un sitemap est publié : signaux contradictoires.")
+    }
+
+    // sitemap déclaré dans robots.txt mais inaccessible
+    s.robots.sitemapsDeclared.forEach((decl) => {
+        const m = s.sitemaps.find((x) => x.url === decl)
+        if (m && !m.available) add('attention', `Sitemap déclaré dans robots.txt mais inaccessible : ${decl}`)
+    })
+
+    // sitemaps présents mais non déclarés dans robots.txt
+    if (s.robots.present && s.sitemaps.some((x) => x.available) && s.robots.sitemapsDeclared.length === 0) {
+        add('info', "Des sitemaps existent mais ne sont pas déclarés dans robots.txt (ligne « Sitemap: »).")
+    }
+
+    // données structurées incomplètes
+    s.jsonLd.issues.forEach((i) => {
+        add('info', `Donnée structurée ${i.type} incomplète : champ(s) manquant(s) — ${(i.missing || []).join(', ')}.`)
+    })
+
+    return out
+}
+
 export const INDEXABILITY_SYSTEM =
     'Tu es un expert SEO technique et GEO (indexabilité par les moteurs de recherche et par les moteurs de réponse IA). ' +
     'Tu réponds en français, en Markdown clair et actionnable.'
@@ -158,15 +229,22 @@ export function buildIndexabilityPrompt(signals) {
         lines.push('```')
     }
 
+    const inconsistencies = detectInconsistencies(s)
+    if (inconsistencies.length) {
+        lines.push('')
+        lines.push('## Incohérences détectées automatiquement')
+        inconsistencies.forEach((i) => lines.push(`- [${i.level}] ${i.message}`))
+    }
+
     lines.push('')
     lines.push('## Ce que je veux')
-    lines.push("Établis un diagnostic d'indexabilité en deux volets : (1) moteurs de recherche classiques (Google/Bing), (2) moteurs de réponse IA (GEO).")
+    lines.push("Fais une **analyse qualitative** de ces micro-données : pour chaque élément, dis s'il est correct, à améliorer ou incohérent, et explique pourquoi. Croise les signaux entre eux pour repérer les contradictions (ex. noindex vs canonical, robots.txt vs sitemap, meta robots vs X-Robots-Tag, canonical vers un autre domaine).")
     lines.push('Structure ta réponse ainsi :')
-    lines.push('1. **Verdict** : une phrase de synthèse + un niveau global (Bon / À améliorer / Critique).')
-    lines.push('2. **Points bloquants** : liste priorisée (impact, effort), du plus grave au moins grave.')
-    lines.push('3. **Recommandations** : actions concrètes et vérifiables pour chaque problème.')
-    lines.push('4. **Points positifs** : ce qui est déjà correct.')
-    lines.push("Ne te base que sur les éléments fournis, n'invente pas de données, et signale les angles morts non mesurés ici (par ex. directives au-delà de la page d'accueil, balises hreflang, statut d'indexation réel en Search Console).")
+    lines.push('1. **Contrôle élément par élément** : un tableau Markdown — colonnes | Élément | État (✅ OK / ⚠️ À corriger / ❌ Incohérent) | Commentaire |.')
+    lines.push("2. **Incohérences** : explicite les contradictions entre signaux (confirme ou nuance les détections automatiques ci-dessus, et ajoute celles que tu repères).")
+    lines.push('3. **Verdict** : niveau global (Bon / À améliorer / Critique) en une phrase, pour la recherche classique (Google/Bing) ET pour les moteurs de réponse IA (GEO).')
+    lines.push('4. **Recommandations priorisées** : actions concrètes et vérifiables (impact / effort).')
+    lines.push("Ne te base que sur les éléments fournis, n'invente pas de données, et signale les angles morts non mesurés ici (directives au-delà de la page d'accueil, balises hreflang, statut d'indexation réel en Search Console).")
 
     return lines.join('\n')
 }

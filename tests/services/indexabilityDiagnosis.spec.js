@@ -2,9 +2,13 @@ import {describe, expect, it} from 'vitest'
 import {
     buildIndexabilityPrompt,
     buildIndexabilitySignals,
+    detectInconsistencies,
     INDEXABILITY_SYSTEM,
     robotsBlocksAll
 } from '@/services/indexabilityDiagnosis'
+
+const signalsFrom = (state) => buildIndexabilitySignals(state)
+const messages = (state) => detectInconsistencies(signalsFrom(state)).map((i) => i.message).join(' | ')
 
 describe('robotsBlocksAll', () => {
     it('detects a global block on User-agent: *', () => {
@@ -106,5 +110,59 @@ describe('buildIndexabilityPrompt', () => {
     it('exposes a French expert system prompt', () => {
         expect(INDEXABILITY_SYSTEM).toMatch(/expert/i)
         expect(INDEXABILITY_SYSTEM).toMatch(/GEO/)
+    })
+
+    it('asks for a per-element qualitative checklist and cross-checks', () => {
+        const prompt = buildIndexabilityPrompt(buildIndexabilitySignals({origin: 'https://x.io'}))
+        expect(prompt).toMatch(/analyse qualitative/i)
+        expect(prompt).toContain('Contrôle élément par élément')
+        expect(prompt).toContain('Incohérent')
+    })
+})
+
+describe('detectInconsistencies', () => {
+    it('flags a homepage in noindex as critical', () => {
+        const issues = detectInconsistencies(signalsFrom({pageMeta: {robots: 'noindex'}}))
+        expect(issues.some((i) => i.level === 'critique' && /noindex/i.test(i.message))).toBe(true)
+    })
+
+    it('flags meta-index vs X-Robots-Tag noindex contradiction', () => {
+        expect(messages({pageMeta: {robots: 'index, follow', xRobotsTag: 'noindex'}})).toMatch(/X-Robots-Tag/)
+    })
+
+    it('flags a canonical on another domain', () => {
+        expect(messages({origin: 'https://example.com', pageMeta: {canonical: 'https://autre.com/'}}))
+            .toMatch(/autre domaine/)
+    })
+
+    it('flags a relative canonical', () => {
+        expect(messages({origin: 'https://example.com', pageMeta: {canonical: '/page'}})).toMatch(/absolue/)
+    })
+
+    it('flags robots.txt blocking everything while a sitemap is published', () => {
+        const state = {
+            resources: [{key: 'robots', available: true, content: 'User-agent: *\nDisallow: /'}],
+            sitemaps: [{url: 'https://x.com/sitemap.xml', available: true, count: 5, type: 'urlset'}]
+        }
+        expect(messages(state)).toMatch(/bloque tout/)
+    })
+
+    it('flags a sitemap declared in robots but unreachable', () => {
+        const state = {
+            resources: [{key: 'robots', available: true, content: 'Sitemap: https://x.com/sitemap.xml'}],
+            sitemaps: [{url: 'https://x.com/sitemap.xml', available: false, status: 404}]
+        }
+        expect(messages(state)).toMatch(/inaccessible/)
+    })
+
+    it('returns nothing coherent when everything lines up', () => {
+        const state = {
+            origin: 'https://example.com',
+            resources: [{key: 'robots', available: true, content: 'User-agent: *\nDisallow:\nSitemap: https://example.com/sitemap.xml'}],
+            sitemaps: [{url: 'https://example.com/sitemap.xml', available: true, count: 10, type: 'urlset'}],
+            jsonLd: {present: true, types: ['Organization'], issues: []},
+            pageMeta: {robots: 'index, follow', canonical: 'https://example.com/'}
+        }
+        expect(detectInconsistencies(signalsFrom(state))).toEqual([])
     })
 })

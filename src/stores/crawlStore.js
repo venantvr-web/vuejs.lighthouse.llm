@@ -2,7 +2,7 @@ import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
-import {discoverUrls, DISCOVERY_MODES} from '@/services/urlDiscovery'
+import {discoverUrls, DISCOVERY_MODES, parseManualUrls} from '@/services/urlDiscovery'
 import {detectTemplates, TEMPLATE_COLORS} from '@/services/templateDetector'
 import {analyzeUrl as analyzeWithPageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeWithLocal} from '@/services/localLighthouse'
@@ -222,7 +222,7 @@ export const useCrawlStore = defineStore('crawl', () => {
 
             let urls
             if (discoveryMode === DISCOVERY_MODES.MANUAL) {
-                urls = parseManualUrls(urlList, maxPages)
+                urls = parseManualUrls(urlList, {maxPages})
             } else {
                 urls = await discoverUrls(baseUrl, discoveryMode, {
                     maxPages,
@@ -429,22 +429,6 @@ export const useCrawlStore = defineStore('crawl', () => {
         } catch {
             return url
         }
-    }
-
-    function parseManualUrls(text, maxPages) {
-        return text
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line && !line.startsWith('#'))
-            .filter(line => {
-                try {
-                    new URL(line)
-                    return true
-                } catch {
-                    return false
-                }
-            })
-            .slice(0, maxPages)
     }
 
     function extractScores(report) {

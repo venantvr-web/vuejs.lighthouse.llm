@@ -21,6 +21,21 @@ https://example.com/page2`
             expect(result).toContain('https://example.com/page2')
         })
 
+        it('should accept scheme-less URLs (manual crawl) by prefixing https', () => {
+            // Régression : le crawl manuel sortait aussitôt car les URL sans
+            // schéma étaient rejetées. normalizeUrl doit préfixer https://.
+            const text = `example.com/page-1
+www.test.fr
+https://example.com/p2`
+
+            const result = parseManualUrls(text)
+
+            expect(result).toContain('https://example.com/page-1')
+            expect(result).toContain('https://www.test.fr/')
+            expect(result).toContain('https://example.com/p2')
+            expect(result).toHaveLength(3)
+        })
+
         it('should ignore empty lines', () => {
             const text = `https://example.com
 

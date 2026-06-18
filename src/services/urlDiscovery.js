@@ -143,6 +143,7 @@ export function parseManualUrls(text, options = {}) {
         .split('\n')
         .map(line => line.trim())
         .filter(line => line && !line.startsWith('#')) // Skip empty lines and comments
+        .map(coerceManualScheme) // Tolerate scheme-less hosts (example.com/page)
         .map(normalizeUrl)
         .filter(url => isValidUrl(url))
 
@@ -274,6 +275,23 @@ function parseSitemapXml(xml, baseOrigin) {
  * @param {string} url - URL to normalize
  * @returns {string} - Normalized URL
  */
+/**
+ * Coerce a manually-entered line into a fetchable URL: when no scheme is
+ * present but the line looks like a host (contains a dot, or is localhost),
+ * prepend https://. Tokens that aren't host-like are left untouched so they
+ * get filtered out as invalid.
+ * @param {string} line - Raw line
+ * @returns {string}
+ */
+function coerceManualScheme(line) {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(line)) return line // already has a scheme
+    const host = line.split(/[/?#]/)[0]
+    if (host === 'localhost' || /^localhost:\d+$/.test(host) || host.includes('.')) {
+        return `https://${line}`
+    }
+    return line
+}
+
 function normalizeUrl(url) {
     try {
         const parsed = new URL(url)

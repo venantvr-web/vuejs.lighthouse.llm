@@ -14,7 +14,24 @@ export default class GeminiProvider extends BaseLLMProvider {
      * @override
      */
     getDefaultModel() {
-        return 'gemini-1.5-flash';
+        return 'gemini-2.5-flash';
+    }
+
+    /**
+     * List models available for this API key that support generateContent.
+     * @returns {Promise<Array<{value: string, label: string}>>}
+     */
+    async listModels() {
+        const url = `${this.baseURL}/models?key=${this.config.apiKey}`;
+        const response = await this._fetch(url, {method: 'GET'});
+        const data = await response.json();
+        return (data.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+            .map(m => ({
+                value: (m.name || '').replace(/^models\//, ''),
+                label: m.displayName || (m.name || '').replace(/^models\//, '')
+            }))
+            .filter(m => m.value);
     }
 
     /**

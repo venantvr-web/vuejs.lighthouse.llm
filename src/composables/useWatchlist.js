@@ -59,7 +59,7 @@ export function analyzeAudit(item, latest, previous) {
         const score = latest?.scores?.[category]
         if (typeof score !== 'number') continue
 
-        // Régression vs previous audit
+        // Regression vs previous audit
         const prev = previous?.scores?.[category]
         if (typeof prev === 'number' && score - prev <= -REGRESSION_THRESHOLD) {
             regressions.push({

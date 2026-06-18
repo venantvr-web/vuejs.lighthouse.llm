@@ -2,11 +2,27 @@
 import {computed, onMounted} from 'vue'
 import {useMorningBriefing} from '@/composables/useMorningBriefing'
 import {originFromUrl} from '@/services/resourceCheck'
-import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
+import {buildBriefingMarkdown} from '@/utils/exporters'
+import {downloadText} from '@/utils/download'
+import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
 
-const {items, geoItems, watchStats, resourceByOrigin, digest, running, progress, lastRunAt, load, runChecks} = useMorningBriefing()
+const {
+  items, geoItems, watchStats, resourceByOrigin, digest, running, progress, lastRunAt,
+  includeGeo, geoAvailable, load, runChecks
+} = useMorningBriefing()
 
 onMounted(load)
+
+function exportReport() {
+  const md = buildBriefingMarkdown({
+    date: Date.now(),
+    overview: overview.value,
+    digest: digest.value,
+    items: items.value,
+    watchStats: watchStats.value
+  })
+  downloadText(`briefing-${formatDateISO()}.md`, md, 'text/markdown;charset=utf-8')
+}
 
 const isEmpty = computed(() => items.value.length === 0 && geoItems.value.length === 0)
 
@@ -60,20 +76,36 @@ const overview = computed(() => {
               </p>
             </div>
           </div>
-          <button
-              v-if="!isEmpty"
-              :disabled="running"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-              @click="runChecks"
-          >
-            <svg
-                :class="{ 'animate-spin': running }"
-                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          <div v-if="!isEmpty" class="flex items-center gap-3">
+            <label
+                v-if="geoAvailable"
+                class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer"
+                title="Relance aussi le GEO (appels LLM facturés)"
             >
-              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-            {{ running ? `Contrôles… ${progress.done}/${progress.total}` : 'Lancer les contrôles du matin' }}
-          </button>
+              <input v-model="includeGeo" class="rounded" type="checkbox"/>
+              Inclure GEO
+            </label>
+            <button
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+                title="Exporter le rapport (Markdown)"
+                @click="exportReport"
+            >
+              Rapport
+            </button>
+            <button
+                :disabled="running"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                @click="runChecks"
+            >
+              <svg
+                  :class="{ 'animate-spin': running }"
+                  class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              {{ running ? `Contrôles… ${progress.done}/${progress.total}` : 'Lancer les contrôles du matin' }}
+            </button>
+          </div>
         </div>
       </div>
     </header>

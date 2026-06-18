@@ -40,6 +40,21 @@ describe('useMorningBriefing - buildDigest', () => {
         expect(buildDigest({geoItems, geoStats})).toEqual([])
     })
 
+    it('flags a Search Console clicks drop', () => {
+        const searchConsole = {
+            'https://x.com': [{clicks: 60, timestamp: 20}, {clicks: 100, timestamp: 10}] // -40%
+        }
+        const digest = buildDigest({searchConsole})
+        expect(digest.some(d => d.message.includes('Clics Search Console en baisse'))).toBe(true)
+    })
+
+    it('ignores a small Search Console variation', () => {
+        const searchConsole = {
+            'https://x.com': [{clicks: 95, timestamp: 20}, {clicks: 100, timestamp: 10}] // -5%
+        }
+        expect(buildDigest({searchConsole})).toEqual([])
+    })
+
     it('orders critical alerts before warnings', () => {
         const items = [{id: 'a', label: 'A', budgets: {seo: 90}}]
         const watchStats = {a: {latest: {scores: {performance: 0.6, seo: 0.5}}, deltas: {performance: -0.2}}}

@@ -60,10 +60,33 @@ export const useSearchConsoleHistoryStore = defineStore('searchConsoleHistory', 
         }
     }
 
+    /**
+     * Get every snapshot grouped by site, each list newest-first.
+     * @returns {Promise<Object>} { [site]: Array<snapshot> }
+     */
+    async function getSnapshotsBySite() {
+        if (!initialized.value) await initialize()
+        try {
+            const all = await indexedDB.getAll(STORE)
+            const bySite = {}
+            for (const snap of all) {
+                if (!bySite[snap.site]) bySite[snap.site] = []
+                bySite[snap.site].push(snap)
+            }
+            for (const site of Object.keys(bySite)) {
+                bySite[site].sort((a, b) => b.timestamp - a.timestamp)
+            }
+            return bySite
+        } catch (err) {
+            console.error('Failed to get Search Console snapshots by site:', err)
+            return {}
+        }
+    }
+
     async function clearAll() {
         if (!initialized.value) await initialize()
         await indexedDB.clear(STORE)
     }
 
-    return {initialized, error, initialize, addSnapshot, getSnapshots, clearAll}
+    return {initialized, error, initialize, addSnapshot, getSnapshots, getSnapshotsBySite, clearAll}
 })

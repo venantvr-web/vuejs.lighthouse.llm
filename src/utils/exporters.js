@@ -123,3 +123,53 @@ export function buildBrokenUrlsCsv(pages = []) {
         .map(p => ({url: p.url, statut: p.status || 'erreur'}))
     return toCsv(['url', 'statut'], rows)
 }
+
+/**
+ * Build a shareable Markdown morning-briefing report.
+ * @param {object} data
+ * @param {Date|number} data.date - Report date
+ * @param {object} data.overview - { sites, avgPerf (0-1|null), toHandle, avgReadiness }
+ * @param {Array} data.digest - Alerts ({ level, site, message })
+ * @param {Array} data.items - Watchlist items
+ * @param {object} data.watchStats - Per-item stats (statsById)
+ * @returns {string} Markdown report
+ */
+export function buildBriefingMarkdown({date = Date.now(), overview = {}, digest = [], items = [], watchStats = {}} = {}) {
+    const day = new Date(date).toLocaleDateString('fr-FR', {weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'})
+    const pct = (v) => (typeof v === 'number' ? `${Math.round(v * 100)}` : '—')
+
+    const lines = [`# Briefing du matin — ${day}`, '']
+
+    lines.push('## Vue d\'ensemble', '')
+    lines.push(`- Sites suivis : ${overview.sites ?? items.length}`)
+    lines.push(`- Performance moyenne : ${pct(overview.avgPerf)}`)
+    lines.push(`- À traiter : ${overview.toHandle ?? digest.length}`)
+    lines.push(`- GEO-readiness moyen : ${overview.avgReadiness ?? '—'}`, '')
+
+    lines.push('## À traiter aujourd\'hui', '')
+    if (!digest.length) {
+        lines.push('Rien à signaler.', '')
+    } else {
+        for (const a of digest) {
+            const tag = a.level === 'critical' ? '🔴' : '🟠'
+            lines.push(`- ${tag} **${a.site}** — ${a.message}`)
+        }
+        lines.push('')
+    }
+
+    if (items.length) {
+        lines.push('## Sites', '')
+        const rows = items.map(item => {
+            const stats = watchStats[item.id]
+            const delta = stats?.deltas?.performance
+            return {
+                page: item.label,
+                performance: pct(stats?.latest?.scores?.performance),
+                delta: typeof delta === 'number' ? `${delta > 0 ? '+' : ''}${Math.round(delta * 100)}` : '—'
+            }
+        })
+        lines.push(toMarkdownTable(['page', 'performance', 'delta'], rows))
+    }
+
+    return lines.join('\n')
+}

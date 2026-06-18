@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {
+    buildBriefingMarkdown,
     buildBrokenUrlsCsv,
     buildGeoCsv,
     buildGeoRows,
@@ -77,6 +78,28 @@ describe('utils/exporters', () => {
             expect(lines).toHaveLength(3) // header + 2 broken
             expect(csv).toContain('https://x.com/b,404')
             expect(csv).toContain('https://x.com/c,erreur')
+        })
+    })
+
+    describe('buildBriefingMarkdown', () => {
+        it('renders the overview, digest and sites table', () => {
+            const md = buildBriefingMarkdown({
+                date: new Date('2026-06-18T08:00:00Z'),
+                overview: {sites: 2, avgPerf: 0.82, toHandle: 1, avgReadiness: 70},
+                digest: [{level: 'critical', site: 'Accueil', message: 'Performance en baisse (-10 pts)'}],
+                items: [{id: 'a', label: 'Accueil'}],
+                watchStats: {a: {latest: {scores: {performance: 0.8}}, deltas: {performance: -0.1}}}
+            })
+            expect(md).toContain('# Briefing du matin')
+            expect(md).toContain('Performance moyenne : 82')
+            expect(md).toContain('🔴 **Accueil**')
+            expect(md).toContain('| page | performance | delta |')
+            expect(md).toContain('-10')
+        })
+
+        it('states when there is nothing to handle', () => {
+            const md = buildBriefingMarkdown({digest: [], items: []})
+            expect(md).toContain('Rien à signaler.')
         })
     })
 

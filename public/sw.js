@@ -34,6 +34,34 @@ self.addEventListener('activate', (event) => {
     )
 })
 
+// Best-effort daily reminder: the browser decides if/when this fires (only for
+// installed PWAs with the periodic-background-sync permission). We can't run the
+// full audit pipeline here, so we surface a reminder notification instead.
+self.addEventListener('periodicsync', (event) => {
+    if (event.tag === 'morning-briefing') {
+        event.waitUntil(self.registration.showNotification('Briefing du matin', {
+            body: 'Lancez les contrôles SEO/GEO du jour.',
+            icon: '/icon.svg',
+            badge: '/icon.svg',
+            tag: 'morning-briefing',
+            data: {url: '/briefing'}
+        }))
+    }
+})
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close()
+    const target = event.notification.data?.url || '/'
+    event.waitUntil(
+        self.clients.matchAll({type: 'window', includeUncontrolled: true}).then((list) => {
+            for (const client of list) {
+                if (client.url.includes(target) && 'focus' in client) return client.focus()
+            }
+            return self.clients.openWindow(target)
+        })
+    )
+})
+
 self.addEventListener('fetch', (event) => {
     const {request} = event
 

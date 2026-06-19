@@ -20,15 +20,40 @@ export function useStructuredData() {
     const settings = useSettingsStore()
     const aiHistory = useAiHistoryStore()
 
-    // État par URL : { status, context, loading, error, generating, generated, genError }
+    // État par URL : { status, context, loading, error, generating, generated, genError, fromHistory }
     const byUrl = reactive({})
     const analyzing = ref(false)
+    // Progression de la génération en lot
+    const batch = reactive({running: false, done: 0, total: 0})
 
     function entry(url) {
         if (!byUrl[url]) {
-            byUrl[url] = {status: null, context: null, loading: false, error: null, generating: false, generated: '', genError: null}
+            byUrl[url] = {status: null, context: null, loading: false, error: null, generating: false, generated: '', genError: null, fromHistory: false}
         }
         return byUrl[url]
+    }
+
+    /**
+     * Pré-remplit le JSON-LD déjà généré pour ces URL depuis l'historique IA,
+     * afin d'éviter de rappeler le LLM (et de payer) à chaque réouverture.
+     * @param {string[]} urls
+     */
+    async function hydrateFromHistory(urls) {
+        try {
+            const all = await aiHistory.getAll()
+            const wanted = new Set(urls)
+            // getAll() est trié du plus récent au plus ancien : on garde le 1er vu
+            for (const a of all) {
+                if (a.type !== AI_ARTIFACT_TYPES.STRUCTURED_DATA || !wanted.has(a.url)) continue
+                const e = entry(a.url)
+                if (!e.generated) {
+                    e.generated = a.content
+                    e.fromHistory = true
+                }
+            }
+        } catch (err) {
+            console.error('Failed to hydrate JSON-LD from history:', err)
+        }
     }
 
     /**
@@ -121,7 +146,31 @@ export function useStructuredData() {
         }
     }
 
-    return {byUrl, analyzing, entry, analyzeUrl, analyzeAll, generate}
+    /**
+     * Génère, en lot et séquentiellement, le JSON-LD des pages où il manque (ou
+     * est incomplet), en sautant celles déjà générées ou réhydratées.
+     * @param {string[]} urls
+     */
+    async function generateAllMissing(urls) {
+        if (!settings.isConfigured || batch.running) return
+        await analyzeAll(urls)
+        const targets = urls.filter((u) => byUrl[u]?.status?.needsGeneration && !byUrl[u]?.generated)
+        if (!targets.length) return
+
+        batch.running = true
+        batch.done = 0
+        batch.total = targets.length
+        try {
+            for (const url of targets) {
+                await generate(url)
+                batch.done++
+            }
+        } finally {
+            batch.running = false
+        }
+    }
+
+    return {byUrl, analyzing, batch, entry, analyzeUrl, analyzeAll, generate, generateAllMissing, hydrateFromHistory}
 }
 
 export default useStructuredData

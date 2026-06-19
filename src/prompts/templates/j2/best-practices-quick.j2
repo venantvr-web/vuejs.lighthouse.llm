@@ -13,12 +13,12 @@ Tu es un Expert en Sécurité Web et Standards Modernes, spécialisé dans les a
 {% if https %}
 ✅ **Connexion sécurisée** - HTTPS active
 {% else %}
-❌ **Non securise** - HTTPS requis
+❌ **Non sécurisé** - HTTPS requis
 {% endif %}
 
 ### Content Security Policy (CSP)
 {% if csp %}
-✅ **CSP configure**
+✅ **CSP configuré**
 {% else %}
 ⚠️ **CSP absent** - Risque XSS
 {% endif %}
@@ -40,7 +40,7 @@ Tu es un Expert en Sécurité Web et Standards Modernes, spécialisé dans les a
 - {{ dep }}
 {% endif %}{% endfor %}
 {% else %}
-✅ Aucune API déprécié utilisée
+✅ Aucune API dépréciée utilisée
 {% endif %}
 
 ## Audits Échoués
@@ -103,7 +103,7 @@ const sanitizedHtml = computed(() =>
   <!-- Éviter v-html avec contenu non-fiable -->
   <div v-html="sanitizedHtml" />
 
-  <!-- Preferer l'interpolation sécurisée -->
+  <!-- Préférer l'interpolation sécurisée -->
   <p>{{ userInput }}</p>
 </template>
 ```
@@ -114,7 +114,7 @@ const sanitizedHtml = computed(() =>
 # Audit des vulnérabilités
 npm audit
 
-# Mise a jour sécurisée
+# Mise à jour sécurisée
 npm update --save
 
 # Vérification des dépréciations

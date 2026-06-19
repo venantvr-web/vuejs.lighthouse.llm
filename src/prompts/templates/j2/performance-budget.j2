@@ -19,7 +19,7 @@ Tu es un Expert en Performance Budgets et optimisation des ressources pour appli
 {% if jsBundles %}
 ## Analyse des Bundles JavaScript
 
-| Bundle | Taille | Gaspillage estime |
+| Bundle | Taille | Gaspillage estimé |
 |--------|--------|-------------------|
 {% for bundle in jsBundles %}| `{{ bundle.url | truncate(50) }}` | {{ bundle.totalBytes | size }} | {{ bundle.wastedBytes | size }} |
 {% endfor %}
@@ -28,7 +28,7 @@ Tu es un Expert en Performance Budgets et optimisation des ressources pour appli
 {% if cssResources %}
 ## Ressources CSS
 
-| Fichier | Taille | CSS non utilise |
+| Fichier | Taille | CSS non utilisé |
 |---------|--------|-----------------|
 {% for css in cssResources %}| `{{ css.url | truncate(50) }}` | {{ css.totalBytes | size }} | {{ css.wastedBytes | size }} |
 {% endfor %}
@@ -70,8 +70,8 @@ Tu es un Expert en Performance Budgets et optimisation des ressources pour appli
 
 En tant qu'expert en Performance Budgets, analyse ces données et fournis:
 
-### 1. Audit des Depassements
-Identifié tous les depassements de budget avec leur impact sur les métriques Lighthouse.
+### 1. Audit des Dépassements
+Identifie tous les dépassements de budget avec leur impact sur les métriques Lighthouse.
 
 ### 2. Stratégies de Réduction JavaScript
 
@@ -86,7 +86,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Separer les vendors
+          // Séparer les vendors
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
           // Librairies lourdes dans des chunks separes
         }

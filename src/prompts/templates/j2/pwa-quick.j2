@@ -11,7 +11,7 @@ Tu es un Expert Progressive Web Apps, spécialisé dans la création d'applicati
 
 ### Manifest
 {% if manifest %}
-✅ **Web App Manifest present**
+✅ **Web App Manifest présent**
 {% else %}
 ❌ **Manifest absent** - Requis pour l'installation
 {% endif %}
@@ -27,7 +27,7 @@ Tu es un Expert Progressive Web Apps, spécialisé dans la création d'applicati
 {% if offline %}
 ✅ **Fonctionnement hors-ligne**
 {% else %}
-⚠️ **Mode offline non configure**
+⚠️ **Mode offline non configuré**
 {% endif %}
 
 ### Installable
@@ -127,7 +127,7 @@ const close = () => { needRefresh.value = false }
 <template>
   <div v-if="needRefresh" class="update-prompt">
     <p>Nouvelle version disponible!</p>
-    <button @click="updateServiceWorker()">Mettre a jour</button>
+    <button @click="updateServiceWorker()">Mettre à jour</button>
     <button @click="close">Plus tard</button>
   </div>
 </template>

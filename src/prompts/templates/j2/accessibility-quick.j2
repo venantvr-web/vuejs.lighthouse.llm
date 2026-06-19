@@ -44,8 +44,8 @@ En tant qu'expert accessibilité, analyse:
 ### 1. Violations WCAG 2.1 AA
 
 Pour chaque violation:
-- Critère WCAG concerne
-- Impact utilisateur (lecteurs d'ecran, navigation clavier, etc.)
+- Critère WCAG concerné
+- Impact utilisateur (lecteurs d'écran, navigation clavier, etc.)
 - Niveau de conformité (A, AA, AAA)
 
 ### 2. Solutions de Code
@@ -58,7 +58,7 @@ Pour chaque violation:
     <nav role="navigation" aria-label="Navigation principale">
       <ul>
         <li><router-link to="/">Accueil</router-link></li>
-        <li><router-link to="/about">A propos</router-link></li>
+        <li><router-link to="/about">À propos</router-link></li>
       </ul>
     </nav>
   </header>
@@ -86,7 +86,7 @@ Pour chaque violation:
     <MenuIcon aria-hidden="true" />
   </button>
 
-  <!-- Messages live pour lecteurs d'ecran -->
+  <!-- Messages live pour lecteurs d'écran -->
   <div role="status" aria-live="polite" class="sr-only">
     {{ statusMessage }}
   </div>
@@ -125,6 +125,6 @@ const handleKeydown = (event) => {
 ```
 
 ### 4. Quick Wins A11y
-3 corrections rapides et a fort impact pour améliorer immédiatement l'accessibilité.
+3 corrections rapides et à fort impact pour améliorer immédiatement l'accessibilité.
 
 Fournis des solutions conformes WCAG 2.1 AA et RGAA.

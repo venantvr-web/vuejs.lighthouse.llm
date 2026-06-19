@@ -8,7 +8,7 @@ Tu es un Expert en Performance Budgets et monitoring continu des performances we
 
 ### Métriques de Timing
 
-| Métrique | Budget | Actuel | Ecart | Statut |
+| Métrique | Budget | Actuel | Écart | Statut |
 |----------|--------|--------|-------|--------|
 {% if budgets.performance %}| **Performance Score** | {{ budgets.performance }}% | {{ actual.performance }}% | {{ (actual.performance - budgets.performance) | round(0) }}% | {% if actual.performance >= budgets.performance %}OK{% elif actual.performance >= budgets.performance - 10 %}Attention{% else %}Critique{% endif %} |{% endif %}
 {% if budgets.lcp %}| **LCP** | {{ budgets.lcp | metric }} | {{ actual.lcp | metric }} | {{ (actual.lcp - budgets.lcp) | metric }} | {% if actual.lcp <= budgets.lcp %}OK{% elif actual.lcp <= budgets.lcp * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
@@ -19,7 +19,7 @@ Tu es un Expert en Performance Budgets et monitoring continu des performances we
 
 ### Tailles de Ressources
 
-| Type | Budget | Actuel | Ecart | Statut |
+| Type | Budget | Actuel | Écart | Statut |
 |------|--------|--------|-------|--------|
 {% if budgets.js %}| **JavaScript** | {{ budgets.js | size }} | {{ actual.js | size }} | {% if actual.js > budgets.js %}+{% endif %}{{ (actual.js - budgets.js) | size }} | {% if actual.js <= budgets.js %}OK{% elif actual.js <= budgets.js * 1.2 %}Attention{% else %}Critique{% endif %} |{% endif %}
 {% if budgets.css %}| **CSS** | {{ budgets.css | size }} | {{ actual.css | size }} | {% if actual.css > budgets.css %}+{% endif %}{{ (actual.css - budgets.css) | size }} | {% if actual.css <= budgets.css %}OK{% elif actual.css <= budgets.css * 1.5 %}Attention{% else %}Critique{% endif %} |{% endif %}
@@ -32,13 +32,13 @@ Tu es un Expert en Performance Budgets et monitoring continu des performances we
 
 {% for violation in violations %}
 ### {{ loop.index }}. {{ violation.metric }}
-**Budget:** {{ violation.budget }} | **Actuel:** {{ violation.actual }} | **Depassement:** {{ violation.overBy }}
+**Budget:** {{ violation.budget }} | **Actuel:** {{ violation.actual }} | **Dépassement :** {{ violation.overBy }}
 **Sévérité:** {{ violation.severity | default('error') }}
 {% endfor %}
 {% else %}
 ## Conformité
 
-Tous les budgets sont respectes.
+Tous les budgets sont respectés.
 {% endif %}
 
 ## Demande
@@ -122,7 +122,7 @@ export default {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // Separer les gros vendors
+            // Séparer les gros vendors
             if (id.includes('lodash')) return 'lodash'
             if (id.includes('moment')) return 'moment'
             return 'vendor'
@@ -141,7 +141,7 @@ export default {
 - Minification avancée
 {% endif %}
 
-### 3. Integration CI/CD
+### 3. Intégration CI/CD
 
 **GitHub Actions:**
 ```yaml
@@ -195,7 +195,7 @@ export default {
 
 ### 5. Ajustement des Budgets
 
-Si les budgets sont trop stricts ou trop laxistes, propose des ajustements realistes.
+Si les budgets sont trop stricts ou trop laxistes, propose des ajustements réalistes.
 
 **Budgets recommandés par type de site:**
 

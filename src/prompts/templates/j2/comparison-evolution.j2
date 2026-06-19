@@ -4,7 +4,7 @@
 ## Role
 Tu es un Expert en Analyse de Performance Web, spécialisé dans le suivi d'évolution et l'analyse comparative.
 
-## Periode Analysée
+## Période Analysée
 
 **Avant:** {{ beforeDate }}
 **Après:** {{ afterDate }}
@@ -48,7 +48,7 @@ Tu es un Expert en Analyse de Performance Web, spécialisé dans le suivi d'évo
 {% endif %}
 
 {% if regressions %}
-## Regressions Détectées
+## Régressions Détectées
 
 {% for reg in regressions %}
 ### {{ loop.index }}. {{ reg.title }}
@@ -65,19 +65,19 @@ Analyse comparative approfondie:
 
 Analyse l'évolution globale:
 - **Points forts:** Quelles sont les principales améliorations?
-- **Points faibles:** Quelles sont les regressions critiques?
-- **Tendance générale:** Le site s'amélioré-t-il globalement?
+- **Points faibles:** Quelles sont les régressions critiques?
+- **Tendance générale:** Le site s'améliore-t-il globalement?
 
 ### 2. Analyse des Améliorations
 
 Pour chaque amélioration significative:
-- Quelle optimisation a probablement cause cette amélioration?
+- Quelle optimisation a probablement causé cette amélioration?
 - Impact utilisateur concret
 - Recommandation pour maintenir/amplifier cette amélioration
 
 **Exemple d'analyse:**
 ```
-Amélioration: LCP réduit de 4.2s a 2.1s (-50%)
+Amélioration: LCP réduit de 4.2s à 2.1s (-50%)
 
 Causes probables:
 - Optimisation des images (format WebP, lazy-loading)
@@ -91,30 +91,30 @@ Impact utilisateur:
 
 Recommandations:
 - Maintenir l'optimisation images
-- Monitorer regulierement le LCP
-- Continuer a optimiser les ressources critiques
+- Monitorer régulièrement le LCP
+- Continuer à optimiser les ressources critiques
 ```
 
-### 3. Analyse des Regressions
+### 3. Analyse des Régressions
 
 {% if regressions %}
-Pour chaque regression:
+Pour chaque régression :
 - Identifier la cause probable
 - Estimer l'impact utilisateur
 - Proposer une solution de correction
 
 **Plan de correction:**
 ```vue
-// Code pour corriger les regressions identifiées
+// Code pour corriger les régressions identifiées
 ```
 {% else %}
-Aucune regression détectée.
+Aucune régression détectée.
 {% endif %}
 
 ### 4. Recommandations Priorisées
 
 **Quick Wins (< 1h):**
-1. [Action rapide a fort impact]
+1. [Action rapide à fort impact]
 2. [Correction simple]
 3. [Ajustement mineur]
 
@@ -128,7 +128,7 @@ Aucune regression détectée.
 
 ### 5. Suivi et Monitoring
 
-**KPIs a suivre:**
+**KPIs à suivre :**
 - Core Web Vitals (LCP, CLS, INP)
 - Scores Lighthouse
 - Métriques business (taux de conversion, engagement)

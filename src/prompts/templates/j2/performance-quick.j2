@@ -13,16 +13,16 @@ Performance: {{ score | score }}
 **Valeur:** {{ lcpDisplay | default(lcp | metric) }} - Status: {{ lcpStatus | default('unknown') }}
 **Cible:** < 2.5s
 {% if lcpElement and (lcpElement.snippet or lcpElement.selector or lcpElement.nodeLabel) %}
-**Element LCP:**
+**Élément LCP :**
 {% if lcpElement.snippet %}- Snippet: `{{ lcpElement.snippet | truncate(120) }}`{% endif %}
-{% if lcpElement.selector %}- Selecteur CSS: `{{ lcpElement.selector }}`{% endif %}
+{% if lcpElement.selector %}- Sélecteur CSS : `{{ lcpElement.selector }}`{% endif %}
 {% if lcpElement.nodeLabel %}- Label: {{ lcpElement.nodeLabel }}{% endif %}
 {% if lcpElement.phases %}
 **Phases LCP:**
   - TTFB: {{ lcpElement.phases.ttfb | metric }}
-  - Delai chargement: {{ lcpElement.phases.loadDelay | metric }}
+  - Délai chargement : {{ lcpElement.phases.loadDelay | metric }}
   - Temps chargement: {{ lcpElement.phases.loadTime | metric }}
-  - Delai rendu: {{ lcpElement.phases.renderDelay | metric }}
+  - Délai rendu : {{ lcpElement.phases.renderDelay | metric }}
 {% endif %}
 {% endif %}
 
@@ -30,10 +30,10 @@ Performance: {{ score | score }}
 **Valeur:** {{ cls }} - Status: {{ clsStatus | default('unknown') }}
 **Cible:** < 0.1
 {% if clsElements %}
-**Elements responsables du Layout Shift:**
+**Éléments responsables du Layout Shift :**
 {% for element in clsElements %}{% if element.snippet or element.nodeLabel or element.selector %}
 - {% if element.nodeLabel %}**{{ element.nodeLabel }}**{% endif %}{% if element.snippet %} `{{ element.snippet | truncate(80) }}`{% endif %}
-  {% if element.selector %}- Selecteur: `{{ element.selector }}`{% endif %}
+  {% if element.selector %}- Sélecteur : `{{ element.selector }}`{% endif %}
   {% if element.score %}- Score CLS: {{ element.score | round(4) }}{% endif %}
 {% endif %}{% endfor %}
 {% endif %}
@@ -92,7 +92,7 @@ Performance: {{ score | score }}
 {% endif %}
 
 {% if unusedJsResources %}
-### JavaScript Non Utilise
+### JavaScript Non Utilisé
 **Gain potentiel:** {{ unusedJs | size }}
 
 | Fichier | Taille totale | Gaspillage |
@@ -102,7 +102,7 @@ Performance: {{ score | score }}
 {% endif %}
 
 {% if unusedCssResources %}
-### CSS Non Utilise
+### CSS Non Utilisé
 **Gain potentiel:** {{ unusedCss | size }}
 
 | Fichier | Taille totale | Gaspillage |
@@ -120,8 +120,8 @@ Performance: {{ score | score }}
 {% endif %}
 
 {% if longTasks %}
-### Taches Longues (Long Tasks)
-| Script | Durée | Debut |
+### Tâches Longues (Long Tasks)
+| Script | Durée | Début |
 |--------|-------|-------|
 {% for task in longTasks %}| `{{ task.url | truncate(50) }}` | {{ task.duration | round(0) }}ms | {{ task.startTime | round(0) }}ms |
 {% endfor %}
@@ -148,7 +148,7 @@ Performance: {{ score | score }}
 {% if has_displayable_items %}
 **Ressources concernées:**
 {% for item in audit.items %}{% if item.url or item.location or item.element or (item.node and item.node.selector) or item.wastedMs or item.wastedBytes or item.totalBytes %}
-- {% if item.url %}`{{ item.url | truncate(70) }}`{% endif %}{% if item.element and not item.url %}**Element:** `{{ item.element | truncate(60) }}`{% endif %}{% if item.node and item.node.selector and not item.url and not item.element %}`{{ item.node.selector }}`{% endif %}
+- {% if item.url %}`{{ item.url | truncate(70) }}`{% endif %}{% if item.element and not item.url %}**Élément :** `{{ item.element | truncate(60) }}`{% endif %}{% if item.node and item.node.selector and not item.url and not item.element %}`{{ item.node.selector }}`{% endif %}
 {% if item.location %}  - **Source:** `{{ item.location }}`{% endif %}
 {% if item.originalLocation %}  - **Fichier original:** `{{ item.originalLocation }}`{% endif %}
 {% if item.wastedMs or item.wastedBytes %}  - **Perte:** {% if item.wastedMs %}{{ item.wastedMs | round(0) }}ms{% endif %}{% if item.wastedBytes %} / {{ item.wastedBytes | size }}{% endif %}{% endif %}
@@ -186,13 +186,13 @@ Performance: {{ score | score }}
 
 Analyse ces données et fournis:
 
-1. **Diagnostic Prioritaire:** Identifié les 3 problèmes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
+1. **Diagnostic Prioritaire:** Identifie les 3 problèmes majeurs impactant les Core Web Vitals avec leur cause racine exacte (fichier, ligne si disponible)
 
 2. **Plan d'Action:** Pour chaque problème:
-   - Fichier(s) exact(s) a modifier avec le chemin
+   - Fichier(s) exact(s) à modifier avec le chemin
    - Code Vue.js 3 (Composition API) optimisé
    - Configuration Vite spécifique si nécessaire
-   - Commandes npm/pnpm a executer
+   - Commandes npm/pnpm à exécuter
 
 3. **Quick Wins:** 3 optimisations implémentables en moins de 30 minutes avec les fichiers cibles
 

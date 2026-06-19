@@ -7,11 +7,11 @@ Tu es un Consultant SEO Technique spécialisé dans l'optimisation des applicati
 ## Score SEO
 {{ score | score }}
 
-## Elements Meta
+## Éléments Meta
 
 ### Title
 {% if title %}
-✅ **Present:** {{ title }}
+✅ **Présent :** {{ title }}
 - Longueur: {{ title | length }} caractères (optimal: 50-60)
 {% else %}
 ❌ **Absent:** Aucune balise title détectée
@@ -19,7 +19,7 @@ Tu es un Consultant SEO Technique spécialisé dans l'optimisation des applicati
 
 ### Meta Description
 {% if description %}
-✅ **Presente:** {{ description }}
+✅ **Présente :** {{ description }}
 - Longueur: {{ description | length }} caractères (optimal: 150-160)
 {% else %}
 ❌ **Absente:** Aucune meta description
@@ -60,7 +60,7 @@ useHead({
   title: 'Titre optimisé | Marque',
   meta: [
     { name: 'description', content: 'Description optimisée 150-160 caractères' },
-    { property: 'og:title', content: 'Titre pour reseaux sociaux' },
+    { property: 'og:title', content: 'Titre pour réseaux sociaux' },
     { property: 'og:description', content: 'Description Open Graph' },
     { property: 'og:image', content: 'https://example.com/og-image.jpg' },
     { name: 'twitter:card', content: 'summary_large_image' }
@@ -69,18 +69,18 @@ useHead({
 </script>
 ```
 
-### 2. Structure Semantique
+### 2. Structure Sémantique
 - Hiérarchie H1-H6 optimale
-- Balises semantiques HTML5
+- Balises sémantiques HTML5
 - Micro-données structurées
 
 ### 3. Problèmes SPA
 Solutions pour les problèmes SEO spécifiques aux SPA Vue.js:
-- Rendu cote serveur (SSR/Nuxt)
+- Rendu côté serveur (SSR/Nuxt)
 - Pre-rendering
 - Hydratation SEO-friendly
 
 ### 4. Quick Wins SEO
-3 améliorations rapides et a fort impact.
+3 améliorations rapides et à fort impact.
 
 Fournis des exemples de code directement intégrables dans Vue.js 3.

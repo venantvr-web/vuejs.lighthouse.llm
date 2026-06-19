@@ -12,7 +12,7 @@ Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans 
 {% if opportunities %}
 {% for opp in opportunities %}{% if opp.title %}
 - **{{ opp.title }}**
-  {% if opp.numericValue %}- Impact: {{ opp.numericValue | metric }} economises{% endif %}
+  {% if opp.numericValue %}- Impact: {{ opp.numericValue | metric }} économisés{% endif %}
   {% if opp.score is defined %}- Score: {{ opp.score | score }}{% endif %}
 {% endif %}{% endfor %}
 {% endif %}
@@ -95,4 +95,4 @@ export default {
 ### 3. Plan d'Action
 Roadmap priorisée avec Quick wins et optimisations avancées.
 
-Reponds en Markdown avec des blocs de code détaillés et commentes.
+Réponds en Markdown avec des blocs de code détaillés et commentés.

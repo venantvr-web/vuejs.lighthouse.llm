@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, it, vi} from 'vitest'
-import {DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualUrls} from '@/services/urlDiscovery'
+import {discoverBySitemap, DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualUrls} from '@/services/urlDiscovery'
 
 /**
  * Tests for URL Discovery service
@@ -201,6 +201,28 @@ https://example.com/page?id=1&utm_campaign=summer`
             })
             const urls = await expandSitemap('https://x.com/sitemap.xml', {maxPages: 2})
             expect(urls).toHaveLength(2)
+        })
+    })
+
+    describe('discoverBySitemap (resolves sitemap index)', () => {
+        afterEach(() => vi.unstubAllGlobals())
+
+        it('expands a sitemap index found at a standard path into page URLs', async () => {
+            // Régression : un <sitemapindex> renvoyait 0 URL (branche index non gérée)
+            const xmlByUrl = {
+                'https://concilio.com/sitemap.xml':
+                    '<sitemapindex><sitemap><loc>https://concilio.com/page-sitemap.xml</loc></sitemap></sitemapindex>',
+                'https://concilio.com/page-sitemap.xml':
+                    '<urlset><url><loc>https://concilio.com/a</loc></url><url><loc>https://concilio.com/b</loc></url></urlset>'
+            }
+            vi.stubGlobal('fetch', vi.fn(async (_endpoint, opts) => {
+                const {url} = JSON.parse(opts.body)
+                return {ok: true, json: async () => ({html: xmlByUrl[url] || ''})}
+            }))
+
+            const urls = await discoverBySitemap('https://concilio.com')
+            expect(urls).toContain('https://concilio.com/a')
+            expect(urls).toContain('https://concilio.com/b')
         })
     })
 })

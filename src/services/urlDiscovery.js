@@ -112,11 +112,10 @@ export async function discoverBySitemap(baseUrl, options = {}) {
         }
 
         try {
-            const xml = await fetchPage(sitemapUrl, proxyEndpoint, signal)
-            if (xml) {
-                urls = parseSitemapXml(xml, baseOrigin)
-                if (urls.length > 0) break
-            }
+            // expandSitemap gère les sitemaps index (récursion dans les enfants),
+            // contrairement à parseSitemapXml qui n'extrait que les <url>.
+            urls = await expandSitemap(sitemapUrl, {maxPages, signal, proxyEndpoint})
+            if (urls.length > 0) break
         } catch {
             // Try next sitemap URL
         }

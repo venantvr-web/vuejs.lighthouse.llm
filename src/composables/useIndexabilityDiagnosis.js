@@ -3,6 +3,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildIndexabilityPrompt, buildIndexabilitySignals, INDEXABILITY_SYSTEM} from '@/services/indexabilityDiagnosis'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
+import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 
 /**
  * Diagnostic d'indexabilité par le LLM, en streaming, à partir des signaux
@@ -11,6 +12,7 @@ import {buildContinuationPrompt} from '@/services/llm/continuation'
  */
 export function useIndexabilityDiagnosis() {
     const settings = useSettingsStore()
+    const aiHistory = useAiHistoryStore()
 
     const diagnosing = ref(false)
     const diagnosis = ref('')
@@ -18,9 +20,32 @@ export function useIndexabilityDiagnosis() {
     const tokenCount = ref(0)
     const truncated = ref(false)
 
-    // Fournisseur actif (pour annuler) et dernier prompt (pour reprendre)
+    // Fournisseur actif (pour annuler), dernier prompt (pour reprendre),
+    // origine et id d'historique courants.
     let activeProvider = null
     let lastPrompt = ''
+    let lastOrigin = ''
+    let lastArtifactId = null
+
+    async function persist() {
+        if (!diagnosis.value.trim()) return
+        try {
+            const payload = {
+                type: AI_ARTIFACT_TYPES.INDEXABILITY,
+                title: `Indexabilité${lastOrigin ? ' — ' + lastOrigin : ''}`,
+                url: lastOrigin,
+                provider: settings.currentProvider,
+                model: settings.currentModel,
+                format: 'markdown',
+                content: diagnosis.value,
+                meta: {truncated: truncated.value}
+            }
+            if (lastArtifactId) await aiHistory.updateArtifact(lastArtifactId, {content: payload.content, meta: payload.meta})
+            else lastArtifactId = await aiHistory.addArtifact(payload)
+        } catch (e) {
+            console.error('Failed to save diagnosis to history:', e)
+        }
+    }
 
     async function streamInto(prompt, {append = false} = {}) {
         if (!settings.isConfigured) {
@@ -56,8 +81,11 @@ export function useIndexabilityDiagnosis() {
      * @param {object} state - { origin, resources, sitemaps, jsonLd, readiness, brokenPages, pageMeta }
      */
     async function run(state) {
+        lastArtifactId = null
+        lastOrigin = state?.origin || ''
         lastPrompt = buildIndexabilityPrompt(buildIndexabilitySignals(state))
         await streamInto(lastPrompt)
+        await persist()
     }
 
     /** Reprend une réponse tronquée là où elle s'est arrêtée. */
@@ -65,6 +93,7 @@ export function useIndexabilityDiagnosis() {
         if (!lastPrompt || !diagnosis.value || diagnosing.value) return
         diagnosis.value += '\n'
         await streamInto(buildContinuationPrompt(lastPrompt, diagnosis.value), {append: true})
+        await persist()
     }
 
     function cancel() {

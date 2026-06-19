@@ -74,6 +74,11 @@ const routes = [
         component: () => import('@/views/ResourcesView.vue')
     },
     {
+        path: '/ai-history',
+        name: 'ai-history',
+        component: () => import('@/views/AiHistoryView.vue')
+    },
+    {
         path: '/crawl',
         name: 'crawl',
         component: () => import('@/views/CrawlView.vue')

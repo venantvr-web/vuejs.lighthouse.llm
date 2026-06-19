@@ -9,6 +9,7 @@ import {
     parseStructuredData,
     STRUCTURED_DATA_SYSTEM
 } from '@/services/structuredDataGen'
+import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 
 /**
  * Analyse les données structurées des pages crawlées et génère, via le LLM, le
@@ -17,6 +18,7 @@ import {
  */
 export function useStructuredData() {
     const settings = useSettingsStore()
+    const aiHistory = useAiHistoryStore()
 
     // État par URL : { status, context, loading, error, generating, generated, genError }
     const byUrl = reactive({})
@@ -97,6 +99,20 @@ export function useStructuredData() {
                 e.genError = error
             } else {
                 e.generated = pretty
+                try {
+                    await aiHistory.addArtifact({
+                        type: AI_ARTIFACT_TYPES.STRUCTURED_DATA,
+                        title: `JSON-LD — ${url}`,
+                        url,
+                        provider: settings.currentProvider,
+                        model: settings.currentModel,
+                        format: 'jsonld',
+                        content: pretty,
+                        meta: {existingTypes: e.status.types}
+                    })
+                } catch (err) {
+                    console.error('Failed to save JSON-LD to history:', err)
+                }
             }
         } catch (err) {
             e.genError = `Erreur : ${err.message}`

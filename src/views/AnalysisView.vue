@@ -8,6 +8,7 @@ import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import {usePromptEngine} from '@/composables/usePromptEngine.js'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 
@@ -15,6 +16,7 @@ const router = useRouter()
 const route = useRoute()
 const promptEngine = usePromptEngine()
 const settings = useSettingsStore()
+const aiHistory = useAiHistoryStore()
 
 const report = ref(null)
 const activeCategory = ref('performance')
@@ -217,19 +219,45 @@ const streamInto = async (prompt, {append = false} = {}) => {
   }
 }
 
+let lastArtifactId = null
+
+const persistAnalysis = async () => {
+  if (!analysisResult.value.trim()) return
+  const url = report.value?.finalUrl || report.value?.requestedUrl || ''
+  const payload = {
+    type: AI_ARTIFACT_TYPES.ANALYSIS,
+    title: `Analyse ${activeCategory.value}${url ? ' — ' + url : ''}`,
+    url,
+    provider: settings.currentProvider,
+    model: settings.currentModel,
+    format: 'markdown',
+    content: analysisResult.value,
+    meta: {category: activeCategory.value, template: selectedTemplate.value, truncated: truncated.value}
+  }
+  try {
+    if (lastArtifactId) await aiHistory.updateArtifact(lastArtifactId, {content: payload.content, meta: payload.meta})
+    else lastArtifactId = await aiHistory.addArtifact(payload)
+  } catch (e) {
+    console.error('Failed to save analysis to history:', e)
+  }
+}
+
 const startAnalysis = async () => {
   if (!settings.isConfigured) {
     error.value = 'Veuillez configurer un fournisseur LLM dans les paramètres'
     return
   }
+  lastArtifactId = null
   lastPrompt = await buildPrompt()
   await streamInto(lastPrompt)
+  await persistAnalysis()
 }
 
 const continueAnalysis = async () => {
   if (!lastPrompt || !analysisResult.value || isStreaming.value) return
   analysisResult.value += '\n'
   await streamInto(buildContinuationPrompt(lastPrompt, analysisResult.value), {append: true})
+  await persistAnalysis()
 }
 
 const cancelAnalysis = () => {

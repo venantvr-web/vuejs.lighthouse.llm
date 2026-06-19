@@ -10,6 +10,8 @@ import {
     STRUCTURED_DATA_SYSTEM
 } from '@/services/structuredDataGen'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
+import {useToast} from '@/composables/useToast'
+import {useI18n} from '@/i18n'
 
 /**
  * Analyse les données structurées des pages crawlées et génère, via le LLM, le
@@ -19,6 +21,8 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 export function useStructuredData() {
     const settings = useSettingsStore()
     const aiHistory = useAiHistoryStore()
+    const toast = useToast()
+    const {t} = useI18n()
 
     // État par URL : { status, context, loading, error, generating, generated, genError, fromHistory }
     const byUrl = reactive({})
@@ -141,6 +145,7 @@ export function useStructuredData() {
             }
         } catch (err) {
             e.genError = `Erreur : ${err.message}`
+            toast.fromError(t('toast.jsonLdFailed'), err)
         } finally {
             e.generating = false
         }
@@ -165,6 +170,8 @@ export function useStructuredData() {
                 await generate(url)
                 batch.done++
             }
+            const ok = targets.filter((u) => byUrl[u]?.generated).length
+            if (ok > 0) toast.success(t('toast.jsonLdDone', {count: ok}))
         } finally {
             batch.running = false
         }

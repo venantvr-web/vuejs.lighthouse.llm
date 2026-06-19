@@ -17,6 +17,7 @@ export default {
         download: 'Download',
         copy: 'Copy',
         close: 'Close',
+        details: 'Details',
         retry: 'Retry',
         loading: 'Loading…',
         analyzing: 'Analyzing…',

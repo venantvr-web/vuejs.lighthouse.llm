@@ -12,8 +12,10 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 const router = useRouter()
 const route = useRoute()
 const promptEngine = usePromptEngine()
@@ -214,7 +216,10 @@ const streamInto = async (prompt, {append = false} = {}) => {
     truncated.value = !!activeProvider?.lastResponseTruncated
   } catch (e) {
     // Don't surface an error when the user cancelled the stream
-    if (isStreaming.value) error.value = t('analysis.streamError', {message: e.message})
+    if (isStreaming.value) {
+      error.value = t('analysis.streamError', {message: e.message})
+      toast.fromError(t('toast.analysisFailed'), e)
+    }
   } finally {
     isStreaming.value = false
     activeProvider = null

@@ -11,8 +11,10 @@ import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 const router = useRouter()
 const crawlStore = useCrawlStore()
 const site = useSiteStore()
@@ -198,6 +200,7 @@ async function handleSubmit() {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
       error.value = t('crawl.errorRelayRequired')
+      toast.warning(t('toast.relayUnavailable'), {details: t('crawl.errorRelayRequired')})
       return
     }
   }
@@ -214,11 +217,18 @@ async function handleSubmit() {
 
     const session = await crawlStore.startCrawl(config)
 
+    if (session && session.status === CRAWL_STATUS.PARTIAL) {
+      toast.warning(t('toast.crawlPartial', {done: session.pagesAnalyzed, total: session.pageCount}))
+    } else if (session && session.status !== CRAWL_STATUS.FAILED) {
+      toast.success(t('toast.crawlDone', {count: session.pagesAnalyzed}))
+    }
+
     if (session && session.status !== CRAWL_STATUS.FAILED) {
       router.push(`/crawl/results/${session.id}`)
     }
   } catch (err) {
     error.value = err.message || t('crawl.errorGeneric')
+    toast.fromError(t('toast.crawlFailed'), err)
   }
 }
 

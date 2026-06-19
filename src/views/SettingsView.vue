@@ -16,8 +16,10 @@ import {
 import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 const settings = useSettingsStore()
 const DEFAULT_UA = DEFAULT_USER_AGENT
 const defaultProxyBase = getDefaultProxyBase()
@@ -127,6 +129,7 @@ const saveSettings = () => {
   setFetchMode(directFetch.value ? FETCH_MODES.DIRECT : FETCH_MODES.PROXY)
   if (maxTokens.value) settings.setMaxTokens(maxTokens.value)
   saved.value = true
+  toast.success(t('toast.saved'))
   setTimeout(() => saved.value = false, 2000)
 }
 

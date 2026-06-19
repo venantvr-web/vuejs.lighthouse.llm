@@ -4,6 +4,8 @@ import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildIndexabilityPrompt, buildIndexabilitySignals, INDEXABILITY_SYSTEM} from '@/services/indexabilityDiagnosis'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
+import {useToast} from '@/composables/useToast'
+import {useI18n} from '@/i18n'
 
 /**
  * Diagnostic d'indexabilité par le LLM, en streaming, à partir des signaux
@@ -13,6 +15,8 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 export function useIndexabilityDiagnosis() {
     const settings = useSettingsStore()
     const aiHistory = useAiHistoryStore()
+    const toast = useToast()
+    const {t} = useI18n()
 
     const diagnosing = ref(false)
     const diagnosis = ref('')
@@ -69,7 +73,10 @@ export function useIndexabilityDiagnosis() {
             }
             truncated.value = !!activeProvider?.lastResponseTruncated
         } catch (e) {
-            if (diagnosing.value) error.value = `Erreur : ${e.message}`
+            if (diagnosing.value) {
+                error.value = `Erreur : ${e.message}`
+                toast.fromError(t('toast.diagnosisFailed'), e)
+            }
         } finally {
             diagnosing.value = false
             activeProvider = null

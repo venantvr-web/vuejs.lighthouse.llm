@@ -1,6 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
+import ToastHost from '@/components/common/ToastHost.vue'
 
 const route = useRoute()
 const isDark = ref(false)
@@ -29,6 +30,9 @@ const toggleTheme = () => {
 
 <template>
   <div class="min-h-screen transition-colors" style="background-color: var(--bg-secondary);">
+    <!-- Notifications in-app -->
+    <ToastHost/>
+
     <!-- Theme toggle (floating) -->
     <button
         :class="isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"

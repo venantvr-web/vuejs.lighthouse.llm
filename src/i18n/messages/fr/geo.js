@@ -40,6 +40,24 @@ export default {
         // Messages (JS)
         errorPromptBrandRequired: 'Le prompt et la marque sont requis.',
         errorInvalidEntry: 'Entrée invalide.',
-        confirmRemove: 'Retirer ce prompt suivi ?'
+        confirmRemove: 'Retirer ce prompt suivi ?',
+        // Carte de prompt (GeoCard)
+        competitorsCount: '{count} concurrent',
+        competitorsCountPlural: '{count} concurrents',
+        removeTitle: 'Retirer',
+        enginesCiting: 'Moteurs citant',
+        avgShareOfVoiceShort: 'Part de voix moy.',
+        mentioned: 'Oui',
+        notMentioned: 'Non',
+        emergingCompetitors: 'Concurrents émergents',
+        citedBy: 'Cité par {count} moteur(s)',
+        showResponses: 'Voir les réponses',
+        hideResponses: 'Masquer les réponses',
+        executedAt: 'Exécuté {time}',
+        run: 'Exécuter',
+        // Sentiment
+        sentimentPositive: 'Positif',
+        sentimentNeutral: 'Neutre',
+        sentimentNegative: 'Négatif'
     }
 }

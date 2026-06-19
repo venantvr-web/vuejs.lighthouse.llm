@@ -22,6 +22,18 @@ export default {
         optimizePerformanceTitle: 'Optimize Performance',
         optimizePerformanceDescription: 'Get AI recommendations to improve your Core Web Vitals',
         compareReportsTitle: 'Compare reports',
-        compareReportsDescription: 'Track how your site evolves over time'
+        compareReportsDescription: 'Track how your site evolves over time',
+
+        // Action plan (ActionPlanPanel)
+        actionPlanTitle: 'Prioritized action plan',
+        generateFixes: 'Generate fixes (AI)',
+        generatingFixes: 'Generating…',
+        impact: 'Impact {level}',
+        effort: 'Effort {level}',
+        levelLow: 'low',
+        levelMedium: 'medium',
+        levelHigh: 'high',
+        potentialGain: 'potential gain {value}',
+        suggestedFixes: 'Suggested fixes'
     }
 }

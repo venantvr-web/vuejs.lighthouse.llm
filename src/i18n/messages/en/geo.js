@@ -40,6 +40,24 @@ export default {
         // Messages (JS)
         errorPromptBrandRequired: 'The prompt and the brand are required.',
         errorInvalidEntry: 'Invalid entry.',
-        confirmRemove: 'Remove this tracked prompt?'
+        confirmRemove: 'Remove this tracked prompt?',
+        // Prompt card (GeoCard)
+        competitorsCount: '{count} competitor',
+        competitorsCountPlural: '{count} competitors',
+        removeTitle: 'Remove',
+        enginesCiting: 'Engines citing',
+        avgShareOfVoiceShort: 'Avg. share of voice',
+        mentioned: 'Yes',
+        notMentioned: 'No',
+        emergingCompetitors: 'Emerging competitors',
+        citedBy: 'Cited by {count} engine(s)',
+        showResponses: 'Show responses',
+        hideResponses: 'Hide responses',
+        executedAt: 'Run {time}',
+        run: 'Run',
+        // Sentiment
+        sentimentPositive: 'Positive',
+        sentimentNeutral: 'Neutral',
+        sentimentNegative: 'Negative'
     }
 }

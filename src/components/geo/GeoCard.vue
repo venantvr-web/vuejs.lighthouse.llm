@@ -2,6 +2,9 @@
 import {ref} from 'vue'
 import {formatRelativeTime, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 defineProps({
   item: {type: Object, required: true},
@@ -14,10 +17,12 @@ const emit = defineEmits(['run', 'remove'])
 
 const PROVIDER_LABELS = {openai: 'OpenAI', anthropic: 'Claude', gemini: 'Gemini', ollama: 'Ollama'}
 
+// Clés ('positive'/'neutral'/'negative') = valeurs de données pour le lookup → inchangées.
+// Seul le libellé d'affichage est traduit via i18n (clé labelKey).
 const SENTIMENT = {
-  positive: {label: 'Positif', class: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'},
-  neutral: {label: 'Neutre', class: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'},
-  negative: {label: 'Négatif', class: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}
+  positive: {labelKey: 'geo.sentimentPositive', class: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'},
+  neutral: {labelKey: 'geo.sentimentNeutral', class: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'},
+  negative: {labelKey: 'geo.sentimentNegative', class: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}
 }
 
 const showResponses = ref(false)
@@ -39,13 +44,13 @@ const showResponses = ref(false)
               v-if="item.competitors.length"
               class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
           >
-            {{ item.competitors.length }} concurrent{{ item.competitors.length > 1 ? 's' : '' }}
+            {{ item.competitors.length > 1 ? $t('geo.competitorsCountPlural', { count: item.competitors.length }) : $t('geo.competitorsCount', { count: item.competitors.length }) }}
           </span>
         </div>
       </div>
       <button
           class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-          title="Retirer"
+          :title="$t('geo.removeTitle')"
           @click="emit('remove')"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,14 +63,14 @@ const showResponses = ref(false)
       <!-- Aggregate across engines -->
       <div class="flex items-center gap-4 mb-3">
         <div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Moteurs citant</p>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.enginesCiting') }}</p>
           <p
               :class="stats.enginesCited > 0 ? 'text-emerald-500' : 'text-red-500'"
               class="text-lg font-bold leading-tight"
           >{{ stats.enginesCited }}/{{ stats.engineCount }}</p>
         </div>
         <div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">Part de voix moy.</p>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.avgShareOfVoiceShort') }}</p>
           <p
               :class="getScoreColorClass((stats.avgShareOfVoice ?? 0) / 100)"
               class="text-lg font-bold leading-tight"
@@ -85,7 +90,7 @@ const showResponses = ref(false)
               :class="stats.byProvider[provider].latest.brandMentioned ? 'text-emerald-500' : 'text-red-500'"
               class="w-10 shrink-0 font-semibold"
           >
-            {{ stats.byProvider[provider].latest.brandMentioned ? 'Oui' : 'Non' }}
+            {{ stats.byProvider[provider].latest.brandMentioned ? $t('geo.mentioned') : $t('geo.notMentioned') }}
           </span>
           <span class="w-10 shrink-0 text-gray-500 dark:text-gray-400">
             <template v-if="stats.byProvider[provider].latest.position">#{{ stats.byProvider[provider].latest.position }}</template>
@@ -101,7 +106,7 @@ const showResponses = ref(false)
               :class="SENTIMENT[stats.byProvider[provider].latest.sentiment].class"
               class="px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0"
           >
-            {{ SENTIMENT[stats.byProvider[provider].latest.sentiment].label }}
+            {{ $t(SENTIMENT[stats.byProvider[provider].latest.sentiment].labelKey) }}
           </span>
           <Sparkline
               v-if="stats.byProvider[provider].sparkline.length > 1"
@@ -115,13 +120,13 @@ const showResponses = ref(false)
 
       <!-- Emerging competitors -->
       <div v-if="stats.emergingCompetitors?.length" class="mb-3">
-        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Concurrents émergents</p>
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{{ $t('geo.emergingCompetitors') }}</p>
         <div class="flex flex-wrap gap-1">
           <span
               v-for="c in stats.emergingCompetitors"
               :key="c.name"
               class="px-1.5 py-0.5 rounded text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-              :title="`Cité par ${c.engines} moteur(s)`"
+              :title="$t('geo.citedBy', { count: c.engines })"
           >
             {{ c.name }}<span v-if="c.engines > 1" class="opacity-60"> · {{ c.engines }}</span>
           </span>
@@ -130,7 +135,7 @@ const showResponses = ref(false)
 
       <!-- Response previews -->
       <button class="text-[11px] text-primary-500 hover:underline" @click="showResponses = !showResponses">
-        {{ showResponses ? 'Masquer' : 'Voir' }} les réponses
+        {{ showResponses ? $t('geo.hideResponses') : $t('geo.showResponses') }}
       </button>
       <div v-if="showResponses" class="mt-2 space-y-2">
         <div v-for="provider in stats.providers" :key="provider">
@@ -144,7 +149,7 @@ const showResponses = ref(false)
 
     <!-- Never run -->
     <div v-else class="flex-1 flex items-center justify-center py-4 mb-2">
-      <p class="text-sm text-gray-400 dark:text-gray-500">Jamais exécuté</p>
+      <p class="text-sm text-gray-400 dark:text-gray-500">{{ $t('geo.neverRun') }}</p>
     </div>
 
     <!-- Error -->
@@ -153,7 +158,7 @@ const showResponses = ref(false)
     <!-- Footer -->
     <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">
       <span class="text-xs text-gray-400 dark:text-gray-500">
-        <template v-if="stats?.lastRunAt">Exécuté {{ formatRelativeTime(stats.lastRunAt) }}</template>
+        <template v-if="stats?.lastRunAt">{{ $t('geo.executedAt', { time: formatRelativeTime(stats.lastRunAt) }) }}</template>
         <template v-else>—</template>
       </span>
       <button
@@ -167,7 +172,7 @@ const showResponses = ref(false)
         >
           <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
-        {{ running ? 'Analyse…' : 'Exécuter' }}
+        {{ running ? $t('common.analyzing') : $t('geo.run') }}
       </button>
     </div>
   </div>

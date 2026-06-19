@@ -3,12 +3,21 @@ import {readFileSync} from 'fs'
 import {fileURLToPath} from 'url'
 import {dirname, join} from 'path'
 import {glob} from 'glob'
-import {messages} from '@/i18n'
+import {DEFAULT_LOCALE, messages, SUPPORTED_LOCALES} from '@/i18n'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
-function hasKey(key) {
-    let cursor = messages
+function flatten(obj, prefix = '', out = []) {
+    for (const [k, v] of Object.entries(obj)) {
+        const key = prefix ? `${prefix}.${k}` : k
+        if (v && typeof v === 'object' && !Array.isArray(v)) flatten(v, key, out)
+        else out.push(key)
+    }
+    return out
+}
+
+function hasKey(locale, key) {
+    let cursor = messages[locale]
     for (const part of key.split('.')) {
         if (cursor == null || typeof cursor !== 'object') return false
         cursor = cursor[part]
@@ -16,7 +25,6 @@ function hasKey(key) {
     return typeof cursor === 'string'
 }
 
-// Récupère les clés i18n littérales : $t('a.b'), t("a.b") — pas les clés dynamiques.
 function extractKeys(source) {
     const keys = new Set()
     const re = /(?:\$t|\bt)\(\s*(['"])([\w.]+)\1/g
@@ -26,7 +34,7 @@ function extractKeys(source) {
 }
 
 describe('i18n message keys', () => {
-    it('every $t/t key used in the code exists in the messages', async () => {
+    it('every $t/t key used in the code exists in the default locale', async () => {
         const files = await glob('src/**/*.{vue,js}', {
             cwd: root,
             absolute: true,
@@ -37,9 +45,8 @@ describe('i18n message keys', () => {
         for (const file of files) {
             const source = readFileSync(file, 'utf-8')
             for (const key of extractKeys(source)) {
-                // On ne considère que les clés namespacées (a.b…), pas les helpers t(x) ad hoc
                 if (!key.includes('.')) continue
-                if (!hasKey(key)) missing.push(`${key}  (${file.replace(root + '/', '')})`)
+                if (!hasKey(DEFAULT_LOCALE, key)) missing.push(`${key}  (${file.replace(root + '/', '')})`)
             }
         }
 
@@ -47,7 +54,19 @@ describe('i18n message keys', () => {
     })
 
     it('exposes the common namespace', () => {
-        expect(hasKey('common.cancel')).toBe(true)
-        expect(hasKey('common.save')).toBe(true)
+        expect(hasKey('fr', 'common.cancel')).toBe(true)
+        expect(hasKey('fr', 'common.save')).toBe(true)
+    })
+
+    it('all locales have the same keys as the default locale (parité)', () => {
+        const refKeys = flatten(messages[DEFAULT_LOCALE]).sort()
+        for (const loc of SUPPORTED_LOCALES) {
+            if (loc === DEFAULT_LOCALE) continue
+            const locKeys = new Set(flatten(messages[loc]))
+            const missing = refKeys.filter(k => !locKeys.has(k))
+            const extra = flatten(messages[loc]).filter(k => !refKeys.includes(k))
+            expect(missing, `Clés manquantes en '${loc}':\n${missing.join('\n')}`).toEqual([])
+            expect(extra, `Clés en trop en '${loc}':\n${extra.join('\n')}`).toEqual([])
+        }
     })
 })

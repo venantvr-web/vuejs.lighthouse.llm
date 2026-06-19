@@ -2,7 +2,15 @@
 import {useRoute} from 'vue-router'
 import {useI18n} from '@/i18n'
 
-const {t} = useI18n()
+const {t, locale, setLocale, SUPPORTED_LOCALES} = useI18n()
+
+// Changer de langue recharge la page : la nouvelle locale (persistée) s'applique
+// partout, y compris aux libellés évalués une seule fois au montage.
+function switchLocale(next) {
+  if (next === locale.value) return
+  setLocale(next)
+  window.location.reload()
+}
 
 defineProps({
   title: {type: String, default: ''},
@@ -64,6 +72,23 @@ function isActive(to) {
             </svg>
           </router-link>
         </nav>
+
+        <!-- Language selector -->
+        <div class="flex items-center gap-0.5 shrink-0 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5">
+          <button
+              v-for="l in SUPPORTED_LOCALES"
+              :key="l"
+              :aria-label="`Langue : ${l}`"
+              :class="locale === l
+                ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200'"
+              class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold uppercase transition-colors"
+              type="button"
+              @click="switchLocale(l)"
+          >
+            {{ l }}
+          </button>
+        </div>
 
         <!-- Page-specific actions -->
         <div v-if="$slots.actions" class="flex items-center gap-2 shrink-0">

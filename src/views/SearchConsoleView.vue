@@ -80,16 +80,14 @@ function formatPosition(p) {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Données de recherche réelles (requêtes, clics, impressions, position)" title="Search Console"/>
+    <AppHeader :subtitle="$t('searchConsole.headerSubtitle')" :title="$t('searchConsole.headerTitle')"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Connection -->
       <div v-if="!connected" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
-        <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">Connexion à Google Search Console</p>
+        <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ $t('searchConsole.connectTitle') }}</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          Renseignez un <strong>Client ID OAuth 2.0</strong> (type « Application Web ») dont l'origine autorisée
-          est celle de ce site. L'API Search Console doit être activée. Le jeton d'accès reste en mémoire,
-          rien n'est stocké côté serveur.
+          {{ $t('searchConsole.connectIntro') }}
         </p>
         <div class="flex flex-col md:flex-row gap-3">
           <input
@@ -104,7 +102,7 @@ function formatPosition(p) {
               class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               @click="handleConnect"
           >
-            {{ loading ? 'Connexion…' : 'Se connecter' }}
+            {{ loading ? $t('searchConsole.connecting') : $t('searchConsole.connect') }}
           </button>
         </div>
         <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
@@ -114,24 +112,24 @@ function formatPosition(p) {
       <template v-else>
         <div class="flex flex-wrap items-end gap-3 mb-6">
           <label class="text-xs text-gray-600 dark:text-gray-300">
-            <span class="block mb-1">Site</span>
+            <span class="block mb-1">{{ $t('searchConsole.site') }}</span>
             <select v-model="selectedSite" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
               <option v-for="site in sites" :key="site" :value="site">{{ site }}</option>
             </select>
           </label>
           <label class="text-xs text-gray-600 dark:text-gray-300">
-            <span class="block mb-1">Période</span>
+            <span class="block mb-1">{{ $t('searchConsole.period') }}</span>
             <select v-model.number="days" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
-              <option :value="7">7 jours</option>
-              <option :value="28">28 jours</option>
-              <option :value="90">90 jours</option>
+              <option :value="7">{{ $t('searchConsole.days7') }}</option>
+              <option :value="28">{{ $t('searchConsole.days28') }}</option>
+              <option :value="90">{{ $t('searchConsole.days90') }}</option>
             </select>
           </label>
           <label class="text-xs text-gray-600 dark:text-gray-300">
-            <span class="block mb-1">Dimension</span>
+            <span class="block mb-1">{{ $t('searchConsole.dimension') }}</span>
             <select v-model="dimension" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
-              <option value="query">Requêtes</option>
-              <option value="page">Pages</option>
+              <option value="query">{{ $t('searchConsole.queries') }}</option>
+              <option value="page">{{ $t('searchConsole.pages') }}</option>
             </select>
           </label>
           <button
@@ -139,10 +137,10 @@ function formatPosition(p) {
               class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               @click="handleQuery"
           >
-            {{ loading ? 'Chargement…' : 'Analyser' }}
+            {{ loading ? $t('common.loading') : $t('searchConsole.analyze') }}
           </button>
           <button class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm" @click="disconnect">
-            Déconnexion
+            {{ $t('searchConsole.disconnect') }}
           </button>
         </div>
 
@@ -151,26 +149,26 @@ function formatPosition(p) {
         <!-- Summary -->
         <div v-if="rows.length" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Clics</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.clicks') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatNumber(summary.clicks) }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Impressions</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.impressions') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatNumber(summary.impressions) }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">CTR moyen</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.avgCtr') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPercent(summary.ctr) }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Position moy.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.avgPosition') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPosition(summary.position) }}</p>
           </div>
         </div>
 
         <!-- Clicks trend across saved snapshots -->
         <div v-if="clicksTrend.length > 1" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Tendance des clics (analyses enregistrées)</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ $t('searchConsole.clicksTrend') }}</p>
           <Sparkline :auto-scale="true" :values="clicksTrend" :width="320" color="#6366f1"/>
         </div>
 
@@ -179,11 +177,11 @@ function formatPosition(p) {
           <table class="w-full text-sm">
             <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400">
             <tr>
-              <th class="text-left font-medium px-4 py-2">{{ dimension === 'page' ? 'Page' : 'Requête' }}</th>
-              <th class="text-right font-medium px-4 py-2">Clics</th>
-              <th class="text-right font-medium px-4 py-2">Impr.</th>
-              <th class="text-right font-medium px-4 py-2">CTR</th>
-              <th class="text-right font-medium px-4 py-2">Position</th>
+              <th class="text-left font-medium px-4 py-2">{{ dimension === 'page' ? $t('searchConsole.page') : $t('searchConsole.query') }}</th>
+              <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.clicks') }}</th>
+              <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.impr') }}</th>
+              <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.ctr') }}</th>
+              <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.position') }}</th>
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -199,7 +197,7 @@ function formatPosition(p) {
         </div>
 
         <div v-else-if="!loading" class="text-center py-16 text-sm text-gray-500 dark:text-gray-400">
-          Choisissez un site et cliquez sur « Analyser ».
+          {{ $t('searchConsole.emptyHint') }}
         </div>
       </template>
     </main>

@@ -6,6 +6,9 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {downloadText} from '@/utils/download'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -17,16 +20,16 @@ const expandedId = ref(null)
 const activeFilter = usePersistentRef('aihistory.filter', 'all')
 
 const TYPE_META = {
-  [AI_ARTIFACT_TYPES.ANALYSIS]: {label: 'Analyse', badge: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'},
-  [AI_ARTIFACT_TYPES.INDEXABILITY]: {label: 'Indexabilité', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'},
-  [AI_ARTIFACT_TYPES.STRUCTURED_DATA]: {label: 'JSON-LD', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'}
+  [AI_ARTIFACT_TYPES.ANALYSIS]: {label: t('aiHistory.typeAnalysis'), badge: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'},
+  [AI_ARTIFACT_TYPES.INDEXABILITY]: {label: t('aiHistory.typeIndexability'), badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'},
+  [AI_ARTIFACT_TYPES.STRUCTURED_DATA]: {label: t('aiHistory.typeStructuredData'), badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'}
 }
 
 const FILTERS = [
-  {value: 'all', label: 'Tout'},
-  {value: AI_ARTIFACT_TYPES.ANALYSIS, label: 'Analyses'},
-  {value: AI_ARTIFACT_TYPES.INDEXABILITY, label: 'Indexabilité'},
-  {value: AI_ARTIFACT_TYPES.STRUCTURED_DATA, label: 'JSON-LD'}
+  {value: 'all', label: t('aiHistory.filterAll')},
+  {value: AI_ARTIFACT_TYPES.ANALYSIS, label: t('aiHistory.filterAnalyses')},
+  {value: AI_ARTIFACT_TYPES.INDEXABILITY, label: t('aiHistory.filterIndexability')},
+  {value: AI_ARTIFACT_TYPES.STRUCTURED_DATA, label: t('aiHistory.filterStructuredData')}
 ]
 
 const filtered = computed(() =>
@@ -63,13 +66,13 @@ async function copy(item) {
 }
 
 async function remove(item) {
-  if (!confirm('Supprimer cet artefact de l\'historique ?')) return
+  if (!confirm(t('aiHistory.confirmRemove'))) return
   await aiHistory.remove(item.id)
   await load()
 }
 
 async function clearAll() {
-  if (!confirm('Vider tout l\'historique IA ?')) return
+  if (!confirm(t('aiHistory.confirmClearAll'))) return
   await aiHistory.clearAll()
   await load()
 }
@@ -79,7 +82,7 @@ onMounted(load)
 
 <template>
   <div :class="embedded ? '' : 'min-h-screen flex flex-col'">
-    <AppHeader v-if="!embedded" subtitle="Analyses, diagnostics et JSON-LD générés par l'IA" title="Historique IA"/>
+    <AppHeader v-if="!embedded" :subtitle="$t('aiHistory.headerSubtitle')" :title="$t('aiHistory.headerTitle')"/>
 
     <main :class="embedded ? 'max-w-5xl w-full mx-auto px-4 py-6' : 'flex-1 max-w-5xl w-full mx-auto px-4 py-8'">
       <!-- Filtres -->
@@ -102,13 +105,13 @@ onMounted(load)
             class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
             @click="clearAll"
         >
-          Tout effacer
+          {{ $t('common.clearAll') }}
         </button>
       </div>
 
-      <p v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">Chargement…</p>
+      <p v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
       <p v-else-if="!filtered.length" class="text-sm text-gray-500 dark:text-gray-400">
-        Aucun artefact IA enregistré. Lancez une analyse, un diagnostic d'indexabilité ou une génération de JSON-LD.
+        {{ $t('aiHistory.empty') }}
       </p>
 
       <ul v-else class="space-y-3">
@@ -127,7 +130,7 @@ onMounted(load)
                   {{ formatRelativeTime(item.timestamp) }}
                 </span>
               </div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.title || item.url || 'Artefact' }}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.title || item.url || $t('aiHistory.artifact') }}</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                 {{ item.provider }}<span v-if="item.model"> · {{ item.model }}</span>
               </p>
@@ -137,19 +140,19 @@ onMounted(load)
                   class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
                   @click="copy(item)"
               >
-                Copier
+                {{ $t('common.copy') }}
               </button>
               <button
                   class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
                   @click="download(item)"
               >
-                Télécharger
+                {{ $t('common.download') }}
               </button>
               <button
                   class="px-2 py-1 rounded-lg border border-red-200 dark:border-red-500/40 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-medium transition-colors"
                   @click="remove(item)"
               >
-                Supprimer
+                {{ $t('common.delete') }}
               </button>
             </div>
           </div>

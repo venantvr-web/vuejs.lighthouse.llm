@@ -10,6 +10,9 @@ import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -191,7 +194,7 @@ async function exportPDF() {
 }
 
 async function confirmClearAll() {
-  if (confirm('Supprimer tout l\'historique ? Cette action est irréversible.')) {
+  if (confirm(t('history.confirmClearAll'))) {
     await historyStore.clearAll()
   }
 }
@@ -214,7 +217,7 @@ function compareSelected() {
 <template>
   <div :class="{embedded}" class="history-view">
     <!-- Header -->
-    <AppHeader v-if="!embedded" subtitle="Évolution de vos scores dans le temps" title="Historique des analyses"/>
+    <AppHeader v-if="!embedded" :subtitle="$t('history.headerSubtitle')" :title="$t('history.headerTitle')"/>
 
     <!-- Toolbar -->
     <div class="history-toolbar">
@@ -229,7 +232,7 @@ function compareSelected() {
           <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
             <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
           </svg>
-          Inclure les crawls
+          {{ $t('history.includeCrawls') }}
         </span>
       </label>
       <button
@@ -240,7 +243,7 @@ function compareSelected() {
         <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
         </svg>
-        Exporter tout
+        {{ $t('common.exportAll') }}
       </button>
       <button
           :disabled="historyStore.isEmpty"
@@ -250,7 +253,7 @@ function compareSelected() {
         <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
           <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
         </svg>
-        Tout supprimer
+        {{ $t('common.deleteAll') }}
       </button>
     </div>
 
@@ -276,10 +279,10 @@ function compareSelected() {
               <path d="M12 8v4l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
-          <h2>Aucun historique</h2>
-          <p>Commencez par analyser une URL pour enregistrer vos premiers scores.</p>
+          <h2>{{ $t('history.emptyTitle') }}</h2>
+          <p>{{ $t('history.emptyText') }}</p>
           <button class="btn btn-primary" @click="goHome">
-            Analyser une URL
+            {{ $t('history.analyzeUrl') }}
           </button>
         </div>
 
@@ -290,7 +293,7 @@ function compareSelected() {
               <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
             </svg>
           </div>
-          <p>Sélectionnez un domaine pour voir son historique</p>
+          <p>{{ $t('history.noSelection') }}</p>
         </div>
 
         <!-- Domain Details -->
@@ -300,7 +303,9 @@ function compareSelected() {
             <div class="domain-info">
               <h2>{{ historyStore.currentDomain }}</h2>
               <span class="analysis-count">
-                {{ selectedDomainData?.count || 0 }} analyse{{ (selectedDomainData?.count || 0) > 1 ? 's' : '' }}
+                {{ (selectedDomainData?.count || 0) > 1
+                    ? $t('history.analysisCountPlural', { count: selectedDomainData?.count || 0 })
+                    : $t('history.analysisCountSingular', { count: selectedDomainData?.count || 0 }) }}
               </span>
             </div>
             <div class="domain-actions">
@@ -313,14 +318,14 @@ function compareSelected() {
                 <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
                   <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
                 </svg>
-                Comparer
+                {{ $t('history.compare') }}
               </button>
               <button
                   v-if="selectionMode"
                   class="btn btn-secondary btn-sm"
                   @click="exitSelectionMode"
               >
-                Annuler
+                {{ $t('common.cancel') }}
               </button>
               <button
                   :disabled="exportLoading"
@@ -349,7 +354,7 @@ function compareSelected() {
           <!-- Charts Grid -->
           <section class="charts-section">
             <div class="charts-header">
-              <h3>Évolution des scores</h3>
+              <h3>{{ $t('history.scoresEvolution') }}</h3>
               <div class="charts-filters">
                 <!-- Strategy toggle -->
                 <div class="strategy-toggle">
@@ -362,7 +367,7 @@ function compareSelected() {
                       <rect height="18" rx="2" width="12" x="6" y="3"/>
                       <path d="M12 18h.01"/>
                     </svg>
-                    Mobile
+                    {{ $t('common.mobile') }}
                   </button>
                   <button
                       :class="['toggle-btn', { active: selectedStrategyFilter === 'desktop' }]"
@@ -373,18 +378,18 @@ function compareSelected() {
                       <rect height="14" rx="2" width="20" x="2" y="3"/>
                       <path d="M8 21h8M12 17v4"/>
                     </svg>
-                    Desktop
+                    {{ $t('common.desktop') }}
                   </button>
                 </div>
                 <!-- Slug filter -->
                 <div v-if="uniqueSlugs.length > 1" class="slug-filter">
-                  <label for="slug-select">Page :</label>
+                  <label for="slug-select">{{ $t('history.pageLabel') }}</label>
                   <select
                       id="slug-select"
                       v-model="selectedSlugFilter"
                       class="slug-select"
                   >
-                    <option :value="null">Toutes ({{ uniqueSlugs.length }})</option>
+                    <option :value="null">{{ $t('history.allPages', { count: uniqueSlugs.length }) }}</option>
                     <option v-for="slug in uniqueSlugs" :key="slug" :value="slug">
                       {{ slug }}
                     </option>
@@ -400,13 +405,13 @@ function compareSelected() {
           <!-- Analysis Table -->
           <section class="table-section">
             <div class="table-header">
-              <h3>Historique detaille</h3>
+              <h3>{{ $t('history.detailedHistory') }}</h3>
               <p v-if="selectionMode" class="selection-hint">
                 <template v-if="lockedPath">
-                  Comparaison : <code>{{ lockedPath }}</code>
+                  {{ $t('history.comparisonPrefix') }} <code>{{ lockedPath }}</code>
                 </template>
                 <template v-else>
-                  Sélectionnez une page pour comparer son évolution
+                  {{ $t('history.selectPageHint') }}
                 </template>
               </p>
             </div>
@@ -428,19 +433,19 @@ function compareSelected() {
     <Teleport to="body">
       <div v-if="showDeleteConfirm" class="modal-overlay" @click="cancelDelete">
         <div class="modal" @click.stop>
-          <h3>Confirmer la suppression</h3>
+          <h3>{{ $t('history.confirmDeleteTitle') }}</h3>
           <p v-if="domainToDelete">
-            Supprimer toutes les analyses pour <strong>{{ domainToDelete }}</strong> ?
+            {{ $t('history.confirmDeleteDomainPrefix') }} <strong>{{ domainToDelete }}</strong> ?
           </p>
           <p v-else>
-            Supprimer cette analyse ?
+            {{ $t('history.confirmDeleteScore') }}
           </p>
           <div class="modal-actions">
             <button class="btn btn-secondary" @click="cancelDelete">
-              Annuler
+              {{ $t('common.cancel') }}
             </button>
             <button class="btn btn-danger" @click="handleDelete">
-              Supprimer
+              {{ $t('common.delete') }}
             </button>
           </div>
         </div>
@@ -466,7 +471,7 @@ function compareSelected() {
 
           <div class="floating-bar-actions">
             <button class="btn btn-secondary btn-sm" @click="clearSelection">
-              Effacer
+              {{ $t('history.clearSelection') }}
             </button>
             <button
                 :class="['btn btn-sm', canCompare ? 'btn-primary' : 'btn-disabled']"
@@ -476,7 +481,7 @@ function compareSelected() {
               <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
                 <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
               </svg>
-              Comparer
+              {{ $t('history.compare') }}
             </button>
           </div>
         </div>

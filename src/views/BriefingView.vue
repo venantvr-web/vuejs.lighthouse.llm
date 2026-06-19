@@ -8,6 +8,9 @@ import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from
 import {usePeriodicSync} from '@/composables/usePeriodicSync'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const {
   items, geoItems, watchStats, resourceByOrigin, digest, criticalTrend, warningTrend, running, progress, lastRunAt,
@@ -64,34 +67,34 @@ const overview = computed(() => {
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <AppHeader
-        :subtitle="lastRunAt ? `Derniers contrôles ${formatRelativeTime(lastRunAt)}` : 'Tout ce qui a bougé, en un coup d\'œil'"
-        title="Briefing du matin"
+        :subtitle="lastRunAt ? $t('briefing.headerSubtitleLast', { time: formatRelativeTime(lastRunAt) }) : $t('briefing.headerSubtitleDefault')"
+        :title="$t('briefing.headerTitle')"
     >
       <template #actions>
         <template v-if="!isEmpty">
           <label
               v-if="geoAvailable"
               class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer"
-              title="Relance aussi le GEO (appels LLM facturés)"
+              :title="$t('briefing.includeGeoTitle')"
           >
             <input v-model="includeGeo" class="rounded" type="checkbox"/>
-            Inclure GEO
+            {{ $t('briefing.includeGeo') }}
           </label>
           <button
               v-if="reminder.available"
               :class="reminder.enabled.value ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'"
-              :title="reminder.status.value || 'Rappel quotidien (PWA installée, best-effort)'"
+              :title="reminder.status.value || $t('briefing.reminderDefaultTitle')"
               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
               @click="reminder.toggle()"
           >
-            {{ reminder.enabled.value ? '🔔 Rappel activé' : '🔔 Rappel quotidien' }}
+            {{ reminder.enabled.value ? $t('briefing.reminderEnabled') : $t('briefing.reminderDaily') }}
           </button>
           <button
               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-              title="Exporter le rapport (Markdown)"
+              :title="$t('briefing.exportTitle')"
               @click="exportReport"
           >
-            Rapport
+            {{ $t('briefing.report') }}
           </button>
           <button
               :disabled="running"
@@ -104,7 +107,7 @@ const overview = computed(() => {
             >
               <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
-            {{ running ? `Contrôles… ${progress.done}/${progress.total}` : 'Lancer les contrôles du matin' }}
+            {{ running ? $t('briefing.running', { done: progress.done, total: progress.total }) : $t('briefing.runChecks') }}
           </button>
         </template>
       </template>
@@ -113,13 +116,13 @@ const overview = computed(() => {
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Empty state -->
       <div v-if="isEmpty" class="text-center py-20">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Rien à suivre pour l'instant</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('briefing.emptyTitle') }}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Ajoutez des URLs à la
-          <router-link class="text-primary-500 hover:underline" to="/watchlist">Watchlist</router-link>
-          et des prompts au
-          <router-link class="text-primary-500 hover:underline" to="/geo">GEO Tracking</router-link>
-          pour composer votre briefing quotidien.
+          {{ $t('briefing.emptyBefore') }}
+          <router-link class="text-primary-500 hover:underline" to="/watchlist">{{ $t('briefing.emptyWatchlist') }}</router-link>
+          {{ $t('briefing.emptyMiddle') }}
+          <router-link class="text-primary-500 hover:underline" to="/geo">{{ $t('briefing.emptyGeo') }}</router-link>
+          {{ $t('briefing.emptyAfter') }}
         </p>
       </div>
 
@@ -127,19 +130,19 @@ const overview = computed(() => {
         <!-- Overview tiles -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Sites suivis</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('briefing.trackedSites') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ overview.sites }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Perf. moyenne</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('briefing.avgPerf') }}</p>
             <p :class="getScoreColorClass(overview.avgPerf)" class="text-2xl font-bold mt-1">{{ formatScore(overview.avgPerf) }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">À traiter</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('briefing.toHandle') }}</p>
             <p :class="overview.toHandle > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">{{ overview.toHandle }}</p>
           </div>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">GEO-readiness moy.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('briefing.avgReadiness') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ overview.avgReadiness !== null ? overview.avgReadiness : '—' }}</p>
           </div>
         </div>
@@ -147,20 +150,20 @@ const overview = computed(() => {
         <!-- To handle today -->
         <section class="mb-8">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">À traiter aujourd'hui</h2>
-            <div v-if="criticalTrend.length > 1" class="flex items-center gap-4" title="Évolution des alertes au fil des contrôles">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('briefing.toHandleToday') }}</h2>
+            <div v-if="criticalTrend.length > 1" class="flex items-center gap-4" :title="$t('briefing.alertsTrendTitle')">
               <div class="flex items-center gap-1.5">
-                <span class="text-[10px] text-red-500 uppercase tracking-wide">Critiques</span>
+                <span class="text-[10px] text-red-500 uppercase tracking-wide">{{ $t('briefing.critical') }}</span>
                 <Sparkline :auto-scale="true" :values="criticalTrend" :width="90" color="#ef4444"/>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="text-[10px] text-amber-500 uppercase tracking-wide">Avert.</span>
+                <span class="text-[10px] text-amber-500 uppercase tracking-wide">{{ $t('briefing.warning') }}</span>
                 <Sparkline :auto-scale="true" :values="warningTrend" :width="90" color="#f59e0b"/>
               </div>
             </div>
           </div>
           <div v-if="!digest.length" class="text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4">
-            Rien à signaler 🎉
+            {{ $t('briefing.nothingToReport') }}
           </div>
           <ul v-else class="space-y-2">
             <li
@@ -181,16 +184,16 @@ const overview = computed(() => {
 
         <!-- Per-site overview -->
         <section v-if="items.length">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sites</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('briefing.sites') }}</h2>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
             <table class="w-full text-sm">
               <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400">
               <tr>
-                <th class="text-left font-medium px-4 py-2">Page</th>
-                <th class="text-right font-medium px-4 py-2">Perf.</th>
+                <th class="text-left font-medium px-4 py-2">{{ $t('briefing.page') }}</th>
+                <th class="text-right font-medium px-4 py-2">{{ $t('briefing.perf') }}</th>
                 <th class="text-right font-medium px-4 py-2">Δ</th>
-                <th class="text-right font-medium px-4 py-2">Readiness</th>
-                <th class="text-right font-medium px-4 py-2">Vérifié</th>
+                <th class="text-right font-medium px-4 py-2">{{ $t('briefing.readiness') }}</th>
+                <th class="text-right font-medium px-4 py-2">{{ $t('briefing.checked') }}</th>
               </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-gray-700">

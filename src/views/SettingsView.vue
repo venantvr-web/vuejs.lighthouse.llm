@@ -15,7 +15,9 @@ import {
 } from '@/services/requestConfig'
 import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const settings = useSettingsStore()
 const DEFAULT_UA = DEFAULT_USER_AGENT
 const defaultProxyBase = getDefaultProxyBase()
@@ -77,7 +79,7 @@ watch(provider, (newProvider) => {
 const loadModels = async () => {
   modelError.value = ''
   if (provider.value !== 'ollama' && !apiKey.value) {
-    modelError.value = 'Renseignez une clé API d\'abord.'
+    modelError.value = t('settings.errKeyFirst')
     return
   }
   loadingModels.value = true
@@ -91,12 +93,12 @@ const loadModels = async () => {
     }
     const instance = buildLLMProvider(settings, provider.value, model.value)
     if (typeof instance.listModels !== 'function') {
-      modelError.value = 'Liste dynamique non disponible pour ce fournisseur.'
+      modelError.value = t('settings.errDynamicUnavailable')
       return
     }
     const list = await instance.listModels()
     if (!list.length) {
-      modelError.value = 'Aucun modèle retourné.'
+      modelError.value = t('settings.errNoModel')
       return
     }
     dynamicModels.value = list
@@ -104,7 +106,7 @@ const loadModels = async () => {
       model.value = list[0].value
     }
   } catch (e) {
-    modelError.value = `Échec du chargement : ${e.message}`
+    modelError.value = t('settings.errLoadFailed', {message: e.message})
   } finally {
     loadingModels.value = false
   }
@@ -139,7 +141,7 @@ const resetProxyBase = () => {
 }
 
 const resetDatabases = async () => {
-  if (!confirm('Réinitialiser toutes les données locales (historiques, crawls, artefacts IA…) ? Cette action est irréversible et la page sera rechargée.')) return
+  if (!confirm(t('settings.confirmResetDb'))) return
   resettingDb.value = true
   try {
     await deleteAllDatabases()
@@ -151,29 +153,29 @@ const resetDatabases = async () => {
 
 const testConnection = async () => {
   // TODO: Implement connection test
-  alert('Test de connexion: fonctionnalite a venir')
+  alert(t('settings.testTodo'))
 }
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <AppHeader subtitle="Fournisseurs LLM, clés API et préférences" title="Paramètres"/>
+    <AppHeader :subtitle="$t('settings.headerSubtitle')" :title="$t('settings.headerTitle')"/>
 
     <!-- Main -->
     <main class="max-w-2xl mx-auto px-4 py-8">
       <div class="card p-6 space-y-6">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Configuration LLM</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('settings.llmTitle') }}</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            Configurez le fournisseur d'IA pour l'analyse de vos rapports Lighthouse.
+            {{ $t('settings.llmIntro') }}
           </p>
         </div>
 
         <!-- Provider selection -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Fournisseur
+            {{ $t('settings.providerLabel') }}
           </label>
           <div class="grid grid-cols-2 gap-3">
             <button
@@ -188,7 +190,7 @@ const testConnection = async () => {
             >
               <div class="font-medium text-gray-900 dark:text-white">{{ p.name }}</div>
               <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {{ p.id === 'ollama' ? 'Gratuit, local' : 'API Cloud' }}
+                {{ p.id === 'ollama' ? $t('settings.providerLocal') : $t('settings.providerCloud') }}
               </div>
             </button>
           </div>
@@ -197,7 +199,7 @@ const testConnection = async () => {
         <!-- API Key (not for Ollama) -->
         <div v-if="provider !== 'ollama'">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Clé API
+            {{ $t('settings.apiKeyLabel') }}
           </label>
           <input
               v-model="apiKey"
@@ -206,14 +208,14 @@ const testConnection = async () => {
               type="password"
           />
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Votre clé API est stockée localement dans votre navigateur.
+            {{ $t('settings.apiKeyHint') }}
           </p>
         </div>
 
         <!-- Ollama URL -->
         <div v-if="provider === 'ollama'">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            URL Ollama
+            {{ $t('settings.ollamaUrlLabel') }}
           </label>
           <input
               v-model="ollamaUrl"
@@ -227,7 +229,7 @@ const testConnection = async () => {
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Modèle
+              {{ $t('settings.modelLabel') }}
             </label>
             <button
                 :disabled="loadingModels"
@@ -235,7 +237,7 @@ const testConnection = async () => {
                 type="button"
                 @click="loadModels"
             >
-              {{ loadingModels ? 'Chargement…' : 'Charger les modèles disponibles' }}
+              {{ loadingModels ? $t('common.loading') : $t('settings.loadModels') }}
             </button>
           </div>
           <select v-model="model" class="input">
@@ -249,7 +251,7 @@ const testConnection = async () => {
         <!-- Max response length -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Longueur max. de réponse (tokens)
+            {{ $t('settings.maxTokensLabel') }}
           </label>
           <input
               v-model.number="maxTokens"
@@ -260,8 +262,7 @@ const testConnection = async () => {
               type="number"
           />
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Augmentez cette valeur si les analyses IA sont coupées. Plafonnée automatiquement selon le modèle
-            (OpenAI 16384, Anthropic 8192, Gemini 32768).
+            {{ $t('settings.maxTokensHint') }}
           </p>
         </div>
 
@@ -271,10 +272,10 @@ const testConnection = async () => {
             <svg v-if="saved" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
-            {{ saved ? 'Enregistre!' : 'Enregistrer' }}
+            {{ saved ? $t('settings.savedConfirm') : $t('common.save') }}
           </button>
           <button class="btn btn-secondary" @click="testConnection">
-            Tester la connexion
+            {{ $t('settings.testConnection') }}
           </button>
         </div>
       </div>
@@ -282,15 +283,14 @@ const testConnection = async () => {
       <!-- PageSpeed Insights -->
       <div class="card p-6 mt-6 space-y-4">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Analyse PageSpeed</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('settings.pageSpeedTitle') }}</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            L'API PageSpeed Insights fonctionne sans clé, mais avec un quota très limité.
-            Une clé est recommandée pour la Watchlist et les analyses répétées.
+            {{ $t('settings.pageSpeedIntro') }}
           </p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Clé API PageSpeed (optionnelle)
+            {{ $t('settings.pageSpeedKeyLabel') }}
           </label>
           <input
               v-model="pageSpeedKey"
@@ -299,9 +299,9 @@ const testConnection = async () => {
               type="password"
           />
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Stockée localement.
+            {{ $t('settings.pageSpeedStored') }}
             <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">
-              Obtenir une clé
+              {{ $t('settings.pageSpeedGetKey') }}
             </a>
           </p>
         </div>
@@ -310,15 +310,14 @@ const testConnection = async () => {
       <!-- Requêtes sortantes (proxy) -->
       <div class="card p-6 mt-6 space-y-4">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Requêtes sortantes</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('settings.outboundTitle') }}</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            User-Agent utilisé par le serveur local pour récupérer robots.txt, sitemaps, llms.txt et vérifier les
-            URLs (Ressources et Crawl). Laissez vide pour la valeur par défaut.
+            {{ $t('settings.outboundIntro') }}
           </p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            User-Agent (optionnel)
+            {{ $t('settings.userAgentLabel') }}
           </label>
           <div class="flex items-center gap-2">
             <input
@@ -333,24 +332,23 @@ const testConnection = async () => {
                 type="button"
                 @click="resetUserAgent"
             >
-              Réinitialiser
+              {{ $t('common.reset') }}
             </button>
           </div>
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Par défaut : <code class="text-[11px]">{{ DEFAULT_UA }}</code>.
-            Un User-Agent transparent et identifiable est recommandé ; n'utilisez un User-Agent de navigateur que si
-            un site bloque le robot.
+            {{ $t('settings.userAgentHintPrefix') }} <code class="text-[11px]">{{ DEFAULT_UA }}</code>.
+            {{ $t('settings.userAgentHintSuffix') }}
           </p>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Base du relais HTTP (optionnel)
+            {{ $t('settings.proxyBaseLabel') }}
           </label>
           <div class="flex items-center gap-2">
             <input
                 v-model="proxyBase"
-                :placeholder="defaultProxyBase || '(même origine)'"
+                :placeholder="defaultProxyBase || $t('settings.proxyBasePlaceholder')"
                 class="input flex-1"
                 type="text"
             />
@@ -360,13 +358,12 @@ const testConnection = async () => {
                 type="button"
                 @click="resetProxyBase"
             >
-              Réinitialiser
+              {{ $t('common.reset') }}
             </button>
           </div>
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Relais utilisé pour contourner le CORS (récupération de robots.txt, sitemaps, pages…).
-            En production, laissez vide : le relais intégré de Cloudflare Pages (<code class="text-[11px]">/api</code>) est utilisé.
-            En local, <code class="text-[11px]">http://localhost:3001</code> (serveur Node), ou indiquez un relais CORS de votre choix.
+            {{ $t('settings.proxyBaseHintPrefix') }}<code class="text-[11px]">/api</code>{{ $t('settings.proxyBaseHintMiddle') }}
+            <code class="text-[11px]">http://localhost:3001</code> {{ $t('settings.proxyBaseHintSuffix') }}
           </p>
         </div>
 
@@ -374,11 +371,9 @@ const testConnection = async () => {
           <label class="flex items-start gap-2 cursor-pointer">
             <input v-model="directFetch" class="rounded mt-0.5" type="checkbox"/>
             <span>
-              <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mode direct (sans relais)</span>
+              <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.directModeLabel') }}</span>
               <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Récupère les ressources directement depuis le navigateur, sans relais. À activer si l'app et le site
-                analysé sont sur la même origine (ton site de prod) ou si la cible autorise le CORS. Pas besoin de
-                serveur ni de Pages Function.
+                {{ $t('settings.directModeHint') }}
               </span>
             </span>
           </label>
@@ -388,10 +383,9 @@ const testConnection = async () => {
       <!-- Données locales / maintenance -->
       <div class="card p-6 mt-6 space-y-4">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Données locales</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('settings.localDataTitle') }}</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            Historiques, sessions de crawl et artefacts IA sont stockés dans ton navigateur (IndexedDB).
-            En cas d'erreur d'ouverture après une mise à jour, réinitialise les bases.
+            {{ $t('settings.localDataIntro') }}
           </p>
         </div>
         <button
@@ -400,11 +394,10 @@ const testConnection = async () => {
             type="button"
             @click="resetDatabases"
         >
-          {{ resettingDb ? 'Réinitialisation…' : 'Réinitialiser les données locales' }}
+          {{ resettingDb ? $t('settings.resettingDb') : $t('settings.resetDbButton') }}
         </button>
         <p class="text-xs text-gray-500 dark:text-gray-400">
-          Supprime toutes les bases IndexedDB de l'application puis recharge la page. Les réglages (clés API,
-          préférences) ne sont pas affectés.
+          {{ $t('settings.localDataNote') }}
         </p>
       </div>
 
@@ -417,11 +410,11 @@ const testConnection = async () => {
             </svg>
           </div>
           <div>
-            <h3 class="font-medium text-gray-900 dark:text-white">Gemini (Recommandé)</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white">{{ $t('settings.geminiTitle') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Contexte de 1M tokens, tier gratuit généreux, excellent en français.
+              {{ $t('settings.geminiDesc') }}
               <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://makersuite.google.com/app/apikey" target="_blank">
-                Obtenir une clé API
+                {{ $t('settings.geminiLink') }}
               </a>
             </p>
           </div>
@@ -434,11 +427,11 @@ const testConnection = async () => {
             </svg>
           </div>
           <div>
-            <h3 class="font-medium text-gray-900 dark:text-white">Ollama (100% Local)</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white">{{ $t('settings.ollamaCardTitle') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Exécutez des modèles IA localement sans envoyer vos données.
+              {{ $t('settings.ollamaCardDesc') }}
               <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://ollama.ai" target="_blank">
-                Installer Ollama
+                {{ $t('settings.ollamaLink') }}
               </a>
             </p>
           </div>

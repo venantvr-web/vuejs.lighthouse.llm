@@ -6,14 +6,17 @@ import HistoryView from '@/views/HistoryView.vue'
 import CrawlHistoryView from '@/views/CrawlHistoryView.vue'
 import AiHistoryView from '@/views/AiHistoryView.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const route = useRoute()
 const router = useRouter()
 
 const TABS = [
-  {value: 'audits', label: 'Audits'},
-  {value: 'crawls', label: 'Crawls'},
-  {value: 'ai', label: 'IA'}
+  {value: 'audits', label: t('historyHub.tabAudits')},
+  {value: 'crawls', label: t('historyHub.tabCrawls')},
+  {value: 'ai', label: t('historyHub.tabAi')}
 ]
 const valid = TABS.map(t => t.value)
 
@@ -32,7 +35,7 @@ watch(tab, (value) => {
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <AppHeader subtitle="Audits, crawls et sorties IA" title="Historique">
+    <AppHeader :subtitle="$t('historyHub.headerSubtitle')" :title="$t('historyHub.headerTitle')">
       <template #actions>
         <nav class="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button

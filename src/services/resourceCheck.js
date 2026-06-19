@@ -6,7 +6,7 @@
  * helpers below are unit-tested.
  */
 
-import {getUserAgent, proxyUrl} from './requestConfig'
+import {getUserAgent, isDirectFetch, proxyUrl} from './requestConfig'
 
 /**
  * Derive the origin (scheme + host) from a user-supplied URL.
@@ -280,6 +280,15 @@ export function computeGeoReadiness(resources = [], sitemaps = [], options = {})
  * @returns {Promise<{url: string, ok: boolean, status: number}>}
  */
 export async function checkUrlStatus(url) {
+    // Mode direct : requête navigateur sans relais (même origine / CORS autorisé)
+    if (isDirectFetch()) {
+        try {
+            const r = await fetch(url, {method: 'GET', redirect: 'follow'})
+            return {url, ok: r.ok, status: r.status}
+        } catch {
+            return {url, ok: false, status: 0}
+        }
+    }
     try {
         const response = await fetch(proxyUrl('/api/check-url'), {
             method: 'POST',
@@ -300,6 +309,22 @@ export async function checkUrlStatus(url) {
  * @returns {Promise<{available: boolean, status: number, content: string, contentType: string, error?: string}>}
  */
 export async function fetchResource(url) {
+    // Mode direct : requête navigateur sans relais (même origine / CORS autorisé)
+    if (isDirectFetch()) {
+        try {
+            const r = await fetch(url, {redirect: 'follow'})
+            if (!r.ok) return {available: false, status: r.status, content: '', contentType: ''}
+            return {
+                available: true,
+                status: 200,
+                content: await r.text(),
+                contentType: r.headers.get('content-type') || '',
+                xRobotsTag: r.headers.get('x-robots-tag') || ''
+            }
+        } catch (error) {
+            return {available: false, status: 0, content: '', contentType: '', error: error.message}
+        }
+    }
     try {
         const response = await fetch(proxyUrl('/api/fetch-page'), {
             method: 'POST',

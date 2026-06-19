@@ -8,6 +8,16 @@
 
 const STORAGE_KEY = 'lighthouse-user-agent'
 const PROXY_KEY = 'lighthouse-proxy-base'
+const MODE_KEY = 'lighthouse-fetch-mode'
+
+// Modes de récupération des ressources distantes.
+export const FETCH_MODES = {
+    // Passe par le relais HTTP (proxy/Pages Functions) — contourne le CORS.
+    PROXY: 'proxy',
+    // Requête directe depuis le navigateur — pas de relais. Convient quand la
+    // cible est la même origine (ton site de prod) ou autorise le CORS.
+    DIRECT: 'direct'
+}
 
 // User-Agent par défaut (aligné avec server/config.js).
 export const DEFAULT_USER_AGENT =
@@ -106,4 +116,31 @@ export function setProxyBase(base) {
 /** Construit une URL de relais à partir d'un chemin (ex. '/api/fetch-page'). */
 export function proxyUrl(path) {
     return `${getProxyBase()}${path}`
+}
+
+// --- Mode de récupération (relais vs direct) ---
+
+let fetchMode = (() => {
+    try {
+        return localStorage.getItem(MODE_KEY) || FETCH_MODES.PROXY
+    } catch {
+        return FETCH_MODES.PROXY
+    }
+})()
+
+export function getFetchMode() {
+    return fetchMode
+}
+
+export function isDirectFetch() {
+    return fetchMode === FETCH_MODES.DIRECT
+}
+
+export function setFetchMode(mode) {
+    fetchMode = mode === FETCH_MODES.DIRECT ? FETCH_MODES.DIRECT : FETCH_MODES.PROXY
+    try {
+        localStorage.setItem(MODE_KEY, fetchMode)
+    } catch {
+        // best-effort
+    }
 }

@@ -94,3 +94,33 @@ describe('requestConfig (configurable proxy base)', () => {
         expect(m.getProxyBase()).toBe('https://hydrated.example')
     })
 })
+
+describe('requestConfig (fetch mode: proxy vs direct)', () => {
+    beforeEach(() => localStorage.clear())
+    afterEach(() => localStorage.clear())
+
+    it('defaults to proxy mode', async () => {
+        const m = await freshModule()
+        expect(m.getFetchMode()).toBe(m.FETCH_MODES.PROXY)
+        expect(m.isDirectFetch()).toBe(false)
+    })
+
+    it('switches to direct mode and persists', async () => {
+        const m = await freshModule()
+        m.setFetchMode(m.FETCH_MODES.DIRECT)
+        expect(m.isDirectFetch()).toBe(true)
+        expect(localStorage.getItem('lighthouse-fetch-mode')).toBe('direct')
+    })
+
+    it('hydrates the mode from localStorage', async () => {
+        localStorage.setItem('lighthouse-fetch-mode', 'direct')
+        const m = await freshModule()
+        expect(m.isDirectFetch()).toBe(true)
+    })
+
+    it('ignores invalid modes (falls back to proxy)', async () => {
+        const m = await freshModule()
+        m.setFetchMode('nonsense')
+        expect(m.getFetchMode()).toBe(m.FETCH_MODES.PROXY)
+    })
+})

@@ -5,7 +5,7 @@ import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
-import {proxyUrl} from '@/services/requestConfig'
+import {getProxyBase, isDirectFetch, proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -169,6 +169,19 @@ async function checkProxyServer() {
   }
 }
 
+// Indicateur d'état du relais HTTP
+const directMode = isDirectFetch()
+const relayBase = getProxyBase()
+const relayStatus = ref('checking') // 'checking' | 'ok' | 'down' | 'direct'
+
+async function checkRelay() {
+  if (directMode) {
+    relayStatus.value = 'direct'
+    return
+  }
+  relayStatus.value = (await checkProxyServer()) ? 'ok' : 'down'
+}
+
 // Handle form submission
 async function handleSubmit() {
   if (!canSubmit.value) return
@@ -177,9 +190,9 @@ async function handleSubmit() {
   site.setFromUrl(baseUrl.value)
   error.value = ''
 
-  // Le proxy est requis pour Auto/Sitemap, et pour le mode Manuel si la liste
-  // contient un sitemap à déplier.
-  if (discoveryMode.value !== DISCOVERY_MODES.MANUAL || manualHasSitemap.value) {
+  // Le relais est requis pour Auto/Sitemap, et pour le mode Manuel si la liste
+  // contient un sitemap à déplier. En mode direct, aucun relais nécessaire.
+  if (!directMode && (discoveryMode.value !== DISCOVERY_MODES.MANUAL || manualHasSitemap.value)) {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
       error.value = 'Le relais HTTP est requis pour la découverte automatique des URLs (les requêtes vers des sites tiers sont bloquées par le CORS du navigateur). En production (Cloudflare Pages), il est intégré ; en local, lancez "npm run server" ou indiquez un relais dans Paramètres → Requêtes sortantes. Sinon, utilisez le mode Manuel.'
@@ -225,6 +238,7 @@ onMounted(async () => {
   if (!baseUrl.value) baseUrl.value = site.origin
   await crawlStore.initialize()
   await checkLocalServer()
+  checkRelay()
 })
 
 onUnmounted(() => {
@@ -267,6 +281,30 @@ onUnmounted(() => {
     <!-- Main content -->
     <main class="flex-1 p-4">
       <div class="max-w-3xl mx-auto">
+        <!-- Indicateur d'état du relais HTTP -->
+        <div
+            v-if="!isRunning"
+            :class="{
+              'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300': relayStatus === 'ok' || relayStatus === 'direct',
+              'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300': relayStatus === 'down',
+              'bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400': relayStatus === 'checking'
+            }"
+            class="mb-4 flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
+        >
+          <span
+              :class="{
+                'bg-emerald-500': relayStatus === 'ok' || relayStatus === 'direct',
+                'bg-amber-500': relayStatus === 'down',
+                'bg-gray-400 animate-pulse': relayStatus === 'checking'
+              }"
+              class="w-2 h-2 rounded-full"
+          ></span>
+          <span v-if="relayStatus === 'direct'">Mode direct (sans relais) — requêtes navigateur</span>
+          <span v-else-if="relayStatus === 'ok'">Relais HTTP OK{{ relayBase ? ` (${relayBase})` : ' (intégré)' }}</span>
+          <span v-else-if="relayStatus === 'down'">Relais HTTP indisponible — modes Auto/Sitemap désactivés (Paramètres → Requêtes sortantes, ou mode direct)</span>
+          <span v-else>Vérification du relais…</span>
+        </div>
+
         <!-- Loading/Progress state -->
         <div v-if="isRunning" class="py-12">
           <!-- Progress header -->

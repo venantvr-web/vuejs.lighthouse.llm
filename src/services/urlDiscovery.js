@@ -3,7 +3,7 @@
  * Discovers URLs from a website using various methods
  */
 
-import {getUserAgent, proxyUrl} from './requestConfig'
+import {getUserAgent, isDirectFetch, proxyUrl} from './requestConfig'
 
 const MAX_PAGES = 20
 const proxyEndpointDefault = () => proxyUrl('/api/fetch-page')
@@ -213,6 +213,13 @@ export function parseManualUrls(text, options = {}) {
  * @returns {Promise<string>} - Page HTML
  */
 async function fetchPage(url, proxyEndpoint, signal) {
+    // Mode direct : requête navigateur sans relais (même origine / CORS autorisé)
+    if (isDirectFetch()) {
+        const r = await fetch(url, {redirect: 'follow', signal})
+        if (!r.ok) throw new Error(`Failed to fetch: ${r.status}`)
+        return r.text()
+    }
+
     const response = await fetch(proxyEndpoint, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},

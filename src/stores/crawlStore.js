@@ -6,10 +6,12 @@ import {discoverUrls, DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualU
 import {detectTemplates, TEMPLATE_COLORS} from '@/services/templateDetector'
 import {analyzeUrl as analyzeWithPageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeWithLocal} from '@/services/localLighthouse'
-
-const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 3
-const CRAWL_SESSIONS_STORE = 'crawl-sessions'
+import {
+    CRAWL_SESSIONS_STORE,
+    LH_DB_NAME as DB_NAME,
+    LH_DB_VERSION as DB_VERSION,
+    upgradeLighthouseHistory
+} from '@/stores/lighthouseHistoryDB'
 
 /**
  * Crawl services
@@ -94,23 +96,8 @@ export const useCrawlStore = defineStore('crawl', () => {
         error.value = null
 
         try {
-            await indexedDB.open((db, oldVersion) => {
-                // Migration handled by scoreHistoryStore
-                // Just ensure crawl-sessions store exists
-                if (oldVersion < 2 && !db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
-                    const store = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
-                    store.createIndex('domain', 'domain', {unique: false})
-                    store.createIndex('timestamp', 'timestamp', {unique: false})
-                    store.createIndex('status', 'status', {unique: false})
-                }
-                // Version 3: Fix missing stores (recovery from corrupted state)
-                if (oldVersion < 3 && !db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
-                    const store = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
-                    store.createIndex('domain', 'domain', {unique: false})
-                    store.createIndex('timestamp', 'timestamp', {unique: false})
-                    store.createIndex('status', 'status', {unique: false})
-                }
-            })
+            // Même base et même schéma partagé que scoreHistoryStore (idempotent)
+            await indexedDB.open((db) => upgradeLighthouseHistory(db))
 
             await loadSessions()
             initialized.value = true

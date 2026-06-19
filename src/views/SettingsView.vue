@@ -4,12 +4,16 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {
   DEFAULT_USER_AGENT,
+  FETCH_MODES,
   getDefaultProxyBase,
+  getFetchMode,
   getRawProxyBase,
   getRawUserAgent,
+  setFetchMode,
   setProxyBase,
   setUserAgent
 } from '@/services/requestConfig'
+import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
 
 const settings = useSettingsStore()
@@ -23,6 +27,8 @@ const ollamaUrl = ref('http://localhost:11434')
 const pageSpeedKey = ref('')
 const userAgent = ref('')
 const proxyBase = ref('')
+const directFetch = ref(false)
+const resettingDb = ref(false)
 const maxTokens = ref(16384)
 const saved = ref(false)
 
@@ -54,6 +60,7 @@ onMounted(() => {
   pageSpeedKey.value = settings.pageSpeedApiKey
   userAgent.value = getRawUserAgent()
   proxyBase.value = getRawProxyBase()
+  directFetch.value = getFetchMode() === FETCH_MODES.DIRECT
   maxTokens.value = settings.maxTokens
 })
 
@@ -115,6 +122,7 @@ const saveSettings = () => {
   settings.setPageSpeedApiKey(pageSpeedKey.value)
   setUserAgent(userAgent.value)
   setProxyBase(proxyBase.value)
+  setFetchMode(directFetch.value ? FETCH_MODES.DIRECT : FETCH_MODES.PROXY)
   if (maxTokens.value) settings.setMaxTokens(maxTokens.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
@@ -128,6 +136,17 @@ const resetUserAgent = () => {
 const resetProxyBase = () => {
   proxyBase.value = ''
   setProxyBase('')
+}
+
+const resetDatabases = async () => {
+  if (!confirm('Réinitialiser toutes les données locales (historiques, crawls, artefacts IA…) ? Cette action est irréversible et la page sera rechargée.')) return
+  resettingDb.value = true
+  try {
+    await deleteAllDatabases()
+  } finally {
+    // Recharge pour fermer les connexions et recréer les bases proprement
+    window.location.reload()
+  }
 }
 
 const testConnection = async () => {
@@ -350,6 +369,43 @@ const testConnection = async () => {
             En local, <code class="text-[11px]">http://localhost:3001</code> (serveur Node), ou indiquez un relais CORS de votre choix.
           </p>
         </div>
+
+        <div>
+          <label class="flex items-start gap-2 cursor-pointer">
+            <input v-model="directFetch" class="rounded mt-0.5" type="checkbox"/>
+            <span>
+              <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">Mode direct (sans relais)</span>
+              <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Récupère les ressources directement depuis le navigateur, sans relais. À activer si l'app et le site
+                analysé sont sur la même origine (ton site de prod) ou si la cible autorise le CORS. Pas besoin de
+                serveur ni de Pages Function.
+              </span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Données locales / maintenance -->
+      <div class="card p-6 mt-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Données locales</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Historiques, sessions de crawl et artefacts IA sont stockés dans ton navigateur (IndexedDB).
+            En cas d'erreur d'ouverture après une mise à jour, réinitialise les bases.
+          </p>
+        </div>
+        <button
+            :disabled="resettingDb"
+            class="btn btn-danger disabled:opacity-50"
+            type="button"
+            @click="resetDatabases"
+        >
+          {{ resettingDb ? 'Réinitialisation…' : 'Réinitialiser les données locales' }}
+        </button>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Supprime toutes les bases IndexedDB de l'application puis recharge la page. Les réglages (clés API,
+          préférences) ne sont pas affectés.
+        </p>
       </div>
 
       <!-- Info cards -->

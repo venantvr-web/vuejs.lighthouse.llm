@@ -2,12 +2,14 @@ import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 import {extractDomain, normalizeUrl} from '@/utils/url'
-
-const DB_NAME = 'lighthouse-history'
-const DB_VERSION = 5
-const STORE_NAME = 'scores'
-const CRAWL_SESSIONS_STORE = 'crawl-sessions'
-const REPORTS_STORE = 'reports'
+import {
+    CRAWL_SESSIONS_STORE,
+    LH_DB_NAME as DB_NAME,
+    LH_DB_VERSION as DB_VERSION,
+    REPORTS_STORE,
+    SCORES_STORE as STORE_NAME,
+    upgradeLighthouseHistory
+} from '@/stores/lighthouseHistoryDB'
 
 /**
  * Store for managing Lighthouse score history with IndexedDB
@@ -69,58 +71,8 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
         }
 
         try {
-            await indexedDB.open((db, oldVersion, newVersion) => {
-                console.log(`[IndexedDB] Upgrading from v${oldVersion} to v${newVersion}`)
-                // Version 1: Create scores store
-                if (oldVersion < 1) {
-                    const store = db.createObjectStore(STORE_NAME, {keyPath: 'id'})
-                    store.createIndex('domain', 'domain', {unique: false})
-                    store.createIndex('timestamp', 'timestamp', {unique: false})
-                    store.createIndex('domain_timestamp', ['domain', 'timestamp'], {unique: false})
-                }
-
-                // Version 2: Add crawl support
-                if (oldVersion < 2) {
-                    // Create crawl-sessions store
-                    if (!db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
-                        const crawlStore = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
-                        crawlStore.createIndex('domain', 'domain', {unique: false})
-                        crawlStore.createIndex('timestamp', 'timestamp', {unique: false})
-                        crawlStore.createIndex('status', 'status', {unique: false})
-                    }
-
-                    // Add new indexes to scores store for crawl support
-                    // Note: Cannot add indexes to existing store in upgrade transaction
-                    // New fields (crawlSessionId, pageTemplate, pagePath) will be added dynamically
-                }
-
-                // Version 3: Fix missing stores (recovery from corrupted state)
-                if (oldVersion < 3) {
-                    // Recreate scores store if missing
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        const store = db.createObjectStore(STORE_NAME, {keyPath: 'id'})
-                        store.createIndex('domain', 'domain', {unique: false})
-                        store.createIndex('timestamp', 'timestamp', {unique: false})
-                        store.createIndex('domain_timestamp', ['domain', 'timestamp'], {unique: false})
-                    }
-                    // Recreate crawl-sessions store if missing
-                    if (!db.objectStoreNames.contains(CRAWL_SESSIONS_STORE)) {
-                        const crawlStore = db.createObjectStore(CRAWL_SESSIONS_STORE, {keyPath: 'id'})
-                        crawlStore.createIndex('domain', 'domain', {unique: false})
-                        crawlStore.createIndex('timestamp', 'timestamp', {unique: false})
-                        crawlStore.createIndex('status', 'status', {unique: false})
-                    }
-                }
-
-                // Version 4: Add reports store for full Lighthouse JSON reports
-                if (oldVersion < 4) {
-                    if (!db.objectStoreNames.contains(REPORTS_STORE)) {
-                        const reportsStore = db.createObjectStore(REPORTS_STORE, {keyPath: 'id'})
-                        reportsStore.createIndex('scoreId', 'scoreId', {unique: true})
-                        reportsStore.createIndex('timestamp', 'timestamp', {unique: false})
-                    }
-                }
-            })
+            // Schéma partagé et idempotent (voir lighthouseHistoryDB.js)
+            await indexedDB.open((db) => upgradeLighthouseHistory(db))
 
             // Load domains list
             await loadDomains()

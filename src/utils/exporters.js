@@ -17,10 +17,11 @@ export function escapeCsv(value) {
  * Build a CSV string from headers and rows (array of objects).
  * @param {string[]} headers - Column keys
  * @param {Array<object>} rows - Row objects
+ * @param {Object<string,string>} [labels] - Optional display label per key (accented French)
  * @returns {string} CSV text
  */
-export function toCsv(headers, rows) {
-    const head = headers.map(escapeCsv).join(',')
+export function toCsv(headers, rows, labels = {}) {
+    const head = headers.map(h => escapeCsv(labels[h] ?? h)).join(',')
     const body = rows.map(row => headers.map(h => escapeCsv(row[h])).join(',')).join('\n')
     return body ? `${head}\n${body}` : head
 }
@@ -29,17 +30,24 @@ export function toCsv(headers, rows) {
  * Build a Markdown table from headers and rows.
  * @param {string[]} headers - Column keys
  * @param {Array<object>} rows - Row objects
+ * @param {Object<string,string>} [labels] - Optional display label per key (accented French)
  * @returns {string} Markdown table
  */
-export function toMarkdownTable(headers, rows) {
+export function toMarkdownTable(headers, rows, labels = {}) {
     const esc = (v) => String(v === null || v === undefined ? '' : v).replace(/\|/g, '\\|')
-    const head = `| ${headers.join(' | ')} |`
+    const head = `| ${headers.map(h => labels[h] ?? h).join(' | ')} |`
     const sep = `| ${headers.map(() => '---').join(' | ')} |`
     const body = rows.map(row => `| ${headers.map(h => esc(row[h])).join(' | ')} |`).join('\n')
     return [head, sep, body].filter(Boolean).join('\n')
 }
 
+// Libellés d'en-tête accentués (clés internes inchangées pour la stabilité)
 const GEO_HEADERS = ['prompt', 'marque', 'moteur', 'cite', 'position', 'partDeVoix', 'sentiment', 'concurrentsEmergents']
+const GEO_LABELS = {
+    cite: 'cité',
+    partDeVoix: 'part de voix',
+    concurrentsEmergents: 'concurrents émergents'
+}
 
 /**
  * Flatten GEO tracking data into one row per prompt × engine.
@@ -74,14 +82,21 @@ export function buildGeoRows(items, statsById) {
 }
 
 export function buildGeoCsv(items, statsById) {
-    return toCsv(GEO_HEADERS, buildGeoRows(items, statsById))
+    return toCsv(GEO_HEADERS, buildGeoRows(items, statsById), GEO_LABELS)
 }
 
 export function buildGeoMarkdown(items, statsById) {
-    return toMarkdownTable(GEO_HEADERS, buildGeoRows(items, statsById))
+    return toMarkdownTable(GEO_HEADERS, buildGeoRows(items, statsById), GEO_LABELS)
 }
 
 const WATCHLIST_HEADERS = ['libelle', 'url', 'strategie', 'source', 'performance', 'accessibilite', 'bonnesPratiques', 'seo', 'verifieLe']
+const WATCHLIST_LABELS = {
+    libelle: 'libellé',
+    strategie: 'stratégie',
+    accessibilite: 'accessibilité',
+    bonnesPratiques: 'bonnes pratiques',
+    verifieLe: 'vérifié le'
+}
 
 /**
  * Flatten Watchlist data into one row per monitored URL (latest scores).
@@ -109,7 +124,7 @@ export function buildWatchlistRows(items, statsById) {
 }
 
 export function buildWatchlistCsv(items, statsById) {
-    return toCsv(WATCHLIST_HEADERS, buildWatchlistRows(items, statsById))
+    return toCsv(WATCHLIST_HEADERS, buildWatchlistRows(items, statsById), WATCHLIST_LABELS)
 }
 
 /**

@@ -43,7 +43,7 @@ export const templateRegistry = {
         quickAnalysis: {
             id: 'quickAnalysis',
             name: 'Analyse Rapide SEO',
-            description: 'Verifications SEO fondamentales',
+            description: 'Vérifications SEO fondamentales',
             strategy: 'quick',
             file: 'seo-quick.j2',
             tags: ['seo', 'quick', 'meta', 'basics']
@@ -69,7 +69,7 @@ export const templateRegistry = {
         },
         wcagCompliance: {
             id: 'wcagCompliance',
-            name: 'Audit Conformite WCAG 2.1 AA',
+            name: 'Audit Conformité WCAG 2.1 AA',
             description: 'Audit complet WCAG 2.1 niveau AA',
             strategy: 'deep',
             file: 'accessibility-wcag.j2',
@@ -81,7 +81,7 @@ export const templateRegistry = {
         quickAnalysis: {
             id: 'quickAnalysis',
             name: 'Analyse Rapide Bonnes Pratiques',
-            description: 'Verifications essentielles securite et standards',
+            description: 'Vérifications essentielles sécurité et standards',
             strategy: 'quick',
             file: 'best-practices-quick.j2',
             tags: ['best-practices', 'security', 'standards', 'quick']
@@ -92,7 +92,7 @@ export const templateRegistry = {
         quickAnalysis: {
             id: 'quickAnalysis',
             name: 'Analyse Rapide PWA',
-            description: 'Conformite PWA et installabilite',
+            description: 'Conformité PWA et installabilité',
             strategy: 'quick',
             file: 'pwa-quick.j2',
             tags: ['pwa', 'quick', 'installable', 'offline']
@@ -110,8 +110,8 @@ export const templateRegistry = {
         },
         budget: {
             id: 'budget',
-            name: 'Conformite Budget',
-            description: 'Verification du respect des budgets performance',
+            name: 'Conformité Budget',
+            description: 'Vérification du respect des budgets performance',
             strategy: 'specific',
             file: 'comparison-budget.j2',
             tags: ['comparison', 'budget', 'compliance', 'monitoring']

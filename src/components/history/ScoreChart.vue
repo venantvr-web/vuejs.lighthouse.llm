@@ -2,6 +2,9 @@
 import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {Line} from 'vue-chartjs'
 import {CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Title, Tooltip} from 'chart.js'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 ChartJS.register(
     CategoryScale,
@@ -56,13 +59,13 @@ const props = defineProps({
   }
 })
 
-const categoryLabels = {
-  performance: 'Performance',
-  accessibility: 'Accessibilité',
-  'best-practices': 'Bonnes Pratiques',
-  seo: 'SEO',
-  pwa: 'PWA'
-}
+const categoryLabels = computed(() => ({
+  performance: t('history.catPerformance'),
+  accessibility: t('history.catAccessibility'),
+  'best-practices': t('history.catBestPractices'),
+  seo: t('history.catSeo'),
+  pwa: t('history.catPwa')
+}))
 
 // Keep sorted scores for tooltip access
 const sortedScores = computed(() => {
@@ -81,7 +84,7 @@ const chartData = computed(() => {
     ),
     datasets: [
       {
-        label: props.label || categoryLabels[props.category] || props.category,
+        label: props.label || categoryLabels.value[props.category] || props.category,
         data: sorted.map(s => {
           const score = s.scores?.[props.category]
           return score !== null && score !== undefined ? Math.round(score * 100) : null
@@ -136,7 +139,7 @@ const chartOptions = computed(() => ({
           if (!score?.pagePath) return ''
           return score.pagePath
         },
-        label: (context) => `Score: ${context.parsed.y}%`
+        label: (context) => t('history.chartScore', {value: context.parsed.y})
       }
     }
   },
@@ -237,7 +240,7 @@ function getScoreClass() {
           :options="chartOptions"
       />
       <div v-else class="no-data">
-        Aucune donnée
+        {{ $t('history.chartNoData') }}
       </div>
     </div>
   </div>

@@ -23,6 +23,36 @@ export default {
         confirmDeleteTitle: 'Confirm deletion',
         confirmDeleteDomainPrefix: 'Delete all analyses for',
         confirmDeleteScore: 'Delete this analysis?',
-        confirmClearAll: 'Delete all history? This action cannot be undone.'
+        confirmClearAll: 'Delete all history? This action cannot be undone.',
+        // ScoreChart
+        chartNoData: 'No data',
+        chartScore: 'Score: {value}%',
+        catPerformance: 'Performance',
+        catAccessibility: 'Accessibility',
+        catBestPractices: 'Best Practices',
+        catSeo: 'SEO',
+        catPwa: 'PWA',
+        // AnalysisTable
+        tableDate: 'Date',
+        tablePage: 'Page',
+        tableSource: 'Source',
+        tableMode: 'Mode',
+        tableCrawl: 'Crawl',
+        tableActions: 'Actions',
+        tableEmpty: 'No analysis for this domain.',
+        sourcePageSpeed: 'PageSpeed',
+        sourceLocal: 'Local',
+        sourceFile: 'File',
+        // DomainList
+        domainsTitle: 'Domains',
+        domainsEmpty: 'No history available.',
+        domainsEmptyHint: 'Analyze a URL to get started.',
+        domainAnalysisSingular: '{count} analysis',
+        domainAnalysisPlural: '{count} analyses',
+        deleteDomainTitle: 'Delete domain',
+        // CrawlBadge
+        crawlBadgeLabel: 'Crawl',
+        crawlBadgeTitle: 'View crawl session',
+        crawlBadgeTitleTemplate: 'View crawl session - Template: {template}'
     }
 }

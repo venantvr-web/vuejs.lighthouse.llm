@@ -23,6 +23,36 @@ export default {
         confirmDeleteTitle: 'Confirmer la suppression',
         confirmDeleteDomainPrefix: 'Supprimer toutes les analyses pour',
         confirmDeleteScore: 'Supprimer cette analyse ?',
-        confirmClearAll: 'Supprimer tout l\'historique ? Cette action est irréversible.'
+        confirmClearAll: 'Supprimer tout l\'historique ? Cette action est irréversible.',
+        // ScoreChart
+        chartNoData: 'Aucune donnée',
+        chartScore: 'Score : {value}%',
+        catPerformance: 'Performance',
+        catAccessibility: 'Accessibilité',
+        catBestPractices: 'Bonnes Pratiques',
+        catSeo: 'SEO',
+        catPwa: 'PWA',
+        // AnalysisTable
+        tableDate: 'Date',
+        tablePage: 'Page',
+        tableSource: 'Source',
+        tableMode: 'Mode',
+        tableCrawl: 'Crawl',
+        tableActions: 'Actions',
+        tableEmpty: 'Aucune analyse pour ce domaine.',
+        sourcePageSpeed: 'PageSpeed',
+        sourceLocal: 'Local',
+        sourceFile: 'Fichier',
+        // DomainList
+        domainsTitle: 'Domaines',
+        domainsEmpty: 'Aucun historique disponible.',
+        domainsEmptyHint: 'Analysez une URL pour commencer.',
+        domainAnalysisSingular: '{count} analyse',
+        domainAnalysisPlural: '{count} analyses',
+        deleteDomainTitle: 'Supprimer le domaine',
+        // CrawlBadge
+        crawlBadgeLabel: 'Crawl',
+        crawlBadgeTitle: 'Voir la session de crawl',
+        crawlBadgeTitleTemplate: 'Voir la session de crawl - Template : {template}'
     }
 }

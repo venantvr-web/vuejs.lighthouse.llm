@@ -4,6 +4,9 @@ import {useRouter} from 'vue-router'
 import CrawlBadge from '@/components/history/CrawlBadge.vue'
 import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
 import {formatScore, formatDateTime, getScoreCssClass} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const router = useRouter()
 
@@ -72,15 +75,15 @@ const categories = [
 
 function getSourceLabel(source) {
   const labels = {
-    pagespeed: 'PageSpeed',
-    local: 'Local',
-    file: 'Fichier'
+    pagespeed: t('history.sourcePageSpeed'),
+    local: t('history.sourceLocal'),
+    file: t('history.sourceFile')
   }
   return labels[source] || source || '-'
 }
 
 function getStrategyLabel(strategy) {
-  return strategy === 'desktop' ? 'Desktop' : 'Mobile'
+  return strategy === 'desktop' ? t('common.desktop') : t('common.mobile')
 }
 </script>
 
@@ -90,15 +93,15 @@ function getStrategyLabel(strategy) {
       <thead>
       <tr>
         <th v-if="selectionMode" class="col-select"></th>
-        <th class="col-date">Date</th>
-        <th class="col-path">Page</th>
-        <th class="col-source">Source</th>
-        <th class="col-strategy">Mode</th>
-        <th class="col-crawl">Crawl</th>
+        <th class="col-date">{{ $t('history.tableDate') }}</th>
+        <th class="col-path">{{ $t('history.tablePage') }}</th>
+        <th class="col-source">{{ $t('history.tableSource') }}</th>
+        <th class="col-strategy">{{ $t('history.tableMode') }}</th>
+        <th class="col-crawl">{{ $t('history.tableCrawl') }}</th>
         <th v-for="cat in categories" :key="cat.key" class="col-score">
           {{ cat.label }}
         </th>
-        <th class="col-actions">Actions</th>
+        <th class="col-actions">{{ $t('history.tableActions') }}</th>
       </tr>
       </thead>
       <tbody>
@@ -157,7 +160,7 @@ function getStrategyLabel(strategy) {
         <td class="col-actions">
           <button
               class="action-btn delete"
-              title="Supprimer"
+              :title="$t('common.delete')"
               @click="emit('delete', score.id)"
           >
             <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
@@ -170,7 +173,7 @@ function getStrategyLabel(strategy) {
     </table>
 
     <div v-if="scores.length === 0" class="empty-state">
-      Aucune analyse pour ce domaine.
+      {{ $t('history.tableEmpty') }}
     </div>
   </div>
 </template>

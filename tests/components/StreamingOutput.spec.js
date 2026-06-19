@@ -53,7 +53,7 @@ describe('StreamingOutput', () => {
                 props: {content: 'test', isStreaming: true}
             })
 
-            expect(wrapper.text()).toContain('Generation en cours')
+            expect(wrapper.text()).toContain('Génération en cours')
             expect(wrapper.find('.animate-ping').exists()).toBe(true)
         })
 
@@ -62,7 +62,7 @@ describe('StreamingOutput', () => {
                 props: {content: 'test', isStreaming: true}
             })
 
-            const cancelButton = wrapper.findAll('button').find(btn => btn.text().includes('Arreter'))
+            const cancelButton = wrapper.findAll('button').find(btn => btn.text().includes('Arrêter'))
             expect(cancelButton).toBeDefined()
         })
 
@@ -71,7 +71,7 @@ describe('StreamingOutput', () => {
                 props: {content: 'test', isStreaming: true}
             })
 
-            const cancelButton = wrapper.findAll('button').find(btn => btn.text().includes('Arreter'))
+            const cancelButton = wrapper.findAll('button').find(btn => btn.text().includes('Arrêter'))
             await cancelButton.trigger('click')
 
             expect(wrapper.emitted('cancel')).toBeTruthy()
@@ -145,7 +145,7 @@ describe('StreamingOutput', () => {
 
                 expect(mockWriteText).toHaveBeenCalledWith('test content')
                 expect(wrapper.emitted('copy')).toBeTruthy()
-                expect(wrapper.text()).toContain('Copie!')
+                expect(wrapper.text()).toContain('Copié !')
 
                 vi.useRealTimers()
             })
@@ -161,7 +161,7 @@ describe('StreamingOutput', () => {
                 await copyButton.trigger('click')
                 await flushPromises()
 
-                expect(wrapper.text()).toContain('Copie!')
+                expect(wrapper.text()).toContain('Copié !')
 
                 await vi.advanceTimersByTimeAsync(2000)
 

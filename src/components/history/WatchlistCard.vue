@@ -3,6 +3,9 @@ import {computed} from 'vue'
 import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import Sparkline from '@/components/common/Sparkline.vue'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const props = defineProps({
   item: {type: Object, required: true},
@@ -14,12 +17,12 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh', 'remove', 'toggle-budget', 'set-budget'])
 
-const CATEGORIES = [
-  {id: 'performance', label: 'Perf.'},
-  {id: 'accessibility', label: 'A11y'},
-  {id: 'best-practices', label: 'Pratiques'},
-  {id: 'seo', label: 'SEO'}
-]
+const CATEGORIES = computed(() => [
+  {id: 'performance', label: t('watchlist.catPerfShort')},
+  {id: 'accessibility', label: t('watchlist.catA11yShort')},
+  {id: 'best-practices', label: t('watchlist.catPracticesShort')},
+  {id: 'seo', label: t('watchlist.catSeoShort')}
+])
 
 // Category ids whose latest score is below the item's configured budget
 const breachedCategories = computed(() => computeBreached(props.item.budgets, props.stats?.latest?.scores))
@@ -54,10 +57,10 @@ function onBudgetInput(category, event) {
         >{{ item.url }}</a>
         <div class="flex items-center gap-1.5 mt-1.5">
           <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-            {{ item.strategy === 'desktop' ? 'Desktop' : 'Mobile' }}
+            {{ item.strategy === 'desktop' ? $t('common.desktop') : $t('common.mobile') }}
           </span>
           <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-            {{ item.source === 'local' ? 'Chromium' : 'PageSpeed' }}
+            {{ item.source === 'local' ? $t('watchlist.sourceLocalShort') : $t('watchlist.sourcePagespeed') }}
           </span>
         </div>
       </div>
@@ -65,7 +68,7 @@ function onBudgetInput(category, event) {
         <button
             :class="budgetEditing ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-400 hover:text-primary-500'"
             class="p-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-            title="Budgets de performance"
+            :title="$t('watchlist.budgetsTitle')"
             @click="emit('toggle-budget')"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +77,7 @@ function onBudgetInput(category, event) {
         </button>
         <button
             class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
-            title="Retirer"
+            :title="$t('watchlist.removeTitle')"
             @click="emit('remove')"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +90,7 @@ function onBudgetInput(category, event) {
     <!-- Budget editor -->
     <div v-if="budgetEditing" class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">
       <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-        Budgets (score minimum)
+        {{ $t('watchlist.budgetsLabel') }}
       </p>
       <div class="grid grid-cols-2 gap-2">
         <label v-for="cat in CATEGORIES" :key="cat.id" class="flex items-center justify-between gap-2 text-xs text-gray-600 dark:text-gray-300">
@@ -114,7 +117,7 @@ function onBudgetInput(category, event) {
               getScoreColorClass(stats.latest.scores?.[cat.id]),
               breachedCategories.includes(cat.id) ? 'underline decoration-red-500 decoration-2 underline-offset-2' : ''
             ]"
-            :title="breachedCategories.includes(cat.id) ? `Budget ${item.budgets[cat.id]} non atteint` : ''"
+            :title="breachedCategories.includes(cat.id) ? $t('watchlist.budgetNotMet', {value: item.budgets[cat.id]}) : ''"
             class="text-lg font-bold leading-none"
         >
           {{ formatScore(stats.latest.scores?.[cat.id]) }}
@@ -132,12 +135,12 @@ function onBudgetInput(category, event) {
 
     <!-- Never audited -->
     <div v-else class="flex-1 flex items-center justify-center py-4 mb-2">
-      <p class="text-sm text-gray-400 dark:text-gray-500">Jamais audité</p>
+      <p class="text-sm text-gray-400 dark:text-gray-500">{{ $t('watchlist.neverAudited') }}</p>
     </div>
 
     <!-- Sparkline -->
     <div v-if="stats?.sparkline?.length > 1" class="mb-4">
-      <p class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">Tendance performance</p>
+      <p class="text-[10px] text-gray-400 dark:text-gray-500 mb-1">{{ $t('watchlist.perfTrend') }}</p>
       <Sparkline :values="stats.sparkline" :width="240" color="#6366f1"/>
     </div>
 
@@ -148,7 +151,7 @@ function onBudgetInput(category, event) {
     <div class="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">
       <span class="text-xs text-gray-400 dark:text-gray-500">
         <template v-if="stats?.lastCheckedAt">
-          Vérifié {{ formatRelativeTime(stats.lastCheckedAt) }}
+          {{ $t('watchlist.audited', {time: formatRelativeTime(stats.lastCheckedAt)}) }}
         </template>
         <template v-else>—</template>
       </span>
@@ -163,7 +166,7 @@ function onBudgetInput(category, event) {
         >
           <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
-        {{ refreshing ? 'Analyse…' : 'Ré-auditer' }}
+        {{ refreshing ? $t('common.analyzing') : $t('watchlist.reaudit') }}
       </button>
     </div>
   </div>

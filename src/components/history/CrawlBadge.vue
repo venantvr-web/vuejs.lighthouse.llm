@@ -1,4 +1,8 @@
 <script setup>
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
+
 defineProps({
   sessionId: {
     type: String,
@@ -39,7 +43,7 @@ const iconSizes = {
         'hover:bg-emerald-200 dark:hover:bg-emerald-900/50',
         sizeClasses[size]
       ]"
-      :title="`Voir la session de crawl${templateName ? ` - Template: ${templateName}` : ''}`"
+      :title="templateName ? $t('history.crawlBadgeTitleTemplate', {template: templateName}) : $t('history.crawlBadgeTitle')"
       @click.stop="$emit('click', sessionId)"
   >
     <svg
@@ -55,7 +59,7 @@ const iconSizes = {
           stroke-width="2"
       />
     </svg>
-    <span>Crawl</span>
+    <span>{{ $t('history.crawlBadgeLabel') }}</span>
     <span v-if="templateName" class="opacity-75">{{ templateName }}</span>
   </button>
 </template>

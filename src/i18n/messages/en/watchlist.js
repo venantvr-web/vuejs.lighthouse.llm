@@ -39,6 +39,19 @@ export default {
         errorUrlInvalid: 'Invalid URL.',
         confirmRemove: 'Remove “{label}” from the watchlist?',
         notifyRegression: '{category}: {from} → {to} ({delta})',
-        notifyBreach: '{category} below budget ({score} < {budget})'
+        notifyBreach: '{category} below budget ({score} < {budget})',
+        // WatchlistCard
+        catPerfShort: 'Perf.',
+        catA11yShort: 'A11y',
+        catPracticesShort: 'Practices',
+        catSeoShort: 'SEO',
+        sourceLocalShort: 'Chromium',
+        budgetsTitle: 'Performance budgets',
+        removeTitle: 'Remove',
+        budgetsLabel: 'Budgets (minimum score)',
+        budgetNotMet: 'Budget {value} not met',
+        perfTrend: 'Performance trend',
+        audited: 'Checked {time}',
+        reaudit: 'Re-audit'
     }
 }

@@ -1,6 +1,9 @@
 <script setup>
 import {computed} from 'vue'
 import {formatDate} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const props = defineProps({
   domains: {
@@ -34,18 +37,18 @@ function getScoreColor(score) {
 <template>
   <div class="domain-list">
     <div class="domain-list-header">
-      <h3>Domaines</h3>
+      <h3>{{ $t('history.domainsTitle') }}</h3>
       <span class="domain-count">{{ domains.length }}</span>
     </div>
 
     <div v-if="loading" class="domain-list-loading">
       <div class="loading-spinner"></div>
-      <span>Chargement...</span>
+      <span>{{ $t('common.loading') }}</span>
     </div>
 
     <div v-else-if="domains.length === 0" class="domain-list-empty">
-      <p>Aucun historique disponible.</p>
-      <p class="hint">Analysez une URL pour commencer.</p>
+      <p>{{ $t('history.domainsEmpty') }}</p>
+      <p class="hint">{{ $t('history.domainsEmptyHint') }}</p>
     </div>
 
     <ul v-else class="domains">
@@ -59,7 +62,7 @@ function getScoreColor(score) {
         <div class="domain-info">
           <span class="domain-name">{{ domain.domain }}</span>
           <span class="domain-meta">
-            {{ domain.count }} analyse{{ domain.count > 1 ? 's' : '' }}
+            {{ domain.count > 1 ? $t('history.domainAnalysisPlural', {count: domain.count}) : $t('history.domainAnalysisSingular', {count: domain.count}) }}
             <span class="separator">-</span>
             {{ formatDate(domain.lastAnalysis) }}
           </span>
@@ -80,7 +83,7 @@ function getScoreColor(score) {
 
         <button
             class="delete-btn"
-            title="Supprimer le domaine"
+            :title="$t('history.deleteDomainTitle')"
             @click.stop="emit('delete', domain.domain)"
         >
           <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">

@@ -134,7 +134,7 @@ describe('DropZone', () => {
             await input.trigger('change')
             await new Promise(resolve => setTimeout(resolve, 100))
 
-            expect(wrapper.text()).toContain('ne semble pas etre un rapport Lighthouse valide')
+            expect(wrapper.text()).toContain("n'est pas un rapport Lighthouse valide")
             expect(wrapper.emitted('report-loaded')).toBeFalsy()
         })
 

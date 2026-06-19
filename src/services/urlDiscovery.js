@@ -131,6 +131,58 @@ export async function discoverBySitemap(baseUrl, options = {}) {
 }
 
 /**
+ * Heuristique : l'URL désigne-t-elle un sitemap (à déplier) plutôt qu'une page ?
+ * @param {string} url
+ * @returns {boolean}
+ */
+export function isSitemapUrl(url) {
+    try {
+        const path = new URL(url).pathname.toLowerCase()
+        return path.endsWith('.xml') || path.includes('sitemap')
+    } catch {
+        return false
+    }
+}
+
+/**
+ * Déplie une URL de sitemap en liste d'URL de pages. Gère un sitemap index en
+ * récupérant ses sitemaps enfants (un niveau).
+ * @param {string} sitemapUrl - URL du sitemap (ou sitemap index)
+ * @param {object} options - { maxPages, signal, proxyEndpoint }
+ * @returns {Promise<Array<string>>} URLs de pages
+ */
+export async function expandSitemap(sitemapUrl, options = {}) {
+    const {maxPages = MAX_PAGES, signal = null, proxyEndpoint = DEFAULT_PROXY_ENDPOINT} = options
+    let baseOrigin = null
+    try {
+        baseOrigin = new URL(sitemapUrl).origin
+    } catch {
+        return []
+    }
+
+    const xml = await fetchPage(sitemapUrl, proxyEndpoint, signal)
+    if (!xml) return []
+
+    // Sitemap index : récupérer les sitemaps enfants puis agréger leurs URL
+    if (xml.includes('<sitemapindex')) {
+        const children = [...xml.matchAll(/<sitemap[^>]*>[\s\S]*?<loc>([^<]+)<\/loc>/gi)].map(m => m[1].trim())
+        const urls = []
+        for (const child of children) {
+            if (signal?.aborted || urls.length >= maxPages) break
+            try {
+                const childXml = await fetchPage(child, proxyEndpoint, signal)
+                if (childXml) urls.push(...parseSitemapXml(childXml, baseOrigin))
+            } catch {
+                // sitemap enfant illisible : on continue
+            }
+        }
+        return [...new Set(urls)].slice(0, maxPages)
+    }
+
+    return parseSitemapXml(xml, baseOrigin).slice(0, maxPages)
+}
+
+/**
  * Parse manual URL list
  * @param {string} text - Text containing URLs (one per line)
  * @param {object} options - Options

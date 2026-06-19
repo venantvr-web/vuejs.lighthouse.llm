@@ -2,7 +2,7 @@ import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
-import {discoverUrls, DISCOVERY_MODES, parseManualUrls} from '@/services/urlDiscovery'
+import {discoverUrls, DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualUrls} from '@/services/urlDiscovery'
 import {detectTemplates, TEMPLATE_COLORS} from '@/services/templateDetector'
 import {analyzeUrl as analyzeWithPageSpeed} from '@/services/pageSpeedInsights'
 import {analyzeUrl as analyzeWithLocal} from '@/services/localLighthouse'
@@ -222,7 +222,26 @@ export const useCrawlStore = defineStore('crawl', () => {
 
             let urls
             if (discoveryMode === DISCOVERY_MODES.MANUAL) {
-                urls = parseManualUrls(urlList, {maxPages})
+                // Liste manuelle : les lignes sitemap sont dépliées, les autres
+                // sont traitées comme des pages, puis fusionnées.
+                const entries = parseManualUrls(urlList, {maxPages: 10000})
+                const pageUrls = entries.filter(u => !isSitemapUrl(u))
+                const sitemapUrls = entries.filter(isSitemapUrl)
+
+                urls = [...pageUrls]
+                for (const sitemap of sitemapUrls) {
+                    if (abortController.value.signal.aborted) break
+                    try {
+                        const expanded = await expandSitemap(sitemap, {
+                            maxPages,
+                            signal: abortController.value.signal
+                        })
+                        urls.push(...expanded)
+                    } catch {
+                        // sitemap injoignable (proxy requis) : ignoré, géré plus bas
+                    }
+                }
+                urls = [...new Set(urls)].slice(0, maxPages)
             } else {
                 urls = await discoverUrls(baseUrl, discoveryMode, {
                     maxPages,

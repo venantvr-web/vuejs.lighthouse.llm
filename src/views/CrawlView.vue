@@ -4,7 +4,7 @@ import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {useSiteStore} from '@/stores/siteStore'
-import {DISCOVERY_MODES} from '@/services/urlDiscovery'
+import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
 import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -137,6 +137,11 @@ const canSubmit = computed(() => {
   return true
 })
 
+// Le mode manuel accepte des URL de sitemap : leur dépliage nécessite le proxy.
+const manualHasSitemap = computed(() =>
+    manualUrls.value.split('\n').map(l => l.trim()).filter(Boolean).some(isSitemapUrl)
+)
+
 // Check local server availability
 async function checkLocalServer() {
   checkingServer.value = true
@@ -171,8 +176,9 @@ async function handleSubmit() {
   site.setFromUrl(baseUrl.value)
   error.value = ''
 
-  // For Auto and Sitemap modes, check if proxy server is available
-  if (discoveryMode.value !== DISCOVERY_MODES.MANUAL) {
+  // Le proxy est requis pour Auto/Sitemap, et pour le mode Manuel si la liste
+  // contient un sitemap à déplier.
+  if (discoveryMode.value !== DISCOVERY_MODES.MANUAL || manualHasSitemap.value) {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
       error.value = 'Le serveur proxy est requis pour la découverte automatique des URLs (mode Auto/Sitemap). Démarrez-le avec "npm run server" (ou "npm run server:install" la première fois), ou utilisez le mode Manuel pour saisir les URLs directement.'
@@ -462,11 +468,12 @@ onUnmounted(() => {
                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="https://example.com/page-1
 https://example.com/page-2
-https://example.com/page-3"
+https://example.com/sitemap.xml"
                   rows="6"
               ></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Maximum {{ maxPages }} URLs. Les lignes commencant par # sont ignorees.
+                Maximum {{ maxPages }} URLs. Une URL de sitemap (.xml) est dépliée en pages (serveur local requis).
+                Les lignes commençant par # sont ignorées.
               </p>
             </div>
 

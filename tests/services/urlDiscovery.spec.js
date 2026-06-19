@@ -1,5 +1,5 @@
-import {describe, expect, it} from 'vitest'
-import {parseManualUrls, DISCOVERY_MODES} from '@/services/urlDiscovery'
+import {afterEach, describe, expect, it, vi} from 'vitest'
+import {DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualUrls} from '@/services/urlDiscovery'
 
 /**
  * Tests for URL Discovery service
@@ -148,6 +148,59 @@ https://example.com/page?id=1&utm_campaign=summer`
             expect(DISCOVERY_MODES.AUTO).toBe('auto')
             expect(DISCOVERY_MODES.SITEMAP).toBe('sitemap')
             expect(DISCOVERY_MODES.MANUAL).toBe('manual')
+        })
+    })
+
+    describe('isSitemapUrl', () => {
+        it('detects .xml and sitemap-like URLs', () => {
+            expect(isSitemapUrl('https://x.com/sitemap.xml')).toBe(true)
+            expect(isSitemapUrl('https://x.com/sitemap_index.xml')).toBe(true)
+            expect(isSitemapUrl('https://x.com/sitemap/')).toBe(true)
+        })
+        it('treats regular pages as non-sitemaps', () => {
+            expect(isSitemapUrl('https://x.com/blog/article')).toBe(false)
+            expect(isSitemapUrl('not a url')).toBe(false)
+        })
+    })
+
+    describe('expandSitemap', () => {
+        afterEach(() => vi.unstubAllGlobals())
+
+        function mockProxy(xmlByUrl) {
+            vi.stubGlobal('fetch', vi.fn(async (_endpoint, opts) => {
+                const {url} = JSON.parse(opts.body)
+                return {ok: true, json: async () => ({html: xmlByUrl[url] || ''})}
+            }))
+        }
+
+        it('expands a urlset sitemap into page URLs', async () => {
+            mockProxy({
+                'https://x.com/sitemap.xml':
+                    '<urlset><url><loc>https://x.com/a</loc></url><url><loc>https://x.com/b</loc></url></urlset>'
+            })
+            const urls = await expandSitemap('https://x.com/sitemap.xml')
+            expect(urls).toContain('https://x.com/a')
+            expect(urls).toContain('https://x.com/b')
+        })
+
+        it('recurses one level into a sitemap index', async () => {
+            mockProxy({
+                'https://x.com/sitemap_index.xml':
+                    '<sitemapindex><sitemap><loc>https://x.com/sm1.xml</loc></sitemap></sitemapindex>',
+                'https://x.com/sm1.xml':
+                    '<urlset><url><loc>https://x.com/child</loc></url></urlset>'
+            })
+            const urls = await expandSitemap('https://x.com/sitemap_index.xml')
+            expect(urls).toContain('https://x.com/child')
+        })
+
+        it('respects maxPages', async () => {
+            mockProxy({
+                'https://x.com/sitemap.xml':
+                    '<urlset><url><loc>https://x.com/a</loc></url><url><loc>https://x.com/b</loc></url><url><loc>https://x.com/c</loc></url></urlset>'
+            })
+            const urls = await expandSitemap('https://x.com/sitemap.xml', {maxPages: 2})
+            expect(urls).toHaveLength(2)
         })
     })
 })

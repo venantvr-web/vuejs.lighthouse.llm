@@ -3,7 +3,7 @@
  * Client for the local Lighthouse server
  */
 
-const LOCAL_API = 'http://localhost:3001'
+import {proxyUrl} from './requestConfig'
 
 /**
  * Analysis strategies
@@ -19,7 +19,7 @@ export const STRATEGIES = {
  */
 export async function checkServerHealth() {
     try {
-        const response = await fetch(`${LOCAL_API}/health`, {
+        const response = await fetch(proxyUrl('/health'), {
             method: 'GET',
             headers: {'Accept': 'application/json'}
         })
@@ -56,7 +56,7 @@ export async function analyzeUrl(url, options = {}) {
         normalizedUrl = 'https://' + normalizedUrl
     }
 
-    const response = await fetch(`${LOCAL_API}/analyze`, {
+    const response = await fetch(proxyUrl('/analyze'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export async function analyzeUrl(url, options = {}) {
  */
 export async function getCategories() {
     try {
-        const response = await fetch(`${LOCAL_API}/categories`)
+        const response = await fetch(proxyUrl('/categories'))
         const data = await response.json()
         return data.categories
     } catch {

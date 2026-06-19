@@ -3,10 +3,10 @@
  * Discovers URLs from a website using various methods
  */
 
-import {getUserAgent} from './requestConfig'
+import {getUserAgent, proxyUrl} from './requestConfig'
 
 const MAX_PAGES = 20
-const DEFAULT_PROXY_ENDPOINT = 'http://localhost:3001/api/fetch-page'
+const proxyEndpointDefault = () => proxyUrl('/api/fetch-page')
 
 /**
  * Discovery modes
@@ -29,7 +29,7 @@ export async function discoverByLinks(baseUrl, options = {}) {
         maxPages = MAX_PAGES,
         signal = null,
         onProgress = null,
-        proxyEndpoint = DEFAULT_PROXY_ENDPOINT
+        proxyEndpoint = proxyEndpointDefault()
     } = options
 
     const baseOrigin = new URL(baseUrl).origin
@@ -94,7 +94,7 @@ export async function discoverBySitemap(baseUrl, options = {}) {
     const {
         maxPages = MAX_PAGES,
         signal = null,
-        proxyEndpoint = DEFAULT_PROXY_ENDPOINT
+        proxyEndpoint = proxyEndpointDefault()
     } = options
 
     const baseOrigin = new URL(baseUrl).origin
@@ -152,7 +152,7 @@ export function isSitemapUrl(url) {
  * @returns {Promise<Array<string>>} URLs de pages
  */
 export async function expandSitemap(sitemapUrl, options = {}) {
-    const {maxPages = MAX_PAGES, signal = null, proxyEndpoint = DEFAULT_PROXY_ENDPOINT} = options
+    const {maxPages = MAX_PAGES, signal = null, proxyEndpoint = proxyEndpointDefault()} = options
     let baseOrigin = null
     try {
         baseOrigin = new URL(sitemapUrl).origin

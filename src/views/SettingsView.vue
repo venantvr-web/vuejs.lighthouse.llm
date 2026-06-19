@@ -2,11 +2,19 @@
 import {computed, onMounted, ref, watch} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
-import {DEFAULT_USER_AGENT, getRawUserAgent, setUserAgent} from '@/services/requestConfig'
+import {
+  DEFAULT_USER_AGENT,
+  getDefaultProxyBase,
+  getRawProxyBase,
+  getRawUserAgent,
+  setProxyBase,
+  setUserAgent
+} from '@/services/requestConfig'
 import AppHeader from '@/components/common/AppHeader.vue'
 
 const settings = useSettingsStore()
 const DEFAULT_UA = DEFAULT_USER_AGENT
+const defaultProxyBase = getDefaultProxyBase()
 
 const provider = ref('gemini')
 const apiKey = ref('')
@@ -14,6 +22,7 @@ const model = ref('')
 const ollamaUrl = ref('http://localhost:11434')
 const pageSpeedKey = ref('')
 const userAgent = ref('')
+const proxyBase = ref('')
 const maxTokens = ref(16384)
 const saved = ref(false)
 
@@ -44,6 +53,7 @@ onMounted(() => {
   ollamaUrl.value = settings.ollamaBaseUrl
   pageSpeedKey.value = settings.pageSpeedApiKey
   userAgent.value = getRawUserAgent()
+  proxyBase.value = getRawProxyBase()
   maxTokens.value = settings.maxTokens
 })
 
@@ -104,6 +114,7 @@ const saveSettings = () => {
   }
   settings.setPageSpeedApiKey(pageSpeedKey.value)
   setUserAgent(userAgent.value)
+  setProxyBase(proxyBase.value)
   if (maxTokens.value) settings.setMaxTokens(maxTokens.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
@@ -112,6 +123,11 @@ const saveSettings = () => {
 const resetUserAgent = () => {
   userAgent.value = ''
   setUserAgent('')
+}
+
+const resetProxyBase = () => {
+  proxyBase.value = ''
+  setProxyBase('')
 }
 
 const testConnection = async () => {
@@ -305,6 +321,33 @@ const testConnection = async () => {
             Par défaut : <code class="text-[11px]">{{ DEFAULT_UA }}</code>.
             Un User-Agent transparent et identifiable est recommandé ; n'utilisez un User-Agent de navigateur que si
             un site bloque le robot.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Base du relais HTTP (optionnel)
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+                v-model="proxyBase"
+                :placeholder="defaultProxyBase || '(même origine)'"
+                class="input flex-1"
+                type="text"
+            />
+            <button
+                :disabled="!proxyBase"
+                class="btn btn-secondary text-sm whitespace-nowrap disabled:opacity-50"
+                type="button"
+                @click="resetProxyBase"
+            >
+              Réinitialiser
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Relais utilisé pour contourner le CORS (récupération de robots.txt, sitemaps, pages…).
+            En production, laissez vide : le relais intégré de Cloudflare Pages (<code class="text-[11px]">/api</code>) est utilisé.
+            En local, <code class="text-[11px]">http://localhost:3001</code> (serveur Node), ou indiquez un relais CORS de votre choix.
           </p>
         </div>
       </div>

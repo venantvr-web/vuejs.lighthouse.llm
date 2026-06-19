@@ -5,6 +5,7 @@ import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
+import {proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -158,7 +159,7 @@ async function checkLocalServer() {
 // Check if proxy server is available
 async function checkProxyServer() {
   try {
-    const response = await fetch('http://localhost:3001/health', {
+    const response = await fetch(proxyUrl('/health'), {
       method: 'GET',
       signal: AbortSignal.timeout(3000)
     })
@@ -181,7 +182,7 @@ async function handleSubmit() {
   if (discoveryMode.value !== DISCOVERY_MODES.MANUAL || manualHasSitemap.value) {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
-      error.value = 'Le serveur proxy est requis pour la découverte automatique des URLs (mode Auto/Sitemap). Démarrez-le avec "npm run server" (ou "npm run server:install" la première fois), ou utilisez le mode Manuel pour saisir les URLs directement.'
+      error.value = 'Le relais HTTP est requis pour la découverte automatique des URLs (les requêtes vers des sites tiers sont bloquées par le CORS du navigateur). En production (Cloudflare Pages), il est intégré ; en local, lancez "npm run server" ou indiquez un relais dans Paramètres → Requêtes sortantes. Sinon, utilisez le mode Manuel.'
       return
     }
   }

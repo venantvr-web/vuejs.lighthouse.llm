@@ -6,10 +6,7 @@
  * helpers below are unit-tested.
  */
 
-import {getUserAgent} from './requestConfig'
-
-const PROXY = 'http://localhost:3001/api/fetch-page'
-const STATUS_PROXY = 'http://localhost:3001/api/check-url'
+import {getUserAgent, proxyUrl} from './requestConfig'
 
 /**
  * Derive the origin (scheme + host) from a user-supplied URL.
@@ -284,7 +281,7 @@ export function computeGeoReadiness(resources = [], sitemaps = [], options = {})
  */
 export async function checkUrlStatus(url) {
     try {
-        const response = await fetch(STATUS_PROXY, {
+        const response = await fetch(proxyUrl('/api/check-url'), {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({url, userAgent: getUserAgent()})
@@ -304,7 +301,7 @@ export async function checkUrlStatus(url) {
  */
 export async function fetchResource(url) {
     try {
-        const response = await fetch(PROXY, {
+        const response = await fetch(proxyUrl('/api/fetch-page'), {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({url, userAgent: getUserAgent()})

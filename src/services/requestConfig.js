@@ -7,10 +7,22 @@
  */
 
 const STORAGE_KEY = 'lighthouse-user-agent'
+const PROXY_KEY = 'lighthouse-proxy-base'
 
 // User-Agent par défaut (aligné avec server/config.js).
 export const DEFAULT_USER_AGENT =
     'Mozilla/5.0 (compatible; LighthouseAIAnalyzer/1.0.0; +https://github.com/venantvr-web/vuejs.lighthouse.llm)'
+
+/**
+ * Base du relais HTTP par défaut. En production, on vise la même origine
+ * (Pages Functions Cloudflare → /api/...), donc base vide. En développement,
+ * le serveur Node local sur le port 3001. Surchargeable via VITE_PROXY_BASE.
+ */
+function defaultProxyBase() {
+    const env = import.meta.env?.VITE_PROXY_BASE
+    if (typeof env === 'string' && env) return env
+    return import.meta.env?.DEV ? 'http://localhost:3001' : ''
+}
 
 function load() {
     try {
@@ -51,4 +63,47 @@ export function setUserAgent(ua) {
     } catch {
         // best-effort
     }
+}
+
+// --- Base du relais HTTP (proxy) ---
+
+function loadProxyBase() {
+    try {
+        return localStorage.getItem(PROXY_KEY) || ''
+    } catch {
+        return ''
+    }
+}
+
+let proxyBase = loadProxyBase()
+
+/** Base effective du relais (réglage utilisateur ou défaut). */
+export function getProxyBase() {
+    return proxyBase || defaultProxyBase()
+}
+
+/** Valeur brute configurée ('' si non personnalisée). */
+export function getRawProxyBase() {
+    return proxyBase
+}
+
+/** Défaut affichable (pour le placeholder). */
+export function getDefaultProxyBase() {
+    return defaultProxyBase()
+}
+
+/** Définit (et persiste) la base du relais. Vide = défaut. */
+export function setProxyBase(base) {
+    proxyBase = (base || '').trim().replace(/\/$/, '')
+    try {
+        if (proxyBase) localStorage.setItem(PROXY_KEY, proxyBase)
+        else localStorage.removeItem(PROXY_KEY)
+    } catch {
+        // best-effort
+    }
+}
+
+/** Construit une URL de relais à partir d'un chemin (ex. '/api/fetch-page'). */
+export function proxyUrl(path) {
+    return `${getProxyBase()}${path}`
 }

@@ -52,3 +52,45 @@ describe('requestConfig (parameterizable User-Agent, client)', () => {
         expect(m.DEFAULT_USER_AGENT).toMatch(/^Mozilla\/5\.0 \(compatible; .+\/\d+\.\d+\.\d+; \+https?:\/\/.+\)$/)
     })
 })
+
+const PROXY_KEY = 'lighthouse-proxy-base'
+
+describe('requestConfig (configurable proxy base)', () => {
+    beforeEach(() => localStorage.clear())
+    afterEach(() => localStorage.clear())
+
+    it('proxyUrl concatenates the active base with the path', async () => {
+        const m = await freshModule()
+        expect(m.proxyUrl('/api/fetch-page')).toBe(`${m.getProxyBase()}/api/fetch-page`)
+    })
+
+    it('uses a configured base and persists it', async () => {
+        const m = await freshModule()
+        m.setProxyBase('https://proxy.example')
+        expect(m.getRawProxyBase()).toBe('https://proxy.example')
+        expect(m.getProxyBase()).toBe('https://proxy.example')
+        expect(m.proxyUrl('/api/check-url')).toBe('https://proxy.example/api/check-url')
+        expect(localStorage.getItem(PROXY_KEY)).toBe('https://proxy.example')
+    })
+
+    it('strips a trailing slash from the base', async () => {
+        const m = await freshModule()
+        m.setProxyBase('https://proxy.example/')
+        expect(m.getProxyBase()).toBe('https://proxy.example')
+    })
+
+    it('reset (empty) clears storage and falls back to the default', async () => {
+        const m = await freshModule()
+        m.setProxyBase('https://proxy.example')
+        m.setProxyBase('')
+        expect(m.getRawProxyBase()).toBe('')
+        expect(m.getProxyBase()).toBe(m.getDefaultProxyBase())
+        expect(localStorage.getItem(PROXY_KEY)).toBeNull()
+    })
+
+    it('hydrates the base from localStorage on load', async () => {
+        localStorage.setItem(PROXY_KEY, 'https://hydrated.example')
+        const m = await freshModule()
+        expect(m.getProxyBase()).toBe('https://hydrated.example')
+    })
+})

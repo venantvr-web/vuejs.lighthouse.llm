@@ -133,7 +133,7 @@ app.post('/api/fetch-page', async (req, res) => {
         }
 
         // Other content types
-        return res.status(415).json({error: 'Type de contenu non supporte', contentType})
+        return res.status(415).json({error: 'Type de contenu non supporté', contentType})
 
     } catch (error) {
         console.error('[Fetch Error]', error.message)

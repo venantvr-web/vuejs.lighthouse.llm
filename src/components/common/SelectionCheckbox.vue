@@ -52,6 +52,6 @@ const sizeClasses = {
           stroke-width="3"
       />
     </svg>
-    <span v-else-if="!disabled" class="sr-only">Selectionner</span>
+    <span v-else-if="!disabled" class="sr-only">Sélectionner</span>
   </button>
 </template>

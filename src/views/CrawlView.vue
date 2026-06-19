@@ -113,7 +113,7 @@ const progressPercentage = computed(() => {
 const statusText = computed(() => {
   switch (crawlStore.crawlStatus) {
     case CRAWL_STATUS.DISCOVERING:
-      return `Decouverte des URLs... (${discoveredUrls.value.length})`
+      return `Découverte des URLs... (${discoveredUrls.value.length})`
     case CRAWL_STATUS.ANALYZING:
       return `Analyse en cours... (${analyzedCount.value}/${discoveredUrls.value.length})`
     case CRAWL_STATUS.COMPLETED:
@@ -123,7 +123,7 @@ const statusText = computed(() => {
     case CRAWL_STATUS.CANCELLED:
       return 'Analyse annulée'
     case CRAWL_STATUS.FAILED:
-      return 'Echec de l\'analyse'
+      return 'Échec de l\'analyse'
     default:
       return ''
   }
@@ -335,7 +335,7 @@ onUnmounted(() => {
                   <span v-else class="text-xs">1</span>
                 </div>
                 <span :class="progress.stage === 'discovering' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">
-                  Decouverte
+                  Découverte
                 </span>
               </div>
 
@@ -368,7 +368,7 @@ onUnmounted(() => {
           <!-- Discovered URLs list -->
           <div v-if="discoveredUrls.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              URLs decouvertes ({{ discoveredUrls.length }})
+              URLs découvertes ({{ discoveredUrls.length }})
             </h3>
             <div ref="urlsListRef" class="max-h-40 overflow-y-auto space-y-1">
               <div
@@ -447,7 +447,7 @@ onUnmounted(() => {
             <!-- Discovery mode -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Mode de decouverte des URLs
+                Mode de découverte des URLs
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <button

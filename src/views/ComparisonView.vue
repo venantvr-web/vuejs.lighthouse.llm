@@ -272,7 +272,7 @@ function getItemScore(item, category) {
                   Excellente évolution ! Tous les scores se sont améliorés ou sont restés stables.
                 </template>
                 <template v-else-if="Object.values(scoreDiffs).every(d => d <= 0)">
-                  Attention, des regressions ont ete detectees sur plusieurs categories.
+                  Attention, des régressions ont été détectées sur plusieurs catégories.
                 </template>
                 <template v-else>
                   Évolution mitigée : certaines catégories se sont améliorées, d'autres ont régressé.

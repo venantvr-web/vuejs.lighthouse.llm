@@ -246,9 +246,9 @@ export const useCrawlStore = defineStore('crawl', () => {
             // Check if URLs were discovered
             if (!urls || urls.length === 0) {
                 if (discoveryMode === DISCOVERY_MODES.AUTO) {
-                    throw new Error('Aucune URL decouverte. Verifiez que l\'URL est accessible et que le site contient des liens internes.')
+                    throw new Error('Aucune URL découverte. Vérifiez que l\'URL est accessible et que le site contient des liens internes.')
                 } else if (discoveryMode === DISCOVERY_MODES.SITEMAP) {
-                    throw new Error('Aucun sitemap trouve ou sitemap vide.')
+                    throw new Error('Aucun sitemap trouvé ou sitemap vide.')
                 } else {
                     throw new Error('Aucune URL valide dans la liste fournie.')
                 }

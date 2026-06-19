@@ -61,7 +61,7 @@ const filterConfig = [
     options: [
       {value: CRAWL_STATUS.COMPLETED, label: 'Terminé'},
       {value: CRAWL_STATUS.PARTIAL, label: 'Partiel'},
-      {value: CRAWL_STATUS.FAILED, label: 'Echec'},
+      {value: CRAWL_STATUS.FAILED, label: 'Échec'},
       {value: CRAWL_STATUS.CANCELLED, label: 'Annulé'}
     ]
   },
@@ -124,7 +124,7 @@ function getStatusLabel(status) {
     case CRAWL_STATUS.PARTIAL:
       return 'Partiel'
     case CRAWL_STATUS.FAILED:
-      return 'Echec'
+      return 'Échec'
     case CRAWL_STATUS.CANCELLED:
       return 'Annulé'
     default:
@@ -373,7 +373,7 @@ onMounted(async () => {
                 <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 mb-2">Aucun resultat pour ces criteres</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-2">Aucun résultat pour ces critères</p>
             <button
                 class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
                 @click="clearAllFilters"
@@ -421,7 +421,7 @@ onMounted(async () => {
             Supprimer cette session ?
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Cette action est irreversible. Les données de cette session de crawl seront definitivement supprimees.
+            Cette action est irréversible. Les données de cette session de crawl seront définitivement supprimées.
           </p>
           <div class="flex justify-end gap-3">
             <button

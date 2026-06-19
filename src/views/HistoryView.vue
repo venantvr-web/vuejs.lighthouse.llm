@@ -191,7 +191,7 @@ async function exportPDF() {
 }
 
 async function confirmClearAll() {
-  if (confirm('Supprimer tout l\'historique ? Cette action est irreversible.')) {
+  if (confirm('Supprimer tout l\'historique ? Cette action est irréversible.')) {
     await historyStore.clearAll()
   }
 }

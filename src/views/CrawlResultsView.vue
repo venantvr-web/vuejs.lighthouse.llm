@@ -64,7 +64,7 @@ const statusLabel = computed(() => {
     case CRAWL_STATUS.PARTIAL:
       return 'Partiel'
     case CRAWL_STATUS.FAILED:
-      return 'Echec'
+      return 'Échec'
     case CRAWL_STATUS.CANCELLED:
       return 'Annulé'
     default:
@@ -149,7 +149,7 @@ function exportPDF() {
   y += 7
   doc.text(`Date: ${formatDateTimeMedium(session.value.timestamp)}`, margin, y)
   y += 7
-  doc.text(`Pages analysees: ${session.value.pagesAnalyzed}/${session.value.pageCount}`, margin, y)
+  doc.text(`Pages analysées: ${session.value.pagesAnalyzed}/${session.value.pageCount}`, margin, y)
   y += 7
   doc.text(`Service: ${session.value.service} | Stratégie: ${session.value.strategy}`, margin, y)
   y += 15
@@ -209,7 +209,7 @@ function exportPDF() {
 
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('Detail par page', margin, y)
+    doc.text('Détail par page', margin, y)
     y += 10
 
     doc.setFontSize(8)
@@ -546,7 +546,7 @@ onMounted(async () => {
             </div>
 
             <div v-if="filteredUrls.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              Aucune URL trouvee pour ce filtre.
+              Aucune URL trouvée pour ce filtre.
             </div>
           </div>
 
@@ -556,7 +556,7 @@ onMounted(async () => {
 
         <!-- No session -->
         <div v-else class="text-center py-12">
-          <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune session trouvee</p>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune session trouvée</p>
           <router-link
               class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               to="/crawl"

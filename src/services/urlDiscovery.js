@@ -123,7 +123,7 @@ export async function discoverBySitemap(baseUrl, options = {}) {
     }
 
     if (urls.length === 0) {
-        throw new Error('Aucun sitemap trouve ou sitemap vide')
+        throw new Error('Aucun sitemap trouvé ou sitemap vide')
     }
 
     // Limit to maxPages

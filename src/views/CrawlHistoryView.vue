@@ -14,6 +14,8 @@ import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
 import {formatScore, formatRelativeTime, getScoreBgClass} from '@/utils/formatters'
 
+defineProps({embedded: {type: Boolean, default: false}})
+
 const router = useRouter()
 const crawlStore = useCrawlStore()
 const {saveToStorage} = useComparison()
@@ -183,42 +185,43 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div :class="embedded ? '' : 'min-h-screen flex flex-col'">
     <!-- Header -->
     <AppHeader
+        v-if="!embedded"
         :subtitle="`${sessions.length} session${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}`"
         title="Historique des crawls"
-    >
-      <template #actions>
-        <button
-            v-if="!selectionMode && sessions.length >= 2"
-            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
-            @click="enterSelectionMode"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-          </svg>
-          Comparer
-        </button>
-        <button
-            v-if="selectionMode"
-            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
-            @click="exitSelectionMode"
-        >
-          Annuler
-        </button>
-        <router-link
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-            to="/crawl"
-        >
-          Nouveau crawl
-        </router-link>
-      </template>
-    </AppHeader>
+    />
 
     <!-- Main content -->
-    <main class="flex-1 p-4">
+    <main :class="embedded ? 'p-4' : 'flex-1 p-4'">
       <div class="max-w-5xl mx-auto">
+        <!-- Toolbar -->
+        <div class="flex items-center justify-end gap-2 mb-4">
+          <button
+              v-if="!selectionMode && sessions.length >= 2"
+              class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              @click="enterSelectionMode"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            Comparer
+          </button>
+          <button
+              v-if="selectionMode"
+              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
+              @click="exitSelectionMode"
+          >
+            Annuler
+          </button>
+          <router-link
+              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+              to="/crawl"
+          >
+            Nouveau crawl
+          </router-link>
+        </div>
         <!-- Loading -->
         <div v-if="loading" class="flex justify-center py-12">
           <LoadingSpinner size="lg"/>

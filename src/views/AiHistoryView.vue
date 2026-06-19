@@ -7,6 +7,8 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {downloadText} from '@/utils/download'
 
+defineProps({embedded: {type: Boolean, default: false}})
+
 const aiHistory = useAiHistoryStore()
 
 const items = ref([])
@@ -76,32 +78,31 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
-    <AppHeader subtitle="Analyses, diagnostics et JSON-LD générés par l'IA" title="Historique IA">
-      <template #actions>
+  <div :class="embedded ? '' : 'min-h-screen flex flex-col'">
+    <AppHeader v-if="!embedded" subtitle="Analyses, diagnostics et JSON-LD générés par l'IA" title="Historique IA"/>
+
+    <main :class="embedded ? 'max-w-5xl w-full mx-auto px-4 py-6' : 'flex-1 max-w-5xl w-full mx-auto px-4 py-8'">
+      <!-- Filtres -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <div class="flex flex-wrap gap-2">
+          <button
+              v-for="f in FILTERS"
+              :key="f.value"
+              :class="activeFilter === f.value
+              ? 'bg-primary-600 text-white'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'"
+              class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              @click="activeFilter = f.value"
+          >
+            {{ f.label }}
+          </button>
+        </div>
         <button
             v-if="items.length"
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
+            class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
             @click="clearAll"
         >
           Tout effacer
-        </button>
-      </template>
-    </AppHeader>
-
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
-      <!-- Filtres -->
-      <div class="flex flex-wrap gap-2 mb-6">
-        <button
-            v-for="f in FILTERS"
-            :key="f.value"
-            :class="activeFilter === f.value
-            ? 'bg-primary-600 text-white'
-            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700'"
-            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-            @click="activeFilter = f.value"
-        >
-          {{ f.label }}
         </button>
       </div>
 

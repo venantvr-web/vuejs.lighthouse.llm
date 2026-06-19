@@ -11,6 +11,8 @@ import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 
+defineProps({embedded: {type: Boolean, default: false}})
+
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
 const {generatePDF, loading: pdfLoading} = useExportPDF()
@@ -210,46 +212,47 @@ function compareSelected() {
 </script>
 
 <template>
-  <div class="history-view">
+  <div :class="{embedded}" class="history-view">
     <!-- Header -->
-    <AppHeader subtitle="Évolution de vos scores dans le temps" title="Historique des analyses">
-      <template #actions>
-        <label class="crawl-toggle">
-          <input
-              :checked="historyStore.includeCrawl"
-              type="checkbox"
-              @change="historyStore.toggleIncludeCrawl()"
-          />
-          <span class="toggle-slider"></span>
-          <span class="toggle-label">
-            <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
-              <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-            </svg>
-            Inclure les crawls
-          </span>
-        </label>
-        <button
-            :disabled="historyStore.isEmpty || exportLoading"
-            class="btn btn-secondary"
-            @click="exportAllJSON"
-        >
-          <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+    <AppHeader v-if="!embedded" subtitle="Évolution de vos scores dans le temps" title="Historique des analyses"/>
+
+    <!-- Toolbar -->
+    <div class="history-toolbar">
+      <label class="crawl-toggle">
+        <input
+            :checked="historyStore.includeCrawl"
+            type="checkbox"
+            @change="historyStore.toggleIncludeCrawl()"
+        />
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">
+          <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+            <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
           </svg>
-          Exporter tout
-        </button>
-        <button
-            :disabled="historyStore.isEmpty"
-            class="btn btn-danger"
-            @click="confirmClearAll"
-        >
-          <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
-            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          </svg>
-          Tout supprimer
-        </button>
-      </template>
-    </AppHeader>
+          Inclure les crawls
+        </span>
+      </label>
+      <button
+          :disabled="historyStore.isEmpty || exportLoading"
+          class="btn btn-secondary"
+          @click="exportAllJSON"
+      >
+        <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Exporter tout
+      </button>
+      <button
+          :disabled="historyStore.isEmpty"
+          class="btn btn-danger"
+          @click="confirmClearAll"
+      >
+        <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
+          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+        Tout supprimer
+      </button>
+    </div>
 
     <!-- Main Content -->
     <div class="history-content">
@@ -488,6 +491,21 @@ function compareSelected() {
   background-color: var(--color-bg);
   display: flex;
   flex-direction: column;
+}
+
+/* En mode intégré (hub), pas de hauteur plein écran ni de fond propre */
+.history-view.embedded {
+  min-height: 0;
+  background-color: transparent;
+}
+
+.history-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0;
 }
 
 /* Header */

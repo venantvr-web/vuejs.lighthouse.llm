@@ -46,7 +46,7 @@ const routes = [
     {
         path: '/history',
         name: 'history',
-        component: () => import('@/views/HistoryView.vue')
+        component: () => import('@/views/HistoryHubView.vue')
     },
     {
         path: '/briefing',
@@ -75,8 +75,7 @@ const routes = [
     },
     {
         path: '/ai-history',
-        name: 'ai-history',
-        component: () => import('@/views/AiHistoryView.vue')
+        redirect: {path: '/history', query: {tab: 'ai'}}
     },
     {
         path: '/crawl',
@@ -90,8 +89,7 @@ const routes = [
     },
     {
         path: '/crawl/history',
-        name: 'crawl-history',
-        component: () => import('@/views/CrawlHistoryView.vue')
+        redirect: {path: '/history', query: {tab: 'crawls'}}
     }
 ]
 

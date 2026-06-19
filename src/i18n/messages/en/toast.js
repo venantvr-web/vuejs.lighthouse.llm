@@ -4,8 +4,11 @@
 export default {
     toast: {
         saved: 'Saved',
+        copied: 'Copied to clipboard',
         exported: 'Export complete',
         analysisFailed: 'Analysis failed',
+        analysisDone: 'Analysis complete',
+        diagnosisDone: 'Diagnosis complete',
         diagnosisFailed: 'Indexability diagnosis failed',
         jsonLdFailed: 'JSON-LD generation failed',
         jsonLdDone: '{count} JSON-LD generated',

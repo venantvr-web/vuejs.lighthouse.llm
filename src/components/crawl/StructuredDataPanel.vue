@@ -6,8 +6,10 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {toScriptTag} from '@/services/structuredDataGen'
 import {downloadText} from '@/utils/download'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 const props = defineProps({
   urls: {type: Array, default: () => []}
@@ -80,6 +82,7 @@ function statusText(url) {
 async function copy(text) {
   try {
     await navigator.clipboard.writeText(text)
+    toast.success(t('toast.copied'))
   } catch {
     // ignore
   }
@@ -95,6 +98,7 @@ function slug(url) {
 
 function download(url) {
   downloadText(`jsonld-${slug(url)}.html`, toScriptTag(byUrl[url].generated), 'text/html;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 </script>
 

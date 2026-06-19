@@ -17,8 +17,10 @@ import Sparkline from '@/components/common/Sparkline.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 const {checking, error, origin, resources, sitemaps, jsonLd, pageMeta, check} = useResourceCheck()
 const {crawling, error: crawlError, progress, pages, crawl} = useSitemapCrawl()
@@ -93,6 +95,7 @@ async function handleCrawl(sitemapUrl) {
 
 function exportBrokenCsv() {
   downloadText(`urls-cassees-${formatDateISO()}.csv`, buildBrokenUrlsCsv(pages.value), 'text/csv;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 
 function handleDiagnose() {
@@ -101,6 +104,7 @@ function handleDiagnose() {
 
 function exportDiagnosis() {
   downloadText(`indexabilite-${formatDateISO()}.md`, diagnosis.value, 'text/markdown;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 </script>
 
@@ -235,6 +239,7 @@ function exportDiagnosis() {
             :token-count="diagTokens"
             @cancel="cancelDiagnosis"
             @export="exportDiagnosis"
+            @copy="toast.success(t('toast.copied'))"
         />
         <div v-if="diagTruncated && !diagnosing" class="mt-2 flex items-center gap-3">
           <p class="text-xs text-amber-600 dark:text-amber-400">{{ $t('resources.responseTruncated') }}</p>

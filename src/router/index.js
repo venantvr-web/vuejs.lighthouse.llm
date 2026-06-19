@@ -1,4 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router'
+import {doneProgress, startProgress} from '@/composables/useProgress'
 
 const routes = [
     {
@@ -97,6 +98,14 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 })
+
+// Barre de progression globale sur les transitions de route
+router.beforeEach((to, from, next) => {
+    startProgress()
+    next()
+})
+router.afterEach(() => doneProgress())
+router.onError(() => doneProgress())
 
 // Navigation guard - redirect to home if no report loaded
 router.beforeEach((to, from, next) => {

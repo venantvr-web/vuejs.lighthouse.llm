@@ -13,9 +13,12 @@ import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useNotifications} from '@/composables/useNotifications'
+import {doneProgress, startProgress} from '@/composables/useProgress'
 
 const {t} = useI18n()
 const toast = useToast()
+const {notifyDone} = useNotifications()
 const router = useRouter()
 const route = useRoute()
 const promptEngine = usePromptEngine()
@@ -201,6 +204,7 @@ const streamInto = async (prompt, {append = false} = {}) => {
   error.value = null
   truncated.value = false
   isStreaming.value = true
+  startProgress()
   if (!append) {
     analysisResult.value = ''
     tokenCount.value = 0
@@ -214,6 +218,7 @@ const streamInto = async (prompt, {append = false} = {}) => {
       tokenCount.value += chunk.split(/\s+/).filter(Boolean).length
     }
     truncated.value = !!activeProvider?.lastResponseTruncated
+    if (analysisResult.value.trim()) notifyDone(t('toast.analysisDone'), report.value?.finalUrl || '')
   } catch (e) {
     // Don't surface an error when the user cancelled the stream
     if (isStreaming.value) {
@@ -222,6 +227,7 @@ const streamInto = async (prompt, {append = false} = {}) => {
     }
   } finally {
     isStreaming.value = false
+    doneProgress()
     activeProvider = null
   }
 }
@@ -280,6 +286,7 @@ const exportAnalysis = () => {
   a.download = `lighthouse-analysis-${activeCategory.value}-${Date.now()}.md`
   a.click()
   URL.revokeObjectURL(url)
+  toast.success(t('toast.exported'))
 }
 </script>
 
@@ -555,6 +562,7 @@ const exportAnalysis = () => {
               :token-count="tokenCount"
               @cancel="cancelAnalysis"
               @export="exportAnalysis"
+          @copy="toast.success(t('toast.copied'))"
           />
           <div v-if="truncated && !isStreaming" class="mt-2 flex items-center gap-3">
             <p class="text-xs text-amber-600 dark:text-amber-400">{{ $t('analysis.responseTruncated') }}</p>

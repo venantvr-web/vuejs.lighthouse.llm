@@ -9,8 +9,10 @@ import {usePeriodicSync} from '@/composables/usePeriodicSync'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 const {
   items, geoItems, watchStats, resourceByOrigin, digest, criticalTrend, warningTrend, running, progress, lastRunAt,
@@ -33,6 +35,7 @@ function exportReport() {
     watchStats: watchStats.value
   })
   downloadText(`briefing-${formatDateISO()}.md`, md, 'text/markdown;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 
 const isEmpty = computed(() => items.value.length === 0 && geoItems.value.length === 0)

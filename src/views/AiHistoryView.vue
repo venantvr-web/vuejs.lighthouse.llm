@@ -7,8 +7,10 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {downloadText} from '@/utils/download'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -55,11 +57,13 @@ function download(item) {
   const mime = item.format === 'jsonld' ? 'application/json;charset=utf-8' : 'text/markdown;charset=utf-8'
   const safe = (item.title || item.type).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()
   downloadText(`${safe || 'artefact-ia'}.${ext}`, item.content, mime)
+  toast.success(t('toast.exported'))
 }
 
 async function copy(item) {
   try {
     await navigator.clipboard.writeText(item.content)
+    toast.success(t('toast.copied'))
   } catch {
     // ignore
   }

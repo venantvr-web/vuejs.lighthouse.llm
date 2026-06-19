@@ -13,8 +13,10 @@ import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
@@ -108,10 +110,12 @@ async function handleRun(item) {
 
 function exportCsv() {
   downloadText(`geo-${formatDateISO()}.csv`, buildGeoCsv(items.value, statsById.value), 'text/csv;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 
 function exportMarkdown() {
   downloadText(`geo-${formatDateISO()}.md`, buildGeoMarkdown(items.value, statsById.value), 'text/markdown;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 
 async function handleRunAll() {

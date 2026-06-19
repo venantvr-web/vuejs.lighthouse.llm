@@ -5,6 +5,8 @@ import {buildIndexabilityPrompt, buildIndexabilitySignals, INDEXABILITY_SYSTEM} 
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {useToast} from '@/composables/useToast'
+import {useNotifications} from '@/composables/useNotifications'
+import {doneProgress, startProgress} from '@/composables/useProgress'
 import {useI18n} from '@/i18n'
 
 /**
@@ -16,6 +18,7 @@ export function useIndexabilityDiagnosis() {
     const settings = useSettingsStore()
     const aiHistory = useAiHistoryStore()
     const toast = useToast()
+    const {notifyDone} = useNotifications()
     const {t} = useI18n()
 
     const diagnosing = ref(false)
@@ -59,6 +62,7 @@ export function useIndexabilityDiagnosis() {
         error.value = null
         truncated.value = false
         diagnosing.value = true
+        startProgress()
         if (!append) {
             diagnosis.value = ''
             tokenCount.value = 0
@@ -72,6 +76,7 @@ export function useIndexabilityDiagnosis() {
                 tokenCount.value += chunk.split(/\s+/).filter(Boolean).length
             }
             truncated.value = !!activeProvider?.lastResponseTruncated
+            if (diagnosis.value.trim()) notifyDone(t('toast.diagnosisDone'), lastOrigin)
         } catch (e) {
             if (diagnosing.value) {
                 error.value = `Erreur : ${e.message}`
@@ -79,6 +84,7 @@ export function useIndexabilityDiagnosis() {
             }
         } finally {
             diagnosing.value = false
+            doneProgress()
             activeProvider = null
         }
     }

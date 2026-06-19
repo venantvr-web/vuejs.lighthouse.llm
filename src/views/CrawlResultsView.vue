@@ -11,8 +11,10 @@ import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
 import {formatScore, getScoreColorClass, formatDateTimeMedium, formatDateISO} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const crawlStore = useCrawlStore()
@@ -126,6 +128,7 @@ function exportJSON() {
   link.download = `crawl-${session.value.domain}-${formatDateISO(session.value.timestamp)}.json`
   link.click()
   URL.revokeObjectURL(url)
+  toast.success(t('toast.exported'))
 }
 
 // Export PDF

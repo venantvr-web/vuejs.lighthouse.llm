@@ -11,8 +11,10 @@ import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -155,6 +157,7 @@ async function exportJSON() {
         : 'lighthouse-history-all.json'
     a.click()
     URL.revokeObjectURL(url)
+  toast.success(t('toast.exported'))
   } catch (err) {
     console.error('Export failed:', err)
   } finally {
@@ -173,6 +176,7 @@ async function exportAllJSON() {
     a.download = 'lighthouse-history-all.json'
     a.click()
     URL.revokeObjectURL(url)
+  toast.success(t('toast.exported'))
   } catch (err) {
     console.error('Export failed:', err)
   } finally {

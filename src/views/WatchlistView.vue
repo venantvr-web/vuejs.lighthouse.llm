@@ -13,8 +13,10 @@ import {downloadText} from '@/utils/download'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import {useI18n} from '@/i18n'
+import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
+const toast = useToast()
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
@@ -153,6 +155,7 @@ async function handleRefresh(item) {
 
 function exportCsv() {
   downloadText(`watchlist-${formatDateISO()}.csv`, buildWatchlistCsv(items.value, statsById.value), 'text/csv;charset=utf-8')
+  toast.success(t('toast.exported'))
 }
 
 async function handleRefreshAll() {

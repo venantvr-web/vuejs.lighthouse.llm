@@ -11,6 +11,8 @@ import {
 } from '@/services/structuredDataGen'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {useToast} from '@/composables/useToast'
+import {useNotifications} from '@/composables/useNotifications'
+import {doneProgress, startProgress} from '@/composables/useProgress'
 import {useI18n} from '@/i18n'
 
 /**
@@ -22,6 +24,7 @@ export function useStructuredData() {
     const settings = useSettingsStore()
     const aiHistory = useAiHistoryStore()
     const toast = useToast()
+    const {notifyDone} = useNotifications()
     const {t} = useI18n()
 
     // État par URL : { status, context, loading, error, generating, generated, genError, fromHistory }
@@ -165,15 +168,20 @@ export function useStructuredData() {
         batch.running = true
         batch.done = 0
         batch.total = targets.length
+        startProgress()
         try {
             for (const url of targets) {
                 await generate(url)
                 batch.done++
             }
             const ok = targets.filter((u) => byUrl[u]?.generated).length
-            if (ok > 0) toast.success(t('toast.jsonLdDone', {count: ok}))
+            if (ok > 0) {
+                toast.success(t('toast.jsonLdDone', {count: ok}))
+                notifyDone(t('toast.jsonLdDone', {count: ok}))
+            }
         } finally {
             batch.running = false
+            doneProgress()
         }
     }
 

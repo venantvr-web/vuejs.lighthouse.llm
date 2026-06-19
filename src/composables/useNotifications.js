@@ -41,11 +41,27 @@ export function useNotifications() {
         }
     }
 
+    /**
+     * Notifie la fin d'une tâche longue, uniquement si l'onglet n'est pas au
+     * premier plan (sinon le toast in-app suffit) et si la permission est
+     * accordée. Évite le bruit quand l'utilisateur regarde déjà l'écran.
+     * @param {string} title
+     * @param {string} body
+     * @param {string} [tag]
+     * @returns {Notification|null}
+     */
+    function notifyDone(title, body = '', tag = undefined) {
+        const hidden = typeof document !== 'undefined' && document.hidden
+        if (!hidden) return null
+        return notify(title, {body, tag})
+    }
+
     return {
         isSupported,
         permission,
         requestPermission,
-        notify
+        notify,
+        notifyDone
     }
 }
 

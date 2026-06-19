@@ -12,9 +12,12 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useNotifications} from '@/composables/useNotifications'
+import {doneProgress, startProgress} from '@/composables/useProgress'
 
 const {t} = useI18n()
 const toast = useToast()
+const {notifyDone} = useNotifications()
 const router = useRouter()
 const crawlStore = useCrawlStore()
 const site = useSiteStore()
@@ -205,6 +208,7 @@ async function handleSubmit() {
     }
   }
 
+  startProgress()
   try {
     const config = {
       baseUrl: baseUrl.value,
@@ -219,8 +223,10 @@ async function handleSubmit() {
 
     if (session && session.status === CRAWL_STATUS.PARTIAL) {
       toast.warning(t('toast.crawlPartial', {done: session.pagesAnalyzed, total: session.pageCount}))
+      notifyDone(t('toast.crawlPartial', {done: session.pagesAnalyzed, total: session.pageCount}), session.domain)
     } else if (session && session.status !== CRAWL_STATUS.FAILED) {
       toast.success(t('toast.crawlDone', {count: session.pagesAnalyzed}))
+      notifyDone(t('toast.crawlDone', {count: session.pagesAnalyzed}), session.domain)
     }
 
     if (session && session.status !== CRAWL_STATUS.FAILED) {
@@ -229,6 +235,8 @@ async function handleSubmit() {
   } catch (err) {
     error.value = err.message || t('crawl.errorGeneric')
     toast.fromError(t('toast.crawlFailed'), err)
+  } finally {
+    doneProgress()
   }
 }
 

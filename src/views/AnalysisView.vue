@@ -9,6 +9,7 @@ import {usePromptEngine} from '@/composables/usePromptEngine.js'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
+import {buildContinuationPrompt} from '@/services/llm/continuation'
 
 const router = useRouter()
 const route = useRoute()
@@ -185,30 +186,28 @@ Réponds en français avec une structure Markdown claire.`
 }
 
 // Active provider instance, kept so the analysis can be aborted on cancel
+const ANALYSIS_SYSTEM = 'Tu es un expert technique. Réponds en français, en Markdown.'
+const truncated = ref(false)
 let activeProvider = null
+let lastPrompt = ''
 
-const startAnalysis = async () => {
-  if (!settings.isConfigured) {
-    error.value = 'Veuillez configurer un fournisseur LLM dans les paramètres'
-    return
-  }
-
+const streamInto = async (prompt, {append = false} = {}) => {
   error.value = null
+  truncated.value = false
   isStreaming.value = true
-  analysisResult.value = ''
-  tokenCount.value = 0
-
-  const prompt = await buildPrompt()
+  if (!append) {
+    analysisResult.value = ''
+    tokenCount.value = 0
+  }
 
   try {
     activeProvider = buildLLMProvider(settings, settings.currentProvider, settings.currentModel)
-    for await (const chunk of activeProvider.stream(prompt, {
-      systemMessage: 'Tu es un expert technique. Réponds en français, en Markdown.'
-    })) {
+    for await (const chunk of activeProvider.stream(prompt, {systemMessage: ANALYSIS_SYSTEM})) {
       if (!isStreaming.value) break // cancelled
       analysisResult.value += chunk
       tokenCount.value += chunk.split(/\s+/).filter(Boolean).length
     }
+    truncated.value = !!activeProvider?.lastResponseTruncated
   } catch (e) {
     // Don't surface an error when the user cancelled the stream
     if (isStreaming.value) error.value = `Erreur: ${e.message}`
@@ -216,6 +215,21 @@ const startAnalysis = async () => {
     isStreaming.value = false
     activeProvider = null
   }
+}
+
+const startAnalysis = async () => {
+  if (!settings.isConfigured) {
+    error.value = 'Veuillez configurer un fournisseur LLM dans les paramètres'
+    return
+  }
+  lastPrompt = await buildPrompt()
+  await streamInto(lastPrompt)
+}
+
+const continueAnalysis = async () => {
+  if (!lastPrompt || !analysisResult.value || isStreaming.value) return
+  analysisResult.value += '\n'
+  await streamInto(buildContinuationPrompt(lastPrompt, analysisResult.value), {append: true})
 }
 
 const cancelAnalysis = () => {
@@ -507,6 +521,15 @@ const exportAnalysis = () => {
               @cancel="cancelAnalysis"
               @export="exportAnalysis"
           />
+          <div v-if="truncated && !isStreaming" class="mt-2 flex items-center gap-3">
+            <p class="text-xs text-amber-600 dark:text-amber-400">Réponse coupée par la limite de tokens.</p>
+            <button
+                class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium transition-colors"
+                @click="continueAnalysis"
+            >
+              Continuer
+            </button>
+          </div>
         </div>
       </div>
     </main>

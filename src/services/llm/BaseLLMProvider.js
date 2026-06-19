@@ -25,6 +25,9 @@ export default class BaseLLMProvider {
 
         this.abortController = null;
         this.isStreaming = false;
+        // Passe à true quand la dernière réponse a été coupée par la limite de
+        // tokens (permet à l'UI de proposer « Continuer »).
+        this.lastResponseTruncated = false;
 
         this.validateConfig();
     }

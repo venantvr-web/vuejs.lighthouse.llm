@@ -61,6 +61,7 @@ export default class AnthropicProvider extends BaseLLMProvider {
      */
     async* stream(prompt, options = {}) {
         this.isStreaming = true;
+        this.lastResponseTruncated = false;
         const mergedOptions = this._mergeOptions(options);
         const url = `${this.baseURL}/messages`;
 
@@ -221,6 +222,7 @@ export default class AnthropicProvider extends BaseLLMProvider {
                     // Message metadata updates
                     if (data.delta?.stop_reason === 'max_tokens') {
                         console.warn('Response truncated due to max_tokens limit');
+                        this.lastResponseTruncated = true;
                     }
                     return '';
 

@@ -66,6 +66,7 @@ export default class GeminiProvider extends BaseLLMProvider {
      */
     async* stream(prompt, options = {}) {
         this.isStreaming = true;
+        this.lastResponseTruncated = false;
         const mergedOptions = this._mergeOptions(options);
         const url = `${this.baseURL}/models/${mergedOptions.model}:streamGenerateContent?key=${this.config.apiKey}&alt=sse`;
 
@@ -160,6 +161,9 @@ export default class GeminiProvider extends BaseLLMProvider {
             // Check finish reason
             if (candidate.finishReason === 'SAFETY') {
                 throw new Error('Content filtered due to safety settings');
+            }
+            if (candidate.finishReason === 'MAX_TOKENS') {
+                this.lastResponseTruncated = true;
             }
 
             if (!candidate.content?.parts || candidate.content.parts.length === 0) {

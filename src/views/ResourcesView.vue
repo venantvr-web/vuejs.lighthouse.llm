@@ -28,7 +28,9 @@ const {
   diagnosis,
   error: diagError,
   tokenCount: diagTokens,
+  truncated: diagTruncated,
   run: runDiagnosis,
+  continueDiagnosis,
   cancel: cancelDiagnosis
 } = useIndexabilityDiagnosis()
 
@@ -232,6 +234,15 @@ function exportDiagnosis() {
             @cancel="cancelDiagnosis"
             @export="exportDiagnosis"
         />
+        <div v-if="diagTruncated && !diagnosing" class="mt-2 flex items-center gap-3">
+          <p class="text-xs text-amber-600 dark:text-amber-400">Réponse coupée par la limite de tokens.</p>
+          <button
+              class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium transition-colors"
+              @click="continueDiagnosis"
+          >
+            Continuer
+          </button>
+        </div>
       </div>
 
       <!-- Resources -->

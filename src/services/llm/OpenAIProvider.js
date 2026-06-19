@@ -65,6 +65,7 @@ export default class OpenAIProvider extends BaseLLMProvider {
      */
     async* stream(prompt, options = {}) {
         this.isStreaming = true;
+        this.lastResponseTruncated = false;
         const mergedOptions = this._mergeOptions(options);
         const url = `${this.baseURL}/chat/completions`;
 
@@ -226,6 +227,9 @@ export default class OpenAIProvider extends BaseLLMProvider {
             if (choice.finish_reason) {
                 if (choice.finish_reason === 'content_filter') {
                     throw new Error('Content filtered by OpenAI safety system');
+                }
+                if (choice.finish_reason === 'length') {
+                    this.lastResponseTruncated = true;
                 }
                 return '';
             }

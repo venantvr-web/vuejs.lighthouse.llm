@@ -5,6 +5,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {TEMPLATE_COLORS} from '@/services/templateDetector'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
+import StructuredDataPanel from '@/components/crawl/StructuredDataPanel.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
@@ -548,6 +549,9 @@ onMounted(async () => {
               Aucune URL trouvee pour ce filtre.
             </div>
           </div>
+
+          <!-- Structured data (JSON-LD) generation -->
+          <StructuredDataPanel :urls="urls" class="mt-6"/>
         </div>
 
         <!-- No session -->

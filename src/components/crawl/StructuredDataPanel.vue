@@ -5,6 +5,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {toScriptTag} from '@/services/structuredDataGen'
 import {downloadText} from '@/utils/download'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const props = defineProps({
   urls: {type: Array, default: () => []}
@@ -51,12 +54,27 @@ watch(urlList, async (list, prev) => {
   }
 })
 
+// Renvoie un code de statut stable ('missing' | 'incomplete' | 'ok') ;
+// le libellé affiché est traduit via statusText().
 function statusLabel(url) {
   const s = byUrl[url]?.status
   if (!s) return ''
-  if (!s.present) return 'Manquant'
-  if (s.issues.length) return 'Incomplet'
-  return 'OK'
+  if (!s.present) return 'missing'
+  if (s.issues.length) return 'incomplete'
+  return 'ok'
+}
+
+function statusText(url) {
+  switch (statusLabel(url)) {
+    case 'missing':
+      return t('structuredData.statusMissing')
+    case 'incomplete':
+      return t('structuredData.statusIncomplete')
+    case 'ok':
+      return t('structuredData.statusOk')
+    default:
+      return ''
+  }
 }
 
 async function copy(text) {
@@ -83,43 +101,43 @@ function download(url) {
 <template>
   <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Données structurées (JSON-LD)</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('structuredData.title') }}</h3>
       <div class="flex items-center gap-2">
         <label class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 mr-1">
           <input v-model="auto" class="rounded" type="checkbox"/>
-          Génération auto
+          {{ $t('structuredData.autoGeneration') }}
         </label>
         <button
             :disabled="analyzing || batch.running || !urlList.length"
             class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium transition-colors disabled:opacity-50"
             @click="runAnalysis"
         >
-          {{ analyzing ? 'Analyse…' : (analyzed ? 'Réanalyser' : 'Analyser') }}
+          {{ analyzing ? $t('common.analyzing') : (analyzed ? $t('structuredData.reanalyze') : $t('structuredData.analyze')) }}
         </button>
         <button
             :disabled="batch.running || analyzing || !urlList.length || !settings.isConfigured"
             class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
             @click="runBatch"
         >
-          {{ batch.running ? `Génération ${batch.done}/${batch.total}…` : 'Générer tout le manquant' }}
+          {{ batch.running ? $t('structuredData.generateProgress', { done: batch.done, total: batch.total }) : $t('structuredData.generateAllMissing') }}
         </button>
       </div>
     </div>
     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-      Détecte le JSON-LD manquant ou incomplet sur chaque page, puis génère le balisage avec l'IA.
-      <span v-if="auto">La génération du manquant se lance automatiquement à l'ouverture des résultats.</span>
+      {{ $t('structuredData.intro') }}
+      <span v-if="auto">{{ $t('structuredData.autoHint') }}</span>
     </p>
 
     <p v-if="analyzed && missingCount" class="text-sm text-amber-600 dark:text-amber-400 mb-3">
-      {{ missingCount }} page(s) avec données structurées manquantes ou incomplètes.
+      {{ $t('structuredData.missingPages', { count: missingCount }) }}
     </p>
     <p v-else-if="analyzed" class="text-sm text-emerald-600 dark:text-emerald-400 mb-3">
-      Toutes les pages analysées disposent de données structurées valides 🎉
+      {{ $t('structuredData.allValid') }}
     </p>
     <p v-if="hasRows && !settings.isConfigured" class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-      Configurez un fournisseur LLM dans les
-      <router-link class="text-primary-600 dark:text-primary-400 hover:underline" to="/settings">paramètres</router-link>
-      pour générer le JSON-LD.
+      {{ $t('structuredData.configurePrefixed') }}
+      <router-link class="text-primary-600 dark:text-primary-400 hover:underline" to="/settings">{{ $t('structuredData.settingsLink') }}</router-link>
+      {{ $t('structuredData.configureSuffix') }}
     </p>
 
     <ul v-if="hasRows" class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -132,17 +150,17 @@ function download(url) {
             <span
                 v-if="byUrl[url]?.status"
                 :class="{
-                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': statusLabel(url) === 'OK',
-                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': statusLabel(url) === 'Manquant',
-                  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': statusLabel(url) === 'Incomplet'
+                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300': statusLabel(url) === 'ok',
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300': statusLabel(url) === 'missing',
+                  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': statusLabel(url) === 'incomplete'
                 }"
                 class="px-2 py-0.5 rounded text-[10px] font-medium"
-            >{{ statusLabel(url) }}</span>
+            >{{ statusText(url) }}</span>
             <span
                 v-if="byUrl[url]?.fromHistory"
                 class="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                title="JSON-LD déjà généré, restauré depuis l'historique IA"
-            >Historisé</span>
+                :title="$t('structuredData.historizedTooltip')"
+            >{{ $t('structuredData.historized') }}</span>
             <span v-if="byUrl[url]?.error" class="text-[11px] text-red-500">{{ byUrl[url].error }}</span>
             <button
                 v-if="byUrl[url]?.status?.needsGeneration"
@@ -150,13 +168,13 @@ function download(url) {
                 class="px-2.5 py-1 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium transition-colors disabled:opacity-50"
                 @click="generate(url)"
             >
-              {{ byUrl[url]?.generating ? 'Génération…' : (byUrl[url]?.generated ? 'Régénérer' : 'Générer le JSON-LD') }}
+              {{ byUrl[url]?.generating ? $t('structuredData.generating') : (byUrl[url]?.generated ? $t('structuredData.regenerate') : $t('structuredData.generateJsonLd')) }}
             </button>
           </div>
         </div>
 
         <p v-if="byUrl[url]?.status?.types?.length" class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-          Types : {{ byUrl[url].status.types.join(', ') }}
+          {{ $t('structuredData.types', { types: byUrl[url].status.types.join(', ') }) }}
         </p>
         <p v-if="byUrl[url]?.genError" class="mt-1 text-[11px] text-red-500">{{ byUrl[url].genError }}</p>
 
@@ -167,13 +185,13 @@ function download(url) {
                 class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
                 @click="copy(toScriptTag(byUrl[url].generated))"
             >
-              Copier la balise
+              {{ $t('structuredData.copyTag') }}
             </button>
             <button
                 class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
                 @click="download(url)"
             >
-              Télécharger
+              {{ $t('common.download') }}
             </button>
           </div>
         </div>

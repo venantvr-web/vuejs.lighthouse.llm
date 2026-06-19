@@ -10,7 +10,9 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
 import {formatScore, getScoreColorClass, formatDateTimeMedium, formatDateISO} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
 const crawlStore = useCrawlStore()
@@ -60,15 +62,15 @@ const statusClass = computed(() => {
 const statusLabel = computed(() => {
   switch (session.value?.status) {
     case CRAWL_STATUS.COMPLETED:
-      return 'Terminé'
+      return t('common.statusCompleted')
     case CRAWL_STATUS.PARTIAL:
-      return 'Partiel'
+      return t('common.statusPartial')
     case CRAWL_STATUS.FAILED:
-      return 'Échec'
+      return t('common.statusFailed')
     case CRAWL_STATUS.CANCELLED:
-      return 'Annulé'
+      return t('common.statusCancelled')
     default:
-      return session.value?.status || 'Inconnu'
+      return session.value?.status || t('common.unknown')
   }
 })
 
@@ -137,28 +139,28 @@ function exportPDF() {
   // Title
   doc.setFontSize(18)
   doc.setFont('helvetica', 'bold')
-  doc.text('Rapport de Crawl Lighthouse', margin, y)
+  doc.text(t('crawlResults.pdfTitle'), margin, y)
   y += 12
 
   // Domain info
   doc.setFontSize(12)
   doc.setFont('helvetica', 'normal')
-  doc.text(`Domaine: ${session.value.domain}`, margin, y)
+  doc.text(t('crawlResults.pdfDomain', {domain: session.value.domain}), margin, y)
   y += 7
-  doc.text(`URL de base: ${session.value.baseUrl}`, margin, y)
+  doc.text(t('crawlResults.pdfBaseUrl', {url: session.value.baseUrl}), margin, y)
   y += 7
-  doc.text(`Date: ${formatDateTimeMedium(session.value.timestamp)}`, margin, y)
+  doc.text(t('crawlResults.pdfDate', {date: formatDateTimeMedium(session.value.timestamp)}), margin, y)
   y += 7
-  doc.text(`Pages analysées: ${session.value.pagesAnalyzed}/${session.value.pageCount}`, margin, y)
+  doc.text(t('crawlResults.pdfPagesAnalyzed', {analyzed: session.value.pagesAnalyzed, total: session.value.pageCount}), margin, y)
   y += 7
-  doc.text(`Service: ${session.value.service} | Stratégie: ${session.value.strategy}`, margin, y)
+  doc.text(t('crawlResults.pdfServiceStrategy', {service: session.value.service, strategy: session.value.strategy}), margin, y)
   y += 15
 
   // Aggregate scores
   if (session.value.aggregateScores) {
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('Scores agrégés', margin, y)
+    doc.text(t('crawlResults.pdfAggregateScores'), margin, y)
     y += 10
 
     doc.setFontSize(10)
@@ -178,13 +180,13 @@ function exportPDF() {
   if (session.value.templates && session.value.templates.length > 0) {
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('Scores par template', margin, y)
+    doc.text(t('crawlResults.pdfScoresByTemplate'), margin, y)
     y += 10
 
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
     session.value.templates.forEach(template => {
-      doc.text(`${template.name} (${template.count} pages)`, margin, y)
+      doc.text(t('crawlResults.pdfTemplateLine', {name: template.name, count: template.count}), margin, y)
       y += 6
       if (template.avgScores) {
         const scores = Object.entries(template.avgScores)
@@ -209,7 +211,7 @@ function exportPDF() {
 
     doc.setFontSize(14)
     doc.setFont('helvetica', 'bold')
-    doc.text('Détail par page', margin, y)
+    doc.text(t('crawlResults.pdfDetailByPage'), margin, y)
     y += 10
 
     doc.setFontSize(8)
@@ -217,11 +219,11 @@ function exportPDF() {
 
     // Table header
     doc.setFont('helvetica', 'bold')
-    doc.text('URL', margin, y)
-    doc.text('Perf', 120, y)
-    doc.text('A11y', 135, y)
-    doc.text('BP', 150, y)
-    doc.text('SEO', 165, y)
+    doc.text(t('crawlResults.colUrl'), margin, y)
+    doc.text(t('crawlResults.colPerf'), 120, y)
+    doc.text(t('crawlResults.colA11y'), 135, y)
+    doc.text(t('crawlResults.colBp'), 150, y)
+    doc.text(t('crawlResults.colSeo'), 165, y)
     y += 5
     doc.setFont('helvetica', 'normal')
 
@@ -265,7 +267,7 @@ onMounted(async () => {
     }
 
     if (!session.value) {
-      error.value = 'Session introuvable'
+      error.value = t('crawlResults.sessionNotFound')
     }
   } catch (err) {
     error.value = err.message
@@ -279,14 +281,14 @@ onMounted(async () => {
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <AppHeader
-        :subtitle="session ? `${session.domain} - ${session.pagesAnalyzed} pages analysées` : ''"
-        title="Résultats du crawl"
+        :subtitle="session ? $t('crawlResults.headerSubtitle', { domain: session.domain, count: session.pagesAnalyzed }) : ''"
+        :title="$t('crawlResults.headerTitle')"
     >
       <template #actions>
         <div v-if="session" class="flex items-center gap-1 mr-2">
           <button
               class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-              title="Exporter en JSON"
+              :title="$t('crawlResults.exportJsonTooltip')"
               @click="exportJSON"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +298,7 @@ onMounted(async () => {
           </button>
           <button
               class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5"
-              title="Exporter en PDF"
+              :title="$t('crawlResults.exportPdfTooltip')"
               @click="exportPDF"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,13 +311,13 @@ onMounted(async () => {
             class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             to="/crawl/history"
         >
-          Historique
+          {{ $t('crawlResults.history') }}
         </router-link>
         <router-link
             class="px-3 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
             to="/crawl"
         >
-          Nouveau crawl
+          {{ $t('crawlResults.newCrawl') }}
         </router-link>
       </template>
     </AppHeader>
@@ -333,7 +335,7 @@ onMounted(async () => {
             v-else-if="error"
             :message="error"
             class="mb-6"
-            title="Erreur"
+            :title="$t('crawlResults.errorTitle')"
             type="error"
         />
 
@@ -349,13 +351,13 @@ onMounted(async () => {
                 {{ formatDateTimeMedium(session.timestamp) }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                Mode: {{ session.discoveryMode }}
+                {{ $t('crawlResults.mode') }}: {{ session.discoveryMode }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                Service: {{ session.service }}
+                {{ $t('crawlResults.service') }}: {{ session.service }}
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                Stratégie: {{ session.strategy }}
+                {{ $t('crawlResults.strategy') }}: {{ session.strategy }}
               </span>
             </div>
             <div class="text-lg font-medium text-gray-900 dark:text-white">
@@ -366,7 +368,7 @@ onMounted(async () => {
           <!-- Aggregate scores -->
           <div v-if="aggregateScores" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Scores agrégés du domaine
+              {{ $t('crawlResults.aggregateTitle') }}
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-6">
               <div v-for="(data, category) in aggregateScores" :key="category" class="text-center">
@@ -378,7 +380,7 @@ onMounted(async () => {
                   {{ category.replace('-', ' ') }}
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                  Min: {{ formatScore(data.min) }} / Max: {{ formatScore(data.max) }}
+                  {{ $t('crawlResults.minMax', { min: formatScore(data.min), max: formatScore(data.max) }) }}
                 </div>
               </div>
             </div>
@@ -387,7 +389,7 @@ onMounted(async () => {
           <!-- Template breakdown -->
           <div v-if="templates.length > 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Scores par template
+              {{ $t('crawlResults.templatesTitle') }}
             </h2>
             <div class="space-y-4">
               <div
@@ -409,7 +411,7 @@ onMounted(async () => {
                       {{ template.name }}
                     </span>
                     <span class="text-sm text-gray-500 dark:text-gray-400">
-                      ({{ template.count }} page{{ template.count > 1 ? 's' : '' }})
+                      {{ template.count > 1 ? $t('crawlResults.pageCountPlural', { count: template.count }) : $t('crawlResults.pageCountSingular', { count: template.count }) }}
                     </span>
                   </div>
                   <svg
@@ -447,9 +449,9 @@ onMounted(async () => {
           <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Detail par page
+                {{ $t('crawlResults.detailTitle') }}
                 <span v-if="selectedTemplate" class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                  (filtre: {{ selectedTemplate }})
+                  {{ $t('crawlResults.detailFilter', { template: selectedTemplate }) }}
                 </span>
               </h2>
               <button
@@ -457,7 +459,7 @@ onMounted(async () => {
                   class="text-sm text-emerald-500 hover:text-emerald-600"
                   @click="selectedTemplate = null"
               >
-                Voir tout
+                {{ $t('crawlResults.seeAll') }}
               </button>
             </div>
 
@@ -465,13 +467,13 @@ onMounted(async () => {
               <table class="w-full">
                 <thead>
                 <tr class="text-left text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                  <th class="pb-3 font-medium">URL</th>
-                  <th class="pb-3 font-medium">Template</th>
-                  <th class="pb-3 font-medium text-center">Perf</th>
-                  <th class="pb-3 font-medium text-center">A11y</th>
-                  <th class="pb-3 font-medium text-center">BP</th>
-                  <th class="pb-3 font-medium text-center">SEO</th>
-                  <th class="pb-3 font-medium text-center">PWA</th>
+                  <th class="pb-3 font-medium">{{ $t('crawlResults.colUrl') }}</th>
+                  <th class="pb-3 font-medium">{{ $t('crawlResults.colTemplate') }}</th>
+                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colPerf') }}</th>
+                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colA11y') }}</th>
+                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colBp') }}</th>
+                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colSeo') }}</th>
+                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colPwa') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -546,7 +548,7 @@ onMounted(async () => {
             </div>
 
             <div v-if="filteredUrls.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-              Aucune URL trouvée pour ce filtre.
+              {{ $t('crawlResults.noUrlForFilter') }}
             </div>
           </div>
 
@@ -556,12 +558,12 @@ onMounted(async () => {
 
         <!-- No session -->
         <div v-else class="text-center py-12">
-          <p class="text-gray-500 dark:text-gray-400 mb-4">Aucune session trouvée</p>
+          <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('crawlResults.noSession') }}</p>
           <router-link
               class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               to="/crawl"
           >
-            Lancer un crawl
+            {{ $t('crawlResults.startCrawl') }}
           </router-link>
         </div>
       </div>

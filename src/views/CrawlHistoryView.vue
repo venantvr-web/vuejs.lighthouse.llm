@@ -13,6 +13,9 @@ import {useFilters} from '@/composables/useFilters'
 import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
 import {formatScore, formatRelativeTime, getScoreBgClass} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -57,28 +60,28 @@ const {
 const filterConfig = [
   {
     key: 'status',
-    label: 'Statut',
+    label: t('crawlHistory.filterStatus'),
     options: [
-      {value: CRAWL_STATUS.COMPLETED, label: 'Terminé'},
-      {value: CRAWL_STATUS.PARTIAL, label: 'Partiel'},
-      {value: CRAWL_STATUS.FAILED, label: 'Échec'},
-      {value: CRAWL_STATUS.CANCELLED, label: 'Annulé'}
+      {value: CRAWL_STATUS.COMPLETED, label: t('common.statusCompleted')},
+      {value: CRAWL_STATUS.PARTIAL, label: t('common.statusPartial')},
+      {value: CRAWL_STATUS.FAILED, label: t('common.statusFailed')},
+      {value: CRAWL_STATUS.CANCELLED, label: t('common.statusCancelled')}
     ]
   },
   {
     key: 'service',
-    label: 'Service',
+    label: t('crawlHistory.filterService'),
     options: [
-      {value: CRAWL_SERVICES.PAGESPEED, label: 'PageSpeed'},
-      {value: CRAWL_SERVICES.LOCAL, label: 'Local'}
+      {value: CRAWL_SERVICES.PAGESPEED, label: t('crawlHistory.servicePageSpeed')},
+      {value: CRAWL_SERVICES.LOCAL, label: t('crawlHistory.serviceLocal')}
     ]
   },
   {
     key: 'strategy',
-    label: 'Stratégie',
+    label: t('crawlHistory.filterStrategy'),
     options: [
-      {value: 'mobile', label: 'Mobile'},
-      {value: 'desktop', label: 'Desktop'}
+      {value: 'mobile', label: t('common.mobile')},
+      {value: 'desktop', label: t('common.desktop')}
     ]
   }
 ]
@@ -120,15 +123,15 @@ function getStatusClass(status) {
 function getStatusLabel(status) {
   switch (status) {
     case CRAWL_STATUS.COMPLETED:
-      return 'Terminé'
+      return t('common.statusCompleted')
     case CRAWL_STATUS.PARTIAL:
-      return 'Partiel'
+      return t('common.statusPartial')
     case CRAWL_STATUS.FAILED:
-      return 'Échec'
+      return t('common.statusFailed')
     case CRAWL_STATUS.CANCELLED:
-      return 'Annulé'
+      return t('common.statusCancelled')
     default:
-      return status || 'Inconnu'
+      return status || t('common.unknown')
   }
 }
 
@@ -189,8 +192,8 @@ onMounted(async () => {
     <!-- Header -->
     <AppHeader
         v-if="!embedded"
-        :subtitle="`${sessions.length} session${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}`"
-        title="Historique des crawls"
+        :subtitle="sessions.length > 1 ? $t('crawlHistory.subtitlePlural', { count: sessions.length }) : $t('crawlHistory.subtitleSingular', { count: sessions.length })"
+        :title="$t('crawlHistory.headerTitle')"
     />
 
     <!-- Main content -->
@@ -206,20 +209,20 @@ onMounted(async () => {
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
-            Comparer
+            {{ $t('crawlHistory.compare') }}
           </button>
           <button
               v-if="selectionMode"
               class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
               @click="exitSelectionMode"
           >
-            Annuler
+            {{ $t('common.cancel') }}
           </button>
           <router-link
               class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               to="/crawl"
           >
-            Nouveau crawl
+            {{ $t('crawlHistory.newCrawl') }}
           </router-link>
         </div>
         <!-- Loading -->
@@ -233,7 +236,7 @@ onMounted(async () => {
             :message="error"
             class="mb-6"
             dismissible
-            title="Erreur"
+            :title="$t('crawlHistory.errorTitle')"
             type="error"
             @dismiss="error = ''"
         />
@@ -247,7 +250,7 @@ onMounted(async () => {
               <div class="flex-1">
                 <SearchInput
                     v-model="searchQuery"
-                    placeholder="Rechercher par domaine..."
+                    :placeholder="$t('crawlHistory.searchPlaceholder')"
                 />
               </div>
 
@@ -264,14 +267,15 @@ onMounted(async () => {
             <!-- Active filters summary -->
             <div v-if="hasActiveFilters" class="mt-4 flex items-center justify-between">
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ filteredSessions.length }} resultat{{ filteredSessions.length > 1 ? 's' : '' }}
-                sur {{ sessions.length }} session{{ sessions.length > 1 ? 's' : '' }}
+                {{ filteredSessions.length > 1
+                  ? $t('crawlHistory.resultsSummaryPlural', { results: filteredSessions.length, total: sessions.length > 1 ? $t('crawlHistory.sessionsCountPlural', { count: sessions.length }) : $t('crawlHistory.sessionsCountSingular', { count: sessions.length }) })
+                  : $t('crawlHistory.resultsSummarySingular', { results: filteredSessions.length, total: sessions.length > 1 ? $t('crawlHistory.sessionsCountPlural', { count: sessions.length }) : $t('crawlHistory.sessionsCountSingular', { count: sessions.length }) }) }}
               </p>
               <button
                   class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                   @click="clearAllFilters"
               >
-                Effacer les filtres
+                {{ $t('crawlHistory.clearFilters') }}
               </button>
             </div>
           </div>
@@ -310,7 +314,7 @@ onMounted(async () => {
                 </div>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                   <span>{{ formatRelativeTime(session.timestamp) }}</span>
-                  <span>{{ session.pagesAnalyzed }}/{{ session.pageCount }} pages</span>
+                  <span>{{ $t('crawlHistory.pagesCount', { analyzed: session.pagesAnalyzed, total: session.pageCount }) }}</span>
                   <span>{{ session.service }}</span>
                   <span>{{ session.strategy }}</span>
                 </div>
@@ -326,14 +330,14 @@ onMounted(async () => {
                   >
                     {{ formatScore(getAverageScore(session.aggregateScores)) }}
                   </div>
-                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">Moyenne</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">{{ $t('crawlHistory.average') }}</span>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2" @click.stop>
                   <button
                       class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="Supprimer"
+                      :title="$t('crawlHistory.deleteTooltip')"
                       @click="confirmDelete(session.id)"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,7 +365,7 @@ onMounted(async () => {
                   v-if="session.templates.length > 5"
                   class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-500 dark:text-gray-400"
               >
-                +{{ session.templates.length - 5 }} autres
+                {{ $t('crawlHistory.otherTemplates', { count: session.templates.length - 5 }) }}
               </span>
             </div>
           </div>
@@ -373,12 +377,12 @@ onMounted(async () => {
                 <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 mb-2">Aucun résultat pour ces critères</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-2">{{ $t('crawlHistory.noResults') }}</p>
             <button
                 class="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
                 @click="clearAllFilters"
             >
-              Effacer les filtres
+              {{ $t('crawlHistory.clearFilters') }}
             </button>
           </div>
         </div>
@@ -391,10 +395,10 @@ onMounted(async () => {
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucun crawl enregistré
+            {{ $t('crawlHistory.emptyTitle') }}
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Lancez votre premier crawl pour analyser plusieurs pages de votre site.
+            {{ $t('crawlHistory.emptyText') }}
           </p>
           <router-link
               class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
@@ -403,7 +407,7 @@ onMounted(async () => {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
-            Lancer un crawl
+            {{ $t('crawlHistory.startCrawl') }}
           </router-link>
         </div>
       </div>
@@ -418,23 +422,23 @@ onMounted(async () => {
       >
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            Supprimer cette session ?
+            {{ $t('crawlHistory.deleteTitle') }}
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Cette action est irréversible. Les données de cette session de crawl seront définitivement supprimées.
+            {{ $t('crawlHistory.deleteText') }}
           </p>
           <div class="flex justify-end gap-3">
             <button
                 class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
                 @click="cancelDelete"
             >
-              Annuler
+              {{ $t('common.cancel') }}
             </button>
             <button
                 class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
                 @click="deleteSession(deleteConfirm)"
             >
-              Supprimer
+              {{ $t('common.delete') }}
             </button>
           </div>
         </div>
@@ -455,7 +459,7 @@ onMounted(async () => {
         >
           <div class="text-sm text-gray-600 dark:text-gray-400">
             <span class="font-semibold text-gray-900 dark:text-white">{{ selectedCount }}</span>
-            session{{ selectedCount > 1 ? 's' : '' }} sélectionnée{{ selectedCount > 1 ? 's' : '' }}
+            {{ selectedCount > 1 ? $t('crawlHistory.selectedPlural') : $t('crawlHistory.selectedSingular') }}
           </div>
 
           <div class="flex items-center gap-3">
@@ -463,7 +467,7 @@ onMounted(async () => {
                 class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
                 @click="clearSelection"
             >
-              Effacer
+              {{ $t('crawlHistory.clearSelection') }}
             </button>
             <button
                 :class="[
@@ -478,7 +482,7 @@ onMounted(async () => {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
-              Comparer
+              {{ $t('crawlHistory.compare') }}
             </button>
           </div>
         </div>

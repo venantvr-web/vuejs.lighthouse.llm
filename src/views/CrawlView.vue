@@ -10,7 +10,9 @@ import {checkServerHealth} from '@/services/localLighthouse'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const router = useRouter()
 const crawlStore = useCrawlStore()
 const site = useSiteStore()
@@ -113,17 +115,17 @@ const progressPercentage = computed(() => {
 const statusText = computed(() => {
   switch (crawlStore.crawlStatus) {
     case CRAWL_STATUS.DISCOVERING:
-      return `Découverte des URLs... (${discoveredUrls.value.length})`
+      return t('crawl.statusDiscovering', {count: discoveredUrls.value.length})
     case CRAWL_STATUS.ANALYZING:
-      return `Analyse en cours... (${analyzedCount.value}/${discoveredUrls.value.length})`
+      return t('crawl.statusAnalyzing', {done: analyzedCount.value, total: discoveredUrls.value.length})
     case CRAWL_STATUS.COMPLETED:
-      return 'Analyse terminée !'
+      return t('crawl.statusCompleted')
     case CRAWL_STATUS.PARTIAL:
-      return 'Analyse partielle terminée'
+      return t('crawl.statusPartial')
     case CRAWL_STATUS.CANCELLED:
-      return 'Analyse annulée'
+      return t('crawl.statusCancelled')
     case CRAWL_STATUS.FAILED:
-      return 'Échec de l\'analyse'
+      return t('crawl.statusFailed')
     default:
       return ''
   }
@@ -195,7 +197,7 @@ async function handleSubmit() {
   if (!directMode && (discoveryMode.value !== DISCOVERY_MODES.MANUAL || manualHasSitemap.value)) {
     const proxyAvailable = await checkProxyServer()
     if (!proxyAvailable) {
-      error.value = 'Le relais HTTP est requis pour la découverte automatique des URLs (les requêtes vers des sites tiers sont bloquées par le CORS du navigateur). En production (Cloudflare Pages), il est intégré ; en local, lancez "npm run server" ou indiquez un relais dans Paramètres → Requêtes sortantes. Sinon, utilisez le mode Manuel.'
+      error.value = t('crawl.errorRelayRequired')
       return
     }
   }
@@ -216,7 +218,7 @@ async function handleSubmit() {
       router.push(`/crawl/results/${session.id}`)
     }
   } catch (err) {
-    error.value = err.message || 'Une erreur est survenue lors du crawl'
+    error.value = err.message || t('crawl.errorGeneric')
   }
 }
 
@@ -252,28 +254,28 @@ onUnmounted(() => {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Analyse multi-pages par templates" title="Mode Crawl">
+    <AppHeader :subtitle="$t('crawl.headerSubtitle')" :title="$t('crawl.headerTitle')">
       <template #actions>
         <button
             class="header-btn"
-            title="Guide d'utilisation"
+            :title="$t('crawl.guideTooltip')"
             type="button"
             @click="showOnboarding = true"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          <span class="hidden sm:inline">Guide</span>
+          <span class="hidden sm:inline">{{ $t('crawl.guide') }}</span>
         </button>
         <router-link
             class="header-btn"
-            title="Historique des crawls"
+            :title="$t('crawl.historyTooltip')"
             to="/crawl/history"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          <span class="hidden sm:inline">Historique</span>
+          <span class="hidden sm:inline">{{ $t('crawl.history') }}</span>
         </router-link>
       </template>
     </AppHeader>
@@ -299,10 +301,10 @@ onUnmounted(() => {
               }"
               class="w-2 h-2 rounded-full"
           ></span>
-          <span v-if="relayStatus === 'direct'">Mode direct (sans relais) — requêtes navigateur</span>
-          <span v-else-if="relayStatus === 'ok'">Relais HTTP OK{{ relayBase ? ` (${relayBase})` : ' (intégré)' }}</span>
-          <span v-else-if="relayStatus === 'down'">Relais HTTP indisponible — modes Auto/Sitemap désactivés (Paramètres → Requêtes sortantes, ou mode direct)</span>
-          <span v-else>Vérification du relais…</span>
+          <span v-if="relayStatus === 'direct'">{{ $t('crawl.relayDirect') }}</span>
+          <span v-else-if="relayStatus === 'ok'">{{ relayBase ? $t('crawl.relayOkWith', { base: relayBase }) : $t('crawl.relayOkIntegrated') }}</span>
+          <span v-else-if="relayStatus === 'down'">{{ $t('crawl.relayDown') }}</span>
+          <span v-else>{{ $t('crawl.relayChecking') }}</span>
         </div>
 
         <!-- Loading/Progress state -->
@@ -335,7 +337,7 @@ onUnmounted(() => {
                   <span v-else class="text-xs">1</span>
                 </div>
                 <span :class="progress.stage === 'discovering' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">
-                  Découverte
+                  {{ $t('crawl.stepDiscovery') }}
                 </span>
               </div>
 
@@ -359,7 +361,7 @@ onUnmounted(() => {
                   <span v-else class="text-xs">2</span>
                 </div>
                 <span :class="progress.stage === 'analyzing' ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">
-                  Analyse
+                  {{ $t('crawl.stepAnalysis') }}
                 </span>
               </div>
             </div>
@@ -368,7 +370,7 @@ onUnmounted(() => {
           <!-- Discovered URLs list -->
           <div v-if="discoveredUrls.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-6">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              URLs découvertes ({{ discoveredUrls.length }})
+              {{ $t('crawl.discoveredUrls', { count: discoveredUrls.length }) }}
             </h3>
             <div ref="urlsListRef" class="max-h-40 overflow-y-auto space-y-1">
               <div
@@ -403,7 +405,7 @@ onUnmounted(() => {
                 type="button"
                 @click="handleCancel"
             >
-              Annuler
+              {{ $t('common.cancel') }}
             </button>
           </div>
         </div>
@@ -412,10 +414,10 @@ onUnmounted(() => {
         <div v-else>
           <div class="text-center mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Crawler de site multi-pages
+              {{ $t('crawl.formTitle') }}
             </h2>
             <p class="text-gray-500 dark:text-gray-400">
-              Analysez plusieurs pages et obtenez des scores agrégés par template
+              {{ $t('crawl.formSubtitle') }}
             </p>
           </div>
 
@@ -425,7 +427,7 @@ onUnmounted(() => {
               :message="error || crawlStore.error"
               class="mb-6"
               dismissible
-              title="Erreur de crawl"
+              :title="$t('crawl.errorTitle')"
               type="error"
               @dismiss="handleDismissError"
           />
@@ -434,7 +436,7 @@ onUnmounted(() => {
             <!-- URL Input -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                URL de base
+                {{ $t('crawl.baseUrlLabel') }}
               </label>
               <UrlInput
                   v-model="baseUrl"
@@ -447,7 +449,7 @@ onUnmounted(() => {
             <!-- Discovery mode -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Mode de découverte des URLs
+                {{ $t('crawl.discoveryModeLabel') }}
               </label>
               <div class="grid grid-cols-3 gap-3">
                 <button
@@ -461,8 +463,8 @@ onUnmounted(() => {
                   <svg :class="discoveryMode === DISCOVERY_MODES.AUTO ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  <div class="font-medium text-gray-900 dark:text-white">Auto</div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Suit les liens internes</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ $t('crawl.modeAuto') }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('crawl.modeAutoDesc') }}</div>
                 </button>
 
                 <button
@@ -476,8 +478,8 @@ onUnmounted(() => {
                   <svg :class="discoveryMode === DISCOVERY_MODES.SITEMAP ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  <div class="font-medium text-gray-900 dark:text-white">Sitemap</div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Parse sitemap.xml</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ $t('crawl.modeSitemap') }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('crawl.modeSitemapDesc') }}</div>
                 </button>
 
                 <button
@@ -491,8 +493,8 @@ onUnmounted(() => {
                   <svg :class="discoveryMode === DISCOVERY_MODES.MANUAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  <div class="font-medium text-gray-900 dark:text-white">Manuel</div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Liste d'URLs</div>
+                  <div class="font-medium text-gray-900 dark:text-white">{{ $t('crawl.modeManual') }}</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('crawl.modeManualDesc') }}</div>
                 </button>
               </div>
             </div>
@@ -500,7 +502,7 @@ onUnmounted(() => {
             <!-- Manual URLs textarea -->
             <div v-if="discoveryMode === DISCOVERY_MODES.MANUAL">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Liste des URLs (une par ligne)
+                {{ $t('crawl.manualUrlsLabel') }}
               </label>
               <textarea
                   v-model="manualUrls"
@@ -511,15 +513,14 @@ https://example.com/sitemap.xml"
                   rows="6"
               ></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Maximum {{ maxPages }} URLs. Une URL de sitemap (.xml) est dépliée en pages (serveur local requis).
-                Les lignes commençant par # sont ignorées.
+                {{ $t('crawl.manualUrlsHint', { count: maxPages }) }}
               </p>
             </div>
 
             <!-- Service selection -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Service d'analyse
+                {{ $t('crawl.serviceLabel') }}
               </label>
               <div class="grid grid-cols-2 gap-3">
                 <button
@@ -534,9 +535,9 @@ https://example.com/sitemap.xml"
                     <svg :class="service === CRAWL_SERVICES.PAGESPEED ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
-                    <span class="font-medium text-gray-900 dark:text-white">PageSpeed Insights</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $t('crawl.pageSpeedName') }}</span>
                   </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">API Google, pas de serveur local requis</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('crawl.pageSpeedDesc') }}</div>
                 </button>
 
                 <button
@@ -555,19 +556,19 @@ https://example.com/sitemap.xml"
                     <svg :class="service === CRAWL_SERVICES.LOCAL ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
-                    <span class="font-medium text-gray-900 dark:text-white">Local Lighthouse</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $t('crawl.localName') }}</span>
                   </div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">Serveur local, plus rapide</div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('crawl.localDesc') }}</div>
 
                   <!-- Server status -->
                   <div v-if="checkingServer" class="absolute top-2 right-2">
                     <LoadingSpinner size="sm"/>
                   </div>
                   <div v-else-if="!localServerAvailable" class="absolute top-2 right-2 text-xs text-orange-500">
-                    Serveur non disponible
+                    {{ $t('crawl.serverUnavailable') }}
                   </div>
                   <div v-else class="absolute top-2 right-2 text-xs text-emerald-500">
-                    En ligne
+                    {{ $t('crawl.serverOnline') }}
                   </div>
                 </button>
               </div>
@@ -576,7 +577,7 @@ https://example.com/sitemap.xml"
             <!-- Strategy -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Stratégie
+                {{ $t('crawl.strategyLabel') }}
               </label>
               <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1">
                 <button
@@ -590,7 +591,7 @@ https://example.com/sitemap.xml"
                   <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Mobile
+                  {{ $t('common.mobile') }}
                 </button>
                 <button
                     :class="strategy === 'desktop'
@@ -603,7 +604,7 @@ https://example.com/sitemap.xml"
                   <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Desktop
+                  {{ $t('common.desktop') }}
                 </button>
               </div>
             </div>
@@ -611,7 +612,7 @@ https://example.com/sitemap.xml"
             <!-- Max pages slider -->
             <div class="max-pages-section">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Nombre maximum de pages
+                {{ $t('crawl.maxPagesLabel') }}
               </label>
               <div class="flex items-center gap-4">
                 <input
@@ -626,8 +627,8 @@ https://example.com/sitemap.xml"
                 </div>
               </div>
               <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mt-2 px-1">
-                <span>1 page</span>
-                <span>20 pages</span>
+                <span>{{ $t('crawl.onePage') }}</span>
+                <span>{{ $t('crawl.twentyPages') }}</span>
               </div>
             </div>
 
@@ -641,7 +642,7 @@ https://example.com/sitemap.xml"
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
-              <span>Lancer le crawl</span>
+              <span>{{ $t('crawl.submit') }}</span>
             </button>
           </div>
 
@@ -652,11 +653,9 @@ https://example.com/sitemap.xml"
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-blue-700 dark:text-blue-300">
-                <p class="font-medium mb-1">A propos du mode Crawl</p>
+                <p class="font-medium mb-1">{{ $t('crawl.aboutTitle') }}</p>
                 <p>
-                  Le crawl analyse plusieurs pages de votre site et détecte automatiquement
-                  les types de templates (page d'accueil, fiche produit, listing...).
-                  Les scores sont agrégés par template et par domaine.
+                  {{ $t('crawl.aboutText') }}
                 </p>
               </div>
             </div>
@@ -669,10 +668,9 @@ https://example.com/sitemap.xml"
                 <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-amber-700 dark:text-amber-300">
-                <p class="font-medium mb-1">Temps d'execution</p>
+                <p class="font-medium mb-1">{{ $t('crawl.execTimeTitle') }}</p>
                 <p>
-                  L'analyse de {{ maxPages }} pages peut prendre environ {{ Math.ceil(maxPages * 1.5 / 60) }}-{{ Math.ceil(maxPages * 2 / 60) + 1 }} minutes
-                  en raison des limitations de debit de l'API.
+                  {{ $t('crawl.execTimeText', { count: maxPages, min: Math.ceil(maxPages * 1.5 / 60), max: Math.ceil(maxPages * 2 / 60) + 1 }) }}
                 </p>
               </div>
             </div>
@@ -695,8 +693,8 @@ https://example.com/sitemap.xml"
                   </svg>
                 </div>
                 <div>
-                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">Guide du Mode Crawl</h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Comprendre les options disponibles</p>
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('crawl.guideModalTitle') }}</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('crawl.guideModalSubtitle') }}</p>
                 </div>
               </div>
               <button
@@ -718,32 +716,32 @@ https://example.com/sitemap.xml"
                   <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Modes de découverte des URLs
+                  {{ $t('crawl.guideDiscoveryTitle') }}
                 </h4>
 
                 <div class="guide-grid">
                   <div class="guide-card guide-card-warning">
                     <div class="guide-card-header">
-                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
-                      <strong>Auto</strong>
+                      <span class="guide-card-badge guide-card-badge-warning">{{ $t('crawl.guideServerRequired') }}</span>
+                      <strong>{{ $t('crawl.modeAuto') }}</strong>
                     </div>
-                    <p>Crawle automatiquement les liens internes du site. Nécessite le serveur proxy local pour contourner les restrictions CORS du navigateur.</p>
+                    <p>{{ $t('crawl.guideAutoDesc') }}</p>
                   </div>
 
                   <div class="guide-card guide-card-warning">
                     <div class="guide-card-header">
-                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
-                      <strong>Sitemap</strong>
+                      <span class="guide-card-badge guide-card-badge-warning">{{ $t('crawl.guideServerRequired') }}</span>
+                      <strong>{{ $t('crawl.modeSitemap') }}</strong>
                     </div>
-                    <p>Parse le fichier sitemap.xml du site. Nécessite également le serveur proxy pour accéder au sitemap.</p>
+                    <p>{{ $t('crawl.guideSitemapDesc') }}</p>
                   </div>
 
                   <div class="guide-card guide-card-success">
                     <div class="guide-card-header">
-                      <span class="guide-card-badge guide-card-badge-success">Sans serveur</span>
-                      <strong>Manuel</strong>
+                      <span class="guide-card-badge guide-card-badge-success">{{ $t('crawl.guideNoServer') }}</span>
+                      <strong>{{ $t('crawl.modeManual') }}</strong>
                     </div>
-                    <p>Saisissez vous-même la liste des URLs à analyser. Aucun serveur requis, les URLs sont traitées localement.</p>
+                    <p>{{ $t('crawl.guideManualDesc') }}</p>
                   </div>
                 </div>
               </div>
@@ -754,24 +752,24 @@ https://example.com/sitemap.xml"
                   <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Services d'analyse
+                  {{ $t('crawl.guideServicesTitle') }}
                 </h4>
 
                 <div class="guide-grid">
                   <div class="guide-card guide-card-success">
                     <div class="guide-card-header">
-                      <span class="guide-card-badge guide-card-badge-success">Sans serveur</span>
-                      <strong>PageSpeed Insights</strong>
+                      <span class="guide-card-badge guide-card-badge-success">{{ $t('crawl.guideNoServer') }}</span>
+                      <strong>{{ $t('crawl.pageSpeedName') }}</strong>
                     </div>
-                    <p>Utilise l'API Google PageSpeed. Gratuit, sans installation, mais avec des quotas limités (environ 25 requêtes/jour sans clé API).</p>
+                    <p>{{ $t('crawl.guidePageSpeedDesc') }}</p>
                   </div>
 
                   <div class="guide-card guide-card-warning">
                     <div class="guide-card-header">
-                      <span class="guide-card-badge guide-card-badge-warning">Serveur requis</span>
-                      <strong>Local Lighthouse</strong>
+                      <span class="guide-card-badge guide-card-badge-warning">{{ $t('crawl.guideServerRequired') }}</span>
+                      <strong>{{ $t('crawl.localName') }}</strong>
                     </div>
-                    <p>Analyse via Chromium local. Plus rapide, sans limite, confidentiel. Nécessite le serveur avec Chromium installé.</p>
+                    <p>{{ $t('crawl.guideLocalDesc') }}</p>
                   </div>
                 </div>
               </div>
@@ -782,38 +780,38 @@ https://example.com/sitemap.xml"
                   <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Tableau de compatibilité
+                  {{ $t('crawl.guideCompatTitle') }}
                 </h4>
 
                 <div class="overflow-x-auto">
                   <table class="guide-table">
                     <thead>
                       <tr>
-                        <th>Découverte</th>
-                        <th>Service</th>
-                        <th>Serveur</th>
+                        <th>{{ $t('crawl.guideColDiscovery') }}</th>
+                        <th>{{ $t('crawl.guideColService') }}</th>
+                        <th>{{ $t('crawl.guideColServer') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td>Manuel</td>
-                        <td>PageSpeed Insights</td>
-                        <td><span class="text-emerald-600 dark:text-emerald-400 font-medium">Non requis</span></td>
+                        <td>{{ $t('crawl.modeManual') }}</td>
+                        <td>{{ $t('crawl.pageSpeedName') }}</td>
+                        <td><span class="text-emerald-600 dark:text-emerald-400 font-medium">{{ $t('crawl.guideNotRequired') }}</span></td>
                       </tr>
                       <tr>
-                        <td>Manuel</td>
-                        <td>Local Lighthouse</td>
-                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                        <td>{{ $t('crawl.modeManual') }}</td>
+                        <td>{{ $t('crawl.localName') }}</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">{{ $t('crawl.guideRequired') }}</span></td>
                       </tr>
                       <tr>
-                        <td>Auto / Sitemap</td>
-                        <td>PageSpeed Insights</td>
-                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                        <td>{{ $t('crawl.guideAutoSitemap') }}</td>
+                        <td>{{ $t('crawl.pageSpeedName') }}</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">{{ $t('crawl.guideRequired') }}</span></td>
                       </tr>
                       <tr>
-                        <td>Auto / Sitemap</td>
-                        <td>Local Lighthouse</td>
-                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">Requis</span></td>
+                        <td>{{ $t('crawl.guideAutoSitemap') }}</td>
+                        <td>{{ $t('crawl.localName') }}</td>
+                        <td><span class="text-amber-600 dark:text-amber-400 font-medium">{{ $t('crawl.guideRequired') }}</span></td>
                       </tr>
                     </tbody>
                   </table>
@@ -826,14 +824,14 @@ https://example.com/sitemap.xml"
                   <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Démarrer le serveur
+                  {{ $t('crawl.guideServerTitle') }}
                 </h4>
 
                 <div class="guide-code">
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Première installation :</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ $t('crawl.guideFirstInstall') }}</p>
                   <code class="guide-code-block">npm run server:install</code>
 
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 mt-4">Démarrage :</p>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 mt-4">{{ $t('crawl.guideStart') }}</p>
                   <code class="guide-code-block">npm run server</code>
                 </div>
               </div>
@@ -846,7 +844,7 @@ https://example.com/sitemap.xml"
                   type="button"
                   @click="showOnboarding = false"
               >
-                Compris !
+                {{ $t('crawl.guideUnderstood') }}
               </button>
             </div>
           </div>

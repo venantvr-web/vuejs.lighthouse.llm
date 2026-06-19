@@ -113,7 +113,8 @@ export default class AnthropicProvider extends BaseLLMProvider {
         const payload = {
             model: options.model,
             messages: this._formatMessages(prompt, options),
-            max_tokens: options.maxTokens,
+            // Claude 3.5 Sonnet caps completion at 8192 tokens
+            max_tokens: Math.min(options.maxTokens, 8192),
             temperature: options.temperature,
             stream: stream
         };

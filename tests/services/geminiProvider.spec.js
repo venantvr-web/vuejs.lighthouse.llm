@@ -33,16 +33,25 @@ describe('GeminiProvider.listModels', () => {
         expect(provider.getDefaultModel()).toBe('gemini-2.5-flash')
     })
 
-    it('disables thinking on 2.5 Flash so output is not truncated', () => {
+    it('disables thinking on 2.5 Flash and Flash-Lite so output is not truncated', () => {
         const provider = new GeminiProvider({apiKey: 'k', model: 'gemini-2.5-flash'})
-        const payload = provider._buildPayload('hello', {model: 'gemini-2.5-flash', maxTokens: 100, temperature: 0.7})
-        expect(payload.generationConfig.thinkingConfig).toEqual({thinkingBudget: 0})
+        expect(provider._buildPayload('hi', {model: 'gemini-2.5-flash', maxTokens: 100, temperature: 0.7})
+            .generationConfig.thinkingConfig).toEqual({thinkingBudget: 0})
+        expect(provider._buildPayload('hi', {model: 'gemini-2.5-flash-lite', maxTokens: 100, temperature: 0.7})
+            .generationConfig.thinkingConfig).toEqual({thinkingBudget: 0})
     })
 
-    it('does not set thinkingConfig on 2.5 Pro (cannot be disabled)', () => {
+    it('bounds (not disables) thinking on 2.5 Pro to keep room for the answer', () => {
         const provider = new GeminiProvider({apiKey: 'k', model: 'gemini-2.5-pro'})
         const payload = provider._buildPayload('hello', {model: 'gemini-2.5-pro', maxTokens: 100, temperature: 0.7})
+        expect(payload.generationConfig.thinkingConfig).toEqual({thinkingBudget: 1024})
+    })
+
+    it('does not set thinkingConfig on 2.0 Flash (unsupported) and caps maxOutputTokens', () => {
+        const provider = new GeminiProvider({apiKey: 'k', model: 'gemini-2.0-flash'})
+        const payload = provider._buildPayload('hello', {model: 'gemini-2.0-flash', maxTokens: 99999, temperature: 0.7})
         expect(payload.generationConfig.thinkingConfig).toBeUndefined()
+        expect(payload.generationConfig.maxOutputTokens).toBe(32768)
     })
 
     it('excludes internal thought parts from extracted content', () => {

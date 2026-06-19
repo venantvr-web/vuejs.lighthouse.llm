@@ -112,17 +112,25 @@ export default class GeminiProvider extends BaseLLMProvider {
             }],
             generationConfig: {
                 temperature: options.temperature,
-                maxOutputTokens: options.maxTokens,
+                // Gemini 2.5 supports large outputs; cap generously
+                maxOutputTokens: Math.min(options.maxTokens, 32768),
                 topP: options.topP || 0.95,
                 topK: options.topK || 40
             }
         };
 
-        // Gemini 2.5 Flash enables "thinking" by default, which consumes the
-        // output token budget and can truncate the visible answer. Disable it
-        // so maxOutputTokens is spent on the response. (2.5 Pro can't disable.)
-        if (/gemini-2\.5-flash/.test(model)) {
-            payload.generationConfig.thinkingConfig = {thinkingBudget: 0};
+        // Gemini 2.5 active le "thinking" par défaut. Or maxOutputTokens borne
+        // l'ensemble thinking + réponse : sans contrôle, le raisonnement épuise
+        // le budget et la réponse visible est tronquée (quelques tokens).
+        //  - Flash / Flash-Lite : thinking désactivable (budget 0).
+        //  - Pro : thinking non désactivable, on le borne pour garder de la
+        //    place à la réponse.
+        // (gemini-2.0-flash ne supporte pas thinkingConfig : on n'y touche pas.)
+        const m = model.toLowerCase();
+        if (m.includes('gemini-2.5')) {
+            payload.generationConfig.thinkingConfig = m.includes('flash')
+                ? {thinkingBudget: 0}
+                : {thinkingBudget: 1024};
         }
 
         // Add safety settings if provided

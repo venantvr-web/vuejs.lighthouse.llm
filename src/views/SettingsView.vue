@@ -14,6 +14,7 @@ const model = ref('')
 const ollamaUrl = ref('http://localhost:11434')
 const pageSpeedKey = ref('')
 const userAgent = ref('')
+const maxTokens = ref(16384)
 const saved = ref(false)
 
 const providers = [
@@ -43,6 +44,7 @@ onMounted(() => {
   ollamaUrl.value = settings.ollamaBaseUrl
   pageSpeedKey.value = settings.pageSpeedApiKey
   userAgent.value = getRawUserAgent()
+  maxTokens.value = settings.maxTokens
 })
 
 watch(provider, (newProvider) => {
@@ -102,6 +104,7 @@ const saveSettings = () => {
   }
   settings.setPageSpeedApiKey(pageSpeedKey.value)
   setUserAgent(userAgent.value)
+  if (maxTokens.value) settings.setMaxTokens(maxTokens.value)
   saved.value = true
   setTimeout(() => saved.value = false, 2000)
 }
@@ -206,6 +209,25 @@ const testConnection = async () => {
             </option>
           </select>
           <p v-if="modelError" class="mt-2 text-xs text-red-500">{{ modelError }}</p>
+        </div>
+
+        <!-- Max response length -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Longueur max. de réponse (tokens)
+          </label>
+          <input
+              v-model.number="maxTokens"
+              class="input"
+              max="32768"
+              min="256"
+              step="256"
+              type="number"
+          />
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Augmentez cette valeur si les analyses IA sont coupées. Plafonnée automatiquement selon le modèle
+            (OpenAI 16384, Anthropic 8192, Gemini 32768).
+          </p>
         </div>
 
         <!-- Actions -->

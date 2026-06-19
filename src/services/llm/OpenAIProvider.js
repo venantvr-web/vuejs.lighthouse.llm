@@ -125,7 +125,8 @@ export default class OpenAIProvider extends BaseLLMProvider {
             model: options.model,
             messages: this._formatMessages(prompt, options),
             temperature: options.temperature,
-            max_tokens: options.maxTokens,
+            // gpt-4o family supports up to 16384 completion tokens
+            max_tokens: Math.min(options.maxTokens, 16384),
             stream: stream
         };
 

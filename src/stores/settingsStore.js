@@ -12,7 +12,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const llmModel = ref('gpt-4o')
     const apiKey = ref('')
     const temperature = ref(0.7)
-    const maxTokens = ref(8192)
+    const maxTokens = ref(16384)
 
     // State - Per-provider API keys (enables multi-provider GEO tracking)
     const providerKeys = ref({openai: '', anthropic: '', gemini: ''})
@@ -341,7 +341,9 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.searchConsoleClientId) searchConsoleClientId.value = settings.searchConsoleClientId
             if (settings.pageSpeedApiKey) pageSpeedApiKey.value = settings.pageSpeedApiKey
             if (settings.temperature !== undefined) temperature.value = settings.temperature
-            if (settings.maxTokens !== undefined) maxTokens.value = settings.maxTokens
+            // Migration : l'ancien défaut 8192 (jamais choisi, faute d'UI) est
+            // relevé à 16384 pour éviter les réponses tronquées.
+            if (settings.maxTokens !== undefined) maxTokens.value = settings.maxTokens === 8192 ? 16384 : settings.maxTokens
             if (settings.ollamaBaseUrl) ollamaBaseUrl.value = settings.ollamaBaseUrl
             if (settings.ollamaModel) ollamaModel.value = settings.ollamaModel
             if (settings.theme) theme.value = settings.theme
@@ -397,7 +399,7 @@ export const useSettingsStore = defineStore('settings', () => {
         llmModel.value = 'gpt-4o'
         apiKey.value = ''
         temperature.value = 0.7
-        maxTokens.value = 8192
+        maxTokens.value = 16384
         ollamaBaseUrl.value = 'http://localhost:11434'
         ollamaModel.value = 'llama3.2'
         theme.value = 'system'

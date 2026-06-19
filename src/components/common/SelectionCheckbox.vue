@@ -52,6 +52,6 @@ const sizeClasses = {
           stroke-width="3"
       />
     </svg>
-    <span v-else-if="!disabled" class="sr-only">Sélectionner</span>
+    <span v-else-if="!disabled" class="sr-only">{{ $t('common.select') }}</span>
   </button>
 </template>

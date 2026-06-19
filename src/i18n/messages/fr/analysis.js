@@ -38,6 +38,13 @@ export default {
         promptPreview: 'Aperçu du prompt ({template})',
 
         responseTruncated: 'Réponse coupée par la limite de tokens.',
-        continue: 'Continuer'
+        continue: 'Continuer',
+
+        // Sortie en streaming (StreamingOutput)
+        streamingGenerating: 'Génération en cours…',
+        stop: 'Arrêter',
+        copied: 'Copié !',
+        tokens: 'tokens',
+        emptyState: "Sélectionnez une catégorie et lancez l'analyse pour obtenir des conseils d'expert."
     }
 }

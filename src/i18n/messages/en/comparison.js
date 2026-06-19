@@ -43,6 +43,19 @@ export default {
         regressionOne: 'Regression',
         regressionMany: 'Regressions',
 
-        unknownUrl: 'Unknown URL'
+        unknownUrl: 'Unknown URL',
+
+        // Template comparison table (TemplateComparisonTable)
+        templateHeader: 'Template',
+        evolution: 'Evolution',
+        statusNew: 'New',
+        statusRemoved: 'Removed',
+        pages: 'pages',
+        noTemplates: 'No template to compare',
+
+        // Session card (SessionComparisonCard)
+        unknownDomain: 'Unknown domain',
+        pagesLabel: 'Pages:',
+        averageLabel: 'Average:'
     }
 }

@@ -5,6 +5,7 @@
 export default {
     common: {
         cancel: 'Annuler',
+        select: 'Sélectionner',
         save: 'Enregistrer',
         saved: 'Enregistré',
         reset: 'Réinitialiser',

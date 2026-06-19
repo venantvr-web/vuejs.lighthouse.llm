@@ -46,7 +46,7 @@ const copyToClipboard = async () => {
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
           </span>
-          Generation en cours...
+          {{ $t('analysis.streamingGenerating') }}
         </span>
 
         <!-- Token count -->
@@ -54,7 +54,7 @@ const copyToClipboard = async () => {
           <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          {{ tokenCount }} tokens
+          {{ tokenCount }} {{ $t('analysis.tokens') }}
         </span>
       </div>
 
@@ -69,7 +69,7 @@ const copyToClipboard = async () => {
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Arreter
+          {{ $t('analysis.stop') }}
         </button>
 
         <!-- Copy button -->
@@ -85,7 +85,7 @@ const copyToClipboard = async () => {
           <svg v-else class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          {{ copied ? 'Copie!' : 'Copier' }}
+          {{ copied ? $t('analysis.copied') : $t('common.copy') }}
         </button>
 
         <!-- Export button -->
@@ -97,7 +97,7 @@ const copyToClipboard = async () => {
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Exporter
+          {{ $t('common.export') }}
         </button>
       </div>
     </div>
@@ -122,7 +122,7 @@ const copyToClipboard = async () => {
           <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
         <p class="italic">
-          Sélectionnez une catégorie et lancez l'analyse pour obtenir des conseils d'expert.
+          {{ $t('analysis.emptyState') }}
         </p>
       </div>
     </div>

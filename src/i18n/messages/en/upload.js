@@ -19,6 +19,15 @@ export default {
         helpStep4: 'Click "Save as JSON" in the menu',
 
         altQuestion: 'Prefer a real-time analysis?',
-        altLink: 'Analyze your URL directly'
+        altLink: 'Analyze your URL directly',
+
+        // DropZone
+        dropTitle: 'Import a Lighthouse report',
+        dropSubtitle: 'Drag and drop a JSON file or click to select',
+        dropOverlay: 'Drop your Lighthouse JSON file',
+        dropHint: 'Export from Chrome DevTools > Lighthouse > Save as JSON',
+        errorNotJson: 'Please select a JSON file',
+        errorInvalidReport: 'This file is not a valid Lighthouse report',
+        errorReadJson: 'Error while reading the JSON file: {message}'
     }
 }

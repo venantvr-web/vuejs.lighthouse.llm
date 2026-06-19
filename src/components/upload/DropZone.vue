@@ -1,5 +1,8 @@
 <script setup>
 import {computed, ref} from 'vue'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const emit = defineEmits(['file-selected', 'report-loaded'])
 
@@ -54,7 +57,7 @@ const processFile = async (file) => {
   error.value = null
 
   if (!file.name.endsWith('.json')) {
-    error.value = 'Veuillez sélectionner un fichier JSON'
+    error.value = t('upload.errorNotJson')
     return
   }
 
@@ -64,7 +67,7 @@ const processFile = async (file) => {
 
     // Validate it's a Lighthouse report
     if (!json.lighthouseVersion || !json.categories) {
-      error.value = 'Ce fichier ne semble pas etre un rapport Lighthouse valide'
+      error.value = t('upload.errorInvalidReport')
       return
     }
 
@@ -72,7 +75,7 @@ const processFile = async (file) => {
     emit('file-selected', file)
     emit('report-loaded', json)
   } catch (e) {
-    error.value = 'Erreur lors de la lecture du fichier JSON: ' + e.message
+    error.value = t('upload.errorReadJson', {message: e.message})
   }
 }
 
@@ -111,7 +114,7 @@ const clearFile = () => {
             <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
           <p class="mt-4 text-lg font-medium text-primary-600 dark:text-primary-400">
-            Deposez votre fichier JSON Lighthouse
+            {{ $t('upload.dropOverlay') }}
           </p>
         </div>
       </div>
@@ -125,17 +128,17 @@ const clearFile = () => {
       </svg>
 
       <h3 class="mt-6 text-xl font-semibold text-gray-700 dark:text-gray-200">
-        Importez un rapport Lighthouse
+        {{ $t('upload.dropTitle') }}
       </h3>
       <p class="mt-2 text-gray-500 dark:text-gray-400">
-        Glissez-déposez un fichier JSON ou cliquez pour sélectionner
+        {{ $t('upload.dropSubtitle') }}
       </p>
 
       <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
         </svg>
-        <span>Export depuis Chrome DevTools > Lighthouse > Save as JSON</span>
+        <span>{{ $t('upload.dropHint') }}</span>
       </div>
     </div>
 

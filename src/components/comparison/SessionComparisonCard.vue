@@ -57,12 +57,12 @@ const formattedAverage = computed(() => {
             : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
         ]"
     >
-      {{ label || (position === 'left' ? 'Reference' : 'Comparaison') }}
+      {{ label || (position === 'left' ? $t('comparison.reference') : $t('comparison.comparisonLabel')) }}
     </div>
 
     <!-- Domain -->
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-      {{ session.domain || 'Domaine inconnu' }}
+      {{ session.domain || $t('comparison.unknownDomain') }}
     </h3>
 
     <!-- Date -->
@@ -74,7 +74,7 @@ const formattedAverage = computed(() => {
     <div class="flex items-center justify-between">
       <!-- Pages analyzed -->
       <div class="text-sm">
-        <span class="text-gray-500 dark:text-gray-400">Pages:</span>
+        <span class="text-gray-500 dark:text-gray-400">{{ $t('comparison.pagesLabel') }}</span>
         <span class="ml-1 font-medium text-gray-900 dark:text-white">
           {{ session.pagesAnalyzed || 0 }}/{{ session.pageCount || 0 }}
         </span>
@@ -82,7 +82,7 @@ const formattedAverage = computed(() => {
 
       <!-- Average score -->
       <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-500 dark:text-gray-400">Moyenne:</span>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $t('comparison.averageLabel') }}</span>
         <div
             :class="[
               'w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold',

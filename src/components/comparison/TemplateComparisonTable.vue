@@ -1,21 +1,28 @@
 <script setup>
+import {computed} from 'vue'
 import ScoreDiffIndicator from './ScoreDiffIndicator.vue'
 import {formatScore, getScoreColorClass} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
 
-defineProps({
+const {t} = useI18n()
+
+const props = defineProps({
   templates: {
     type: Array,
     required: true
   },
   labelA: {
     type: String,
-    default: 'Reference'
+    default: ''
   },
   labelB: {
     type: String,
-    default: 'Comparaison'
+    default: ''
   }
 })
+
+const labelAText = computed(() => props.labelA || t('comparison.reference'))
+const labelBText = computed(() => props.labelB || t('comparison.comparisonLabel'))
 </script>
 
 <template>
@@ -24,16 +31,16 @@ defineProps({
       <thead>
       <tr class="border-b border-gray-200 dark:border-gray-700">
         <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
-          Template
+          {{ $t('comparison.templateHeader') }}
         </th>
         <th class="text-center py-3 px-4 font-medium text-blue-600 dark:text-blue-400">
-          {{ labelA }}
+          {{ labelAText }}
         </th>
         <th class="text-center py-3 px-4 font-medium text-purple-600 dark:text-purple-400">
-          {{ labelB }}
+          {{ labelBText }}
         </th>
         <th class="text-center py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
-          Évolution
+          {{ $t('comparison.evolution') }}
         </th>
       </tr>
       </thead>
@@ -53,17 +60,17 @@ defineProps({
                 v-if="!template.inA"
                 class="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs rounded"
             >
-              Nouveau
+              {{ $t('comparison.statusNew') }}
             </span>
             <span
                 v-else-if="!template.inB"
                 class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded"
             >
-              Supprime
+              {{ $t('comparison.statusRemoved') }}
             </span>
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {{ template.countA || 0 }} → {{ template.countB || 0 }} pages
+            {{ template.countA || 0 }} → {{ template.countB || 0 }} {{ $t('comparison.pages') }}
           </div>
         </td>
 
@@ -99,7 +106,7 @@ defineProps({
 
     <!-- Empty state -->
     <div v-if="templates.length === 0" class="py-8 text-center text-gray-500 dark:text-gray-400">
-      Aucun template a comparer
+      {{ $t('comparison.noTemplates') }}
     </div>
   </div>
 </template>

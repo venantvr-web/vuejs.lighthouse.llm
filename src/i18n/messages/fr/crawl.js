@@ -64,7 +64,7 @@ export default {
 
         submit: 'Lancer le crawl',
 
-        aboutTitle: 'A propos du mode Crawl',
+        aboutTitle: 'À propos du mode Crawl',
         aboutText: "Le crawl analyse plusieurs pages de votre site et détecte automatiquement les types de templates (page d'accueil, fiche produit, listing...). Les scores sont agrégés par template et par domaine.",
 
         execTimeTitle: "Temps d'exécution",

@@ -1,0 +1,130 @@
+{# Accessibility Quick Analysis - Expert WCAG/RGAA #}
+# Analyse Accessibilité - {{ url }}
+
+## Role
+Tu es un Expert Accessibilité Numérique, spécialisé RGAA (Référentiel Général d'Amélioration de l'Accessibilité) et WCAG 2.1 niveau AA.
+
+## Score Accessibilité
+{{ score | score }}
+
+## Violations Détectées
+
+{% if violations %}
+### Problèmes Prioritaires
+{% for v in violations %}{% if v.title %}
+- **{{ v.title }}**{% if v.score is defined %} ({{ v.score | round(2) }}){% endif %}
+{% endif %}{% endfor %}
+{% endif %}
+
+{% if ariaIssues %}
+### Problèmes ARIA
+{% for issue in ariaIssues %}{% if issue.title %}
+- {{ issue.title }}{% if issue.description %}: {{ issue.description | truncate(80) }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
+
+{% if colorContrast %}
+### Contraste des Couleurs
+{% for issue in colorContrast %}{% if issue.title %}
+- {{ issue.title }}{% if issue.description %}: {{ issue.description | truncate(80) }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
+
+## Audits Échoués
+
+{% for audit in failedAudits %}{% if audit.title %}
+{{ loop.index }}. **{{ audit.title }}**
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
+
+## Demande
+
+En tant qu'expert accessibilité, analyse:
+
+### 1. Violations WCAG 2.1 AA
+
+Pour chaque violation:
+- Critère WCAG concerné
+- Impact utilisateur (lecteurs d'écran, navigation clavier, etc.)
+- Niveau de conformité (A, AA, AAA)
+
+### 2. Solutions de Code
+
+**HTML Semantique:**
+```vue
+<template>
+  <!-- Structure accessible avec landmarks -->
+  <header role="banner">
+    <nav role="navigation" aria-label="Navigation principale">
+      <ul>
+        <li><router-link to="/">Accueil</router-link></li>
+        <li><router-link to="/about">À propos</router-link></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main role="main" id="main-content">
+    <h1>Titre de la page</h1>
+    <!-- Contenu principal -->
+  </main>
+
+  <footer role="contentinfo">
+    <!-- Pied de page -->
+  </footer>
+</template>
+```
+
+**ARIA Attributes:**
+```vue
+<template>
+  <!-- Boutons accessibles -->
+  <button
+    :aria-label="isOpen ? 'Fermer le menu' : 'Ouvrir le menu'"
+    :aria-expanded="isOpen"
+    @click="toggle"
+  >
+    <MenuIcon aria-hidden="true" />
+  </button>
+
+  <!-- Messages live pour lecteurs d'écran -->
+  <div role="status" aria-live="polite" class="sr-only">
+    {{ statusMessage }}
+  </div>
+</template>
+```
+
+**Navigation Clavier:**
+```vue
+<script setup>
+const handleKeydown = (event) => {
+  if (event.key === 'Escape') {
+    closeModal()
+  }
+  if (event.key === 'Tab') {
+    trapFocus(event)
+  }
+}
+</script>
+```
+
+### 3. Contraste et Lisibilité
+
+```css
+/* Contrastes WCAG AA: 4.5:1 pour texte, 3:1 pour grands textes */
+:root {
+  --text-primary: #1a1a1a;   /* 21:1 sur blanc */
+  --text-secondary: #4a4a4a; /* 9:1 sur blanc */
+  --link-color: #0066cc;     /* 7:1 sur blanc */
+}
+
+/* Focus visible obligatoire */
+:focus-visible {
+  outline: 3px solid var(--link-color);
+  outline-offset: 2px;
+}
+```
+
+### 4. Quick Wins A11y
+3 corrections rapides et à fort impact pour améliorer immédiatement l'accessibilité.
+
+Fournis des solutions conformes WCAG 2.1 AA et RGAA.

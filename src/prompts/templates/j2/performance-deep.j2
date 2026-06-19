@@ -1,0 +1,98 @@
+{# Performance Deep Dive Analysis - Expert WPO Vue.js/Vite #}
+# Analyse Approfondie Performance - {{ url }}
+
+## Role
+Tu es un Expert Senior en Web Performance Optimization (WPO), spécialisé dans Vue.js 3, Vite, et les optimisations avancées.
+
+## Score Performance
+{{ score | score }}
+
+## Opportunités d'Optimisation
+
+{% if opportunities %}
+{% for opp in opportunities %}{% if opp.title %}
+- **{{ opp.title }}**
+  {% if opp.numericValue %}- Impact: {{ opp.numericValue | metric }} économisés{% endif %}
+  {% if opp.score is defined %}- Score: {{ opp.score | score }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
+
+## Diagnostics
+
+{% if diagnostics %}
+{% for diag in diagnostics %}{% if diag.title %}
+- {{ diag.title }}{% if diag.displayValue %}: {{ diag.displayValue }}{% endif %}
+{% endif %}{% endfor %}
+{% endif %}
+
+## Métriques Détaillées
+
+{% if metrics %}
+| Métrique | Valeur | Cible |
+|----------|--------|-------|
+| LCP | {{ metrics.lcp | metric }} | < 2.5s |
+| FCP | {{ metrics.fcp | metric }} | < 1.8s |
+| TBT | {{ metrics.tbt | metric }} | < 200ms |
+| CLS | {{ metrics.cls }} | < 0.1 |
+| Speed Index | {{ metrics.si | metric }} | < 3.4s |
+{% endif %}
+
+## Audits Échoués
+
+{% for audit in failedAudits %}{% if audit.title %}
+### {{ loop.index }}. {{ audit.title }}
+{% if audit.score is defined %}**Score:** {{ audit.score | round(2) }}{% endif %}
+{% if audit.description %}{{ audit.description | truncate(250) }}{% endif %}
+
+{% endif %}{% endfor %}
+
+## Demande
+
+En tant qu'expert WPO Vue.js/Vite, analyse en profondeur:
+
+### 1. Analyse des Opportunités
+Pour chaque opportunité majeure:
+- Explication technique du problème
+- Impact précis sur les Core Web Vitals
+- Priorité d'implémentation (P0/P1/P2)
+
+### 2. Solutions de Code
+Fournis des exemples concrets:
+
+**a) Optimisations Vue.js 3:**
+```vue
+<script setup>
+// Composant optimisé avec lazy-loading
+import { defineAsyncComponent } from 'vue'
+
+const HeavyComponent = defineAsyncComponent(() =>
+  import('./HeavyComponent.vue')
+)
+</script>
+```
+
+**b) Configuration Vite:**
+```javascript
+// vite.config.js
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Code-splitting optimisé
+        }
+      }
+    }
+  }
+}
+```
+
+**c) Techniques Avancées:**
+- Resource hints (preload, prefetch, preconnect)
+- Dynamic imports stratégiques
+- Optimisation des images (formats modernes)
+
+### 3. Plan d'Action
+Roadmap priorisée avec Quick wins et optimisations avancées.
+
+Réponds en Markdown avec des blocs de code détaillés et commentés.

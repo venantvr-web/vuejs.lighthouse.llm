@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link href="/favicon.ico" rel="icon">
+    <link href="/icon.svg" rel="icon" type="image/svg+xml">
+    <link href="/icon.svg" rel="apple-touch-icon">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="#6366f1" name="theme-color">
+    <meta content="Analyse et suivi quotidien de la santé de vos pages web avec Lighthouse et l'IA." name="description">
+    <link href="/manifest.webmanifest" rel="manifest">
+    <title>Lighthouse Analyzer</title>
+    <script>
+        // Set theme immediately to prevent flash
+        (function () {
+            var stored = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body>
+<div id="app"></div>
+<script src="/src/main.js" type="module"></script>
+</body>
+</html>

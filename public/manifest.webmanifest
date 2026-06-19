@@ -1,0 +1,40 @@
+{
+  "name": "Lighthouse AI Analyzer",
+  "short_name": "Lighthouse AI",
+  "description": "Analyse et suivi quotidien de la santé de vos pages web avec Lighthouse et l'IA.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "lang": "fr",
+  "categories": ["productivity", "developer", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Watchlist",
+      "short_name": "Watchlist",
+      "description": "Suivi quotidien de vos pages",
+      "url": "/watchlist"
+    },
+    {
+      "name": "Historique",
+      "short_name": "Historique",
+      "url": "/history"
+    }
+  ]
+}

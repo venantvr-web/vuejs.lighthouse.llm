@@ -1,0 +1,63 @@
+/**
+ * GEO Tracking screen texts (brand visibility in AI engines).
+ */
+export default {
+    geo: {
+        // Header
+        title: 'GEO Tracking',
+        subtitle: 'Your brand visibility in AI engine responses',
+        apiKeys: 'API keys',
+        enableAlerts: 'Enable alerts',
+        exportCsvTitle: 'Export the comparison to CSV',
+        exportMarkdownTitle: 'Export the comparison to Markdown',
+        runAll: 'Run all',
+        runningAll: 'Analyzing…',
+        // Key editor
+        keysTitle: 'API keys per engine',
+        keysHelp: 'Stored locally in your browser. Fill in the engines you want to query.',
+        keyPlaceholder: 'API key…',
+        ollamaHint: 'Ollama is configured in the Settings.',
+        // No engine ready (two fragments, the "API keys" button is inserted between them)
+        noProviderBefore: 'No engine configured. Click ',
+        noProviderAfter: ' to enter at least one key (OpenAI, Claude or Gemini).',
+        // Engine selection
+        engines: 'Engines:',
+        advancedTitle: 'One additional LLM call per engine: cited competitors + sentiment of the mention',
+        advancedAnalysis: 'Advanced analysis (competitors + sentiment)',
+        // Add form
+        promptPlaceholder: 'Prompt to track (e.g.: What are the best SEO audit tools?)',
+        brandPlaceholder: 'Your brand',
+        competitorsPlaceholder: 'Competitors (comma-separated)',
+        add: 'Add',
+        // Summary
+        promptsTracked: 'Prompts tracked',
+        avgShareOfVoice: 'Avg. share of voice',
+        brandAbsent: 'Brand absent everywhere',
+        neverRun: 'Never run',
+        // Empty state
+        emptyTitle: 'No prompt tracked',
+        emptyText: 'Add prompts representative of your customers\' searches, enter your brand and your competitors, then compare your visibility across AI engines.',
+        // Messages (JS)
+        errorPromptBrandRequired: 'The prompt and the brand are required.',
+        errorInvalidEntry: 'Invalid entry.',
+        confirmRemove: 'Remove this tracked prompt?',
+        // Prompt card (GeoCard)
+        competitorsCount: '{count} competitor',
+        competitorsCountPlural: '{count} competitors',
+        removeTitle: 'Remove',
+        enginesCiting: 'Engines citing',
+        avgShareOfVoiceShort: 'Avg. share of voice',
+        mentioned: 'Yes',
+        notMentioned: 'No',
+        emergingCompetitors: 'Emerging competitors',
+        citedBy: 'Cited by {count} engine(s)',
+        showResponses: 'Show responses',
+        hideResponses: 'Hide responses',
+        executedAt: 'Run {time}',
+        run: 'Run',
+        // Sentiment
+        sentimentPositive: 'Positive',
+        sentimentNeutral: 'Neutral',
+        sentimentNegative: 'Negative'
+    }
+}

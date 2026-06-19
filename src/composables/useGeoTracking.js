@@ -1,0 +1,379 @@
+import {ref} from 'vue'
+import {buildLLMProvider} from '@/services/llm/buildProvider'
+import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
+import {useSettingsStore} from '@/stores/settingsStore'
+import {toSeries} from '@/utils/series'
+
+// A drop of 15 share-of-voice points between runs counts as a notable change.
+const SOV_DROP_THRESHOLD = 15
+
+/**
+ * Escape a string for safe use inside a RegExp.
+ * @param {string} str - Raw string
+ * @returns {string} Escaped string
+ */
+export function escapeRegExp(str) {
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * Count case-insensitive occurrences of a term in a text.
+ * @param {string} text - Haystack
+ * @param {string} term - Needle
+ * @returns {number} Occurrence count
+ */
+export function countOccurrences(text, term) {
+    const cleanTerm = (term || '').trim()
+    if (!cleanTerm || !text) return 0
+    const matches = text.match(new RegExp(escapeRegExp(cleanTerm), 'gi'))
+    return matches ? matches.length : 0
+}
+
+/**
+ * Analyze an AI answer for brand visibility against competitors.
+ * @param {string} text - The AI engine's answer
+ * @param {string} brand - Brand to look for
+ * @param {string[]} competitors - Competitor names
+ * @returns {{
+ *   brandMentioned: boolean,
+ *   brandMentions: number,
+ *   competitorsFound: Array<{name: string, count: number}>,
+ *   shareOfVoice: number|null,
+ *   position: number|null
+ * }}
+ */
+export function analyzeResponse(text, brand, competitors = []) {
+    const answer = text || ''
+    const brandMentions = countOccurrences(answer, brand)
+
+    const competitorsFound = competitors
+        .map(name => ({name, count: countOccurrences(answer, name)}))
+        .filter(c => c.count > 0)
+
+    const competitorMentions = competitorsFound.reduce((sum, c) => sum + c.count, 0)
+    const totalMentions = brandMentions + competitorMentions
+
+    const shareOfVoice = totalMentions > 0
+        ? Math.round((brandMentions / totalMentions) * 100)
+        : null
+
+    // Position = rank of the brand by first appearance among all entities present.
+    let position = null
+    if (brandMentions > 0) {
+        const lower = answer.toLowerCase()
+        const entities = [{name: brand, idx: lower.indexOf(brand.toLowerCase())}]
+        for (const c of competitorsFound) {
+            entities.push({name: c.name, idx: lower.indexOf(c.name.toLowerCase())})
+        }
+        entities.sort((a, b) => a.idx - b.idx)
+        position = entities.findIndex(e => e.name === brand) + 1
+    }
+
+    return {
+        brandMentioned: brandMentions > 0,
+        brandMentions,
+        competitorsFound,
+        shareOfVoice,
+        position
+    }
+}
+
+/**
+ * Compare a fresh run against the previous one and flag notable changes.
+ * @param {object} item - Tracked prompt
+ * @param {object} latest - Latest analysis (brandMentioned, shareOfVoice)
+ * @param {object} previous - Previous run record (may be null)
+ * @returns {string[]} Human-readable change messages
+ */
+export function detectChanges(item, latest, previous) {
+    const changes = []
+    if (!previous) return changes
+
+    if (previous.brandMentioned && !latest.brandMentioned) {
+        changes.push(`« ${item.brand} » n'est plus cité`)
+    } else if (!previous.brandMentioned && latest.brandMentioned) {
+        changes.push(`« ${item.brand} » est désormais cité`)
+    }
+
+    if (typeof latest.shareOfVoice === 'number' && typeof previous.shareOfVoice === 'number') {
+        const delta = latest.shareOfVoice - previous.shareOfVoice
+        if (delta <= -SOV_DROP_THRESHOLD) {
+            changes.push(`Part de voix en baisse : ${previous.shareOfVoice}% → ${latest.shareOfVoice}%`)
+        }
+    }
+
+    return changes
+}
+
+/**
+ * Build a prompt asking the model to extract the brands it cited AND the
+ * sentiment toward the tracked brand, as a single JSON object.
+ * @param {string} answer - The AI engine's answer
+ * @param {string} brand - The tracked brand
+ * @returns {string} Extraction prompt
+ */
+export function buildExtractionPrompt(answer, brand) {
+    return `Analyse la réponse d'un assistant ci-dessous. Renvoie UNIQUEMENT un objet JSON, sans autre texte, ` +
+        `de la forme {"brands": ["..."], "sentiment": "positive|neutral|negative|absent"} où :\n` +
+        `- "brands" liste les marques, produits, outils ou entreprises cités ;\n` +
+        `- "sentiment" décrit la tonalité envers « ${brand} » (positive, neutral, negative, ou absent si non cité).\n\n` +
+        `Réponse :\n${answer}`
+}
+
+/**
+ * Parse a model's JSON list of brand names, tolerating code fences and noise.
+ * @param {string} text - Model output
+ * @returns {string[]} Extracted names
+ */
+export function parseBrandList(text) {
+    if (!text) return []
+    const cleaned = String(text).replace(/```(?:json)?/gi, '').trim()
+    const match = cleaned.match(/\[[\s\S]*]/)
+    if (!match) return []
+    try {
+        const parsed = JSON.parse(match[0])
+        if (!Array.isArray(parsed)) return []
+        return parsed.map(v => String(v).trim()).filter(Boolean)
+    } catch {
+        return []
+    }
+}
+
+/**
+ * Normalize a free-form sentiment value to a fixed vocabulary.
+ * @param {string} value - Raw sentiment string (FR or EN)
+ * @returns {'positive'|'neutral'|'negative'|'absent'|null}
+ */
+export function normalizeSentiment(value) {
+    const v = String(value || '').trim().toLowerCase()
+    if (/(posit)/.test(v)) return 'positive'
+    if (/(négat|negat)/.test(v)) return 'negative'
+    if (/(neutr)/.test(v)) return 'neutral'
+    if (/(absent|none|aucun)/.test(v)) return 'absent'
+    return null
+}
+
+/**
+ * Parse the combined extraction object (brands + sentiment), tolerating code
+ * fences and falling back to a bare array of brand names.
+ * @param {string} text - Model output
+ * @returns {{brands: string[], sentiment: string|null}}
+ */
+export function parseExtraction(text) {
+    if (!text) return {brands: [], sentiment: null}
+    const cleaned = String(text).replace(/```(?:json)?/gi, '').trim()
+    const objMatch = cleaned.match(/\{[\s\S]*}/)
+    if (objMatch) {
+        try {
+            const parsed = JSON.parse(objMatch[0])
+            const brands = Array.isArray(parsed.brands)
+                ? parsed.brands.map(v => String(v).trim()).filter(Boolean)
+                : []
+            return {brands, sentiment: normalizeSentiment(parsed.sentiment)}
+        } catch {
+            // fall through to array parsing
+        }
+    }
+    return {brands: parseBrandList(text), sentiment: null}
+}
+
+/**
+ * Keep only names that are neither the brand nor a known competitor.
+ * Case-insensitive, de-duplicated, ignores 1-character tokens.
+ * @param {string[]} names - Names extracted from the answer
+ * @param {string} brand - Tracked brand
+ * @param {string[]} competitors - Known competitors
+ * @returns {string[]} Emerging competitor names
+ */
+export function extractEmerging(names, brand, competitors = []) {
+    const known = new Set([brand, ...competitors].map(n => (n || '').trim().toLowerCase()).filter(Boolean))
+    const seen = new Set()
+    const result = []
+    for (const raw of names) {
+        const name = (raw || '').trim()
+        const key = name.toLowerCase()
+        if (name.length < 2 || known.has(key) || seen.has(key)) continue
+        seen.add(key)
+        result.push(name)
+    }
+    return result
+}
+
+/**
+ * Group a prompt's runs by provider and build a comparison summary.
+ * Runs must be sorted newest-first.
+ * @param {Array} runs - Run records for a single prompt
+ * @returns {{
+ *   providers: string[],
+ *   byProvider: Object,
+ *   engineCount: number,
+ *   enginesCited: number,
+ *   avgShareOfVoice: number|null,
+ *   lastRunAt: number|null
+ * }}
+ */
+export function groupRunsByProvider(runs) {
+    const grouped = {}
+    for (const run of runs) {
+        if (!grouped[run.provider]) grouped[run.provider] = []
+        grouped[run.provider].push(run)
+    }
+
+    const providers = Object.keys(grouped)
+    const byProvider = {}
+    const sovValues = []
+    let enginesCited = 0
+    let lastRunAt = null
+    // Emerging competitors aggregated across engines: name -> set of engines
+    const emergingMap = new Map()
+
+    for (const provider of providers) {
+        const list = grouped[provider] // newest first
+        const latest = list[0]
+        const sparkline = toSeries(list, r => (typeof r.shareOfVoice === 'number' ? r.shareOfVoice : null))
+
+        byProvider[provider] = {latest, previous: list[1] || null, sparkline, lastRunAt: latest.timestamp}
+
+        if (latest.brandMentioned) enginesCited++
+        if (typeof latest.shareOfVoice === 'number') sovValues.push(latest.shareOfVoice)
+        if (latest.timestamp > (lastRunAt || 0)) lastRunAt = latest.timestamp
+
+        for (const name of latest.emergingCompetitors || []) {
+            const key = name.toLowerCase()
+            if (!emergingMap.has(key)) emergingMap.set(key, {name, engines: new Set()})
+            emergingMap.get(key).engines.add(provider)
+        }
+    }
+
+    const avgShareOfVoice = sovValues.length
+        ? Math.round(sovValues.reduce((a, b) => a + b, 0) / sovValues.length)
+        : null
+
+    const emergingCompetitors = [...emergingMap.values()]
+        .map(e => ({name: e.name, engines: e.engines.size}))
+        .sort((a, b) => b.engines - a.engines)
+
+    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, lastRunAt}
+}
+
+
+/**
+ * Composable for GEO tracking: run tracked prompts against the configured LLM
+ * provider, score brand visibility, persist runs and expose per-prompt stats.
+ */
+export function useGeoTracking() {
+    const geoHistory = useGeoHistoryStore()
+    const settings = useSettingsStore()
+
+    const statsById = ref({})
+    const runningById = ref({})
+    const errorById = ref({})
+
+    /**
+     * Build enriched, per-provider stats for a prompt from its stored runs.
+     * @param {object} item - Tracked prompt
+     */
+    async function loadItemStats(item) {
+        const runs = await geoHistory.getRunsForPrompt(item.id)
+        statsById.value = {
+            ...statsById.value,
+            [item.id]: {...groupRunsByProvider(runs), count: runs.length}
+        }
+    }
+
+    /**
+     * Load stats for every tracked prompt.
+     * @param {Array} items - Tracked prompts
+     */
+    async function loadStats(items) {
+        await Promise.all(items.map(loadItemStats))
+    }
+
+    /**
+     * Run a prompt across several providers in parallel, scoring and
+     * persisting one result per provider.
+     * @param {object} item - Tracked prompt
+     * @param {Array<{id: string, label: string, model: string}>} providers - Providers to query
+     * @param {{advancedAnalysis?: boolean}} options - Run options
+     * @returns {Promise<{success: boolean, changes: string[]}>}
+     */
+    async function runPrompt(item, providers = [], options = {}) {
+        if (!providers.length) {
+            errorById.value = {...errorById.value, [item.id]: 'Aucun fournisseur sélectionné (configurez une clé).'}
+            return {success: false, changes: []}
+        }
+
+        runningById.value = {...runningById.value, [item.id]: true}
+        errorById.value = {...errorById.value, [item.id]: null}
+
+        // Capture each provider's previous latest for change detection
+        const prevByProvider = statsById.value[item.id]?.byProvider || {}
+
+        const results = await Promise.allSettled(providers.map(async (descriptor) => {
+            const provider = buildLLMProvider(settings, descriptor.id, descriptor.model)
+            const answer = await provider.send(item.prompt)
+            const analysis = analyzeResponse(answer, item.brand, item.competitors)
+
+            // Optional second call: ask the model which brands it cited and the
+            // sentiment toward the tracked brand.
+            let emergingCompetitors = []
+            let sentiment = null
+            if (options.advancedAnalysis) {
+                try {
+                    const extraction = await provider.send(buildExtractionPrompt(answer, item.brand))
+                    const {brands, sentiment: s} = parseExtraction(extraction)
+                    emergingCompetitors = extractEmerging(brands, item.brand, item.competitors)
+                    sentiment = analysis.brandMentioned ? s : 'absent'
+                } catch {
+                    emergingCompetitors = []
+                }
+            }
+
+            await geoHistory.addRun({
+                promptId: item.id,
+                provider: descriptor.id,
+                model: descriptor.model,
+                response: answer,
+                emergingCompetitors,
+                sentiment,
+                ...analysis
+            })
+            return {descriptor, analysis}
+        }))
+
+        await loadItemStats(item)
+
+        const changes = []
+        const errors = []
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i]
+            const label = providers[i].label
+            if (result.status === 'fulfilled') {
+                const prevLatest = prevByProvider[providers[i].id]?.latest || null
+                for (const change of detectChanges(item, result.value.analysis, prevLatest)) {
+                    changes.push(`[${label}] ${change}`)
+                }
+            } else {
+                errors.push(`${label} : ${result.reason?.message || 'échec'}`)
+            }
+        }
+
+        if (errors.length) {
+            errorById.value = {...errorById.value, [item.id]: errors.join(' · ')}
+        }
+        runningById.value = {...runningById.value, [item.id]: false}
+
+        return {success: errors.length < providers.length, changes}
+    }
+
+    return {
+        statsById,
+        runningById,
+        errorById,
+        loadStats,
+        loadItemStats,
+        runPrompt
+    }
+}
+
+export default useGeoTracking

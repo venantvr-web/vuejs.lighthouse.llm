@@ -1,0 +1,128 @@
+{# Best Practices Quick Analysis - Expert Sécurité Web #}
+# Analyse Bonnes Pratiques - {{ url }}
+
+## Role
+Tu es un Expert en Sécurité Web et Standards Modernes, spécialisé dans les applications Vue.js et les meilleures pratiques de développement.
+
+## Score Bonnes Pratiques
+{{ score | score }}
+
+## Sécurité
+
+### HTTPS
+{% if https %}
+✅ **Connexion sécurisée** - HTTPS active
+{% else %}
+❌ **Non sécurisé** - HTTPS requis
+{% endif %}
+
+### Content Security Policy (CSP)
+{% if csp %}
+✅ **CSP configuré**
+{% else %}
+⚠️ **CSP absent** - Risque XSS
+{% endif %}
+
+### Vulnérabilités
+{% if vulnerabilities %}
+{% for vuln in vulnerabilities %}{% if vuln.title or vuln.name or vuln %}
+- {% if vuln.title %}{{ vuln.title }}{% elif vuln.name %}{{ vuln.name }}{% else %}{{ vuln }}{% endif %}{% if vuln.severity %} ({{ vuln.severity }}){% endif %}
+{% endif %}{% endfor %}
+{% else %}
+✅ Aucune vulnérabilité connue détectée
+{% endif %}
+
+## Standards Web
+
+### APIs Dépréciées
+{% if deprecations %}
+{% for dep in deprecations %}{% if dep %}
+- {{ dep }}
+{% endif %}{% endfor %}
+{% else %}
+✅ Aucune API dépréciée utilisée
+{% endif %}
+
+## Audits Échoués
+
+{% for audit in failedAudits %}{% if audit.title %}
+{{ loop.index }}. **{{ audit.title }}**
+{% if audit.description %}   {{ audit.description | truncate(150) }}{% endif %}
+{% endif %}{% endfor %}
+
+## Demande
+
+Analyse les bonnes pratiques et fournis:
+
+### 1. Sécurité Frontend
+
+**Configuration CSP stricte:**
+```html
+<!-- Dans index.html ou via headers serveur -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://trusted-cdn.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: https:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://api.example.com;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+">
+```
+
+**Headers de sécurité (Vite):**
+```javascript
+// vite.config.js
+export default {
+  server: {
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin'
+    }
+  }
+}
+```
+
+### 2. Protection XSS
+
+```vue
+<script setup>
+import DOMPurify from 'dompurify'
+
+// Sanitization du contenu HTML
+const sanitizedHtml = computed(() =>
+  DOMPurify.sanitize(rawHtml.value)
+)
+</script>
+
+<template>
+  <!-- Éviter v-html avec contenu non-fiable -->
+  <div v-html="sanitizedHtml" />
+
+  <!-- Préférer l'interpolation sécurisée -->
+  <p>{{ userInput }}</p>
+</template>
+```
+
+### 3. Gestion des Dépendances
+
+```bash
+# Audit des vulnérabilités
+npm audit
+
+# Mise à jour sécurisée
+npm update --save
+
+# Vérification des dépréciations
+npx depcheck
+```
+
+### 4. Quick Wins Sécurité
+
+3 améliorations rapides pour renforcer la sécurité.
+
+Fournis des solutions conformes aux standards OWASP.

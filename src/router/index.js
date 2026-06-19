@@ -1,0 +1,114 @@
+import {createRouter, createWebHistory} from 'vue-router'
+
+const routes = [
+    {
+        path: '/',
+        name: 'home',
+        component: () => import('@/views/HomeView.vue')
+    },
+    {
+        path: '/lighthouse',
+        name: 'lighthouse',
+        component: () => import('@/views/LighthouseView.vue')
+    },
+    {
+        path: '/upload',
+        name: 'upload',
+        component: () => import('@/views/UploadView.vue')
+    },
+    {
+        path: '/local',
+        name: 'local-lighthouse',
+        component: () => import('@/views/LocalLighthouseView.vue')
+    },
+    {
+        path: '/dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/DashboardView.vue'),
+        meta: {requiresReport: true}
+    },
+    {
+        path: '/analysis/:category?',
+        name: 'analysis',
+        component: () => import('@/views/AnalysisView.vue'),
+        meta: {requiresReport: true}
+    },
+    {
+        path: '/comparison',
+        name: 'comparison',
+        component: () => import('@/views/ComparisonView.vue')
+    },
+    {
+        path: '/settings',
+        name: 'settings',
+        component: () => import('@/views/SettingsView.vue')
+    },
+    {
+        path: '/history',
+        name: 'history',
+        component: () => import('@/views/HistoryHubView.vue')
+    },
+    {
+        path: '/briefing',
+        name: 'briefing',
+        component: () => import('@/views/BriefingView.vue')
+    },
+    {
+        path: '/watchlist',
+        name: 'watchlist',
+        component: () => import('@/views/WatchlistView.vue')
+    },
+    {
+        path: '/geo',
+        name: 'geo',
+        component: () => import('@/views/GeoView.vue')
+    },
+    {
+        path: '/search-console',
+        name: 'search-console',
+        component: () => import('@/views/SearchConsoleView.vue')
+    },
+    {
+        path: '/resources',
+        name: 'resources',
+        component: () => import('@/views/ResourcesView.vue')
+    },
+    {
+        path: '/ai-history',
+        redirect: {path: '/history', query: {tab: 'ai'}}
+    },
+    {
+        path: '/crawl',
+        name: 'crawl',
+        component: () => import('@/views/CrawlView.vue')
+    },
+    {
+        path: '/crawl/results/:id',
+        name: 'crawl-results',
+        component: () => import('@/views/CrawlResultsView.vue')
+    },
+    {
+        path: '/crawl/history',
+        redirect: {path: '/history', query: {tab: 'crawls'}}
+    }
+]
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
+})
+
+// Navigation guard - redirect to home if no report loaded
+router.beforeEach((to, from, next) => {
+    if (to.meta.requiresReport) {
+        // Check if report exists in localStorage or store
+        const hasReport = localStorage.getItem('current-report')
+        if (!hasReport) {
+            next({name: 'home'})
+            return
+        }
+    }
+    next()
+})
+
+export default router

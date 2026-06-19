@@ -1,0 +1,125 @@
+{# SEO Technical Deep Audit - Expert SEO Technique #}
+# Audit SEO Technique Avancé - {{ url }}
+
+## Role
+Tu es un Expert SEO Technique avec une spécialisation dans les applications JavaScript modernes (Vue.js, SPA).
+
+## Score SEO Technique
+{{ score | score }}
+
+## Éléments Techniques
+
+### 1. Canonical URL
+{% if canonical %}
+✅ **Présent :** `{{ canonical }}`
+{% else %}
+⚠️ **Absent:** Risque de contenu dupliqué
+{% endif %}
+
+### 2. Robots.txt
+{% if robots %}
+✅ **Présent et accessible**
+{% else %}
+❌ **Non détecté**
+{% endif %}
+
+### 3. Sitemap XML
+{% if sitemap %}
+✅ **Présent :** {{ sitemap }}
+{% else %}
+❌ **Non détecté**
+{% endif %}
+
+### 4. Hreflang
+{% if hreflang %}
+✅ **Implémenté** pour internationalisation
+{% else %}
+⚠️ **Absent** (si site multilingue, a implémenter)
+{% endif %}
+
+### 5. Données Structurées (Schema.org)
+{% if structured %}
+✅ **Présentes**
+{% for item in structured %}{% if item %}
+- {{ item }}
+{% endif %}{% endfor %}
+{% else %}
+⚠️ **Absentes:** Impact sur rich snippets Google
+{% endif %}
+
+## Audits Échoués
+
+{% for audit in failedAudits %}{% if audit.title %}
+- **{{ audit.title }}**{% if audit.score is defined %} ({{ audit.score | round(2) }}){% endif %}
+{% endif %}{% endfor %}
+
+## Demande
+
+Audit technique complet avec solutions:
+
+### 1. Configuration Robots & Sitemap
+
+**robots.txt optimisé :**
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://{{ url }}/sitemap.xml
+```
+
+**Génération sitemap dynamique :**
+```javascript
+// scripts/generate-sitemap.js
+import { SitemapStream, streamToPromise } from 'sitemap'
+import { createWriteStream } from 'fs'
+
+const sitemap = new SitemapStream({ hostname: 'https://{{ url }}' })
+
+const pages = [
+  { url: '/', changefreq: 'daily', priority: 1.0 },
+  { url: '/about', changefreq: 'monthly', priority: 0.8 }
+]
+
+pages.forEach(page => sitemap.write(page))
+sitemap.end()
+```
+
+### 2. Implémentation Schema.org
+
+```vue
+<script setup>
+import { useSchemaOrg } from '@unhead/schema-org'
+
+useSchemaOrg([
+  {
+    '@type': 'Organization',
+    name: 'Nom de l\'entreprise',
+    logo: 'https://example.com/logo.png',
+    url: 'https://example.com'
+  },
+  {
+    '@type': 'WebSite',
+    name: 'Nom du site',
+    url: 'https://example.com'
+  }
+])
+</script>
+```
+
+### 3. SEO pour SPA
+
+**Configuration Nuxt 3 pour SSR:**
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  ssr: true,
+  routeRules: {
+    '/': { prerender: true },
+    '/blog/**': { isr: 3600 }
+  }
+})
+```
+
+Fournis des solutions techniques complètes et directement implémentables.

@@ -1,0 +1,360 @@
+<script setup>
+import {computed} from 'vue'
+import {useRouter} from 'vue-router'
+import CrawlBadge from '@/components/history/CrawlBadge.vue'
+import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
+import {formatScore, formatDateTime, getScoreCssClass} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
+
+const router = useRouter()
+
+const props = defineProps({
+  scores: {
+    type: Array,
+    required: true
+  },
+  selectionMode: {
+    type: Boolean,
+    default: false
+  },
+  selectedIds: {
+    type: Array,
+    default: () => []
+  },
+  canSelect: {
+    type: Boolean,
+    default: true
+  },
+  lockedPath: {
+    type: String,
+    default: null
+  }
+})
+
+const emit = defineEmits(['delete', 'view', 'toggle-selection'])
+
+function isSelected(id) {
+  return props.selectedIds.includes(id)
+}
+
+function isRowDisabled(score) {
+  if (!props.selectionMode) return false
+  if (isSelected(score.id)) return false
+  if (!props.canSelect) return true
+  // Disable if locked to a different path
+  if (props.lockedPath && score.pagePath !== props.lockedPath) return true
+  return false
+}
+
+function navigateToCrawl(sessionId) {
+  router.push(`/crawl/results/${sessionId}`)
+}
+
+function formatPath(pagePath) {
+  if (!pagePath || pagePath === '/') return '/'
+  // Truncate long paths
+  if (pagePath.length > 30) {
+    return pagePath.substring(0, 27) + '...'
+  }
+  return pagePath
+}
+
+const sortedScores = computed(() => {
+  return [...props.scores].sort((a, b) => b.timestamp - a.timestamp)
+})
+
+const categories = [
+  {key: 'performance', label: 'Perf'},
+  {key: 'accessibility', label: 'A11y'},
+  {key: 'best-practices', label: 'BP'},
+  {key: 'seo', label: 'SEO'},
+  {key: 'pwa', label: 'PWA'}
+]
+
+function getSourceLabel(source) {
+  const labels = {
+    pagespeed: t('history.sourcePageSpeed'),
+    local: t('history.sourceLocal'),
+    file: t('history.sourceFile')
+  }
+  return labels[source] || source || '-'
+}
+
+function getStrategyLabel(strategy) {
+  return strategy === 'desktop' ? t('common.desktop') : t('common.mobile')
+}
+</script>
+
+<template>
+  <div class="analysis-table-container">
+    <table class="analysis-table">
+      <thead>
+      <tr>
+        <th v-if="selectionMode" class="col-select"></th>
+        <th class="col-date">{{ $t('history.tableDate') }}</th>
+        <th class="col-path">{{ $t('history.tablePage') }}</th>
+        <th class="col-source">{{ $t('history.tableSource') }}</th>
+        <th class="col-strategy">{{ $t('history.tableMode') }}</th>
+        <th class="col-crawl">{{ $t('history.tableCrawl') }}</th>
+        <th v-for="cat in categories" :key="cat.key" class="col-score">
+          {{ cat.label }}
+        </th>
+        <th class="col-actions">{{ $t('history.tableActions') }}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr
+          v-for="score in sortedScores"
+          :key="score.id"
+          :class="{
+            'row-selected': selectionMode && isSelected(score.id),
+            'row-selectable': selectionMode && !isRowDisabled(score),
+            'row-disabled': isRowDisabled(score)
+          }"
+          @click="selectionMode && !isRowDisabled(score) ? emit('toggle-selection', score) : null"
+      >
+        <td v-if="selectionMode" class="col-select">
+          <SelectionCheckbox
+              :disabled="isRowDisabled(score)"
+              :selected="isSelected(score.id)"
+              size="sm"
+              @toggle="emit('toggle-selection', score)"
+          />
+        </td>
+        <td class="col-date">
+          <span class="date-value">{{ formatDateTime(score.timestamp) }}</span>
+        </td>
+        <td class="col-path">
+          <span :title="score.pagePath" class="path-value">{{ formatPath(score.pagePath) }}</span>
+        </td>
+        <td class="col-source">
+            <span :class="score.source" class="source-badge">
+              {{ getSourceLabel(score.source) }}
+            </span>
+        </td>
+        <td class="col-strategy">
+            <span :class="score.strategy" class="strategy-badge">
+              {{ getStrategyLabel(score.strategy) }}
+            </span>
+        </td>
+        <td class="col-crawl">
+          <CrawlBadge
+              v-if="score.crawlSessionId"
+              :session-id="score.crawlSessionId"
+              :template-name="score.pageTemplate"
+              size="xs"
+              @click="navigateToCrawl"
+          />
+          <span v-else class="no-crawl">-</span>
+        </td>
+        <td
+            v-for="cat in categories"
+            :key="cat.key"
+            :class="getScoreCssClass(score.scores?.[cat.key])"
+            class="col-score"
+        >
+          {{ formatScore(score.scores?.[cat.key]) }}
+        </td>
+        <td class="col-actions">
+          <button
+              class="action-btn delete"
+              :title="$t('common.delete')"
+              @click="emit('delete', score.id)"
+          >
+            <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div v-if="scores.length === 0" class="empty-state">
+      {{ $t('history.tableEmpty') }}
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.analysis-table-container {
+  overflow-x: auto;
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.analysis-table th,
+.analysis-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.analysis-table th {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-tertiary);
+  white-space: nowrap;
+}
+
+.analysis-table tbody tr:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.col-date {
+  min-width: 150px;
+}
+
+.col-path {
+  min-width: 120px;
+  max-width: 180px;
+}
+
+.path-value {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  background-color: var(--color-bg-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-source,
+.col-strategy {
+  min-width: 80px;
+}
+
+.col-crawl {
+  min-width: 90px;
+  text-align: center !important;
+}
+
+.no-crawl {
+  color: var(--color-text-muted);
+}
+
+.col-score {
+  min-width: 50px;
+  text-align: center !important;
+  font-weight: 600;
+}
+
+.col-actions {
+  width: 60px;
+  text-align: center !important;
+}
+
+.date-value {
+  color: var(--color-text);
+}
+
+.source-badge,
+.strategy-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.source-badge.pagespeed {
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.source-badge.local {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.source-badge.file {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.strategy-badge.mobile {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.strategy-badge.desktop {
+  background-color: var(--color-secondary-light);
+  color: var(--color-secondary);
+}
+
+.score-good {
+  color: var(--color-score-good);
+}
+
+.score-average {
+  color: var(--color-score-average);
+}
+
+.score-poor {
+  color: var(--color-score-poor);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* Selection styles */
+.col-select {
+  width: 40px;
+  text-align: center !important;
+}
+
+.row-selectable {
+  cursor: pointer;
+}
+
+.row-selected {
+  background-color: var(--color-primary-light) !important;
+}
+
+.row-selected td {
+  border-color: var(--color-primary);
+}
+
+.row-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.row-disabled:hover {
+  background-color: transparent;
+}
+</style>

@@ -1,0 +1,45 @@
+/**
+ * Textes de l'écran GEO Tracking (visibilité de la marque dans les moteurs IA).
+ */
+export default {
+    geo: {
+        // En-tête
+        title: 'GEO Tracking',
+        subtitle: 'Visibilité de votre marque dans les réponses des moteurs IA',
+        apiKeys: 'Clés API',
+        enableAlerts: 'Activer les alertes',
+        exportCsvTitle: 'Exporter le comparatif en CSV',
+        exportMarkdownTitle: 'Exporter le comparatif en Markdown',
+        runAll: 'Tout exécuter',
+        runningAll: 'Analyse en cours…',
+        // Éditeur de clés
+        keysTitle: 'Clés API par moteur',
+        keysHelp: 'Stockées localement dans votre navigateur. Renseignez les moteurs que vous voulez interroger.',
+        keyPlaceholder: 'clé API…',
+        ollamaHint: 'Ollama se configure dans les Paramètres.',
+        // Aucun moteur prêt (deux fragments, le bouton « Clés API » s'insère entre les deux)
+        noProviderBefore: 'Aucun moteur configuré. Cliquez sur ',
+        noProviderAfter: ' pour renseigner au moins une clé (OpenAI, Claude ou Gemini).',
+        // Sélection des moteurs
+        engines: 'Moteurs :',
+        advancedTitle: 'Un appel LLM supplémentaire par moteur : concurrents cités + sentiment de la mention',
+        advancedAnalysis: 'Analyse avancée (concurrents + sentiment)',
+        // Formulaire d'ajout
+        promptPlaceholder: 'Prompt à suivre (ex. : Quels sont les meilleurs outils d\'audit SEO ?)',
+        brandPlaceholder: 'Votre marque',
+        competitorsPlaceholder: 'Concurrents (séparés par des virgules)',
+        add: 'Ajouter',
+        // Résumé
+        promptsTracked: 'Prompts suivis',
+        avgShareOfVoice: 'Part de voix moy.',
+        brandAbsent: 'Marque absente partout',
+        neverRun: 'Jamais exécuté',
+        // État vide
+        emptyTitle: 'Aucun prompt suivi',
+        emptyText: 'Ajoutez des prompts représentatifs des recherches de vos clients, indiquez votre marque et vos concurrents, puis comparez votre visibilité selon les moteurs IA.',
+        // Messages (JS)
+        errorPromptBrandRequired: 'Le prompt et la marque sont requis.',
+        errorInvalidEntry: 'Entrée invalide.',
+        confirmRemove: 'Retirer ce prompt suivi ?'
+    }
+}

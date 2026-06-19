@@ -12,6 +12,9 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
@@ -75,12 +78,12 @@ onMounted(async () => {
 async function handleAdd() {
   addError.value = ''
   if (!newPrompt.value.trim() || !newBrand.value.trim()) {
-    addError.value = 'Le prompt et la marque sont requis.'
+    addError.value = t('geo.errorPromptBrandRequired')
     return
   }
   const item = geoStore.addItem({prompt: newPrompt.value, brand: newBrand.value, competitors: newCompetitors.value})
   if (!item) {
-    addError.value = 'Entrée invalide.'
+    addError.value = t('geo.errorInvalidEntry')
     return
   }
   newPrompt.value = ''
@@ -90,7 +93,7 @@ async function handleAdd() {
 }
 
 function handleRemove(item) {
-  if (confirm('Retirer ce prompt suivi ?')) {
+  if (confirm(t('geo.confirmRemove'))) {
     geoStore.removeItem(item.id)
     geoHistory.deleteRunsForPrompt(item.id)
   }
@@ -126,25 +129,25 @@ async function handleRunAll() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Visibilité de votre marque dans les réponses des moteurs IA" title="GEO Tracking">
+    <AppHeader :subtitle="$t('geo.subtitle')" :title="$t('geo.title')">
       <template #actions>
         <button
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
             @click="showKeyEditor = !showKeyEditor"
         >
-          Clés API
+          {{ $t('geo.apiKeys') }}
         </button>
         <button
             v-if="notificationsSupported && notificationPermission !== 'granted'"
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
             @click="requestPermission"
         >
-          Activer les alertes
+          {{ $t('geo.enableAlerts') }}
         </button>
         <button
             v-if="!geoStore.isEmpty"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-            title="Exporter le comparatif en CSV"
+            :title="$t('geo.exportCsvTitle')"
             @click="exportCsv"
         >
           CSV
@@ -152,7 +155,7 @@ async function handleRunAll() {
         <button
             v-if="!geoStore.isEmpty"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-            title="Exporter le comparatif en Markdown"
+            :title="$t('geo.exportMarkdownTitle')"
             @click="exportMarkdown"
         >
           MD
@@ -169,7 +172,7 @@ async function handleRunAll() {
           >
             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          {{ runningAll ? 'Analyse en cours…' : 'Tout exécuter' }}
+          {{ runningAll ? $t('geo.runningAll') : $t('geo.runAll') }}
         </button>
       </template>
     </AppHeader>
@@ -177,9 +180,9 @@ async function handleRunAll() {
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Key editor -->
       <div v-if="showKeyEditor" class="mb-6 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">Clés API par moteur</p>
+        <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ $t('geo.keysTitle') }}</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          Stockées localement dans votre navigateur. Renseignez les moteurs que vous voulez interroger.
+          {{ $t('geo.keysHelp') }}
         </p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <label v-for="p in keyProviders" :key="p.id" class="text-xs text-gray-600 dark:text-gray-300">
@@ -187,13 +190,13 @@ async function handleRunAll() {
             <input
                 :value="settings.providerKeys[p.id]"
                 class="w-full px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
-                placeholder="clé API…"
+                :placeholder="$t('geo.keyPlaceholder')"
                 type="password"
                 @input="onKeyInput(p.id, $event)"
             />
           </label>
         </div>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Ollama se configure dans les Paramètres.</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">{{ $t('geo.ollamaHint') }}</p>
       </div>
 
       <!-- No provider ready -->
@@ -201,12 +204,12 @@ async function handleRunAll() {
           v-if="!readyProviders.length"
           class="mb-6 p-4 rounded-xl border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-900/20 text-sm text-amber-800 dark:text-amber-200"
       >
-        Aucun moteur configuré. Cliquez sur <strong>Clés API</strong> pour renseigner au moins une clé (OpenAI, Claude ou Gemini).
+        {{ $t('geo.noProviderBefore') }}<strong>{{ $t('geo.apiKeys') }}</strong>{{ $t('geo.noProviderAfter') }}
       </div>
 
       <!-- Provider selection -->
       <div v-else class="flex flex-wrap items-center gap-2 mb-6">
-        <span class="text-xs text-gray-500 dark:text-gray-400">Moteurs :</span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.engines') }}</span>
         <button
             v-for="p in readyProviders"
             :key="p.id"
@@ -218,9 +221,9 @@ async function handleRunAll() {
         >
           {{ p.label }}
         </button>
-        <label class="ml-auto flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer" title="Un appel LLM supplémentaire par moteur : concurrents cités + sentiment de la mention">
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer" :title="$t('geo.advancedTitle')">
           <input v-model="advancedAnalysis" class="rounded" type="checkbox"/>
-          Analyse avancée (concurrents + sentiment)
+          {{ $t('geo.advancedAnalysis') }}
         </label>
       </div>
 
@@ -230,7 +233,7 @@ async function handleRunAll() {
           <input
               v-model="newPrompt"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Prompt à suivre (ex. : Quels sont les meilleurs outils d'audit SEO ?)"
+              :placeholder="$t('geo.promptPlaceholder')"
               type="text"
               @keyup.enter="handleAdd"
           />
@@ -238,14 +241,14 @@ async function handleRunAll() {
             <input
                 v-model="newBrand"
                 class="md:w-56 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Votre marque"
+                :placeholder="$t('geo.brandPlaceholder')"
                 type="text"
                 @keyup.enter="handleAdd"
             />
             <input
                 v-model="newCompetitors"
                 class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Concurrents (séparés par des virgules)"
+                :placeholder="$t('geo.competitorsPlaceholder')"
                 type="text"
                 @keyup.enter="handleAdd"
             />
@@ -253,7 +256,7 @@ async function handleRunAll() {
                 class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
                 @click="handleAdd"
             >
-              Ajouter
+              {{ $t('geo.add') }}
             </button>
           </div>
         </div>
@@ -263,33 +266,32 @@ async function handleRunAll() {
       <!-- Summary -->
       <div v-if="!geoStore.isEmpty" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Prompts suivis</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.promptsTracked') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ summary.total }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Part de voix moy.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.avgShareOfVoice') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {{ summary.avgSov !== null ? summary.avgSov + '%' : '—' }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Marque absente partout</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.brandAbsent') }}</p>
           <p :class="summary.absent > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">
             {{ summary.absent }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jamais exécuté</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('geo.neverRun') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ summary.neverRun }}</p>
         </div>
       </div>
 
       <!-- Empty state -->
       <div v-if="geoStore.isEmpty" class="text-center py-20">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Aucun prompt suivi</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('geo.emptyTitle') }}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Ajoutez des prompts représentatifs des recherches de vos clients, indiquez votre
-          marque et vos concurrents, puis comparez votre visibilité selon les moteurs IA.
+          {{ $t('geo.emptyText') }}
         </p>
       </div>
 

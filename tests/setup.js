@@ -2,11 +2,16 @@
  * Vitest global setup
  */
 import {vi} from 'vitest'
+import {config} from '@vue/test-utils'
+import i18n from '@/i18n'
 
 // Mock import.meta.glob for template loading
 vi.mock('import.meta', () => ({
     glob: vi.fn()
 }))
+
+// Expose $t dans tous les montages de composants
+config.global.plugins = [...(config.global.plugins || []), i18n]
 
 // Global test utilities
 global.createMockLighthouseReport = (overrides = {}) => ({

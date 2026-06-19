@@ -12,6 +12,9 @@ import {buildWatchlistCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import AppHeader from '@/components/common/AppHeader.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
+import {useI18n} from '@/i18n'
+
+const {t} = useI18n()
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
@@ -20,10 +23,10 @@ const {statsById, refreshingById, errorById, loadStats, loadItemStats, refreshIt
 const {isSupported: notificationsSupported, permission: notificationPermission, requestPermission, notify} = useNotifications()
 
 const CATEGORY_LABELS = {
-  performance: 'Performance',
-  accessibility: 'Accessibilité',
-  'best-practices': 'Bonnes pratiques',
-  seo: 'SEO'
+  performance: t('watchlist.categoryPerformance'),
+  accessibility: t('watchlist.categoryAccessibility'),
+  'best-practices': t('watchlist.categoryBestPractices'),
+  seo: t('watchlist.categorySeo')
 }
 
 // Track which cards have their budget editor expanded
@@ -91,11 +94,11 @@ onMounted(async () => {
 async function handleAdd() {
   addError.value = ''
   if (!newUrl.value.trim()) {
-    addError.value = 'Veuillez saisir une URL.'
+    addError.value = t('watchlist.errorUrlRequired')
     return
   }
   if (watchlistStore.hasUrl(newUrl.value)) {
-    addError.value = 'Cette URL est déjà suivie.'
+    addError.value = t('watchlist.errorUrlExists')
     return
   }
 
@@ -106,7 +109,7 @@ async function handleAdd() {
   })
 
   if (!item) {
-    addError.value = 'URL invalide.'
+    addError.value = t('watchlist.errorUrlInvalid')
     return
   }
 
@@ -118,7 +121,7 @@ async function handleAdd() {
 }
 
 function handleRemove(item) {
-  if (confirm(`Retirer « ${item.label} » de la watchlist ?`)) {
+  if (confirm(t('watchlist.confirmRemove', {label: item.label}))) {
     watchlistStore.removeItem(item.id)
   }
 }
@@ -134,10 +137,10 @@ async function handleRefresh(item) {
   if (notificationPermission.value === 'granted') {
     const lines = []
     for (const r of result.regressions) {
-      lines.push(`${CATEGORY_LABELS[r.category]} : ${r.from} → ${r.to} (${r.delta})`)
+      lines.push(t('watchlist.notifyRegression', {category: CATEGORY_LABELS[r.category], from: r.from, to: r.to, delta: r.delta}))
     }
     for (const b of result.breaches) {
-      lines.push(`${CATEGORY_LABELS[b.category]} sous le budget (${b.score} < ${b.budget})`)
+      lines.push(t('watchlist.notifyBreach', {category: CATEGORY_LABELS[b.category], score: b.score, budget: b.budget}))
     }
     if (lines.length > 0) {
       notify(`⚠️ ${item.label}`, {
@@ -171,33 +174,33 @@ async function handleEnableNotifications() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Suivi quotidien de la santé de vos pages" title="Watchlist">
+    <AppHeader :subtitle="$t('watchlist.subtitle')" :title="$t('watchlist.title')">
       <template #actions>
         <button
             v-if="notificationsSupported && notificationPermission !== 'granted'"
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-            title="Recevoir une alerte navigateur en cas de régression ou de budget dépassé"
+            :title="$t('watchlist.enableAlertsTitle')"
             @click="handleEnableNotifications"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Activer les alertes
+          {{ $t('watchlist.enableAlerts') }}
         </button>
         <span
             v-else-if="notificationsSupported && notificationPermission === 'granted'"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-emerald-600 dark:text-emerald-400 text-sm font-medium"
-            title="Les alertes navigateur sont activées"
+            :title="$t('watchlist.alertsActiveTitle')"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Alertes actives
+          {{ $t('watchlist.alertsActive') }}
         </span>
         <button
             v-if="!watchlistStore.isEmpty"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium transition-colors"
-            title="Exporter en CSV"
+            :title="$t('watchlist.exportCsvTitle')"
             @click="exportCsv"
         >
           CSV
@@ -214,7 +217,7 @@ async function handleEnableNotifications() {
           >
             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          {{ refreshingAll ? 'Analyse en cours…' : 'Tout ré-auditer' }}
+          {{ refreshingAll ? $t('watchlist.refreshingAll') : $t('watchlist.refreshAll') }}
         </button>
       </template>
     </AppHeader>
@@ -226,14 +229,14 @@ async function handleEnableNotifications() {
           <input
               v-model="newUrl"
               class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="https://exemple.com/page"
+              :placeholder="$t('watchlist.urlPlaceholder')"
               type="url"
               @keyup.enter="handleAdd"
           />
           <input
               v-model="newLabel"
               class="md:w-44 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Nom (optionnel)"
+              :placeholder="$t('watchlist.labelPlaceholder')"
               type="text"
               @keyup.enter="handleAdd"
           />
@@ -241,21 +244,21 @@ async function handleEnableNotifications() {
               v-model="newStrategy"
               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="mobile">Mobile</option>
-            <option value="desktop">Desktop</option>
+            <option value="mobile">{{ $t('common.mobile') }}</option>
+            <option value="desktop">{{ $t('common.desktop') }}</option>
           </select>
           <select
               v-model="newSource"
               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="pagespeed">PageSpeed</option>
-            <option value="local">Chromium local</option>
+            <option value="pagespeed">{{ $t('watchlist.sourcePagespeed') }}</option>
+            <option value="local">{{ $t('watchlist.sourceLocal') }}</option>
           </select>
           <button
               class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
               @click="handleAdd"
           >
-            Ajouter
+            {{ $t('watchlist.add') }}
           </button>
         </div>
         <p v-if="addError" class="mt-2 text-sm text-red-500">{{ addError }}</p>
@@ -264,29 +267,29 @@ async function handleEnableNotifications() {
       <!-- Summary strip -->
       <div v-if="!watchlistStore.isEmpty" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Pages suivies</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('watchlist.pagesTracked') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ summary.total }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Perf. moyenne</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('watchlist.avgPerf') }}</p>
           <p :class="getScoreColorClass(summary.avgPerf)" class="text-2xl font-bold mt-1">
             {{ formatScore(summary.avgPerf) }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Régressions</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('watchlist.regressions') }}</p>
           <p :class="summary.regressions > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">
             {{ summary.regressions }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Budgets dépassés</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('watchlist.budgetBreaches') }}</p>
           <p :class="summary.budgetBreaches > 0 ? 'text-red-500' : 'text-emerald-500'" class="text-2xl font-bold mt-1">
             {{ summary.budgetBreaches }}
           </p>
         </div>
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jamais audité</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('watchlist.neverAudited') }}</p>
           <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ summary.neverAudited }}</p>
         </div>
       </div>
@@ -299,10 +302,9 @@ async function handleEnableNotifications() {
             <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Aucune page suivie</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('watchlist.emptyTitle') }}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
-          Ajoutez les URLs que vous voulez surveiller au quotidien. Chaque ré-audit est
-          comparé au précédent pour détecter les régressions.
+          {{ $t('watchlist.emptyText') }}
         </p>
       </div>
 

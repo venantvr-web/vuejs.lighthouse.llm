@@ -10,7 +10,9 @@ import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {analyzeUrl, getEstimatedTime, STRATEGIES} from '@/services/pageSpeedInsights'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
 const settings = useSettingsStore()
@@ -64,7 +66,7 @@ async function handleSubmit(inputUrl) {
     router.push('/dashboard')
   } catch (err) {
     clearInterval(progressInterval)
-    error.value = err.message || 'Une erreur est survenue lors de l\'analyse'
+    error.value = err.message || t('lighthouse.genericError')
     loading.value = false
     progress.value = 0
   }
@@ -87,7 +89,7 @@ function handleDismissError() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Analyse live via PageSpeed Insights" title="Analyse PageSpeed"/>
+    <AppHeader :subtitle="$t('lighthouse.headerSubtitle')" :title="$t('lighthouse.headerTitle')"/>
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center p-4">
@@ -96,17 +98,17 @@ function handleDismissError() {
         <div v-if="loading" class="text-center py-12">
           <LoadingSpinner :progress="progress" size="xl"/>
           <p class="mt-6 text-lg text-gray-600 dark:text-gray-300">
-            Analyse en cours...
+            {{ $t('lighthouse.analyzing') }}
           </p>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            Temps estimé : ~{{ estimatedTime }} secondes
+            {{ $t('lighthouse.estimatedTime', { seconds: estimatedTime }) }}
           </p>
           <button
               class="mt-6 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
               type="button"
               @click="handleCancel"
           >
-            Annuler
+            {{ $t('common.cancel') }}
           </button>
         </div>
 
@@ -114,10 +116,10 @@ function handleDismissError() {
         <div v-else>
           <div class="text-center mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Analysez votre site web
+              {{ $t('lighthouse.title') }}
             </h2>
             <p class="text-gray-500 dark:text-gray-400">
-              Entrez l'URL de votre site pour lancer une analyse Lighthouse en temps réel
+              {{ $t('lighthouse.subtitle') }}
             </p>
           </div>
 
@@ -135,7 +137,7 @@ function handleDismissError() {
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
-                Mobile
+                {{ $t('common.mobile') }}
               </button>
               <button
                   :class="strategy === 'desktop'
@@ -148,7 +150,7 @@ function handleDismissError() {
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
-                Desktop
+                {{ $t('common.desktop') }}
               </button>
             </div>
           </div>
@@ -159,7 +161,7 @@ function handleDismissError() {
               :message="error"
               class="mb-6"
               dismissible
-              title="Erreur d'analyse"
+              :title="$t('lighthouse.errorTitle')"
               type="error"
               @dismiss="handleDismissError"
           />
@@ -179,10 +181,9 @@ function handleDismissError() {
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
               <div class="text-sm text-blue-700 dark:text-blue-300">
-                <p class="font-medium mb-1">À propos de l'analyse</p>
+                <p class="font-medium mb-1">{{ $t('lighthouse.infoTitle') }}</p>
                 <p>
-                  Cette analyse utilise l'API PageSpeed Insights de Google pour exécuter
-                  Lighthouse sur votre site. Les résultats sont identiques à ceux de Chrome DevTools.
+                  {{ $t('lighthouse.infoBody') }}
                 </p>
               </div>
             </div>
@@ -191,9 +192,9 @@ function handleDismissError() {
           <!-- Alternative option -->
           <div class="mt-8 text-center">
             <p class="text-gray-500 dark:text-gray-400 text-sm">
-              Vous avez déjà un rapport Lighthouse ?
+              {{ $t('lighthouse.altQuestion') }}
               <router-link class="text-primary-500 hover:text-primary-600 font-medium" to="/upload">
-                Importez-le ici
+                {{ $t('lighthouse.altLink') }}
               </router-link>
             </p>
           </div>

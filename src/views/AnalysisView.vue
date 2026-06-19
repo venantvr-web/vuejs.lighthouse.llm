@@ -11,7 +11,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const router = useRouter()
 const route = useRoute()
 const promptEngine = usePromptEngine()
@@ -104,11 +106,11 @@ const categories = computed(() => {
 
   const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
   const labels = {
-    'performance': 'Performance',
-    'accessibility': 'Accessibilité',
-    'best-practices': 'Bonnes Pratiques',
-    'seo': 'SEO',
-    'pwa': 'PWA'
+    'performance': t('analysis.categoryPerformance'),
+    'accessibility': t('analysis.categoryAccessibility'),
+    'best-practices': t('analysis.categoryBestPractices'),
+    'seo': t('analysis.categorySeo'),
+    'pwa': t('analysis.categoryPwa')
   }
 
   return cats
@@ -212,7 +214,7 @@ const streamInto = async (prompt, {append = false} = {}) => {
     truncated.value = !!activeProvider?.lastResponseTruncated
   } catch (e) {
     // Don't surface an error when the user cancelled the stream
-    if (isStreaming.value) error.value = `Erreur: ${e.message}`
+    if (isStreaming.value) error.value = t('analysis.streamError', {message: e.message})
   } finally {
     isStreaming.value = false
     activeProvider = null
@@ -244,7 +246,7 @@ const persistAnalysis = async () => {
 
 const startAnalysis = async () => {
   if (!settings.isConfigured) {
-    error.value = 'Veuillez configurer un fournisseur LLM dans les paramètres'
+    error.value = t('analysis.notConfigured')
     return
   }
   lastArtifactId = null
@@ -279,7 +281,7 @@ const exportAnalysis = () => {
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <AppHeader title="Analyse IA">
+    <AppHeader :title="$t('analysis.headerTitle')">
       <template #actions>
         <router-link
             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
@@ -288,7 +290,7 @@ const exportAnalysis = () => {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Tableau de bord
+          {{ $t('common.backToDashboard') }}
         </router-link>
       </template>
     </AppHeader>
@@ -312,7 +314,7 @@ const exportAnalysis = () => {
               {{ categories.find(c => c.id === activeCategory)?.label || '' }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {{ failedAudits.length }} problèmes détectés
+              {{ $t('analysis.issuesDetected', { count: failedAudits.length }) }}
             </p>
           </div>
 
@@ -322,7 +324,7 @@ const exportAnalysis = () => {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
-              Type d'analyse
+              {{ $t('analysis.analysisType') }}
             </h4>
             <div class="space-y-2">
               <label
@@ -354,7 +356,7 @@ const exportAnalysis = () => {
                     }"
                       class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full"
                   >
-                    {{ template.strategy === 'quick' ? 'Rapide' : template.strategy === 'deep' ? 'Approfondi' : 'Specifique' }}
+                    {{ template.strategy === 'quick' ? $t('analysis.strategyQuick') : template.strategy === 'deep' ? $t('analysis.strategyDeep') : $t('analysis.strategySpecific') }}
                   </span>
                 </div>
               </label>
@@ -374,7 +376,7 @@ const exportAnalysis = () => {
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
             </svg>
-            {{ isStreaming ? 'Analyse en cours...' : 'Générer le plan d\'action' }}
+            {{ isStreaming ? $t('analysis.analyzing') : $t('analysis.generateActionPlan') }}
           </button>
 
           <!-- Error message -->
@@ -388,9 +390,9 @@ const exportAnalysis = () => {
               <svg class="w-4 h-4 text-lighthouse-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
-              Problèmes détectés
+              {{ $t('analysis.issuesPanelTitle') }}
             </h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour voir les détails</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('analysis.clickForDetails') }}</p>
             <ul class="space-y-1 max-h-64 overflow-y-auto">
               <li
                   v-for="audit in failedAudits"
@@ -423,7 +425,7 @@ const exportAnalysis = () => {
               <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
-            {{ showPromptPreview ? 'Masquer le prompt' : 'Voir le prompt' }}
+            {{ showPromptPreview ? $t('analysis.hidePrompt') : $t('analysis.showPrompt') }}
           </button>
         </div>
 
@@ -475,13 +477,13 @@ const exportAnalysis = () => {
 
               <!-- Description -->
               <div class="prose prose-sm dark:prose-invert max-w-none mb-4">
-                <p class="text-gray-600 dark:text-gray-300" v-html="selectedAudit.description?.split('[Learn more]')[0] || 'Aucune description disponible.'"></p>
+                <p class="text-gray-600 dark:text-gray-300" v-html="selectedAudit.description?.split('[Learn more]')[0] || $t('analysis.noDescription')"></p>
               </div>
 
               <!-- Details items if available -->
               <div v-if="selectedAudit.details?.items?.length" class="mt-4">
                 <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Éléments concernés ({{ selectedAudit.details.items.length }})
+                  {{ $t('analysis.affectedElements', { count: selectedAudit.details.items.length }) }}
                 </h4>
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 max-h-48 overflow-y-auto">
                   <ul class="space-y-2 text-sm">
@@ -498,14 +500,14 @@ const exportAnalysis = () => {
                     </li>
                   </ul>
                   <p v-if="selectedAudit.details.items.length > 10" class="text-xs text-gray-400 mt-2">
-                    Et {{ selectedAudit.details.items.length - 10 }} autres éléments...
+                    {{ $t('analysis.moreElements', { count: selectedAudit.details.items.length - 10 }) }}
                   </p>
                 </div>
               </div>
 
               <!-- Savings if available -->
               <div v-if="selectedAudit.details?.overallSavingsMs || selectedAudit.details?.overallSavingsBytes" class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <h4 class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">Gains potentiels</h4>
+                <h4 class="text-sm font-medium text-green-700 dark:text-green-400 mb-1">{{ $t('analysis.potentialGains') }}</h4>
                 <div class="flex gap-4 text-sm">
                   <span v-if="selectedAudit.details.overallSavingsMs" class="text-green-600 dark:text-green-400">
                     ⏱️ {{ Math.round(selectedAudit.details.overallSavingsMs) }} ms
@@ -526,7 +528,7 @@ const exportAnalysis = () => {
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                   </svg>
-                  Aperçu du prompt ({{ selectedTemplate }})
+                  {{ $t('analysis.promptPreview', { template: selectedTemplate }) }}
                 </h4>
                 <button
                     class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -537,7 +539,7 @@ const exportAnalysis = () => {
                   </svg>
                 </button>
               </div>
-              <pre class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-xs overflow-auto max-h-64 whitespace-pre-wrap font-mono text-gray-700 dark:text-gray-300">{{ promptPreview || 'Chargement...' }}</pre>
+              <pre class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-xs overflow-auto max-h-64 whitespace-pre-wrap font-mono text-gray-700 dark:text-gray-300">{{ promptPreview || $t('common.loading') }}</pre>
             </div>
           </Transition>
 
@@ -550,12 +552,12 @@ const exportAnalysis = () => {
               @export="exportAnalysis"
           />
           <div v-if="truncated && !isStreaming" class="mt-2 flex items-center gap-3">
-            <p class="text-xs text-amber-600 dark:text-amber-400">Réponse coupée par la limite de tokens.</p>
+            <p class="text-xs text-amber-600 dark:text-amber-400">{{ $t('analysis.responseTruncated') }}</p>
             <button
                 class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium transition-colors"
                 @click="continueAnalysis"
             >
-              Continuer
+              {{ $t('analysis.continue') }}
             </button>
           </div>
         </div>

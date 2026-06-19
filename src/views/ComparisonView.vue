@@ -9,7 +9,9 @@ import ScoreDiffIndicator from '@/components/comparison/ScoreDiffIndicator.vue'
 import TemplateComparisonTable from '@/components/comparison/TemplateComparisonTable.vue'
 import {useComparison, COMPARISON_CATEGORIES} from '@/composables/useComparison'
 import {formatDateTime} from '@/utils/formatters'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const route = useRoute()
 const router = useRouter()
 const {
@@ -80,10 +82,10 @@ const scoreDiffs = computed(() => {
 })
 
 const categoryLabels = {
-  performance: 'Performance',
-  accessibility: 'Accessibilité',
-  seo: 'SEO',
-  'best-practices': 'Bonnes Pratiques'
+  performance: t('comparison.categoryPerformance'),
+  accessibility: t('comparison.categoryAccessibility'),
+  seo: t('comparison.categorySeo'),
+  'best-practices': t('comparison.categoryBestPractices')
 }
 
 const clearReport = (which) => {
@@ -106,11 +108,11 @@ function goBack() {
 const pageTitle = computed(() => {
   switch (mode.value) {
     case 'session':
-      return 'Comparer les sessions de crawl'
+      return t('comparison.titleSession')
     case 'history':
-      return 'Comparer les analyses'
+      return t('comparison.titleHistory')
     default:
-      return 'Comparer les rapports'
+      return t('comparison.titleFile')
   }
 })
 
@@ -145,7 +147,7 @@ function getItemScore(item, category) {
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
-          Retour
+          {{ $t('common.back') }}
         </button>
       </template>
     </AppHeader>
@@ -159,7 +161,7 @@ function getItemScore(item, category) {
           <div>
             <div class="flex items-center gap-2 mb-4">
               <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
-              <h2 class="font-semibold text-gray-900 dark:text-white">Rapport A (Avant)</h2>
+              <h2 class="font-semibold text-gray-900 dark:text-white">{{ $t('comparison.reportABefore') }}</h2>
             </div>
 
             <div v-if="!reportA">
@@ -190,7 +192,7 @@ function getItemScore(item, category) {
           <div>
             <div class="flex items-center gap-2 mb-4">
               <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
-              <h2 class="font-semibold text-gray-900 dark:text-white">Rapport B (Après)</h2>
+              <h2 class="font-semibold text-gray-900 dark:text-white">{{ $t('comparison.reportBAfter') }}</h2>
             </div>
 
             <div v-if="!reportB">
@@ -220,7 +222,7 @@ function getItemScore(item, category) {
 
         <!-- File comparison results -->
         <div v-if="reportA && reportB" class="mt-12">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Évolution des scores</h2>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('comparison.scoreEvolution') }}</h2>
 
           <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div
@@ -264,27 +266,27 @@ function getItemScore(item, category) {
 
           <!-- Summary -->
           <div class="mt-8 card p-6">
-            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Résumé</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ $t('comparison.summary') }}</h3>
 
             <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
               <p>
                 <template v-if="Object.values(scoreDiffs).every(d => d >= 0)">
-                  Excellente évolution ! Tous les scores se sont améliorés ou sont restés stables.
+                  {{ $t('comparison.summaryAllImproved') }}
                 </template>
                 <template v-else-if="Object.values(scoreDiffs).every(d => d <= 0)">
-                  Attention, des régressions ont été détectées sur plusieurs catégories.
+                  {{ $t('comparison.summaryAllDeclined') }}
                 </template>
                 <template v-else>
-                  Évolution mitigée : certaines catégories se sont améliorées, d'autres ont régressé.
+                  {{ $t('comparison.summaryMixed') }}
                 </template>
               </p>
 
               <ul>
                 <li v-for="(diff, key) in scoreDiffs" :key="key">
                   <strong>{{ categoryLabels[key] }}</strong>:
-                  <span v-if="diff > 0" class="text-green-600 dark:text-green-400">+{{ diff }} points</span>
-                  <span v-else-if="diff < 0" class="text-red-600 dark:text-red-400">{{ diff }} points</span>
-                  <span v-else class="text-gray-500">stable</span>
+                  <span v-if="diff > 0" class="text-green-600 dark:text-green-400">+{{ diff }} {{ $t('comparison.points') }}</span>
+                  <span v-else-if="diff < 0" class="text-red-600 dark:text-red-400">{{ diff }} {{ $t('comparison.points') }}</span>
+                  <span v-else class="text-gray-500">{{ $t('comparison.stable') }}</span>
                 </li>
               </ul>
             </div>
@@ -302,16 +304,16 @@ function getItemScore(item, category) {
             </svg>
           </div>
           <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucune comparaison sélectionnée
+            {{ $t('comparison.noComparisonTitle') }}
           </h3>
           <p class="text-gray-500 dark:text-gray-400 mb-6">
-            Sélectionnez deux {{ mode === 'session' ? 'sessions' : 'analyses' }} pour les comparer.
+            {{ mode === 'session' ? $t('comparison.selectTwoSessions') : $t('comparison.selectTwoAnalyses') }}
           </p>
           <button
               class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               @click="goBack"
           >
-            Retour a la liste
+            {{ $t('comparison.backToList') }}
           </button>
         </div>
 
@@ -320,12 +322,12 @@ function getItemScore(item, category) {
           <!-- Session cards -->
           <div class="grid md:grid-cols-2 gap-6 mb-8">
             <SessionComparisonCard
-                :label="'Reference'"
+                :label="$t('comparison.reference')"
                 :session="itemA"
                 position="left"
             />
             <SessionComparisonCard
-                :label="'Comparaison'"
+                :label="$t('comparison.comparisonLabel')"
                 :session="itemB"
                 position="right"
             />
@@ -334,7 +336,7 @@ function getItemScore(item, category) {
           <!-- Score comparison -->
           <div class="card p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Évolution des scores
+              {{ $t('comparison.scoreEvolution') }}
             </h2>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -355,7 +357,7 @@ function getItemScore(item, category) {
                 </div>
 
                 <div class="text-xs text-gray-400">
-                  Avant: {{ formatScore(cat.scoreA) }}
+                  {{ $t('comparison.before', { score: formatScore(cat.scoreA) }) }}
                 </div>
               </div>
             </div>
@@ -367,12 +369,12 @@ function getItemScore(item, category) {
               class="card p-6"
           >
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Comparaison par template
+              {{ $t('comparison.templateComparison') }}
             </h2>
 
             <TemplateComparisonTable
-                :label-a="'Reference'"
-                :label-b="'Comparaison'"
+                :label-a="$t('comparison.reference')"
+                :label-b="$t('comparison.comparisonLabel')"
                 :templates="sessionComparison.templateComparison"
             />
           </div>
@@ -380,7 +382,7 @@ function getItemScore(item, category) {
           <!-- Summary -->
           <div class="card p-6 mt-8">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Résumé
+              {{ $t('comparison.summary') }}
             </h2>
 
             <div class="grid sm:grid-cols-3 gap-6">
@@ -389,7 +391,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.improved || 0 }}
                 </div>
                 <div class="text-sm text-emerald-700 dark:text-emerald-300">
-                  Amélioration{{ (comparison?.summary?.improved || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.improved || 0) > 1 ? $t('comparison.improvementMany') : $t('comparison.improvementOne') }}
                 </div>
               </div>
 
@@ -398,7 +400,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.unchanged || 0 }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  Stable{{ (comparison?.summary?.unchanged || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.unchanged || 0) > 1 ? $t('comparison.stableMany') : $t('comparison.stableOne') }}
                 </div>
               </div>
 
@@ -407,7 +409,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.declined || 0 }}
                 </div>
                 <div class="text-sm text-red-700 dark:text-red-300">
-                  Régression{{ (comparison?.summary?.declined || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.declined || 0) > 1 ? $t('comparison.regressionMany') : $t('comparison.regressionOne') }}
                 </div>
               </div>
             </div>
@@ -421,10 +423,10 @@ function getItemScore(item, category) {
             <!-- Analysis A -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-blue-800 p-4">
               <div class="text-xs font-medium px-2 py-0.5 rounded inline-block mb-3 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-                Reference
+                {{ $t('comparison.reference') }}
               </div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-                {{ itemA?.url || itemA?.domain || 'URL inconnue' }}
+                {{ itemA?.url || itemA?.domain || $t('comparison.unknownUrl') }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ formatDateTime(itemA?.timestamp) }}
@@ -434,10 +436,10 @@ function getItemScore(item, category) {
             <!-- Analysis B -->
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
               <div class="text-xs font-medium px-2 py-0.5 rounded inline-block mb-3 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                Comparaison
+                {{ $t('comparison.comparisonLabel') }}
               </div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-                {{ itemB?.url || itemB?.domain || 'URL inconnue' }}
+                {{ itemB?.url || itemB?.domain || $t('comparison.unknownUrl') }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ formatDateTime(itemB?.timestamp) }}
@@ -448,7 +450,7 @@ function getItemScore(item, category) {
           <!-- Score comparison -->
           <div class="card p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-              Évolution des scores
+              {{ $t('comparison.scoreEvolution') }}
             </h2>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -469,7 +471,7 @@ function getItemScore(item, category) {
                 </div>
 
                 <div class="text-xs text-gray-400">
-                  Avant: {{ formatScore(cat.scoreA) }}
+                  {{ $t('comparison.before', { score: formatScore(cat.scoreA) }) }}
                 </div>
               </div>
             </div>
@@ -478,7 +480,7 @@ function getItemScore(item, category) {
           <!-- Summary -->
           <div class="card p-6 mt-8">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Résumé
+              {{ $t('comparison.summary') }}
             </h2>
 
             <div class="grid sm:grid-cols-3 gap-6">
@@ -487,7 +489,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.improved || 0 }}
                 </div>
                 <div class="text-sm text-emerald-700 dark:text-emerald-300">
-                  Amélioration{{ (comparison?.summary?.improved || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.improved || 0) > 1 ? $t('comparison.improvementMany') : $t('comparison.improvementOne') }}
                 </div>
               </div>
 
@@ -496,7 +498,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.unchanged || 0 }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  Stable{{ (comparison?.summary?.unchanged || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.unchanged || 0) > 1 ? $t('comparison.stableMany') : $t('comparison.stableOne') }}
                 </div>
               </div>
 
@@ -505,7 +507,7 @@ function getItemScore(item, category) {
                   {{ comparison?.summary?.declined || 0 }}
                 </div>
                 <div class="text-sm text-red-700 dark:text-red-300">
-                  Régression{{ (comparison?.summary?.declined || 0) > 1 ? 's' : '' }}
+                  {{ (comparison?.summary?.declined || 0) > 1 ? $t('comparison.regressionMany') : $t('comparison.regressionOne') }}
                 </div>
               </div>
             </div>

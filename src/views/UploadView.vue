@@ -5,7 +5,9 @@ import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
 import DropZone from '@/components/upload/DropZone.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const router = useRouter()
 const lighthouseStore = useLighthouseStore()
 
@@ -22,7 +24,7 @@ const onReportLoaded = async (json) => {
     // Navigate to dashboard
     router.push('/dashboard')
   } catch (err) {
-    error.value = err.message || 'Erreur lors du chargement du rapport'
+    error.value = err.message || t('upload.loadError')
   }
 }
 
@@ -34,17 +36,17 @@ function handleDismissError() {
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Import d'un rapport Lighthouse JSON" title="Importer un rapport"/>
+    <AppHeader :subtitle="$t('upload.headerSubtitle')" :title="$t('upload.headerTitle')"/>
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center p-4">
       <div class="w-full max-w-2xl">
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Importez votre rapport Lighthouse
+            {{ $t('upload.title') }}
           </h2>
           <p class="text-gray-500 dark:text-gray-400">
-            Glissez-déposez ou sélectionnez un fichier JSON exporté depuis Chrome DevTools
+            {{ $t('upload.subtitle') }}
           </p>
         </div>
 
@@ -54,7 +56,7 @@ function handleDismissError() {
             :message="error"
             class="mb-6"
             dismissible
-            title="Erreur d'import"
+            :title="$t('upload.errorTitle')"
             type="error"
             @dismiss="handleDismissError"
         />
@@ -65,22 +67,22 @@ function handleDismissError() {
         <!-- Help text -->
         <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
           <h3 class="font-medium text-gray-900 dark:text-white mb-2">
-            Comment obtenir un rapport Lighthouse ?
+            {{ $t('upload.helpTitle') }}
           </h3>
           <ol class="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
-            <li>Ouvrez Chrome DevTools (F12)</li>
-            <li>Allez dans l'onglet "Lighthouse"</li>
-            <li>Lancez une analyse</li>
-            <li>Cliquez sur "Save as JSON" dans le menu</li>
+            <li>{{ $t('upload.helpStep1') }}</li>
+            <li>{{ $t('upload.helpStep2') }}</li>
+            <li>{{ $t('upload.helpStep3') }}</li>
+            <li>{{ $t('upload.helpStep4') }}</li>
           </ol>
         </div>
 
         <!-- Alternative option -->
         <div class="mt-8 text-center">
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            Vous préférez une analyse en temps réel ?
+            {{ $t('upload.altQuestion') }}
             <router-link class="text-primary-500 hover:text-primary-600 font-medium" to="/lighthouse">
-              Analysez votre URL directement
+              {{ $t('upload.altLink') }}
             </router-link>
           </p>
         </div>

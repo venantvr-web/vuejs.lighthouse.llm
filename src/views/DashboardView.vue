@@ -5,7 +5,9 @@ import {useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import ActionPlanPanel from '@/components/dashboard/ActionPlanPanel.vue'
 import {useLighthouseParser} from '@/composables/useLighthouseParser'
+import {useI18n} from '@/i18n'
 
+const {t} = useI18n()
 const router = useRouter()
 const report = ref(null)
 const loading = ref(true)
@@ -33,11 +35,11 @@ const categories = computed(() => {
 
   const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
   const labels = {
-    'performance': 'Performance',
-    'accessibility': 'Accessibilité',
-    'best-practices': 'Bonnes Pratiques',
-    'seo': 'SEO',
-    'pwa': 'PWA'
+    'performance': t('dashboard.categoryPerformance'),
+    'accessibility': t('dashboard.categoryAccessibility'),
+    'best-practices': t('dashboard.categoryBestPractices'),
+    'seo': t('dashboard.categorySeo'),
+    'pwa': t('dashboard.categoryPwa')
   }
 
   return cats
@@ -84,10 +86,10 @@ const clearReport = () => {
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <AppHeader :subtitle="url || ''" title="Tableau de bord">
+    <AppHeader :subtitle="url || ''" :title="$t('dashboard.headerTitle')">
       <template #actions>
         <button class="btn btn-secondary text-sm" @click="clearReport">
-          Nouveau rapport
+          {{ $t('dashboard.newReport') }}
         </button>
       </template>
     </AppHeader>
@@ -101,7 +103,7 @@ const clearReport = () => {
     <main v-else class="max-w-6xl mx-auto px-4 py-8">
       <!-- Scores grid -->
       <section class="mb-12">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Vue d'ensemble</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.overview') }}</h2>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
           <button
@@ -117,7 +119,7 @@ const clearReport = () => {
             />
             <div class="mt-4 text-center opacity-0 group-hover:opacity-100 transition-opacity">
               <span class="text-xs text-primary-600 dark:text-primary-400 font-medium">
-                Analyser →
+                {{ $t('dashboard.analyze') }}
               </span>
             </div>
           </button>
@@ -126,7 +128,7 @@ const clearReport = () => {
 
       <!-- Core Web Vitals -->
       <section v-if="coreWebVitals.length" class="mb-12">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Core Web Vitals</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.coreWebVitals') }}</h2>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           <div
@@ -157,7 +159,7 @@ const clearReport = () => {
 
       <!-- Quick actions -->
       <section>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Actions rapides</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('dashboard.quickActions') }}</h2>
 
         <div class="grid sm:grid-cols-2 gap-4">
           <router-link
@@ -170,8 +172,8 @@ const clearReport = () => {
               </svg>
             </div>
             <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white">Optimiser la Performance</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Obtenez des recommandations IA pour améliorer vos Core Web Vitals</p>
+              <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('dashboard.optimizePerformanceTitle') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('dashboard.optimizePerformanceDescription') }}</p>
             </div>
           </router-link>
 
@@ -185,8 +187,8 @@ const clearReport = () => {
               </svg>
             </div>
             <div>
-              <h3 class="font-semibold text-gray-900 dark:text-white">Comparer les rapports</h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Analysez l'évolution de votre site dans le temps</p>
+              <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('dashboard.compareReportsTitle') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('dashboard.compareReportsDescription') }}</p>
             </div>
           </router-link>
         </div>

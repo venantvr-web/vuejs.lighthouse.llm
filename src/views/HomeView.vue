@@ -5,7 +5,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <AppHeader subtitle="Analyse intelligente de vos rapports Lighthouse" title="Lighthouse AI Analyzer"/>
+    <AppHeader :subtitle="$t('home.headerSubtitle')" :title="$t('home.headerTitle')"/>
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center p-4">
@@ -13,11 +13,10 @@ import AppHeader from '@/components/common/AppHeader.vue'
         <!-- Title -->
         <div class="text-center mb-12">
           <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Analysez et optimisez votre site web
+            {{ $t('home.heroTitle') }}
           </h2>
           <p class="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Obtenez des recommandations personnalisées générées par IA pour améliorer
-            les performances, l'accessibilité et le SEO de votre site.
+            {{ $t('home.heroDescription') }}
           </p>
         </div>
 
@@ -33,12 +32,12 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="card-title">PageSpeed Insights</h3>
+            <h3 class="card-title">{{ $t('home.pageSpeedTitle') }}</h3>
             <p class="card-description">
-              Analyse via l'API Google PageSpeed Insights. Rapide, sans installation requise.
+              {{ $t('home.pageSpeedDescription') }}
             </p>
             <div class="card-cta">
-              <span>Analyser une URL</span>
+              <span>{{ $t('home.pageSpeedCta') }}</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
@@ -55,12 +54,12 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="card-title">Chromium Local</h3>
+            <h3 class="card-title">{{ $t('home.localTitle') }}</h3>
             <p class="card-description">
-              Analyse locale via Chromium. Illimitée, confidentielle, fonctionne avec l'intranet.
+              {{ $t('home.localDescription') }}
             </p>
             <div class="card-cta card-cta-local">
-              <span>Lancer localement</span>
+              <span>{{ $t('home.localCta') }}</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
@@ -77,12 +76,12 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="card-title">Importer un rapport</h3>
+            <h3 class="card-title">{{ $t('home.uploadTitle') }}</h3>
             <p class="card-description">
-              Importez un fichier JSON Lighthouse exporté depuis Chrome DevTools.
+              {{ $t('home.uploadDescription') }}
             </p>
             <div class="card-cta">
-              <span>Importer un fichier</span>
+              <span>{{ $t('home.uploadCta') }}</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
@@ -99,12 +98,12 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="card-title">Mode Crawl</h3>
+            <h3 class="card-title">{{ $t('home.crawlTitle') }}</h3>
             <p class="card-description">
-              Analysez plusieurs pages et obtenez des scores agrégés par template.
+              {{ $t('home.crawlDescription') }}
             </p>
             <div class="card-cta card-cta-crawl">
-              <span>Crawler un site</span>
+              <span>{{ $t('home.crawlCta') }}</span>
               <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
@@ -120,9 +119,9 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Performance</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('home.featurePerformance') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Optimisez vos Core Web Vitals
+              {{ $t('home.featurePerformanceDescription') }}
             </p>
           </div>
 
@@ -132,9 +131,9 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">SEO</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('home.featureSeo') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Améliorez votre référencement
+              {{ $t('home.featureSeoDescription') }}
             </p>
           </div>
 
@@ -144,9 +143,9 @@ import AppHeader from '@/components/common/AppHeader.vue'
                 <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
               </svg>
             </div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Accessibilité</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('home.featureAccessibility') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Rendez votre site inclusif
+              {{ $t('home.featureAccessibilityDescription') }}
             </p>
           </div>
         </div>
@@ -158,7 +157,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
               <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             <span class="text-gray-600 dark:text-gray-300">
-              Propulsé par <strong class="text-primary-600 dark:text-primary-400">Gemini</strong> / OpenAI / Claude / Ollama
+              {{ $t('home.poweredBy') }} <strong class="text-primary-600 dark:text-primary-400">Gemini</strong> / OpenAI / Claude / Ollama
             </span>
           </span>
         </div>

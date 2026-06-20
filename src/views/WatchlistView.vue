@@ -309,6 +309,12 @@ async function handleEnableNotifications() {
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
           {{ $t('watchlist.emptyText') }}
         </p>
+        <router-link
+            class="mt-3 inline-block text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+            to="/lighthouse"
+        >
+          {{ $t('help.ctaAnalyzeUrl') }} →
+        </router-link>
       </div>
 
       <!-- Cards grid -->

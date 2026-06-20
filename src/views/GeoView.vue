@@ -303,10 +303,10 @@ async function handleRunAll() {
         </p>
         <button
             v-if="!readyProviders.length"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+            class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
             @click="showKeyEditor = true"
         >
-          {{ $t('help.geoConfigureKeys') }}
+          {{ $t('help.geoConfigureKeys') }} →
         </button>
       </div>
 

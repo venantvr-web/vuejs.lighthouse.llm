@@ -114,9 +114,17 @@ onMounted(load)
       </div>
 
       <p v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-      <p v-else-if="!filtered.length" class="text-sm text-gray-500 dark:text-gray-400">
-        {{ $t('aiHistory.empty') }}
-      </p>
+      <div v-else-if="!filtered.length" class="text-sm text-gray-500 dark:text-gray-400">
+        <p>{{ $t('aiHistory.empty') }}</p>
+        <p class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+          <router-link class="font-medium text-primary-600 dark:text-primary-400 hover:underline" to="/resources">
+            {{ $t('help.goToResources') }} →
+          </router-link>
+          <router-link class="font-medium text-primary-600 dark:text-primary-400 hover:underline" to="/crawl">
+            {{ $t('help.goToCrawl') }} →
+          </router-link>
+        </p>
+      </div>
 
       <ul v-else class="space-y-3">
         <li

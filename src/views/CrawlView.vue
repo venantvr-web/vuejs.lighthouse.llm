@@ -5,6 +5,7 @@ import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {useSiteStore} from '@/stores/siteStore'
+import {useSettingsStore} from '@/stores/settingsStore'
 import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
 import {getProxyBase, isDirectFetch, proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
@@ -22,6 +23,11 @@ const {notifyDone} = useNotifications()
 const router = useRouter()
 const crawlStore = useCrawlStore()
 const site = useSiteStore()
+const settings = useSettingsStore()
+
+// PageSpeed sans clé API : le quota anonyme partagé de Google est saturé en
+// permanence (HTTP 429), donc l'analyse échoue. On le signale avant de lancer.
+const noPageSpeedKey = computed(() => service.value === CRAWL_SERVICES.PAGESPEED && !settings.pageSpeedApiKey)
 
 // Form state
 const baseUrl = ref('')
@@ -593,6 +599,17 @@ https://example.com/sitemap.xml"
                   </div>
                 </button>
               </div>
+
+              <!-- Avertissement : PageSpeed sans clé API -->
+              <p
+                  v-if="noPageSpeedKey"
+                  class="mt-3 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-2"
+              >
+                {{ $t('crawl.noKeyWarning') }}
+                <router-link class="font-medium text-primary-600 dark:text-primary-400 hover:underline" to="/settings">
+                  {{ $t('crawl.noKeyWarningLink') }} →
+                </router-link>
+              </p>
             </div>
 
             <!-- Strategy -->

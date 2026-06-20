@@ -2,6 +2,7 @@ import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
 import {useIndexedDB} from '@/composables/useIndexedDB'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
+import {useSettingsStore} from '@/stores/settingsStore'
 import {discoverUrls, DISCOVERY_MODES, expandSitemap, isSitemapUrl, parseManualUrls} from '@/services/urlDiscovery'
 import {detectTemplates, TEMPLATE_COLORS} from '@/services/templateDetector'
 import {analyzeUrl as analyzeWithPageSpeed} from '@/services/pageSpeedInsights'
@@ -270,7 +271,12 @@ export const useCrawlStore = defineStore('crawl', () => {
             crawlStatus.value = CRAWL_STATUS.ANALYZING
 
             const historyStore = useScoreHistoryStore()
-            const analyzeFunc = service === CRAWL_SERVICES.LOCAL ? analyzeWithLocal : analyzeWithPageSpeed
+            const settingsStore = useSettingsStore()
+            const isLocal = service === CRAWL_SERVICES.LOCAL
+            const analyzeFunc = isLocal ? analyzeWithLocal : analyzeWithPageSpeed
+            // La clé PageSpeed est indispensable : sans elle, les requêtes utilisent
+            // le quota anonyme partagé de Google, en permanence saturé (HTTP 429).
+            const apiKey = isLocal ? undefined : (settingsStore.pageSpeedApiKey || null)
 
             for (let i = 0; i < urls.length; i++) {
                 if (abortController.value.signal.aborted) {
@@ -285,6 +291,7 @@ export const useCrawlStore = defineStore('crawl', () => {
                     // Analyze URL
                     const report = await analyzeFunc(urlInfo.url, {
                         strategy,
+                        apiKey,
                         signal: abortController.value.signal
                     })
 

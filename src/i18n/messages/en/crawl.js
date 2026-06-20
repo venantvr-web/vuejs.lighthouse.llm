@@ -51,6 +51,8 @@ export default {
         serviceLabel: 'Analysis service',
         pageSpeedName: 'PageSpeed Insights',
         pageSpeedDesc: 'Google API, no local server required',
+        noKeyWarning: 'Without a PageSpeed API key, requests use Google\'s shared anonymous quota, which is often exhausted: analysis fails (error 429). Add your free key.',
+        noKeyWarningLink: 'Configure PageSpeed key',
         localName: 'Local Lighthouse',
         localDesc: 'Local server, faster',
         serverUnavailable: 'Server unavailable',

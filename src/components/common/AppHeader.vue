@@ -36,7 +36,7 @@ function isActive(to) {
 </script>
 
 <template>
-  <header class="border-b border-gray-200 dark:border-gray-800">
+  <header class="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
     <div class="max-w-6xl mx-auto px-4 py-3">
       <div class="flex items-center justify-between gap-4">
         <!-- Brand + page title -->

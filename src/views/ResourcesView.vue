@@ -6,6 +6,7 @@ import {computeGeoReadiness, detectResourceChanges} from '@/services/resourceChe
 import {useResourceHistoryStore} from '@/stores/resourceHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useIndexabilityDiagnosis} from '@/composables/useIndexabilityDiagnosis'
 import {buildIndexabilitySignals, detectInconsistencies} from '@/services/indexabilityDiagnosis'
 import {useNotifications} from '@/composables/useNotifications'
@@ -40,8 +41,8 @@ const {
   cancel: cancelDiagnosis
 } = useIndexabilityDiagnosis()
 
-// Préremplissage silencieux à partir du site actif
-const url = ref(site.origin)
+// Préremplissage à partir du site actif, puis mémorisation de la dernière saisie
+const url = usePersistentRef('resources.url', site.origin)
 const crawledSitemap = ref('')
 const readinessTrend = ref([])
 

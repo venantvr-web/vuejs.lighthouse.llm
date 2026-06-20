@@ -27,11 +27,11 @@ const site = useSiteStore()
 const {statsById, runningById, errorById, loadStats, loadItemStats, runPrompt} = useGeoTracking()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 
-// Add form state
-const newPrompt = ref('')
+// Add form state (mémorisé : un brouillon non soumis survit aux rechargements)
+const newPrompt = usePersistentRef('geo.draftPrompt', '')
 // Suggestion de marque dérivée du domaine du site actif (modifiable)
-const newBrand = ref(site.brandGuess)
-const newCompetitors = ref('')
+const newBrand = usePersistentRef('geo.draftBrand', site.brandGuess)
+const newCompetitors = usePersistentRef('geo.draftCompetitors', '')
 const addError = ref('')
 
 const runningAll = ref(false)
@@ -252,12 +252,12 @@ async function handleRunAll() {
               type="text"
               @keyup.enter="handleAdd"
           />
-          <div class="flex flex-wrap items-center gap-1.5">
+          <div class="flex flex-col gap-1.5">
             <span class="text-xs text-gray-400 dark:text-gray-500">{{ $t('geo.presetsLabel') }}</span>
             <button
                 v-for="(preset, i) in promptPresets"
                 :key="i"
-                class="px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-500/40 transition-colors"
+                class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-xs text-center text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-500/40 transition-colors"
                 type="button"
                 @click="applyPreset(preset)"
             >

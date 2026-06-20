@@ -48,10 +48,9 @@ function breachedCategories(item) {
   return computeBreached(item.budgets, statsById.value[item.id]?.latest?.scores)
 }
 
-// Add form state
-// Préremplissage silencieux à partir du site actif
-const newUrl = ref(site.origin)
-const newLabel = ref('')
+// Add form state (mémorisé : la saisie en cours survit aux rechargements)
+const newUrl = usePersistentRef('watchlist.newUrl', site.origin)
+const newLabel = usePersistentRef('watchlist.newLabel', '')
 const newStrategy = usePersistentRef('watchlist.newStrategy', 'mobile')
 const newSource = usePersistentRef('watchlist.newSource', 'pagespeed')
 const addError = ref('')

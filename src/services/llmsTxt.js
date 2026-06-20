@@ -82,7 +82,9 @@ export function parseHomepage(html = '', origin = '') {
     const title = cleanText(doc.querySelector('title')?.textContent || '')
     const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute('content')
     const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute('content')
-    const description = cleanText(metaDesc || ogDesc || '')
+    // Description complète (pas de troncature agressive : les meta description
+    // dépassent rarement quelques centaines de caractères).
+    const description = (metaDesc || ogDesc || '').replace(/\s+/g, ' ').trim().slice(0, 600)
 
     // En-tête : on privilégie <header>/<nav> ; à défaut, on prend la barre de navigation.
     let headerLinks = collectLinks(doc, 'header a, nav a', origin)
@@ -202,21 +204,44 @@ export function buildLlmsTxtPrompt(context, {keywords = '', full = false} = {}) 
     }
 
     lines.push('')
-    lines.push('## Format et bonnes pratiques (llms.txt)')
-    lines.push('- Markdown valide, pensé pour être lu par un agent IA.')
-    lines.push('- Titre H1 = nom du site, suivi d\'une citation `> ...` qui résume en une phrase ce que fait le site et pour qui.')
-    lines.push('- Quelques sections `## ...` thématiques, chacune avec une liste de liens `- [Titre](URL) : description en une ligne`.')
-    lines.push('- Une section `## Optional` pour le secondaire (mentions légales, etc.) que les agents peuvent ignorer.')
-    lines.push('- URLs absolues, langue dominante du site, aucune URL inventée.')
+    lines.push('## Format Markdown STRICT (obligatoire)')
+    lines.push('Le fichier doit être du **Markdown valide et structuré**, pas du texte au fil de l\'eau. Respecte exactement ce squelette :')
+    lines.push('')
+    lines.push('```')
+    lines.push('# Nom du site')
+    lines.push('> Résumé en une phrase : ce que fait le site et pour qui.')
+    lines.push('')
+    lines.push('## Nom de la section')
+    lines.push('- [Titre du lien](https://url-absolue) : description en une ligne.')
+    lines.push('- [Autre lien](https://url-absolue) : description en une ligne.')
+    lines.push('')
+    lines.push('## Optional')
+    lines.push('- [Mentions légales](https://url-absolue)')
+    lines.push('```')
+    lines.push('')
+    lines.push('Règles :')
+    lines.push('- Chaque section commence par un titre `## ...` ; son contenu est une **liste à puces de liens Markdown** `- [Texte](URL) : description`. N\'écris jamais une section sous forme de paragraphe en prose.')
+    lines.push('- URLs absolues, langue dominante du site, aucune URL inventée (uniquement celles du contexte).')
     if (full) {
-        lines.push('- Comme il s\'agit de **llms-full.txt**, sois **exhaustif mais structuré** : décris chaque section et enrichis les descriptions. Évite les listes interminables : regroupe et résume plutôt que d\'aligner toutes les URL.')
+        lines.push('- Comme il s\'agit de **llms-full.txt**, sois **exhaustif mais structuré** : couvre chaque section et enrichis les descriptions. Évite les listes interminables : regroupe et résume plutôt que d\'aligner toutes les URL.')
     } else {
         lines.push('- Reste **condensé** : 3 à 6 sections maximum, uniquement les liens essentiels (pas tout le sitemap), descriptions courtes. Privilégie la clarté à l\'exhaustivité, évite les énumérations longues.')
     }
     lines.push('')
-    lines.push('Renvoie uniquement le contenu Markdown du fichier.')
+    lines.push('Renvoie UNIQUEMENT le contenu Markdown du fichier, sans bloc de code englobant (pas de ```), sans phrase avant ni après.')
 
     return lines.join('\n')
+}
+
+/**
+ * Retire un éventuel bloc de code englobant (```markdown … ```) ajouté par le LLM.
+ * @param {string} text
+ * @returns {string}
+ */
+export function stripCodeFence(text = '') {
+    const trimmed = (text || '').trim()
+    const match = trimmed.match(/^```[a-zA-Z]*\s*\n([\s\S]*?)\n```$/)
+    return match ? match[1].trim() : text
 }
 
 /**

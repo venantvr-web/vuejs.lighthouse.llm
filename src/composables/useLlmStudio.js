@@ -5,7 +5,7 @@ import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
-import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM} from '@/services/llmsTxt'
+import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
@@ -152,6 +152,8 @@ export function useLlmStudio() {
         outputKind.value = full ? 'full' : 'llms'
         lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords})
         await streamInto(lastPrompt)
+        // Filet de sécurité : retire un éventuel bloc de code englobant
+        if (!generating.value) output.value = stripCodeFence(output.value)
         await persist(outputKind.value)
     }
 

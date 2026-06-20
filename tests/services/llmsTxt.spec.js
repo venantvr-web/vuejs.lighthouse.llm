@@ -4,7 +4,8 @@ import {
     buildSiteContext,
     detectContextChanges,
     groupSitemapUrls,
-    parseHomepage
+    parseHomepage,
+    stripCodeFence
 } from '@/services/llmsTxt'
 
 const HTML = `
@@ -93,6 +94,16 @@ describe('buildLlmsTxtPrompt', () => {
         const prompt = buildLlmsTxtPrompt(context, {full: true})
         expect(prompt).toContain('llms-full.txt')
         expect(prompt.toLowerCase()).toContain('exhaustif')
+    })
+})
+
+describe('stripCodeFence', () => {
+    it('retire un bloc de code englobant', () => {
+        expect(stripCodeFence('```markdown\n# Titre\n> x\n```')).toBe('# Titre\n> x')
+        expect(stripCodeFence('```\n# Titre\n```')).toBe('# Titre')
+    })
+    it('laisse le contenu intact sans fence', () => {
+        expect(stripCodeFence('# Titre\n> x')).toBe('# Titre\n> x')
     })
 })
 

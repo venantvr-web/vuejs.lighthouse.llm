@@ -18,7 +18,7 @@ const lighthouseStore = useLighthouseStore()
 const site = useSiteStore()
 
 // Préremplissage silencieux à partir du site actif
-const url = ref(site.lastUrl || site.origin)
+const url = usePersistentRef('localLighthouse.url', site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)

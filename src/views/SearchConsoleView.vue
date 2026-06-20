@@ -22,7 +22,7 @@ function siteHost(s) {
   return s.startsWith('sc-domain:') ? s.slice('sc-domain:'.length) : extractDomain(s)
 }
 
-const selectedSite = ref('')
+const selectedSite = usePersistentRef('searchconsole.selectedSite', '')
 const days = usePersistentRef('searchconsole.days', 28)
 const dimension = usePersistentRef('searchconsole.dimension', 'query')
 const rows = ref([])
@@ -36,8 +36,9 @@ function onClientIdInput(event) {
 
 async function handleConnect() {
   await connect(settings.searchConsoleClientId)
-  if (sites.value.length && !selectedSite.value) {
-    // Présélectionne la propriété qui correspond au site actif, sinon la première
+  // Conserve la propriété mémorisée si elle existe toujours, sinon présélectionne
+  if (sites.value.length && !sites.value.includes(selectedSite.value)) {
+    // Propriété correspondant au site actif, sinon la première
     const match = site.domain ? sites.value.find(s => siteHost(s) === site.domain) : null
     selectedSite.value = match || sites.value[0]
   }

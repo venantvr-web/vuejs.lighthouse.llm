@@ -20,7 +20,7 @@ const settings = useSettingsStore()
 const site = useSiteStore()
 
 // Préremplissage silencieux à partir du site actif
-const url = ref(site.lastUrl || site.origin)
+const url = usePersistentRef('lighthouse.url', site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)

@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useLighthouseStore} from '@/stores/lighthouseStore'
@@ -105,6 +106,8 @@ function handleDismissError() {
     <AppHeader :subtitle="$t('localLighthouse.headerSubtitle')" :title="$t('localLighthouse.headerTitle')"/>
 
     <!-- Main content -->
+    <PageIntro :text="$t('intro.local')" width="4xl"/>
+
     <main class="flex-1 flex items-center justify-center p-4">
       <div class="w-full max-w-2xl">
         <!-- Checking server -->

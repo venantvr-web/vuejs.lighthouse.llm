@@ -11,6 +11,7 @@ import WatchlistCard from '@/components/history/WatchlistCard.vue'
 import {buildWatchlistCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
@@ -224,6 +225,8 @@ async function handleEnableNotifications() {
         </button>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.watchlist')" width="6xl"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Add form -->

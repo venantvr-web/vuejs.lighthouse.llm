@@ -1,11 +1,14 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <AppHeader :subtitle="$t('home.headerSubtitle')" :title="$t('home.headerTitle')"/>
+
+    <PageIntro :text="$t('intro.home')" width="4xl"/>
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center p-4">

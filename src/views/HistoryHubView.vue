@@ -2,6 +2,7 @@
 import {onMounted, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import HistoryView from '@/views/HistoryView.vue'
 import CrawlHistoryView from '@/views/CrawlHistoryView.vue'
 import AiHistoryView from '@/views/AiHistoryView.vue'
@@ -52,6 +53,8 @@ watch(tab, (value) => {
         </nav>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.history')" width="6xl"/>
 
     <main class="flex-1 w-full">
       <HistoryView v-if="tab === 'audits'" embedded/>

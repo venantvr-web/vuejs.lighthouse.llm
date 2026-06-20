@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
@@ -93,6 +94,8 @@ const clearReport = () => {
         </button>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.dashboard')" width="6xl"/>
 
     <!-- Loading state -->
     <div v-if="loading" class="flex items-center justify-center h-64">

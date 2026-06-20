@@ -9,6 +9,7 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 
 const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
@@ -81,6 +82,8 @@ function formatPosition(p) {
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <AppHeader :subtitle="$t('searchConsole.headerSubtitle')" :title="$t('searchConsole.headerTitle')"/>
+
+    <PageIntro :text="$t('intro.searchConsole')" width="6xl"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Connection -->

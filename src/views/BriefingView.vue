@@ -8,6 +8,7 @@ import {formatDateISO, formatRelativeTime, formatScore, getScoreColorClass} from
 import {usePeriodicSync} from '@/composables/usePeriodicSync'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -115,6 +116,8 @@ const overview = computed(() => {
         </template>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.briefing')" width="6xl"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Empty state -->

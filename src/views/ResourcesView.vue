@@ -16,6 +16,7 @@ import {formatDateISO, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -123,6 +124,8 @@ function exportDiagnosis() {
         </button>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.resources')" width="5xl"/>
 
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
       <!-- Local server notice -->

@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
@@ -297,6 +298,8 @@ onUnmounted(() => {
         </router-link>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.crawl')" width="3xl"/>
 
     <!-- Main content -->
     <main class="flex-1 p-4">

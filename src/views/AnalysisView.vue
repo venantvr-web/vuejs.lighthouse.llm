@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import CategoryTabs from '@/components/analysis/CategoryTabs.vue'
@@ -306,6 +307,8 @@ const exportAnalysis = () => {
         </router-link>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.analysis')" width="6xl"/>
 
     <!-- Main -->
     <main class="max-w-6xl mx-auto px-4 py-8">

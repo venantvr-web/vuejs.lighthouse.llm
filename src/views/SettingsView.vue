@@ -15,6 +15,7 @@ import {
 } from '@/services/requestConfig'
 import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -166,6 +167,8 @@ const testConnection = async () => {
     <AppHeader :subtitle="$t('settings.headerSubtitle')" :title="$t('settings.headerTitle')"/>
 
     <!-- Main -->
+    <PageIntro :text="$t('intro.settings')" width="2xl"/>
+
     <main class="max-w-2xl mx-auto px-4 py-8">
       <div class="card p-6 space-y-6">
         <div>

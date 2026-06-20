@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
@@ -151,6 +152,8 @@ function getItemScore(item, category) {
         </button>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.comparison')" width="6xl"/>
 
     <!-- Main -->
     <main class="max-w-6xl mx-auto px-4 py-8">

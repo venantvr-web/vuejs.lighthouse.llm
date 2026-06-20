@@ -9,6 +9,7 @@ import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import PageIntro from '@/components/common/PageIntro.vue'
 import HelpTip from '@/components/common/HelpTip.vue'
 import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
@@ -181,6 +182,8 @@ async function handleRunAll() {
         </button>
       </template>
     </AppHeader>
+
+    <PageIntro :text="$t('intro.geo')" width="6xl"/>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Key editor -->

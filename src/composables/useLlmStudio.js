@@ -6,6 +6,7 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
 import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM} from '@/services/llmsTxt'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
 import {useI18n} from '@/i18n'
@@ -21,21 +22,30 @@ export function useLlmStudio() {
     const toast = useToast()
     const {t} = useI18n()
 
-    // Analyse du domaine
+    // Analyse du domaine — mémorisée pour restaurer l'écran au rechargement
     const analyzing = ref(false)
     const analyzeError = ref(null)
-    const context = ref(null)
+    const context = usePersistentRef('llmStudio.context', null)
     // Fichiers actuellement publiés (veille)
-    const liveLlms = ref(null)      // { present, content }
-    const liveLlmsFull = ref(null)
+    const liveLlms = usePersistentRef('llmStudio.liveLlms', null)      // { present, content }
+    const liveLlmsFull = usePersistentRef('llmStudio.liveLlmsFull', null)
 
-    // Génération
+    // Génération (la sortie en cours est affichée en direct ; sa version finale
+    // est mémorisée pour réapparaître au rechargement — sans réécrire à chaque jeton)
     const generating = ref(false)
     const output = ref('')
     const outputKind = ref('llms')  // 'llms' | 'full'
+    const savedOutput = usePersistentRef('llmStudio.lastOutput', '')
+    const savedKind = usePersistentRef('llmStudio.lastOutputKind', 'llms')
     const genError = ref(null)
     const tokenCount = ref(0)
     const truncated = ref(false)
+
+    // Restaure la dernière sortie générée à l'ouverture
+    if (savedOutput.value && !output.value) {
+        output.value = savedOutput.value
+        outputKind.value = savedKind.value
+    }
 
     let activeProvider = null
     let lastPrompt = ''
@@ -76,6 +86,9 @@ export function useLlmStudio() {
 
     async function persist(kind) {
         if (!output.value.trim() || !context.value) return
+        // Mémorise la version finale pour la restaurer au rechargement
+        savedOutput.value = output.value
+        savedKind.value = kind
         const isFull = kind === 'full'
         try {
             const payload = {

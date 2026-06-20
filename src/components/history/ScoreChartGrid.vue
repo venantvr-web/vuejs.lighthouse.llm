@@ -12,8 +12,7 @@ const categories = [
   {key: 'performance', color: '#ef4444'},
   {key: 'accessibility', color: '#8b5cf6'},
   {key: 'best-practices', color: '#3b82f6'},
-  {key: 'seo', color: '#10b981'},
-  {key: 'pwa', color: '#f59e0b'}
+  {key: 'seo', color: '#10b981'}
 ]
 </script>
 

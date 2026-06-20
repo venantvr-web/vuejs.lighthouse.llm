@@ -69,8 +69,7 @@ const categories = [
   {key: 'performance', label: 'Perf'},
   {key: 'accessibility', label: 'A11y'},
   {key: 'best-practices', label: 'BP'},
-  {key: 'seo', label: 'SEO'},
-  {key: 'pwa', label: 'PWA'}
+  {key: 'seo', label: 'SEO'}
 ]
 
 function getSourceLabel(source) {

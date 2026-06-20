@@ -99,8 +99,7 @@ export async function getCategories() {
             {id: 'performance', name: 'Performance'},
             {id: 'accessibility', name: 'Accessibilité'},
             {id: 'best-practices', name: 'Bonnes Pratiques'},
-            {id: 'seo', name: 'SEO'},
-            {id: 'pwa', name: 'PWA'}
+            {id: 'seo', name: 'SEO'}
         ]
     }
 }

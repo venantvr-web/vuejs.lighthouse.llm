@@ -31,7 +31,6 @@ export default {
         catAccessibility: 'Accessibility',
         catBestPractices: 'Best Practices',
         catSeo: 'SEO',
-        catPwa: 'PWA',
         // AnalysisTable
         tableDate: 'Date',
         tablePage: 'Page',

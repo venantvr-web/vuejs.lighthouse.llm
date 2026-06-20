@@ -11,7 +11,6 @@ export default {
         categoryAccessibility: 'Accessibility',
         categoryBestPractices: 'Best Practices',
         categorySeo: 'SEO',
-        categoryPwa: 'PWA',
 
         overview: 'Overview',
         analyze: 'Analyze →',

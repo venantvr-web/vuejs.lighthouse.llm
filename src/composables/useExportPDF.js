@@ -14,16 +14,14 @@ export function useExportPDF() {
         performance: 'Performance',
         accessibility: 'Accessibilité',
         'best-practices': 'Bonnes Pratiques',
-        seo: 'SEO',
-        pwa: 'PWA'
+        seo: 'SEO'
     }
 
     const categoryColors = {
         performance: '#ef4444',
         accessibility: '#8b5cf6',
         'best-practices': '#3b82f6',
-        seo: '#10b981',
-        pwa: '#f59e0b'
+        seo: '#10b981'
     }
 
     /**
@@ -80,7 +78,7 @@ export function useExportPDF() {
                 const boxHeight = 25
                 let xPos = margin
 
-                const categories = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+                const categories = ['performance', 'accessibility', 'best-practices', 'seo']
 
                 for (const cat of categories) {
                     const score = latestScore.scores?.[cat]
@@ -160,8 +158,8 @@ export function useExportPDF() {
             yPos += 8
 
             // Table header
-            const colWidths = [35, 25, 20, 20, 20, 20, 20, 20]
-            const headers = ['Date', 'Source', 'Mode', 'Perf', 'A11y', 'BP', 'SEO', 'PWA']
+            const colWidths = [35, 25, 20, 20, 20, 20, 20]
+            const headers = ['Date', 'Source', 'Mode', 'Perf', 'A11y', 'BP', 'SEO']
 
             pdf.setFillColor(240, 240, 240)
             pdf.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F')
@@ -211,8 +209,7 @@ export function useExportPDF() {
                     formatScorePercent(score.scores?.performance),
                     formatScorePercent(score.scores?.accessibility),
                     formatScorePercent(score.scores?.['best-practices']),
-                    formatScorePercent(score.scores?.seo),
-                    formatScorePercent(score.scores?.pwa)
+                    formatScorePercent(score.scores?.seo)
                 ]
 
                 for (let i = 0; i < rowData.length; i++) {

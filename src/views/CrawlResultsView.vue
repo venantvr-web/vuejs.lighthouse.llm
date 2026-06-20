@@ -116,8 +116,7 @@ function exportJSON() {
         performance: formatScore(u.scores.performance),
         accessibility: formatScore(u.scores.accessibility),
         'best-practices': formatScore(u.scores['best-practices']),
-        seo: formatScore(u.scores.seo),
-        pwa: formatScore(u.scores.pwa)
+        seo: formatScore(u.scores.seo)
       } : null,
       error: u.error
     }))
@@ -489,7 +488,6 @@ onMounted(async () => {
                   <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colA11y') }}</th>
                   <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colBp') }}</th>
                   <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colSeo') }}</th>
-                  <th class="pb-3 font-medium text-center">{{ $t('crawlResults.colPwa') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -554,11 +552,6 @@ onMounted(async () => {
                   <td class="py-3 text-center">
                       <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.seo)]">
                         {{ formatScore(urlInfo.scores?.seo) }}
-                      </span>
-                  </td>
-                  <td class="py-3 text-center">
-                      <span :class="['font-medium', getScoreColorClass(urlInfo.scores?.pwa)]">
-                        {{ formatScore(urlInfo.scores?.pwa) }}
                       </span>
                   </td>
                 </tr>

@@ -10,7 +10,6 @@ export default {
         categoryAccessibility: 'Accessibilité',
         categoryBestPractices: 'Bonnes Pratiques',
         categorySeo: 'SEO',
-        categoryPwa: 'PWA',
 
         issuesDetected: '{count} problèmes détectés',
 

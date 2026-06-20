@@ -63,8 +63,7 @@ const categoryLabels = computed(() => ({
   performance: t('history.catPerformance'),
   accessibility: t('history.catAccessibility'),
   'best-practices': t('history.catBestPractices'),
-  seo: t('history.catSeo'),
-  pwa: t('history.catPwa')
+  seo: t('history.catSeo')
 }))
 
 // Keep sorted scores for tooltip access

@@ -110,13 +110,12 @@ function togglePromptPreview() {
 const categories = computed(() => {
   if (!report.value?.categories) return []
 
-  const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+  const cats = ['performance', 'accessibility', 'best-practices', 'seo']
   const labels = {
     'performance': t('analysis.categoryPerformance'),
     'accessibility': t('analysis.categoryAccessibility'),
     'best-practices': t('analysis.categoryBestPractices'),
-    'seo': t('analysis.categorySeo'),
-    'pwa': t('analysis.categoryPwa')
+    'seo': t('analysis.categorySeo')
   }
 
   return cats

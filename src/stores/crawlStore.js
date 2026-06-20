@@ -471,7 +471,7 @@ export const useCrawlStore = defineStore('crawl', () => {
     }
 
     function calculateAggregateScores(results) {
-        const categories = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+        const categories = ['performance', 'accessibility', 'best-practices', 'seo']
         const aggregates = {}
 
         for (const cat of categories) {

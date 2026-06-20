@@ -34,13 +34,12 @@ onMounted(() => {
 const categories = computed(() => {
   if (!report.value?.categories) return []
 
-  const cats = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+  const cats = ['performance', 'accessibility', 'best-practices', 'seo']
   const labels = {
     'performance': t('dashboard.categoryPerformance'),
     'accessibility': t('dashboard.categoryAccessibility'),
     'best-practices': t('dashboard.categoryBestPractices'),
-    'seo': t('dashboard.categorySeo'),
-    'pwa': t('dashboard.categoryPwa')
+    'seo': t('dashboard.categorySeo')
   }
 
   return cats

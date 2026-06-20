@@ -583,7 +583,7 @@ export const useScoreHistoryStore = defineStore('scoreHistory', () => {
             return null
         }
 
-        const categories = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+        const categories = ['performance', 'accessibility', 'best-practices', 'seo']
         const stats = {}
 
         for (const category of categories) {

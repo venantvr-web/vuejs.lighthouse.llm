@@ -9,7 +9,8 @@ const PSI_API = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'
 /**
  * Default categories to analyze
  */
-export const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa']
+// PWA retiré : Google a supprimé les audits PWA de Lighthouse, l'API ne renvoie plus de score.
+export const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo']
 
 /**
  * Available strategies

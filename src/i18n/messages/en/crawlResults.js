@@ -44,7 +44,6 @@ export default {
         colA11y: 'A11y',
         colBp: 'BP',
         colSeo: 'SEO',
-        colPwa: 'PWA',
 
         // PDF
         pdfTitle: 'Lighthouse Crawl Report',

@@ -1,5 +1,6 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
+import BuildStamp from '@/components/common/BuildStamp.vue'
 </script>
 
 <template>
@@ -160,6 +161,11 @@ import AppHeader from '@/components/common/AppHeader.vue'
               {{ $t('home.poweredBy') }} <strong class="text-primary-600 dark:text-primary-400">Gemini</strong> / OpenAI / Claude / Ollama
             </span>
           </span>
+
+          <!-- Date du dernier commit (footer) -->
+          <p class="mt-3">
+            <BuildStamp inline/>
+          </p>
         </div>
       </div>
     </main>

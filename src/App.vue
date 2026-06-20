@@ -3,7 +3,6 @@ import {onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import ToastHost from '@/components/common/ToastHost.vue'
 import ProgressBar from '@/components/common/ProgressBar.vue'
-import BuildStamp from '@/components/common/BuildStamp.vue'
 
 const route = useRoute()
 const isDark = ref(false)
@@ -32,10 +31,9 @@ const toggleTheme = () => {
 
 <template>
   <div class="min-h-screen transition-colors" style="background-color: var(--bg-secondary);">
-    <!-- Barre de progression globale + notifications in-app + tampon de build -->
+    <!-- Barre de progression globale + notifications in-app -->
     <ProgressBar/>
     <ToastHost/>
-    <BuildStamp/>
 
     <!-- Theme toggle (floating) -->
     <button

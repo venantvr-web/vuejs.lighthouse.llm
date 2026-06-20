@@ -1,6 +1,11 @@
 <script setup>
 import {computed} from 'vue'
 
+defineProps({
+  // inline = intégré dans un footer (texte simple) ; sinon pastille flottante
+  inline: {type: Boolean, default: false}
+})
+
 /* globals __COMMIT_DATE__, __COMMIT_SHA__ */
 // Injectés au build par Vite (define). typeof évite tout crash hors build (tests).
 const rawDate = typeof __COMMIT_DATE__ !== 'undefined' ? __COMMIT_DATE__ : ''
@@ -24,8 +29,15 @@ const tooltip = computed(() => (parsed.value ? parsed.value.toLocaleString() : '
 </script>
 
 <template>
+  <span
+      v-if="label && inline"
+      :title="tooltip"
+      class="text-[11px] text-gray-400 dark:text-gray-500 select-none"
+  >
+    {{ label }}
+  </span>
   <div
-      v-if="label"
+      v-else-if="label"
       :title="tooltip"
       class="fixed bottom-2 left-2 z-30 text-[11px] leading-none px-2 py-1 rounded-md
              bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60

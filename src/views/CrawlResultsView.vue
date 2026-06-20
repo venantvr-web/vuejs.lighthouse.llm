@@ -570,6 +570,15 @@ onMounted(async () => {
 
           <!-- Structured data (JSON-LD) generation -->
           <StructuredDataPanel :urls="urls" class="mt-6"/>
+
+          <div class="mt-6 text-right">
+            <router-link
+                class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                :to="{ path: '/history', query: { tab: 'crawls' } }"
+            >
+              {{ $t('help.compareCrawls') }} →
+            </router-link>
+          </div>
         </div>
 
         <!-- No session -->

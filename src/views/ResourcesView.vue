@@ -250,6 +250,11 @@ function exportDiagnosis() {
             {{ $t('resources.continueButton') }}
           </button>
         </div>
+        <div v-if="diagnosis && !diagnosing" class="mt-3">
+          <router-link class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline" to="/crawl">
+            {{ $t('help.goToCrawl') }} →
+          </router-link>
+        </div>
       </div>
 
       <!-- Resources -->

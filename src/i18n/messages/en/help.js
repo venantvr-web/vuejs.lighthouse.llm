@@ -8,6 +8,7 @@ export default {
         ctaAnalyzeUrl: 'Analyze a URL',
         goToResources: 'Indexability diagnosis',
         goToCrawl: 'Crawl a site',
+        compareCrawls: 'Compare crawls',
         crawlAggregateWhat: 'Average, minimum and maximum Lighthouse scores across all analyzed pages of the domain.',
         crawlTemplatesWhat: 'Pages are grouped by type (homepage, detail, listing…) to compare scores per page template.'
     }

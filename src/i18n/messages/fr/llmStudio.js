@@ -16,6 +16,18 @@ export default {
         configureLink: 'Configurer',
         configureSuffix: ' dans les paramètres.',
 
+        bestPracticesTitle: 'Bonnes pratiques llms.txt',
+        bestPractices: [
+            'Un fichier Markdown à la racine : /llms.txt (et /llms-full.txt pour la version complète).',
+            'Commencez par un titre H1 (nom du site), puis une citation « > » qui résume en une phrase l\'activité et le public visé.',
+            'Organisez en quelques sections « ## » thématiques, avec des listes de liens « [Titre](URL) : description courte ».',
+            'Sélectionnez les pages essentielles — ne recopiez pas tout le sitemap.',
+            'Phrases courtes, sans jargon ; une ligne de description par lien.',
+            'Placez le secondaire (mentions légales, etc.) sous une section « ## Optional » que les agents peuvent ignorer.',
+            'URLs absolues et contenu maintenu à jour.',
+            'llms-full.txt : version étendue, avec descriptions complètes pour donner tout le contexte aux IA.'
+        ],
+
         contextTitle: 'Domaine compris par l\'IA',
         ctxTitle: 'Titre',
         ctxDescription: 'Description',

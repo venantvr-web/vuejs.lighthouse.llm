@@ -1,8 +1,9 @@
 <script setup>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
+import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
@@ -16,8 +17,12 @@ import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {useToast} from '@/composables/useToast'
 import {useI18n} from '@/i18n'
 
-const {t} = useI18n()
+const {t, messages, locale} = useI18n()
 const toast = useToast()
+
+// Bonnes pratiques llms.txt (rappelées dans l'interface)
+const showTips = usePersistentRef('llmStudio.showTips', true)
+const bestPractices = computed(() => messages[locale.value]?.llmStudio?.bestPractices || messages.fr.llmStudio.bestPractices || [])
 const site = useSiteStore()
 const settings = useSettingsStore()
 const aiHistory = useAiHistoryStore()
@@ -135,6 +140,23 @@ onMounted(async () => {
           <router-link class="text-primary-600 dark:text-primary-400 hover:underline" to="/settings">{{ $t('llmStudio.configureLink') }}</router-link>
           {{ $t('llmStudio.configureSuffix') }}
         </p>
+      </div>
+
+      <!-- Bonnes pratiques llms.txt -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+        <button class="flex items-center justify-between w-full text-left" @click="showTips = !showTips">
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $t('llmStudio.bestPracticesTitle') }}</span>
+          <svg
+              :class="showTips ? 'rotate-180' : ''"
+              class="w-4 h-4 text-gray-400 transition-transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+        </button>
+        <ul v-if="showTips" class="mt-3 space-y-1.5 list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+          <li v-for="(tip, i) in bestPractices" :key="i">{{ tip }}</li>
+        </ul>
       </div>
 
       <!-- Contexte du domaine -->
@@ -330,7 +352,7 @@ onMounted(async () => {
           {{ $t('common.copy') }}
         </button>
       </div>
-      <pre class="text-xs leading-snug bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 overflow-x-auto whitespace-pre-wrap text-gray-800 dark:text-gray-200">{{ liveModal?.content }}</pre>
+      <MarkdownViewer :content="liveModal?.content || ''"/>
     </Modal>
   </div>
 </template>

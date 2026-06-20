@@ -202,22 +202,19 @@ export function buildLlmsTxtPrompt(context, {keywords = '', full = false} = {}) 
     }
 
     lines.push('')
-    lines.push('## Format attendu')
-    lines.push('Respecte strictement la spécification llms.txt :')
-    lines.push('1. Un titre H1 (`# Nom du site`).')
-    lines.push('2. Une citation de synthèse (`> ...`) décrivant en une à deux phrases ce que fait le site et pour qui.')
-    lines.push("3. Éventuellement un court paragraphe de contexte (sans titre).")
-    lines.push('4. Des sections `## ...` regroupant des **listes de liens Markdown** `- [Titre](URL) : courte description`, en privilégiant les pages les plus utiles à un agent IA.')
-    lines.push('5. Une section `## Optional` pour les liens secondaires (mentions légales, etc.).')
+    lines.push('## Format et bonnes pratiques (llms.txt)')
+    lines.push('- Markdown valide, pensé pour être lu par un agent IA.')
+    lines.push('- Titre H1 = nom du site, suivi d\'une citation `> ...` qui résume en une phrase ce que fait le site et pour qui.')
+    lines.push('- Quelques sections `## ...` thématiques, chacune avec une liste de liens `- [Titre](URL) : description en une ligne`.')
+    lines.push('- Une section `## Optional` pour le secondaire (mentions légales, etc.) que les agents peuvent ignorer.')
+    lines.push('- URLs absolues, langue dominante du site, aucune URL inventée.')
     if (full) {
-        lines.push('')
-        lines.push('Comme il s\'agit de **llms-full.txt**, sois plus exhaustif : décris chaque section du site, ajoute une description riche pour chaque lien et un résumé du périmètre fonctionnel. Vise un document complet et autoportant.')
+        lines.push('- Comme il s\'agit de **llms-full.txt**, sois **exhaustif mais structuré** : décris chaque section et enrichis les descriptions. Évite les listes interminables : regroupe et résume plutôt que d\'aligner toutes les URL.')
     } else {
-        lines.push('')
-        lines.push('Garde le fichier **concis** : sélectionne les liens essentiels (pas toutes les URL), descriptions courtes.')
+        lines.push('- Reste **condensé** : 3 à 6 sections maximum, uniquement les liens essentiels (pas tout le sitemap), descriptions courtes. Privilégie la clarté à l\'exhaustivité, évite les énumérations longues.')
     }
     lines.push('')
-    lines.push("Ne mentionne que des URL réellement présentes dans le contexte fourni ; n'invente pas de pages. Rédige dans la langue dominante du site.")
+    lines.push('Renvoie uniquement le contenu Markdown du fichier.')
 
     return lines.join('\n')
 }

@@ -3,6 +3,7 @@ import {onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import ToastHost from '@/components/common/ToastHost.vue'
 import ProgressBar from '@/components/common/ProgressBar.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 
 const route = useRoute()
 const isDark = ref(false)
@@ -80,6 +81,9 @@ const toggleTheme = () => {
         <component :is="Component" :key="route.path"/>
       </Transition>
     </router-view>
+
+    <!-- Footer global (date du commit, toutes pages) -->
+    <AppFooter/>
   </div>
 </template>
 

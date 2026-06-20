@@ -1,8 +1,9 @@
 <script setup>
-import {computed} from 'vue'
+import {computed, ref} from 'vue'
 import {buildActionPlan, useActionPlan} from '@/composables/useActionPlan'
 import {formatMetric} from '@/utils/formatters'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
+import Modal from '@/components/common/Modal.vue'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -15,6 +16,7 @@ const props = defineProps({
 const {generating, error, fixPlan, generateFixPlan} = useActionPlan()
 
 const tickets = computed(() => buildActionPlan(props.opportunities))
+const showFixModal = ref(false)
 
 const impactClass = {
   'élevé': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
@@ -86,8 +88,18 @@ const levelLabel = (level) => {
 
     <!-- AI remediation plan -->
     <div v-if="fixPlan" class="card p-6 mt-4">
-      <h3 class="font-semibold text-gray-900 dark:text-white mb-3">{{ $t('dashboard.suggestedFixes') }}</h3>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('dashboard.suggestedFixes') }}</h3>
+        <button class="text-xs text-primary-500 hover:underline" @click="showFixModal = true">
+          {{ $t('common.expand') }}
+        </button>
+      </div>
       <MarkdownViewer :content="fixPlan"/>
     </div>
+
+    <!-- Plan de correction en plein écran (pop-up Markdown) -->
+    <Modal :open="showFixModal" :title="$t('dashboard.suggestedFixes')" @close="showFixModal = false">
+      <MarkdownViewer :content="fixPlan"/>
+    </Modal>
   </section>
 </template>

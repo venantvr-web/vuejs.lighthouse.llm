@@ -17,6 +17,8 @@ export default {
         download: 'Télécharger',
         copy: 'Copier',
         close: 'Fermer',
+        expand: 'Agrandir',
+        aiResponse: 'Réponse de l\'IA',
         details: 'Détails',
         retry: 'Réessayer',
         loading: 'Chargement…',

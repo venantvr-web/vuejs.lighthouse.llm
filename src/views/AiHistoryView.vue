@@ -2,6 +2,7 @@
 import {computed, onMounted, ref} from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
+import Modal from '@/components/common/Modal.vue'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
@@ -18,7 +19,7 @@ const aiHistory = useAiHistoryStore()
 
 const items = ref([])
 const loading = ref(true)
-const expandedId = ref(null)
+const selected = ref(null)
 const activeFilter = usePersistentRef('aihistory.filter', 'all')
 
 const TYPE_META = {
@@ -48,8 +49,8 @@ async function load() {
   loading.value = false
 }
 
-function toggle(id) {
-  expandedId.value = expandedId.value === id ? null : id
+function open(item) {
+  selected.value = item
 }
 
 function download(item) {
@@ -133,7 +134,7 @@ onMounted(load)
             class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
         >
           <div class="p-4 flex items-start justify-between gap-3">
-            <button class="flex-1 min-w-0 text-left" @click="toggle(item.id)">
+            <button class="flex-1 min-w-0 text-left" @click="open(item)">
               <div class="flex items-center gap-2 mb-1">
                 <span :class="typeMeta(item.type).badge" class="px-2 py-0.5 rounded text-[10px] font-medium">
                   {{ typeMeta(item.type).label }}
@@ -168,16 +169,17 @@ onMounted(load)
               </button>
             </div>
           </div>
-
-          <div v-if="expandedId === item.id" class="border-t border-gray-100 dark:border-gray-700 p-4">
-            <pre
-                v-if="item.format === 'jsonld'"
-                class="text-[11px] leading-snug bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 overflow-x-auto max-h-96 overflow-y-auto text-gray-800 dark:text-gray-200"
-            >{{ item.content }}</pre>
-            <MarkdownViewer v-else :content="item.content"/>
-          </div>
         </li>
       </ul>
+
+      <!-- Contenu de l'artefact en plein écran (pop-up Markdown) -->
+      <Modal :open="!!selected" :title="selected?.title || selected?.url || $t('aiHistory.artifact')" @close="selected = null">
+        <pre
+            v-if="selected?.format === 'jsonld'"
+            class="text-[11px] leading-snug bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 overflow-x-auto text-gray-800 dark:text-gray-200"
+        >{{ selected.content }}</pre>
+        <MarkdownViewer v-else :content="selected?.content || ''"/>
+      </Modal>
     </main>
   </div>
 </template>

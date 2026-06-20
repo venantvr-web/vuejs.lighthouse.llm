@@ -1,6 +1,7 @@
 <script setup>
 import {nextTick, ref, watch} from 'vue'
 import MarkdownViewer from './MarkdownViewer.vue'
+import Modal from '@/components/common/Modal.vue'
 
 const props = defineProps({
   content: {type: String, default: ''},
@@ -11,6 +12,7 @@ const props = defineProps({
 const emit = defineEmits(['cancel', 'copy', 'export'])
 const outputContainer = ref(null)
 const copied = ref(false)
+const showModal = ref(false)
 
 // Auto-scroll during streaming
 watch(() => props.content, async () => {
@@ -60,6 +62,18 @@ const copyToClipboard = async () => {
 
       <!-- Action buttons -->
       <div class="flex items-center gap-2">
+        <!-- Expand to Markdown popup -->
+        <button
+            v-if="content && !isStreaming"
+            class="btn btn-ghost text-sm"
+            @click="showModal = true"
+        >
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          {{ $t('common.expand') }}
+        </button>
+
         <!-- Cancel button -->
         <button
             v-if="isStreaming"
@@ -126,6 +140,11 @@ const copyToClipboard = async () => {
         </p>
       </div>
     </div>
+
+    <!-- Réponse en plein écran (pop-up Markdown) -->
+    <Modal :open="showModal" :title="$t('common.aiResponse')" @close="showModal = false">
+      <MarkdownViewer :content="content"/>
+    </Modal>
 
     <!-- Progress bar during streaming -->
     <Transition name="slide-up">

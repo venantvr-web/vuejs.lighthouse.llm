@@ -2,6 +2,8 @@
 import {ref} from 'vue'
 import {formatRelativeTime, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
+import Modal from '@/components/common/Modal.vue'
+import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -25,7 +27,7 @@ const SENTIMENT = {
   negative: {labelKey: 'geo.sentimentNegative', class: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}
 }
 
-const showResponses = ref(false)
+const responsesModal = ref(false)
 </script>
 
 <template>
@@ -133,18 +135,10 @@ const showResponses = ref(false)
         </div>
       </div>
 
-      <!-- Response previews -->
-      <button class="text-[11px] text-primary-500 hover:underline" @click="showResponses = !showResponses">
-        {{ showResponses ? $t('geo.hideResponses') : $t('geo.showResponses') }}
+      <!-- Réponses : affichées en Markdown dans une fenêtre modale -->
+      <button class="text-[11px] text-primary-500 hover:underline self-start" @click="responsesModal = true">
+        {{ $t('geo.showResponses') }}
       </button>
-      <div v-if="showResponses" class="mt-2 space-y-2">
-        <div v-for="provider in stats.providers" :key="provider">
-          <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
-            {{ PROVIDER_LABELS[provider] || provider }} ({{ stats.byProvider[provider].latest.model }})
-          </p>
-          <p class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap max-h-32 overflow-y-auto p-2 rounded bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">{{ stats.byProvider[provider].latest.response }}</p>
-        </div>
-      </div>
     </template>
 
     <!-- Never run -->
@@ -175,5 +169,31 @@ const showResponses = ref(false)
         {{ running ? $t('common.analyzing') : $t('geo.run') }}
       </button>
     </div>
+
+    <!-- Réponses des moteurs, rendues en Markdown -->
+    <Modal :open="responsesModal" @close="responsesModal = false">
+      <template #title>
+        <span class="line-clamp-1">{{ item.prompt }}</span>
+      </template>
+      <div v-if="stats?.providers?.length" class="space-y-6">
+        <section v-for="provider in stats.providers" :key="provider">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ PROVIDER_LABELS[provider] || provider }}</span>
+            <span class="text-[11px] text-gray-400 dark:text-gray-500">{{ stats.byProvider[provider].latest.model }}</span>
+            <span
+                :class="stats.byProvider[provider].latest.brandMentioned ? 'text-emerald-500' : 'text-red-500'"
+                class="ml-auto text-xs font-semibold"
+            >
+              {{ stats.byProvider[provider].latest.brandMentioned ? $t('geo.mentioned') : $t('geo.notMentioned') }}
+            </span>
+          </div>
+          <MarkdownViewer
+              v-if="stats.byProvider[provider].latest.response"
+              :content="stats.byProvider[provider].latest.response"
+          />
+          <p v-else class="text-xs text-gray-400 dark:text-gray-500 italic">—</p>
+        </section>
+      </div>
+    </Modal>
   </div>
 </template>

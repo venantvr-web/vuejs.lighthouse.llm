@@ -3,6 +3,7 @@ import {computed, onMounted, ref} from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
+import SearchInput from '@/components/common/SearchInput.vue'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
@@ -21,6 +22,7 @@ const items = ref([])
 const loading = ref(true)
 const selected = ref(null)
 const activeFilter = usePersistentRef('aihistory.filter', 'all')
+const search = usePersistentRef('aihistory.search', '')
 
 const TYPE_META = {
   [AI_ARTIFACT_TYPES.ANALYSIS]: {label: t('aiHistory.typeAnalysis'), badge: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'},
@@ -37,9 +39,14 @@ const FILTERS = [
   {value: AI_ARTIFACT_TYPES.STRUCTURED_DATA, label: t('aiHistory.filterStructuredData')}
 ]
 
-const filtered = computed(() =>
-    activeFilter.value === 'all' ? items.value : items.value.filter(i => i.type === activeFilter.value)
-)
+const filtered = computed(() => {
+  let list = activeFilter.value === 'all' ? items.value : items.value.filter(i => i.type === activeFilter.value)
+  const q = search.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter(i => `${i.title} ${i.url} ${i.provider} ${i.model} ${i.content}`.toLowerCase().includes(q))
+  }
+  return list
+})
 
 function typeMeta(type) {
   return TYPE_META[type] || {label: type, badge: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'}
@@ -114,6 +121,10 @@ onMounted(load)
         >
           {{ $t('common.clearAll') }}
         </button>
+      </div>
+
+      <div v-if="items.length" class="mb-4">
+        <SearchInput v-model="search" :placeholder="$t('aiHistory.searchPlaceholder')"/>
       </div>
 
       <p v-if="loading" class="text-sm text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>

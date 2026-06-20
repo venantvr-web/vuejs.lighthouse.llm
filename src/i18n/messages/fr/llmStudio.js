@@ -46,6 +46,8 @@ export default {
 
         veilleTitle: 'Historique',
         veilleHint: 'Historique des fichiers générés. Relancez régulièrement pour suivre l\'évolution de votre domaine et garder vos fichiers à jour.',
+        searchPlaceholder: 'Rechercher (domaine, contenu…)',
+        noResults: 'Aucun résultat.',
 
         watchTitle: 'Veille automatique',
         watchHint: 'Les domaines surveillés sont revérifiés à l\'ouverture de l\'app quand l\'intervalle est écoulé. En cas de changement (structure du domaine, fichier llms.txt retiré ou publié), vous recevez une alerte.',

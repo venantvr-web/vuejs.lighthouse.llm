@@ -44,6 +44,7 @@ export default {
         sourceFile: 'Fichier',
         // DomainList
         domainsTitle: 'Domaines',
+        searchPlaceholder: 'Rechercher un domaine…',
         domainsEmpty: 'Aucun historique disponible.',
         domainsEmptyHint: 'Analysez une URL pour commencer.',
         domainAnalysisSingular: '{count} analyse',

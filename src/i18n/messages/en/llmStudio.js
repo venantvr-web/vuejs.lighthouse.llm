@@ -46,6 +46,8 @@ export default {
 
         veilleTitle: 'History',
         veilleHint: 'History of generated files. Re-run regularly to track how your domain evolves and keep your files up to date.',
+        searchPlaceholder: 'Search (domain, content…)',
+        noResults: 'No results.',
 
         watchTitle: 'Automatic monitoring',
         watchHint: 'Watched domains are re-checked when you open the app once the interval has elapsed. On any change (domain structure, llms.txt removed or published) you get an alert.',

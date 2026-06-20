@@ -15,6 +15,7 @@ export default {
         filterIndexability: 'Indexability',
         filterStructuredData: 'JSON-LD',
         empty: 'No AI artifact saved yet. Run an analysis, an indexability diagnostic or a JSON-LD generation.',
+        searchPlaceholder: 'Search (title, URL, content…)',
         artifact: 'Artifact',
         confirmRemove: 'Remove this artifact from the history?',
         confirmClearAll: 'Clear the entire AI history?'

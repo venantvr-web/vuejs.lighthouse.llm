@@ -9,6 +9,7 @@ import DomainList from '@/components/history/DomainList.vue'
 import AnalysisTable from '@/components/history/AnalysisTable.vue'
 import ScoreChartGrid from '@/components/history/ScoreChartGrid.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import SearchInput from '@/components/common/SearchInput.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
@@ -56,6 +57,14 @@ watch(() => historyStore.currentScores, (scores) => {
 }, {immediate: true})
 
 const chartsRef = ref(null)
+
+// Recherche dans la liste des domaines
+const domainSearch = usePersistentRef('history.domainSearch', '')
+const filteredDomains = computed(() => {
+  const q = domainSearch.value.trim().toLowerCase()
+  if (!q) return historyStore.domains
+  return historyStore.domains.filter(d => d.domain.toLowerCase().includes(q))
+})
 
 // Slug filter for charts
 const selectedSlugFilter = usePersistentRef('history.slugFilter', null)
@@ -265,8 +274,11 @@ function compareSelected() {
     <div class="history-content">
       <!-- Sidebar - Domain List -->
       <aside class="history-sidebar">
+        <div v-if="!historyStore.isEmpty" class="p-3 pb-0">
+          <SearchInput v-model="domainSearch" :placeholder="$t('history.searchPlaceholder')"/>
+        </div>
         <DomainList
-            :domains="historyStore.domains"
+            :domains="filteredDomains"
             :loading="historyStore.loading"
             :selected-domain="historyStore.currentDomain"
             @delete="confirmDeleteDomain"

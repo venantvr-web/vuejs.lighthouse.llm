@@ -5,6 +5,7 @@ import PageIntro from '@/components/common/PageIntro.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
+import SearchInput from '@/components/common/SearchInput.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
 import {useNotifications} from '@/composables/useNotifications'
@@ -49,13 +50,25 @@ function toggleWatch() {
 
 // Veille : historique des fichiers générés + contenu en ligne consulté
 const history = ref([])
+const historySearch = usePersistentRef('llmStudio.historySearch', '')
 const liveModal = ref(null)   // { title, content }
 
 const LLMS_TYPES = [AI_ARTIFACT_TYPES.LLMS_TXT, AI_ARTIFACT_TYPES.LLMS_FULL]
 
+const filteredHistory = computed(() => {
+  const q = historySearch.value.trim().toLowerCase()
+  if (!q) return history.value
+  return history.value.filter(i => `${i.url} ${typeLabel(i.type)} ${i.model} ${i.content}`.toLowerCase().includes(q))
+})
+
 async function loadHistory() {
   const all = await aiHistory.getAll()
   history.value = all.filter(i => LLMS_TYPES.includes(i.type))
+}
+
+async function removeHistory(item) {
+  await aiHistory.remove(item.id)
+  await loadHistory()
 }
 
 async function handleAnalyze() {
@@ -321,8 +334,12 @@ onMounted(async () => {
       <div v-if="history.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
         <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">{{ $t('llmStudio.veilleTitle') }}</h2>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('llmStudio.veilleHint') }}</p>
-        <ul class="divide-y divide-gray-100 dark:divide-gray-700">
-          <li v-for="item in history" :key="item.id" class="py-2 flex items-center justify-between gap-3">
+        <div class="mb-3">
+          <SearchInput v-model="historySearch" :placeholder="$t('llmStudio.searchPlaceholder')"/>
+        </div>
+        <p v-if="!filteredHistory.length" class="text-sm text-gray-400 dark:text-gray-500">{{ $t('llmStudio.noResults') }}</p>
+        <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700">
+          <li v-for="item in filteredHistory" :key="item.id" class="py-2 flex items-center justify-between gap-3">
             <div class="min-w-0">
               <p class="text-sm text-gray-900 dark:text-white truncate">{{ item.url }}</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
@@ -331,12 +348,17 @@ onMounted(async () => {
                 <span v-if="item.model"> · {{ item.model }}</span>
               </p>
             </div>
-            <button
-                class="shrink-0 text-xs text-primary-600 dark:text-primary-400 hover:underline"
-                @click="liveModal = {title: typeLabel(item.type) + ' — ' + item.url, content: item.content}"
-            >
-              {{ $t('common.expand') }}
-            </button>
+            <div class="flex items-center gap-3 shrink-0">
+              <button
+                  class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                  @click="liveModal = {title: typeLabel(item.type) + ' — ' + item.url, content: item.content}"
+              >
+                {{ $t('common.expand') }}
+              </button>
+              <button class="text-xs text-red-500 hover:underline" @click="removeHistory(item)">
+                {{ $t('common.delete') }}
+              </button>
+            </div>
           </li>
         </ul>
       </div>

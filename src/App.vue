@@ -31,7 +31,7 @@ const toggleTheme = () => {
 </script>
 
 <template>
-  <div class="min-h-screen transition-colors" style="background-color: var(--bg-secondary);">
+  <div class="min-h-screen transition-colors pb-9" style="background-color: var(--bg-secondary);">
     <!-- Barre de progression globale + notifications in-app -->
     <ProgressBar/>
     <ToastHost/>
@@ -40,7 +40,7 @@ const toggleTheme = () => {
     <button
         :class="isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'"
         :title="isDark ? 'Mode clair' : 'Mode sombre'"
-        class="fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg hover:shadow-xl transition-all border"
+        class="fixed bottom-12 right-4 z-50 p-3 rounded-full shadow-lg hover:shadow-xl transition-all border"
         @click="toggleTheme"
     >
       <!-- Sun icon -->

@@ -68,8 +68,8 @@ async function handleGenerate(full) {
 }
 
 function exportOutput() {
-  const name = outputKind.value === 'full' ? 'llms-full.txt' : 'llms.txt'
-  downloadText(name, output.value, 'text/plain;charset=utf-8')
+  const name = outputKind.value === 'full' ? 'llms-full.md' : 'llms.md'
+  downloadText(name, output.value, 'text/markdown;charset=utf-8')
   toast.success(t('toast.exported'))
 }
 

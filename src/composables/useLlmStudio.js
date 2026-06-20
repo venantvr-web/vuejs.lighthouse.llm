@@ -3,9 +3,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
-import {fetchResource, originFromUrl} from '@/services/resourceCheck'
-import {discoverBySitemap} from '@/services/urlDiscovery'
-import {buildLlmsTxtPrompt, buildSiteContext, LLMS_TXT_SYSTEM} from '@/services/llmsTxt'
+import {originFromUrl} from '@/services/resourceCheck'
+import {fetchSiteSnapshot} from '@/services/llmSnapshot'
+import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM} from '@/services/llmsTxt'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
 import {useI18n} from '@/i18n'
@@ -60,24 +60,14 @@ export function useLlmStudio() {
         startProgress()
 
         try {
-            const base = origin.replace(/\/$/, '')
-            const [home, sitemapUrls, llms, llmsFull] = await Promise.all([
-                fetchResource(origin),
-                discoverBySitemap(origin, {maxPages: 2000}).catch(() => []),
-                fetchResource(`${base}/llms.txt`),
-                fetchResource(`${base}/llms-full.txt`)
-            ])
-
-            if (!home.available) {
-                analyzeError.value = t('llmStudio.errorFetchHome')
-                return
-            }
-
-            context.value = buildSiteContext({origin, html: home.content, sitemapUrls})
-            liveLlms.value = {present: llms.available, content: llms.available ? llms.content : ''}
-            liveLlmsFull.value = {present: llmsFull.available, content: llmsFull.available ? llmsFull.content : ''}
+            const snap = await fetchSiteSnapshot(origin)
+            context.value = snap.context
+            liveLlms.value = snap.liveLlms
+            liveLlmsFull.value = snap.liveLlmsFull
         } catch (e) {
-            analyzeError.value = e.message || t('llmStudio.errorAnalyze')
+            analyzeError.value = e.message === 'home-unreachable'
+                ? t('llmStudio.errorFetchHome')
+                : (e.message || t('llmStudio.errorAnalyze'))
         } finally {
             analyzing.value = false
             doneProgress()

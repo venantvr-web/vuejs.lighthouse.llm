@@ -5,6 +5,8 @@ import PageIntro from '@/components/common/PageIntro.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import Modal from '@/components/common/Modal.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
+import {useLlmWatch} from '@/composables/useLlmWatch'
+import {useNotifications} from '@/composables/useNotifications'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSiteStore} from '@/stores/siteStore'
 import {useSettingsStore} from '@/stores/settingsStore'
@@ -26,8 +28,19 @@ const {
   generate, continueGeneration, cancel
 } = useLlmStudio()
 
+const {items: watchItems, checking: watchChecking, isWatched, watchDomain, unwatch, checkAll, checkDue} = useLlmWatch()
+const {permission: notifPermission, requestPermission, isSupported: notifSupported} = useNotifications()
+
 const url = usePersistentRef('llmStudio.url', site.origin)
 const keywords = usePersistentRef('llmStudio.keywords', '')
+const interval = usePersistentRef('llmStudio.interval', 24)
+
+function toggleWatch() {
+  if (!context.value) return
+  const origin = context.value.origin
+  if (isWatched(origin)) unwatch(origin)
+  else watchDomain(origin, {context: context.value, llmsPresent: liveLlms.value?.present, llmsFullPresent: liveLlmsFull.value?.present})
+}
 
 // Veille : historique des fichiers générés + contenu en ligne consulté
 const history = ref([])
@@ -73,7 +86,11 @@ function typeLabel(type) {
   return type === AI_ARTIFACT_TYPES.LLMS_FULL ? 'llms-full.txt' : 'llms.txt'
 }
 
-onMounted(loadHistory)
+onMounted(async () => {
+  await loadHistory()
+  // Veille automatique : revérifie les domaines dont l'intervalle est écoulé
+  await checkDue(Number(interval.value) * 3600 * 1000)
+})
 </script>
 
 <template>
@@ -208,6 +225,74 @@ onMounted(loadHistory)
             {{ $t('llmStudio.continue') }}
           </button>
         </div>
+      </div>
+
+      <!-- Veille automatique -->
+      <div v-if="context || watchItems.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $t('llmStudio.watchTitle') }}</h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {{ $t('llmStudio.watchInterval') }}
+              <select
+                  v-model.number="interval"
+                  class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs"
+              >
+                <option :value="6">6 h</option>
+                <option :value="24">24 h</option>
+                <option :value="168">7 j</option>
+              </select>
+            </label>
+            <button
+                v-if="watchItems.length"
+                :disabled="watchChecking"
+                class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors disabled:opacity-50"
+                @click="checkAll"
+            >
+              {{ watchChecking ? $t('llmStudio.checking') : $t('llmStudio.checkNow') }}
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('llmStudio.watchHint') }}</p>
+
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+          <button
+              v-if="context"
+              class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+              @click="toggleWatch"
+          >
+            {{ isWatched(context.origin) ? $t('llmStudio.unwatch') + ' →' : $t('llmStudio.watchThis') + ' →' }}
+          </button>
+          <button
+              v-if="notifSupported && notifPermission !== 'granted'"
+              class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+              @click="requestPermission"
+          >
+            {{ $t('llmStudio.enableAlerts') }} →
+          </button>
+        </div>
+
+        <ul v-if="watchItems.length" class="divide-y divide-gray-100 dark:divide-gray-700">
+          <li v-for="item in watchItems" :key="item.origin" class="py-2">
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-sm text-gray-900 dark:text-white truncate">{{ item.origin }}</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                  {{ $t('llmStudio.lastChecked') }}
+                  <span :title="formatDateTimeMedium(item.lastCheckedAt)">{{ formatRelativeTime(item.lastCheckedAt) }}</span>
+                  · llms.txt {{ item.snapshot.llmsPresent ? '✓' : '—' }}
+                  · llms-full.txt {{ item.snapshot.llmsFullPresent ? '✓' : '—' }}
+                </p>
+              </div>
+              <button class="shrink-0 text-xs text-red-500 hover:underline" @click="unwatch(item.origin)">
+                {{ $t('common.delete') }}
+              </button>
+            </div>
+            <ul v-if="item.lastChanges?.length" class="mt-1 ml-1 list-disc list-inside text-[11px] text-amber-600 dark:text-amber-400">
+              <li v-for="(c, i) in item.lastChanges" :key="i">{{ c }}</li>
+            </ul>
+          </li>
+        </ul>
       </div>
 
       <!-- Veille : historique des générations -->

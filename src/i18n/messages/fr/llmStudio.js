@@ -32,8 +32,19 @@ export default {
         generateLlmsFull: 'Générer llms-full.txt',
         continue: 'Continuer la génération',
 
-        veilleTitle: 'Veille',
+        veilleTitle: 'Historique',
         veilleHint: 'Historique des fichiers générés. Relancez régulièrement pour suivre l\'évolution de votre domaine et garder vos fichiers à jour.',
+
+        watchTitle: 'Veille automatique',
+        watchHint: 'Les domaines surveillés sont revérifiés à l\'ouverture de l\'app quand l\'intervalle est écoulé. En cas de changement (structure du domaine, fichier llms.txt retiré ou publié), vous recevez une alerte.',
+        watchInterval: 'Intervalle',
+        watchThis: 'Surveiller ce domaine',
+        unwatch: 'Ne plus surveiller',
+        checkNow: 'Vérifier maintenant',
+        checking: 'Vérification…',
+        enableAlerts: 'Activer les notifications',
+        lastChecked: 'Vérifié',
+        watchAlert: 'Veille LLM',
 
         errorInvalidUrl: 'URL invalide.',
         errorFetchHome: 'Impossible de récupérer la page d\'accueil (relais requis ou site inaccessible).',

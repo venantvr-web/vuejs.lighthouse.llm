@@ -32,8 +32,19 @@ export default {
         generateLlmsFull: 'Generate llms-full.txt',
         continue: 'Continue generation',
 
-        veilleTitle: 'Monitoring',
+        veilleTitle: 'History',
         veilleHint: 'History of generated files. Re-run regularly to track how your domain evolves and keep your files up to date.',
+
+        watchTitle: 'Automatic monitoring',
+        watchHint: 'Watched domains are re-checked when you open the app once the interval has elapsed. On any change (domain structure, llms.txt removed or published) you get an alert.',
+        watchInterval: 'Interval',
+        watchThis: 'Watch this domain',
+        unwatch: 'Stop watching',
+        checkNow: 'Check now',
+        checking: 'Checking…',
+        enableAlerts: 'Enable notifications',
+        lastChecked: 'Checked',
+        watchAlert: 'LLM monitoring',
 
         errorInvalidUrl: 'Invalid URL.',
         errorFetchHome: 'Could not fetch the homepage (relay required or site unreachable).',

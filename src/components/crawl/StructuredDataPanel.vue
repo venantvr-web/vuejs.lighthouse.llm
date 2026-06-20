@@ -1,8 +1,9 @@
 <script setup>
-import {computed, onMounted, watch} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useStructuredData} from '@/composables/useStructuredData'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import Modal from '@/components/common/Modal.vue'
 import {toScriptTag} from '@/services/structuredDataGen'
 import {downloadText} from '@/utils/download'
 import {useI18n} from '@/i18n'
@@ -20,6 +21,9 @@ const {byUrl, analyzing, batch, analyzeAll, generate, generateAllMissing, hydrat
 
 // Génération automatique du JSON-LD manquant à l'ouverture des résultats
 const auto = usePersistentRef('structuredData.auto', true)
+
+// URL dont le JSON-LD est affiché en plein écran (pop-up)
+const expandedUrl = ref(null)
 
 const urlList = computed(() => props.urls.map(u => (typeof u === 'string' ? u : u.url)).filter(Boolean))
 const analyzed = computed(() => urlList.value.some(u => byUrl[u]?.status))
@@ -187,6 +191,12 @@ function download(url) {
           <div class="mt-1.5 flex gap-2">
             <button
                 class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
+                @click="expandedUrl = url"
+            >
+              {{ $t('common.expand') }}
+            </button>
+            <button
+                class="px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors"
                 @click="copy(toScriptTag(byUrl[url].generated))"
             >
               {{ $t('structuredData.copyTag') }}
@@ -201,5 +211,13 @@ function download(url) {
         </div>
       </li>
     </ul>
+
+    <!-- JSON-LD en plein écran (pop-up code) -->
+    <Modal :open="!!expandedUrl" :title="$t('structuredData.title')" @close="expandedUrl = null">
+      <pre
+          v-if="expandedUrl && byUrl[expandedUrl]?.generated"
+          class="text-xs leading-snug bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 overflow-x-auto text-gray-800 dark:text-gray-200"
+      >{{ byUrl[expandedUrl].generated }}</pre>
+    </Modal>
   </div>
 </template>

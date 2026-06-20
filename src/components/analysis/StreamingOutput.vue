@@ -37,7 +37,7 @@ const copyToClipboard = async () => {
 <template>
   <div class="relative card p-6">
     <!-- Header with actions -->
-    <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
       <div class="flex items-center gap-3">
         <!-- Streaming indicator -->
         <span
@@ -61,7 +61,7 @@ const copyToClipboard = async () => {
       </div>
 
       <!-- Action buttons -->
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <!-- Expand to Markdown popup -->
         <button
             v-if="content && !isStreaming"

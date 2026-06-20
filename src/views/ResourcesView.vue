@@ -201,13 +201,13 @@ function exportDiagnosis() {
 
       <!-- Diagnostic IA d'indexabilité -->
       <div v-if="resources.length" class="mb-6">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $t('resources.diagnosisTitle') }}</h2>
           <button
               v-if="!diagnosing"
               :disabled="!settings.isConfigured"
               :title="settings.isConfigured ? '' : $t('resources.diagnoseDisabledTitle')"
-              class="px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              class="self-start sm:self-auto shrink-0 whitespace-nowrap px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
               @click="handleDiagnose"
           >
             {{ diagnosis ? $t('resources.rerunDiagnosis') : $t('resources.diagnoseWithAi') }}

@@ -8,6 +8,8 @@ export default {
         typeAnalysis: 'Analysis',
         typeIndexability: 'Indexability',
         typeStructuredData: 'JSON-LD',
+        typeLlmsTxt: 'llms.txt',
+        typeLlmsFull: 'llms-full.txt',
         filterAll: 'All',
         filterAnalyses: 'Analyses',
         filterIndexability: 'Indexability',

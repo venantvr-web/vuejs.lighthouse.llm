@@ -8,6 +8,7 @@ export default {
         geo: 'GEO',
         searchConsole: 'Search Console',
         resources: 'Ressources',
+        llmStudio: 'Studio LLM',
         history: 'Historique',
         settings: 'Paramètres',
         home: 'Accueil'

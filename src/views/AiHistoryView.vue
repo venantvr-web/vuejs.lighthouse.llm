@@ -25,7 +25,9 @@ const activeFilter = usePersistentRef('aihistory.filter', 'all')
 const TYPE_META = {
   [AI_ARTIFACT_TYPES.ANALYSIS]: {label: t('aiHistory.typeAnalysis'), badge: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'},
   [AI_ARTIFACT_TYPES.INDEXABILITY]: {label: t('aiHistory.typeIndexability'), badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'},
-  [AI_ARTIFACT_TYPES.STRUCTURED_DATA]: {label: t('aiHistory.typeStructuredData'), badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'}
+  [AI_ARTIFACT_TYPES.STRUCTURED_DATA]: {label: t('aiHistory.typeStructuredData'), badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'},
+  [AI_ARTIFACT_TYPES.LLMS_TXT]: {label: t('aiHistory.typeLlmsTxt'), badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'},
+  [AI_ARTIFACT_TYPES.LLMS_FULL]: {label: t('aiHistory.typeLlmsFull'), badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'}
 }
 
 const FILTERS = [

@@ -17,6 +17,7 @@ export default {
         geo: 'GEO (Generative Engine Optimization) measures whether your brand is cited by AI answer engines (ChatGPT, Gemini, Claude…). Define prompts representative of your customers and track your visibility over time. Configure the providers\' API keys first.',
         searchConsole: 'Connect Google Search Console to cross-reference your search data with the audits. You see impressions, clicks and positions of tracked pages. Access is read-only from your browser.',
         resources: 'Diagnose a domain\'s indexability: robots.txt, sitemap, tags and other technical SEO signals. The LLM summarizes inconsistencies and suggests fixes. Enter a URL to run the diagnosis.',
+        llmStudio: 'Generate better llms.txt and llms-full.txt files to make your site readable by AIs. The analysis understands your business domain from the header, footer and sitemap, then the AI writes the files. Also track how these aspects evolve over time.',
         crawl: 'Crawl a site to collect its pages, then run Lighthouse audits in batch. You get an aggregated view of scores across the whole domain. Enter the start URL and crawl options.',
         crawlResults: 'Crawl results: Lighthouse scores page by page, domain aggregates and grouping by page type. Spot the weakest page templates to fix first. You can generate structured data or compare with other crawls.'
     }

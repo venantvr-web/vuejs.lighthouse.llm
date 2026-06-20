@@ -12,7 +12,9 @@ const STORE = 'artifacts'
 export const AI_ARTIFACT_TYPES = {
     ANALYSIS: 'analysis',
     INDEXABILITY: 'indexability',
-    STRUCTURED_DATA: 'structured-data'
+    STRUCTURED_DATA: 'structured-data',
+    LLMS_TXT: 'llms-txt',
+    LLMS_FULL: 'llms-full'
 }
 
 /**

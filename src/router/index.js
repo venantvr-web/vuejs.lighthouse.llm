@@ -75,6 +75,11 @@ const routes = [
         component: () => import('@/views/ResourcesView.vue')
     },
     {
+        path: '/llm-studio',
+        name: 'llm-studio',
+        component: () => import('@/views/LlmStudioView.vue')
+    },
+    {
         path: '/ai-history',
         redirect: {path: '/history', query: {tab: 'ai'}}
     },

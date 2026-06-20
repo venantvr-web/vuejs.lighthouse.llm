@@ -31,6 +31,7 @@ export default {
         add: 'Add',
         // Prompt presets (replace the brackets with your context)
         presetsLabel: 'Presets:',
+        fillTokens: 'Fill in the preset fields:',
         presets: [
             'What are the best [industry] solutions in 2026?',
             'What tool do you recommend for [need]?',

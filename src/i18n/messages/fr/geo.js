@@ -31,6 +31,7 @@ export default {
         add: 'Ajouter',
         // Présets de prompts (remplacez les crochets par votre contexte)
         presetsLabel: 'Présets :',
+        fillTokens: 'Renseignez les champs du préset :',
         presets: [
             'Quelles sont les meilleures solutions de [secteur] en 2026 ?',
             'Quel outil recommandez-vous pour [besoin] ?',

@@ -42,8 +42,42 @@ const advancedAnalysis = usePersistentRef('geo.advancedAnalysis', true)
 // Présets de prompts (lus directement dans les messages : t() ne renvoie pas de tableaux)
 const promptPresets = computed(() => messages[locale.value]?.geo?.presets || messages.fr.geo.presets || [])
 
+// Jetons à renseigner : un préset comme « … de [secteur] en 2026 ? » expose un champ « secteur ».
+const promptTemplate = ref('')
+const tokenValues = ref({})
+
+const promptTokens = computed(() => {
+  const tokens = []
+  const re = /\[([^\]]+)\]/g
+  let m
+  while ((m = re.exec(promptTemplate.value)) !== null) {
+    if (!tokens.includes(m[1])) tokens.push(m[1])
+  }
+  return tokens
+})
+
 function applyPreset(preset) {
+  promptTemplate.value = preset
+  tokenValues.value = {}
   newPrompt.value = preset
+}
+
+// Reconstruit le prompt en remplaçant chaque jeton renseigné par sa valeur.
+function assemblePrompt() {
+  let out = promptTemplate.value
+  for (const token of promptTokens.value) {
+    const value = (tokenValues.value[token] || '').trim()
+    if (value) out = out.split(`[${token}]`).join(value)
+  }
+  newPrompt.value = out
+}
+
+// Édition manuelle du prompt : on quitte le mode jetons pour ne rien écraser.
+function onPromptInput() {
+  if (promptTemplate.value) {
+    promptTemplate.value = ''
+    tokenValues.value = {}
+  }
 }
 
 const items = computed(() => geoStore.sortedItems)
@@ -250,8 +284,29 @@ async function handleRunAll() {
               class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               :placeholder="$t('geo.promptPlaceholder')"
               type="text"
+              @input="onPromptInput"
               @keyup.enter="handleAdd"
           />
+          <!-- Champs des jetons du préset (ex. [secteur], [besoin]…) -->
+          <div
+              v-if="promptTemplate && promptTokens.length"
+              class="flex flex-col gap-2 rounded-lg border border-primary-200 dark:border-primary-500/30 bg-primary-50/60 dark:bg-primary-900/10 p-3"
+          >
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.fillTokens') }}</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label v-for="token in promptTokens" :key="token" class="block">
+                <span class="block mb-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ token }}</span>
+                <input
+                    v-model="tokenValues[token]"
+                    :placeholder="token"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    type="text"
+                    @input="assemblePrompt"
+                    @keyup.enter="handleAdd"
+                />
+              </label>
+            </div>
+          </div>
           <div class="flex flex-col gap-1.5">
             <span class="text-xs text-gray-400 dark:text-gray-500">{{ $t('geo.presetsLabel') }}</span>
             <button

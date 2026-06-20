@@ -29,6 +29,18 @@ export default {
         brandPlaceholder: 'Your brand',
         competitorsPlaceholder: 'Competitors (comma-separated)',
         add: 'Add',
+        // Prompt presets (replace the brackets with your context)
+        presetsLabel: 'Presets:',
+        presets: [
+            'What are the best [industry] solutions in 2026?',
+            'What tool do you recommend for [need]?',
+            'What are the best alternatives to [competitor]?',
+            'Compare the main players in the [industry] market.',
+            'Which company should I choose for [product/service]?',
+            'Who are the leaders in [industry]?',
+            'Which [service] providers do you recommend in [city/region]?',
+            'What are the pros and cons of [brand]?'
+        ],
         // Summary
         promptsTracked: 'Prompts tracked',
         avgShareOfVoice: 'Avg. share of voice',

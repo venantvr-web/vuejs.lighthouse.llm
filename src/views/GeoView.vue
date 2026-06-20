@@ -17,7 +17,7 @@ import {formatDateISO} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
-const {t} = useI18n()
+const {t, messages, locale} = useI18n()
 const toast = useToast()
 
 const geoStore = useGeoStore()
@@ -38,6 +38,13 @@ const runningAll = ref(false)
 const showKeyEditor = ref(false)
 const selectedProviderIds = ref([])
 const advancedAnalysis = usePersistentRef('geo.advancedAnalysis', true)
+
+// Présets de prompts (lus directement dans les messages : t() ne renvoie pas de tableaux)
+const promptPresets = computed(() => messages[locale.value]?.geo?.presets || messages.fr.geo.presets || [])
+
+function applyPreset(preset) {
+  newPrompt.value = preset
+}
 
 const items = computed(() => geoStore.sortedItems)
 const readyProviders = computed(() => settings.geoProviders.filter(p => p.ready))
@@ -245,6 +252,18 @@ async function handleRunAll() {
               type="text"
               @keyup.enter="handleAdd"
           />
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-xs text-gray-400 dark:text-gray-500">{{ $t('geo.presetsLabel') }}</span>
+            <button
+                v-for="(preset, i) in promptPresets"
+                :key="i"
+                class="px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-500/40 transition-colors"
+                type="button"
+                @click="applyPreset(preset)"
+            >
+              {{ preset }}
+            </button>
+          </div>
           <div class="flex flex-col md:flex-row gap-3">
             <input
                 v-model="newBrand"

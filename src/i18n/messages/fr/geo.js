@@ -29,6 +29,18 @@ export default {
         brandPlaceholder: 'Votre marque',
         competitorsPlaceholder: 'Concurrents (séparés par des virgules)',
         add: 'Ajouter',
+        // Présets de prompts (remplacez les crochets par votre contexte)
+        presetsLabel: 'Présets :',
+        presets: [
+            'Quelles sont les meilleures solutions de [secteur] en 2026 ?',
+            'Quel outil recommandez-vous pour [besoin] ?',
+            'Quelles sont les meilleures alternatives à [concurrent] ?',
+            'Comparez les principaux acteurs du marché [secteur].',
+            'Quelle entreprise choisir pour [produit/service] ?',
+            'Quels sont les leaders du [secteur] en France ?',
+            'Quels prestataires de [service] recommandez-vous à [ville/région] ?',
+            'Quels sont les avantages et inconvénients de [marque] ?'
+        ],
         // Résumé
         promptsTracked: 'Prompts suivis',
         avgShareOfVoice: 'Part de voix moy.',

@@ -6,6 +6,7 @@ import {CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {TEMPLATE_COLORS} from '@/services/templateDetector'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import StructuredDataPanel from '@/components/crawl/StructuredDataPanel.vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
@@ -370,8 +371,9 @@ onMounted(async () => {
 
           <!-- Aggregate scores -->
           <div v-if="aggregateScores" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               {{ $t('crawlResults.aggregateTitle') }}
+              <HelpTip :text="$t('help.crawlAggregateWhat')"/>
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-6">
               <div v-for="(data, category) in aggregateScores" :key="category" class="text-center">
@@ -391,8 +393,9 @@ onMounted(async () => {
 
           <!-- Template breakdown -->
           <div v-if="templates.length > 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
               {{ $t('crawlResults.templatesTitle') }}
+              <HelpTip :text="$t('help.crawlTemplatesWhat')"/>
             </h2>
             <div class="space-y-4">
               <div

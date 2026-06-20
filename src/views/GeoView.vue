@@ -9,6 +9,7 @@ import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
+import HelpTip from '@/components/common/HelpTip.vue'
 import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO} from '@/utils/formatters'
@@ -293,10 +294,20 @@ async function handleRunAll() {
 
       <!-- Empty state -->
       <div v-if="geoStore.isEmpty" class="text-center py-20">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('geo.emptyTitle') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 inline-flex items-center gap-2">
+          {{ $t('geo.emptyTitle') }}
+          <HelpTip :text="$t('help.geoWhat')"/>
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-4">
           {{ $t('geo.emptyText') }}
         </p>
+        <button
+            v-if="!readyProviders.length"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+            @click="showKeyEditor = true"
+        >
+          {{ $t('help.geoConfigureKeys') }}
+        </button>
       </div>
 
       <!-- Cards -->

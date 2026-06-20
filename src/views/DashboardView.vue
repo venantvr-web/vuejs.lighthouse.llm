@@ -191,6 +191,37 @@ const clearReport = () => {
               <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('dashboard.compareReportsDescription') }}</p>
             </div>
           </router-link>
+
+          <router-link
+              class="card p-6 hover:shadow-lg transition-shadow flex items-center gap-4"
+              to="/watchlist"
+          >
+            <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('dashboard.watchlistTitle') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('dashboard.watchlistDescription') }}</p>
+            </div>
+          </router-link>
+
+          <router-link
+              class="card p-6 hover:shadow-lg transition-shadow flex items-center gap-4"
+              to="/history"
+          >
+            <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('dashboard.historyTitle') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('dashboard.historyDescription') }}</p>
+            </div>
+          </router-link>
         </div>
       </section>
     </main>

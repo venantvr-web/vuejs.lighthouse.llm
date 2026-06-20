@@ -23,6 +23,10 @@ export default {
         optimizePerformanceDescription: 'Get AI recommendations to improve your Core Web Vitals',
         compareReportsTitle: 'Compare reports',
         compareReportsDescription: 'Track how your site evolves over time',
+        watchlistTitle: 'Track daily',
+        watchlistDescription: 'Add your URLs to the Watchlist and catch regressions.',
+        historyTitle: 'History',
+        historyDescription: 'Compare score evolution over time.',
 
         // Action plan (ActionPlanPanel)
         actionPlanTitle: 'Prioritized action plan',

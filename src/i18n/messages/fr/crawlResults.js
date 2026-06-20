@@ -29,6 +29,10 @@ export default {
 
         // Détail par page
         detailTitle: 'Détail par page',
+        dotAnalyzed: 'Analysée',
+        dotError: "Échec de l'analyse",
+        dotPending: 'Non analysée',
+        statusLegend: 'Statut par page :',
         detailFilter: '(filtre: {template})',
         seeAll: 'Voir tout',
         noUrlForFilter: 'Aucune URL trouvée pour ce filtre.',

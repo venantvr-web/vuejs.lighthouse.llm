@@ -1,4 +1,5 @@
 <script setup>
+import {ref, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {useI18n} from '@/i18n'
 
@@ -18,6 +19,11 @@ defineProps({
 })
 
 const route = useRoute()
+const menuOpen = ref(false)
+// Referme le menu mobile à chaque changement de page
+watch(() => route.path, () => {
+  menuOpen.value = false
+})
 
 // Single source of truth for the main section navigation
 const NAV = [
@@ -33,15 +39,18 @@ const NAV = [
 function isActive(to) {
   return route.path === to || route.path.startsWith(to + '/')
 }
+
+const activeClass = 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
 </script>
 
 <template>
   <header class="border-b border-gray-200 dark:border-gray-800">
     <div class="max-w-6xl mx-auto px-4 py-3">
-      <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center justify-between gap-3">
         <!-- Brand + page title -->
-        <div class="flex items-center gap-3 min-w-0">
-          <router-link class="flex items-center gap-2 shrink-0" :title="$t('nav.home')" to="/">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <router-link :title="$t('nav.home')" class="flex items-center gap-2 shrink-0" to="/">
             <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
               <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -49,49 +58,81 @@ function isActive(to) {
             </div>
           </router-link>
           <div v-if="title" class="min-w-0">
-            <h1 class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ title }}</h1>
-            <p v-if="subtitle" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ subtitle }}</p>
+            <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">{{ title }}</h1>
+            <p v-if="subtitle" class="hidden sm:block text-xs text-gray-500 dark:text-gray-400 truncate">{{ subtitle }}</p>
           </div>
         </div>
 
-        <!-- Section navigation -->
-        <nav class="flex items-center gap-0.5">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Section navigation (desktop) -->
+          <nav class="hidden md:flex items-center gap-0.5">
+            <router-link
+                v-for="item in NAV"
+                :key="item.to"
+                :aria-label="item.label"
+                :class="isActive(item.to) ? activeClass : inactiveClass"
+                :title="item.label"
+                :to="item.to"
+                class="p-2 rounded-lg transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path v-for="(d, i) in item.paths" :key="i" :d="d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </router-link>
+          </nav>
+
+          <!-- Language selector -->
+          <div class="flex items-center gap-0.5 shrink-0 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5">
+            <button
+                v-for="l in SUPPORTED_LOCALES"
+                :key="l"
+                :aria-label="`Langue : ${l}`"
+                :class="locale === l ? activeClass : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200'"
+                class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold uppercase transition-colors"
+                type="button"
+                @click="switchLocale(l)"
+            >
+              {{ l }}
+            </button>
+          </div>
+
+          <!-- Page-specific actions (desktop) -->
+          <div v-if="$slots.actions" class="hidden md:flex items-center gap-2">
+            <slot name="actions"/>
+          </div>
+
+          <!-- Burger (mobile) -->
+          <button
+              aria-label="Menu"
+              class="md:hidden p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              type="button"
+              @click="menuOpen = !menuOpen"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path v-if="!menuOpen" d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              <path v-else d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu -->
+      <div v-if="menuOpen" class="md:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+        <nav class="grid grid-cols-2 gap-1">
           <router-link
               v-for="item in NAV"
               :key="item.to"
-              :aria-label="item.label"
-              :class="isActive(item.to)
-                ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'"
-              :title="item.label"
+              :class="isActive(item.to) ? activeClass : inactiveClass"
               :to="item.to"
-              class="p-2 rounded-lg transition-colors"
+              class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path v-for="(d, i) in item.paths" :key="i" :d="d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
+            {{ item.label }}
           </router-link>
         </nav>
-
-        <!-- Language selector -->
-        <div class="flex items-center gap-0.5 shrink-0 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5">
-          <button
-              v-for="l in SUPPORTED_LOCALES"
-              :key="l"
-              :aria-label="`Langue : ${l}`"
-              :class="locale === l
-                ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200'"
-              class="px-1.5 py-0.5 rounded-md text-[11px] font-semibold uppercase transition-colors"
-              type="button"
-              @click="switchLocale(l)"
-          >
-            {{ l }}
-          </button>
-        </div>
-
-        <!-- Page-specific actions -->
-        <div v-if="$slots.actions" class="flex items-center gap-2 shrink-0">
+        <div v-if="$slots.actions" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800 flex flex-wrap gap-2">
           <slot name="actions"/>
         </div>
       </div>

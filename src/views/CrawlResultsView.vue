@@ -466,6 +466,13 @@ onMounted(async () => {
               </button>
             </div>
 
+            <!-- Légende des pastilles de statut -->
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 text-xs text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>{{ $t('crawlResults.dotAnalyzed') }}</span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span>{{ $t('crawlResults.dotError') }}</span>
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-300"></span>{{ $t('crawlResults.dotPending') }}</span>
+            </div>
+
             <div class="overflow-x-auto">
               <table class="w-full">
                 <thead>
@@ -489,15 +496,18 @@ onMounted(async () => {
                     <div class="flex items-center gap-2">
                         <span
                             v-if="urlInfo.analyzed"
-                            class="w-2 h-2 rounded-full bg-emerald-500"
+                            :title="$t('crawlResults.dotAnalyzed')"
+                            class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"
                         ></span>
                       <span
                           v-else-if="urlInfo.error"
-                          class="w-2 h-2 rounded-full bg-red-500"
+                          :title="urlInfo.error || $t('crawlResults.dotError')"
+                          class="w-2 h-2 rounded-full bg-red-500 shrink-0"
                       ></span>
                       <span
                           v-else
-                          class="w-2 h-2 rounded-full bg-gray-300"
+                          :title="$t('crawlResults.dotPending')"
+                          class="w-2 h-2 rounded-full bg-gray-300 shrink-0"
                       ></span>
                       <a
                           :href="urlInfo.url"

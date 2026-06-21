@@ -10,6 +10,11 @@ export default {
         enableAlerts: 'Activer les alertes',
         exportCsvTitle: 'Exporter le comparatif en CSV',
         exportMarkdownTitle: 'Exporter le comparatif en Markdown',
+        report: 'Rapport',
+        reportTitle: 'Rapport de visibilité GEO',
+        reportDownload: 'Télécharger (.md)',
+        reportPrint: 'Imprimer / PDF',
+        reportPopupBlocked: 'Impossible d\'ouvrir la fenêtre d\'impression (pop-up bloquée).',
         runAll: 'Tout exécuter',
         runningAll: 'Analyse en cours…',
         // Éditeur de clés

@@ -68,6 +68,14 @@ onBeforeUnmount(() => {
           <div class="flex-1 overflow-y-auto px-5 py-4">
             <slot/>
           </div>
+
+          <!-- Footer (actions optionnelles) -->
+          <div
+              v-if="$slots.footer"
+              class="flex items-center justify-end gap-2 px-5 py-3 border-t border-gray-100 dark:border-gray-700"
+          >
+            <slot name="footer"/>
+          </div>
         </div>
       </div>
     </Transition>

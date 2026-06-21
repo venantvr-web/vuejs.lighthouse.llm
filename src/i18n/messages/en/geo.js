@@ -10,6 +10,11 @@ export default {
         enableAlerts: 'Enable alerts',
         exportCsvTitle: 'Export the comparison to CSV',
         exportMarkdownTitle: 'Export the comparison to Markdown',
+        report: 'Report',
+        reportTitle: 'GEO visibility report',
+        reportDownload: 'Download (.md)',
+        reportPrint: 'Print / PDF',
+        reportPopupBlocked: 'Could not open the print window (pop-up blocked).',
         runAll: 'Run all',
         runningAll: 'Analyzing…',
         // Key editor

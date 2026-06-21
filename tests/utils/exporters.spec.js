@@ -1,8 +1,11 @@
 import {describe, expect, it} from 'vitest'
 import {
+    aggregateCitedSources,
+    aggregateEmergingCompetitors,
     buildBriefingMarkdown,
     buildBrokenUrlsCsv,
     buildGeoCsv,
+    buildGeoReportMarkdown,
     buildGeoRows,
     buildWatchlistRows,
     escapeCsv,
@@ -110,6 +113,70 @@ describe('utils/exporters', () => {
             const rows = buildWatchlistRows(items, statsById)
             expect(rows[0]).toMatchObject({libelle: 'Home', performance: 90, seo: 50})
             expect(rows[0].accessibilite).toBe('')
+        })
+    })
+
+    describe('aggregateCitedSources', () => {
+        it('sums engines and prompts per host across prompts', () => {
+            const items = [{id: 'p1'}, {id: 'p2'}]
+            const statsById = {
+                p1: {citedSources: [{host: 'acme.com', engines: 2}, {host: 'wiki.org', engines: 1}]},
+                p2: {citedSources: [{host: 'acme.com', engines: 1}]}
+            }
+            const agg = aggregateCitedSources(items, statsById)
+            expect(agg[0]).toEqual({host: 'acme.com', engines: 3, prompts: 2})
+            expect(agg.find(s => s.host === 'wiki.org')).toEqual({host: 'wiki.org', engines: 1, prompts: 1})
+        })
+    })
+
+    describe('aggregateEmergingCompetitors', () => {
+        it('counts the prompts each competitor surfaced in', () => {
+            const items = [{id: 'p1'}, {id: 'p2'}]
+            const statsById = {
+                p1: {emergingCompetitors: [{name: 'Zappy'}]},
+                p2: {emergingCompetitors: [{name: 'Zappy'}, {name: 'Nuxo'}]}
+            }
+            const agg = aggregateEmergingCompetitors(items, statsById)
+            expect(agg[0]).toEqual({name: 'Zappy', prompts: 2})
+        })
+    })
+
+    describe('buildGeoReportMarkdown', () => {
+        const items = [{id: 'p1', prompt: 'Meilleur CRM ?', brand: 'Acme'}]
+        const statsById = {
+            p1: {
+                providers: ['perplexity'],
+                byProvider: {perplexity: {latest: {brandMentioned: true, position: 1, shareOfVoice: 60, sentiment: 'positive'}}},
+                citedSources: [{host: 'acme.com', engines: 1}, {host: 'competitor.io', engines: 1}],
+                emergingCompetitors: [{name: 'Nuxo'}]
+            }
+        }
+        const score = {score: 75, citationRate: 100, avgShareOfVoice: 60, enginesCited: 1, engineRuns: 1, promptCount: 1, trend: 10}
+
+        it('renders the executive summary with score and methodology', () => {
+            const md = buildGeoReportMarkdown({brand: 'Acme', domain: 'https://acme.com/', score, items, statsById})
+            expect(md).toContain('# Rapport de visibilité GEO — Acme')
+            expect(md).toContain('**Score GEO : 75/100**')
+            expect(md).toContain('en hausse de 10 pts')
+            expect(md).toContain('Méthodologie')
+        })
+
+        it('highlights the tracked domain among cited sources', () => {
+            const md = buildGeoReportMarkdown({brand: 'Acme', domain: 'https://acme.com/', score, items, statsById})
+            expect(md).toMatch(/acme\.com.*votre site/)
+            expect(md).toContain('competitor.io')
+        })
+
+        it('flags when the tracked domain is not cited', () => {
+            const stats2 = {p1: {...statsById.p1, citedSources: [{host: 'competitor.io', engines: 1}]}}
+            const md = buildGeoReportMarkdown({brand: 'Acme', domain: 'https://acme.com/', score, items, statsById: stats2})
+            expect(md).toContain('n\'apparaît pas parmi les sources citées')
+        })
+
+        it('handles the no-data case gracefully', () => {
+            const md = buildGeoReportMarkdown({brand: 'Acme', score: {score: null}, items: [], statsById: {}})
+            expect(md).toContain('Aucune analyse exécutée')
+            expect(md).toContain('Lancez des analyses')
         })
     })
 })

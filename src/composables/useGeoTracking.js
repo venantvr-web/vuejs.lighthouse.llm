@@ -3,6 +3,7 @@ import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {toSeries} from '@/utils/series'
+import {extractDomain} from '@/utils/url'
 
 // A drop of 15 share-of-voice points between runs counts as a notable change.
 const SOV_DROP_THRESHOLD = 15
@@ -76,6 +77,28 @@ export function analyzeResponse(text, brand, competitors = []) {
         shareOfVoice,
         position
     }
+}
+
+/**
+ * Extrait les sources (domaines) citées dans une réponse d'IA : URL http(s)
+ * présentes dans le texte, regroupées par hôte (www. et casse ignorés).
+ * Déterministe (pas d'appel LLM) — répond à « quels sites l'IA cite-t-elle ? ».
+ * @param {string} text - Réponse de l'IA
+ * @returns {Array<{host: string, count: number}>} hôtes cités, triés par occurrences
+ */
+export function extractSources(text) {
+    if (!text) return []
+    const urlRe = /https?:\/\/[^\s)<>\]"'`]+/gi
+    const map = new Map()
+    let m
+    while ((m = urlRe.exec(text)) !== null) {
+        const raw = m[0].replace(/[.,;:!?)\]}>"']+$/, '')
+        const host = extractDomain(raw).toLowerCase().replace(/^www\./, '')
+        if (!host || !host.includes('.')) continue
+        if (!map.has(host)) map.set(host, {host, count: 0})
+        map.get(host).count++
+    }
+    return [...map.values()].sort((a, b) => b.count - a.count)
 }
 
 /**
@@ -231,6 +254,8 @@ export function groupRunsByProvider(runs) {
     let lastRunAt = null
     // Emerging competitors aggregated across engines: name -> set of engines
     const emergingMap = new Map()
+    // Sources citées agrégées entre moteurs : hôte -> set de moteurs
+    const sourcesMap = new Map()
 
     for (const provider of providers) {
         const list = grouped[provider] // newest first
@@ -248,6 +273,13 @@ export function groupRunsByProvider(runs) {
             if (!emergingMap.has(key)) emergingMap.set(key, {name, engines: new Set()})
             emergingMap.get(key).engines.add(provider)
         }
+
+        for (const s of latest.sources || []) {
+            const host = (s.host || '').toLowerCase()
+            if (!host) continue
+            if (!sourcesMap.has(host)) sourcesMap.set(host, {host: s.host, engines: new Set()})
+            sourcesMap.get(host).engines.add(provider)
+        }
     }
 
     const avgShareOfVoice = sovValues.length
@@ -260,7 +292,13 @@ export function groupRunsByProvider(runs) {
         .sort((a, b) => b.engines - a.engines)
         .slice(0, 12)
 
-    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, lastRunAt}
+    // Sources citées : triées par nombre de moteurs qui les citent, bornées
+    const citedSources = [...sourcesMap.values()]
+        .map(e => ({host: e.host, engines: e.engines.size}))
+        .sort((a, b) => b.engines - a.engines)
+        .slice(0, 12)
+
+    return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, citedSources, lastRunAt}
 }
 
 
@@ -320,6 +358,7 @@ export function useGeoTracking() {
             const provider = buildLLMProvider(settings, descriptor.id, descriptor.model)
             const answer = await provider.send(item.prompt)
             const analysis = analyzeResponse(answer, item.brand, item.competitors)
+            const sources = extractSources(answer)
 
             // Optional second call: ask the model which brands it cited and the
             // sentiment toward the tracked brand.
@@ -342,6 +381,7 @@ export function useGeoTracking() {
                 model: descriptor.model,
                 response: answer,
                 emergingCompetitors,
+                sources,
                 sentiment,
                 ...analysis
             })

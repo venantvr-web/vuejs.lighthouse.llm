@@ -5,6 +5,7 @@ import {
     detectChanges,
     escapeRegExp,
     extractEmerging,
+    extractSources,
     groupRunsByProvider,
     normalizeSentiment,
     parseBrandList,
@@ -141,6 +142,36 @@ describe('useGeoTracking - pure logic', () => {
             // Zappy cited by 2 engines -> ranked first
             expect(g.emergingCompetitors[0]).toEqual({name: 'Zappy', engines: 2})
             expect(g.emergingCompetitors.find(e => e.name === 'Nuxo').engines).toBe(1)
+        })
+
+        it('aggregates cited sources across engines', () => {
+            const g = groupRunsByProvider([
+                {provider: 'openai', timestamp: 20, brandMentioned: true, shareOfVoice: 50, sources: [{host: 'wikipedia.org', count: 3}, {host: 'acme.com', count: 1}]},
+                {provider: 'gemini', timestamp: 10, brandMentioned: true, shareOfVoice: 40, sources: [{host: 'wikipedia.org', count: 1}]}
+            ])
+            // wikipedia.org cité par 2 moteurs -> en tête
+            expect(g.citedSources[0]).toEqual({host: 'wikipedia.org', engines: 2})
+            expect(g.citedSources.find(s => s.host === 'acme.com').engines).toBe(1)
+        })
+    })
+
+    describe('extractSources', () => {
+        it('returns an empty array for blank input', () => {
+            expect(extractSources('')).toEqual([])
+            expect(extractSources(null)).toEqual([])
+        })
+
+        it('extracts hosts and counts occurrences, www and case ignored', () => {
+            const text = 'Voir https://www.Example.com/page et http://example.com/autre ainsi que https://acme.io.'
+            const sources = extractSources(text)
+            // example.com cité 2 fois (www + casse fusionnés) -> en tête
+            expect(sources[0]).toEqual({host: 'example.com', count: 2})
+            expect(sources.find(s => s.host === 'acme.io').count).toBe(1)
+        })
+
+        it('strips trailing punctuation from URLs', () => {
+            const sources = extractSources('Source : https://example.com/page).')
+            expect(sources).toEqual([{host: 'example.com', count: 1}])
         })
     })
 

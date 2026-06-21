@@ -1,15 +1,28 @@
 <script setup>
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 import {formatRelativeTime, getScoreColorClass} from '@/utils/formatters'
+import {canonicalUrl, sameHost} from '@/utils/url'
 import Sparkline from '@/components/common/Sparkline.vue'
 import Modal from '@/components/common/Modal.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
+import {useSiteStore} from '@/stores/siteStore'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
+const site = useSiteStore()
 
-defineProps({
+// Une source citée correspond-elle au domaine suivi ? (casse + www. ignorés)
+function isOwnSource(host) {
+  return !!site.activeDomain && sameHost(host, site.activeDomain)
+}
+
+// Le domaine suivi figure-t-il parmi les sources citées par au moins un moteur ?
+const ownCited = computed(() =>
+    (props.stats?.citedSources || []).some(s => isOwnSource(s.host))
+)
+
+const props = defineProps({
   item: {type: Object, required: true},
   stats: {type: Object, default: null},
   running: {type: Boolean, default: false},
@@ -124,6 +137,30 @@ const responsesModal = ref(false)
               :title="$t('geo.citedBy', { count: c.engines })"
           >
             {{ c.name }}<span v-if="c.engines > 1" class="opacity-60"> · {{ c.engines }}</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Sources citées : domaines que les moteurs IA citent en réponse -->
+      <div v-if="stats.citedSources?.length" class="mb-3">
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+          {{ $t('geo.citedSources') }}
+          <span
+              :class="ownCited ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'"
+              class="ml-1 normal-case font-medium"
+          >· {{ ownCited ? $t('geo.ownSourceCited') : $t('geo.ownSourceNotCited') }}</span>
+        </p>
+        <div class="flex flex-wrap gap-1">
+          <span
+              v-for="s in stats.citedSources"
+              :key="s.host"
+              :class="isOwnSource(s.host)
+                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 font-medium'
+                : 'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'"
+              :title="$t('geo.citedBy', { count: s.engines })"
+              class="px-1.5 py-0.5 rounded text-[10px]"
+          >
+            <span v-if="isOwnSource(s.host)" aria-hidden="true">✓ </span>{{ canonicalUrl(s.host) }}<span v-if="s.engines > 1" class="opacity-60"> · {{ s.engines }}</span>
           </span>
         </div>
       </div>

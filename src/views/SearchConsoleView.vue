@@ -39,7 +39,7 @@ async function handleConnect() {
   // Conserve la propriété mémorisée si elle existe toujours, sinon présélectionne
   if (sites.value.length && !sites.value.includes(selectedSite.value)) {
     // Propriété correspondant au site actif, sinon la première
-    const match = site.domain ? sites.value.find(s => siteHost(s) === site.domain) : null
+    const match = site.activeDomain ? sites.value.find(s => siteHost(s) === site.activeDomain) : null
     selectedSite.value = match || sites.value[0]
   }
 }

@@ -55,7 +55,10 @@ export default {
         emptyTitle: 'No prompt tracked',
         emptyText: 'Add prompts representative of your customers\' searches, enter your brand and your competitors, then compare your visibility across AI engines.',
         // Messages (JS)
-        errorPromptBrandRequired: 'The prompt and the brand are required.',
+        errorPromptRequired: 'The prompt is required.',
+        errorBrandRequired: 'Configure a brand first (onboarding or Settings).',
+        brandActivePrefix: 'Tracked brand:',
+        brandManage: 'Manage',
         errorInvalidEntry: 'Invalid entry.',
         confirmRemove: 'Remove this tracked prompt?',
         // Prompt card (GeoCard)

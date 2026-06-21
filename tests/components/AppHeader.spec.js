@@ -1,9 +1,15 @@
-import {describe, expect, it} from 'vitest'
+import {beforeEach, describe, expect, it} from 'vitest'
 import {mount} from '@vue/test-utils'
+import {createPinia, setActivePinia} from 'pinia'
 import {createMemoryHistory, createRouter} from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
 
-const SECTIONS = ['/briefing', '/watchlist', '/geo', '/search-console', '/resources', '/history', '/settings']
+const SECTIONS = ['/briefing', '/watchlist', '/geo', '/search-console', '/resources', '/llm-studio', '/history', '/settings']
+
+beforeEach(() => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+})
 
 function makeRouter(path = '/') {
     const router = createRouter({

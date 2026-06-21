@@ -11,6 +11,7 @@ export default {
         llmStudio: 'Studio LLM',
         history: 'Historique',
         settings: 'Paramètres',
-        home: 'Accueil'
+        home: 'Accueil',
+        activeBrand: 'Marque active'
     }
 }

@@ -18,7 +18,7 @@ describe('shared active site — silent prefill', () => {
     beforeEach(() => {
         localStorage.clear()
         // Site actif déjà connu avant le montage des écrans
-        localStorage.setItem(KEY, JSON.stringify({domain: 'example.com', lastUrl: ''}))
+        localStorage.setItem(KEY, JSON.stringify({domains: ['example.com'], brands: [], activeDomain: 'example.com', activeBrand: '', lastUrl: ''}))
         setActivePinia(createPinia())
     })
 
@@ -36,7 +36,7 @@ describe('shared active site — silent prefill', () => {
         // Soumission d'une URL d'un autre domaine → met à jour le site actif partagé
         await w.findComponent(UrlInput).vm.$emit('submit', 'https://newsite.io/page')
         const site = useSiteStore()
-        expect(site.domain).toBe('newsite.io')
-        expect(JSON.parse(localStorage.getItem(KEY)).domain).toBe('newsite.io')
+        expect(site.activeDomain).toBe('newsite.io')
+        expect(JSON.parse(localStorage.getItem(KEY)).activeDomain).toBe('newsite.io')
     })
 })

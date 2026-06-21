@@ -55,7 +55,10 @@ export default {
         emptyTitle: 'Aucun prompt suivi',
         emptyText: 'Ajoutez des prompts représentatifs des recherches de vos clients, indiquez votre marque et vos concurrents, puis comparez votre visibilité selon les moteurs IA.',
         // Messages (JS)
-        errorPromptBrandRequired: 'Le prompt et la marque sont requis.',
+        errorPromptRequired: 'Le prompt est requis.',
+        errorBrandRequired: 'Configurez d\'abord une marque (onboarding ou Paramètres).',
+        brandActivePrefix: 'Marque suivie :',
+        brandManage: 'Gérer',
         errorInvalidEntry: 'Entrée invalide.',
         confirmRemove: 'Retirer ce prompt suivi ?',
         // Carte de prompt (GeoCard)

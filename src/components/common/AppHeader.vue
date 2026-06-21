@@ -1,9 +1,17 @@
 <script setup>
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {useI18n} from '@/i18n'
+import {useSiteStore} from '@/stores/siteStore'
 
 const {t, locale, setLocale, SUPPORTED_LOCALES} = useI18n()
+const site = useSiteStore()
+
+// Marque active (affichée dans l'en-tête, commutable si plusieurs marques)
+const activeBrandModel = computed({
+  get: () => site.activeBrand,
+  set: (v) => site.setActiveBrand(v)
+})
 
 // Changer de langue recharge la page : la nouvelle locale (persistée) s'applique
 // partout, y compris aux libellés évalués une seule fois au montage.
@@ -65,6 +73,21 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
         </div>
 
         <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Marque active -->
+          <div
+              v-if="site.activeBrand"
+              :title="$t('nav.activeBrand')"
+              class="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
+          >
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            <select v-if="site.brands.length > 1" v-model="activeBrandModel" class="bg-transparent text-xs font-semibold focus:outline-none cursor-pointer">
+              <option v-for="b in site.brands" :key="b" :value="b">{{ b }}</option>
+            </select>
+            <span v-else class="text-xs font-semibold">{{ site.activeBrand }}</span>
+          </div>
+
           <!-- Section navigation (desktop) -->
           <nav class="hidden md:flex items-center gap-0.5">
             <router-link
@@ -119,6 +142,17 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
 
       <!-- Mobile menu -->
       <div v-if="menuOpen" class="md:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
+        <label v-if="site.activeBrand" class="flex items-center gap-2 mb-3 text-sm">
+          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeBrand') }} :</span>
+          <select
+              v-if="site.brands.length > 1"
+              v-model="activeBrandModel"
+              class="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+          >
+            <option v-for="b in site.brands" :key="b" :value="b">{{ b }}</option>
+          </select>
+          <span v-else class="font-semibold text-primary-600 dark:text-primary-400">{{ site.activeBrand }}</span>
+        </label>
         <nav class="grid grid-cols-2 gap-1">
           <router-link
               v-for="item in NAV"

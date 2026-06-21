@@ -8,6 +8,16 @@ export default {
         headerSubtitle: 'LLM providers, API keys and preferences',
         headerTitle: 'Settings',
 
+        // Identity (brands and domains)
+        identityTitle: 'Brands and domains',
+        identityIntro: 'Manage your brands and domains. The active brand shows in the header and is used for GEO tracking; the active domain pre-fills the screens.',
+        brandsLabel: 'Brands:',
+        brandPlaceholder: 'Add a brand…',
+        domainsLabel: 'Domains:',
+        domainPlaceholder: 'https://example.com',
+        addBtn: 'Add',
+        identityHint: 'Click a chip to make it active, ✕ to remove it.',
+
         // LLM configuration
         llmTitle: 'LLM configuration',
         llmIntro: 'Configure the AI provider for analyzing your Lighthouse reports.',

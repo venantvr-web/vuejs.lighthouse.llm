@@ -4,6 +4,7 @@ import {useRoute} from 'vue-router'
 import ToastHost from '@/components/common/ToastHost.vue'
 import ProgressBar from '@/components/common/ProgressBar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import OnboardingModal from '@/components/common/OnboardingModal.vue'
 
 const route = useRoute()
 const isDark = ref(false)
@@ -35,6 +36,9 @@ const toggleTheme = () => {
     <!-- Barre de progression globale + notifications in-app -->
     <ProgressBar/>
     <ToastHost/>
+
+    <!-- Onboarding initial (marque + domaine) si rien n'est configuré -->
+    <OnboardingModal/>
 
     <!-- Theme toggle (floating) -->
     <button

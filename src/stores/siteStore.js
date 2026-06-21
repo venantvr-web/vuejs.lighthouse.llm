@@ -5,50 +5,118 @@ import {extractDomain, normalizeUrl} from '@/utils/url'
 const STORAGE_KEY = 'lighthouse-active-site'
 
 /**
- * Site actif partagé : le domaine n'est saisi qu'une fois puis réutilisé
- * partout. Toute saisie d'URL dans un écran met à jour le site actif, et les
- * autres écrans s'en servent pour se préremplir (préremplissage silencieux).
+ * Identité du compte : plusieurs marques et plusieurs domaines, avec une marque
+ * et un domaine actifs. Saisis une fois (onboarding ou Paramètres) puis réutilisés
+ * partout pour le préremplissage. La marque active est affichée dans l'en-tête.
+ *
+ * Stockage (localStorage) : { domains: string[], brands: string[],
+ *   activeDomain, activeBrand, lastUrl }.
  */
 export const useSiteStore = defineStore('site', () => {
-    // Nom d'hôte normalisé, ex. "example.com"
-    const domain = ref('')
-    // Dernière URL complète normalisée saisie par l'utilisateur
-    const lastUrl = ref('')
+    const domains = ref([])      // hôtes normalisés, ex. "example.com"
+    const brands = ref([])       // noms de marque libres
+    const activeDomain = ref('')
+    const activeBrand = ref('')
+    const lastUrl = ref('')      // dernière URL complète saisie
 
-    // Chargement initial depuis localStorage
+    // Chargement initial + migration depuis l'ancien format { domain, lastUrl }
     try {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) {
             const data = JSON.parse(raw)
-            domain.value = data.domain || ''
-            lastUrl.value = data.lastUrl || ''
+            if (Array.isArray(data.domains)) {
+                domains.value = data.domains
+                brands.value = Array.isArray(data.brands) ? data.brands : []
+                activeDomain.value = data.activeDomain || data.domains[0] || ''
+                activeBrand.value = data.activeBrand || data.brands?.[0] || ''
+                lastUrl.value = data.lastUrl || ''
+            } else if (data.domain) {
+                // Ancien format mono-domaine
+                domains.value = [data.domain]
+                activeDomain.value = data.domain
+                lastUrl.value = data.lastUrl || ''
+            }
         }
     } catch {
         // localStorage indisponible ou JSON invalide : on démarre vide
     }
 
-    // Origine homepage du domaine actif, ex. "https://example.com"
-    const origin = computed(() => (domain.value ? `https://${domain.value}` : ''))
+    const origin = computed(() => (activeDomain.value ? `https://${activeDomain.value}` : ''))
+    const hasSite = computed(() => !!activeDomain.value)
+    // L'onboarding est requis tant qu'on n'a ni domaine ni marque
+    const needsOnboarding = computed(() => domains.value.length === 0 && brands.value.length === 0)
 
-    const hasSite = computed(() => !!domain.value)
-
-    // Suggestion de marque dérivée du domaine, ex. "example.co.uk" -> "example"
+    // Suggestion de marque dérivée du domaine actif, ex. "example.co.uk" -> "example"
     const brandGuess = computed(() => {
-        if (!domain.value) return ''
-        const host = domain.value.replace(/^www\./, '')
+        if (!activeDomain.value) return ''
+        const host = activeDomain.value.replace(/^www\./, '')
         return host.split('.')[0] || ''
     })
 
     function persist() {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({domain: domain.value, lastUrl: lastUrl.value}))
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                domains: domains.value,
+                brands: brands.value,
+                activeDomain: activeDomain.value,
+                activeBrand: activeBrand.value,
+                lastUrl: lastUrl.value
+            }))
         } catch {
             // best-effort
         }
     }
 
+    // --- Domaines ---
+    function addDomain(input) {
+        const normalized = normalizeUrl(input)
+        const host = normalized ? extractDomain(normalized) : ''
+        if (!host) return ''
+        if (!domains.value.includes(host)) domains.value = [...domains.value, host]
+        if (!activeDomain.value) activeDomain.value = host
+        persist()
+        return host
+    }
+
+    function removeDomain(host) {
+        domains.value = domains.value.filter(d => d !== host)
+        if (activeDomain.value === host) activeDomain.value = domains.value[0] || ''
+        persist()
+    }
+
+    function setActiveDomain(host) {
+        if (domains.value.includes(host)) {
+            activeDomain.value = host
+            persist()
+        }
+    }
+
+    // --- Marques ---
+    function addBrand(name) {
+        const clean = (name || '').trim()
+        if (!clean) return ''
+        if (!brands.value.includes(clean)) brands.value = [...brands.value, clean]
+        if (!activeBrand.value) activeBrand.value = clean
+        persist()
+        return clean
+    }
+
+    function removeBrand(name) {
+        brands.value = brands.value.filter(b => b !== name)
+        if (activeBrand.value === name) activeBrand.value = brands.value[0] || ''
+        persist()
+    }
+
+    function setActiveBrand(name) {
+        if (brands.value.includes(name)) {
+            activeBrand.value = name
+            persist()
+        }
+    }
+
     /**
-     * Mémorise le site actif à partir de n'importe quelle URL/domaine saisi.
+     * Mémorise le site actif à partir d'une URL/domaine saisi dans un écran :
+     * ajoute le domaine (s'il est nouveau) et le rend actif.
      * @param {string} input - URL ou domaine brut
      */
     function setFromUrl(input) {
@@ -56,16 +124,26 @@ export const useSiteStore = defineStore('site', () => {
         if (!normalized) return
         const host = extractDomain(normalized)
         if (!host) return
-        domain.value = host
+        if (!domains.value.includes(host)) domains.value = [...domains.value, host]
+        activeDomain.value = host
         lastUrl.value = normalized
         persist()
     }
 
     function clear() {
-        domain.value = ''
+        domains.value = []
+        brands.value = []
+        activeDomain.value = ''
+        activeBrand.value = ''
         lastUrl.value = ''
         persist()
     }
 
-    return {domain, lastUrl, origin, hasSite, brandGuess, setFromUrl, clear}
+    return {
+        domains, brands, activeDomain, activeBrand, lastUrl,
+        origin, hasSite, needsOnboarding, brandGuess,
+        addDomain, removeDomain, setActiveDomain,
+        addBrand, removeBrand, setActiveBrand,
+        setFromUrl, clear
+    }
 })

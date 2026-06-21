@@ -27,10 +27,9 @@ const site = useSiteStore()
 const {statsById, runningById, errorById, loadStats, loadItemStats, runPrompt} = useGeoTracking()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 
-// Add form state (mémorisé : un brouillon non soumis survit aux rechargements)
+// Add form state (mémorisé : un brouillon non soumis survit aux rechargements).
+// La marque vient de l'identité active (en-tête / Paramètres), plus de champ ici.
 const newPrompt = usePersistentRef('geo.draftPrompt', '')
-// Suggestion de marque dérivée du domaine du site actif (modifiable)
-const newBrand = usePersistentRef('geo.draftBrand', site.brandGuess)
 const newCompetitors = usePersistentRef('geo.draftCompetitors', '')
 const addError = ref('')
 
@@ -122,17 +121,20 @@ onMounted(async () => {
 
 async function handleAdd() {
   addError.value = ''
-  if (!newPrompt.value.trim() || !newBrand.value.trim()) {
-    addError.value = t('geo.errorPromptBrandRequired')
+  if (!newPrompt.value.trim()) {
+    addError.value = t('geo.errorPromptRequired')
     return
   }
-  const item = geoStore.addItem({prompt: newPrompt.value, brand: newBrand.value, competitors: newCompetitors.value})
+  if (!site.activeBrand) {
+    addError.value = t('geo.errorBrandRequired')
+    return
+  }
+  const item = geoStore.addItem({prompt: newPrompt.value, brand: site.activeBrand, competitors: newCompetitors.value})
   if (!item) {
     addError.value = t('geo.errorInvalidEntry')
     return
   }
   newPrompt.value = ''
-  newBrand.value = site.brandGuess
   newCompetitors.value = ''
   await loadItemStats(item)
 }
@@ -322,18 +324,12 @@ async function handleRunAll() {
               {{ preset }}
             </button>
           </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.brandCompetitorsHelp') }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ $t('geo.brandActivePrefix') }}
+            <strong class="text-gray-700 dark:text-gray-200">{{ site.activeBrand || '—' }}</strong>
+            <router-link class="ml-1 text-primary-600 dark:text-primary-400 hover:underline" to="/settings">{{ $t('geo.brandManage') }}</router-link>
+          </p>
           <div class="flex flex-col md:flex-row md:items-end gap-3">
-            <label class="md:w-56 block">
-              <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.brandLabel') }}</span>
-              <input
-                  v-model="newBrand"
-                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  :placeholder="$t('geo.brandPlaceholder')"
-                  type="text"
-                  @keyup.enter="handleAdd"
-              />
-            </label>
             <label class="flex-1 block">
               <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.competitorsLabel') }}</span>
               <input

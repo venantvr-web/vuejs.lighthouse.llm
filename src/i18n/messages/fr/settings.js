@@ -8,6 +8,16 @@ export default {
         headerSubtitle: "Fournisseurs LLM, clés API et préférences",
         headerTitle: 'Paramètres',
 
+        // Identité (marques et domaines)
+        identityTitle: 'Marques et domaines',
+        identityIntro: 'Gérez vos marques et vos domaines. La marque active est affichée dans l\'en-tête et utilisée pour le suivi GEO ; le domaine actif préremplit les écrans.',
+        brandsLabel: 'Marques :',
+        brandPlaceholder: 'Ajouter une marque…',
+        domainsLabel: 'Domaines :',
+        domainPlaceholder: 'https://exemple.com',
+        addBtn: 'Ajouter',
+        identityHint: 'Cliquez sur une puce pour la rendre active, sur ✕ pour la supprimer.',
+
         // Configuration LLM
         llmTitle: 'Configuration LLM',
         llmIntro: "Configurez le fournisseur d'IA pour l'analyse de vos rapports Lighthouse.",

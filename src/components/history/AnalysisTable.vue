@@ -3,6 +3,7 @@ import {computed} from 'vue'
 import {useRouter} from 'vue-router'
 import CrawlBadge from '@/components/history/CrawlBadge.vue'
 import SelectionCheckbox from '@/components/common/SelectionCheckbox.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {formatScore, formatDateTime, getScoreCssClass} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
 
@@ -157,15 +158,7 @@ function getStrategyLabel(strategy) {
           {{ formatScore(score.scores?.[cat.key]) }}
         </td>
         <td class="col-actions">
-          <button
-              class="action-btn delete"
-              :title="$t('common.delete')"
-              @click="emit('delete', score.id)"
-          >
-            <svg fill="none" height="14" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14">
-              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-            </svg>
-          </button>
+          <DeleteButton @click="emit('delete', score.id)"/>
         </td>
       </tr>
       </tbody>

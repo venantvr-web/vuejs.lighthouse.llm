@@ -7,6 +7,7 @@ import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import FieldLabel from '@/components/common/FieldLabel.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
 import {useNotifications} from '@/composables/useNotifications'
@@ -340,9 +341,7 @@ onMounted(async () => {
                   · llms-full.txt {{ item.snapshot.llmsFullPresent ? '✓' : '—' }}
                 </p>
               </div>
-              <button class="shrink-0 text-xs text-red-500 hover:underline" @click="unwatch(item.origin)">
-                {{ $t('common.delete') }}
-              </button>
+              <DeleteButton @click="unwatch(item.origin)"/>
             </div>
             <ul v-if="item.lastChanges?.length" class="mt-1 ml-1 list-disc list-inside text-[11px] text-amber-600 dark:text-amber-400">
               <li v-for="(c, i) in item.lastChanges" :key="i">{{ c }}</li>
@@ -380,16 +379,7 @@ onMounted(async () => {
                   <path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </button>
-              <button
-                  class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  :title="$t('common.delete')"
-                  :aria-label="$t('common.delete')"
-                  @click="removeHistory(item)"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </button>
+              <DeleteButton @click="removeHistory(item)"/>
             </div>
           </li>
         </ul>

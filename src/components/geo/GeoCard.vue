@@ -3,6 +3,7 @@ import {ref} from 'vue'
 import {formatRelativeTime, getScoreColorClass} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import Modal from '@/components/common/Modal.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import {useI18n} from '@/i18n'
 
@@ -50,15 +51,7 @@ const responsesModal = ref(false)
           </span>
         </div>
       </div>
-      <button
-          class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors shrink-0"
-          :title="$t('geo.removeTitle')"
-          @click="emit('remove')"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-        </svg>
-      </button>
+      <DeleteButton :label="$t('geo.removeTitle')" @click="emit('remove')"/>
     </div>
 
     <template v-if="stats?.providers?.length">

@@ -2,6 +2,7 @@
 import {computed} from 'vue'
 import {formatDate} from '@/utils/formatters'
 import {canonicalUrl} from '@/utils/url'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -82,15 +83,7 @@ function getScoreColor(score) {
           </span>
         </div>
 
-        <button
-            class="delete-btn"
-            :title="$t('history.deleteDomainTitle')"
-            @click.stop="emit('delete', domain.domain)"
-        >
-          <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16">
-            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          </svg>
-        </button>
+        <DeleteButton :label="$t('history.deleteDomainTitle')" @click="emit('delete', domain.domain)"/>
       </li>
     </ul>
   </div>

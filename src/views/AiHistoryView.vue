@@ -4,6 +4,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
@@ -189,16 +190,7 @@ onMounted(load)
                   <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                 </svg>
               </button>
-              <button
-                  class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  :title="$t('common.delete')"
-                  :aria-label="$t('common.delete')"
-                  @click="remove(item)"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                </svg>
-              </button>
+              <DeleteButton @click="remove(item)"/>
             </div>
           </div>
         </li>

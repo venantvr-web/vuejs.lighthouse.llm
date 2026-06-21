@@ -4,6 +4,7 @@ import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/forma
 import {canonicalUrl} from '@/utils/url'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import Sparkline from '@/components/common/Sparkline.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -76,15 +77,7 @@ function onBudgetInput(category, event) {
             <path d="M3 6l9-4 9 4M4 10v10a1 1 0 001 1h3m10-11v11a1 1 0 01-1 1h-3m-6 0h6m-6 0v-6a1 1 0 011-1h4a1 1 0 011 1v6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
           </svg>
         </button>
-        <button
-            class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors"
-            :title="$t('watchlist.removeTitle')"
-            @click="emit('remove')"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-          </svg>
-        </button>
+        <DeleteButton :label="$t('watchlist.removeTitle')" @click="emit('remove')"/>
       </div>
     </div>
 

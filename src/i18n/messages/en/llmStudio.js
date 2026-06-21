@@ -12,6 +12,7 @@ export default {
         analyzing: 'Analyzing…',
         keywordsLabel: 'Keywords / business domain (optional, improves results):',
         keywordsPlaceholder: 'E.g.: SEO audit, web performance, agency, fashion e-commerce…',
+        conceptsHint: 'Site concepts (click to add):',
 
         configurePrefix: 'AI generation requires an LLM provider. ',
         configureLink: 'Configure',

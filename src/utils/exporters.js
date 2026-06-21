@@ -186,9 +186,10 @@ function geoRecommendations(score, ownCited) {
  * @param {object} args.score - computeGeoScore() result
  * @param {Array} args.items - Tracked prompts
  * @param {Object} args.statsById - Per-prompt stats
+ * @param {object} [args.concepts] - Concepts appris ({products, audiences, keywords})
  * @returns {string} Markdown report
  */
-export function buildGeoReportMarkdown({brand = '', sector = '', domain = '', date = Date.now(), score = {}, items = [], statsById = {}} = {}) {
+export function buildGeoReportMarkdown({brand = '', sector = '', domain = '', date = Date.now(), score = {}, items = [], statsById = {}, concepts = {}} = {}) {
     const day = new Date(date).toLocaleDateString('fr-FR', {day: '2-digit', month: 'long', year: 'numeric'})
     const fmtPct = (v) => (typeof v === 'number' ? `${v}%` : '—')
     const lines = []
@@ -199,6 +200,18 @@ export function buildGeoReportMarkdown({brand = '', sector = '', domain = '', da
     if (domain) subtitleParts.push(domain)
     subtitleParts.push(`généré le ${day}`)
     lines.push(`*${subtitleParts.join(' · ')}*`, '')
+
+    // Concepts de la marque (appris du site)
+    const products = Array.isArray(concepts.products) ? concepts.products : []
+    const audiences = Array.isArray(concepts.audiences) ? concepts.audiences : []
+    const keywords = Array.isArray(concepts.keywords) ? concepts.keywords : []
+    if (products.length || audiences.length || keywords.length) {
+        lines.push('## Concepts de la marque', '')
+        if (products.length) lines.push(`- **Produits / services** : ${products.join(', ')}`)
+        if (audiences.length) lines.push(`- **Cible** : ${audiences.join(', ')}`)
+        if (keywords.length) lines.push(`- **Thèmes** : ${keywords.join(', ')}`)
+        lines.push('')
+    }
 
     // Synthèse
     lines.push('## Synthèse', '')

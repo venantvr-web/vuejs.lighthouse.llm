@@ -178,5 +178,21 @@ describe('utils/exporters', () => {
             expect(md).toContain('Aucune analyse exécutée')
             expect(md).toContain('Lancez des analyses')
         })
+
+        it('includes the learned brand concepts when provided', () => {
+            const md = buildGeoReportMarkdown({
+                brand: 'Concilio', score, items, statsById,
+                concepts: {products: ['Bilan santé'], audiences: ['Entreprises'], keywords: ['prévention']}
+            })
+            expect(md).toContain('## Concepts de la marque')
+            expect(md).toMatch(/Produits \/ services.*Bilan santé/)
+            expect(md).toMatch(/Cible.*Entreprises/)
+            expect(md).toMatch(/Thèmes.*prévention/)
+        })
+
+        it('omits the concepts section when none are learned', () => {
+            const md = buildGeoReportMarkdown({brand: 'Concilio', score, items, statsById})
+            expect(md).not.toContain('## Concepts de la marque')
+        })
     })
 })

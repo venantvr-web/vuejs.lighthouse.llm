@@ -10,6 +10,7 @@ import FieldLabel from '@/components/common/FieldLabel.vue'
 import DeleteButton from '@/components/common/DeleteButton.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
+import {useBrandConcepts} from '@/composables/useBrandConcepts'
 import {useNotifications} from '@/composables/useNotifications'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
@@ -46,6 +47,31 @@ const {permission: notifPermission, requestPermission, isSupported: notifSupport
 const url = useScopedPersistentRef('llmStudio.url', () => site.origin)
 const keywords = useScopedPersistentRef('llmStudio.keywords', '')
 const interval = usePersistentRef('llmStudio.interval', 24)
+
+// Concepts appris du site (partagés avec GEO) : raccourcis pour enrichir les mots-clés
+const {concepts, hasConcepts, learning: conceptsLearning, learn: learnConcepts, error: conceptsError} = useBrandConcepts()
+
+// Tous les concepts en une liste plate, pour les badges-raccourcis
+const conceptChips = computed(() => {
+  const c = concepts.value || {}
+  return [...(c.products || []), ...(c.audiences || []), ...(c.keywords || [])]
+})
+
+// Ajoute un concept aux mots-clés (séparés par des virgules, sans doublon)
+function addConceptToKeywords(value) {
+  const existing = (keywords.value || '').split(/[,\n]/).map(s => s.trim().toLowerCase()).filter(Boolean)
+  if (existing.includes(value.toLowerCase())) return
+  keywords.value = keywords.value.trim() ? `${keywords.value.trim()}, ${value}` : value
+}
+
+async function handleLearnConcepts() {
+  const ok = await learnConcepts()
+  if (ok) toast.success(t('geo.conceptsLearned'))
+  else {
+    const map = {'no-llm': t('geo.conceptsErrLLM'), 'no-site': t('geo.conceptsErrSite'), 'unreachable': t('geo.conceptsErrFetch')}
+    toast.error(map[conceptsError.value] || t('geo.conceptsErrFailed'))
+  }
+}
 
 function toggleWatch() {
   if (!context.value) return
@@ -156,6 +182,32 @@ onMounted(async () => {
                 rows="2"
             />
           </FieldLabel>
+
+          <!-- Concepts du site : raccourcis pour enrichir les mots-clés -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] text-gray-500 dark:text-gray-400">{{ $t('llmStudio.conceptsHint') }}</span>
+            <button
+                v-for="chip in conceptChips"
+                :key="chip"
+                class="px-1.5 py-0.5 rounded text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                type="button"
+                :title="$t('geo.badgeFill')"
+                @click="addConceptToKeywords(chip)"
+            >
+              {{ chip }}
+            </button>
+            <button
+                :disabled="conceptsLearning"
+                class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                type="button"
+                @click="handleLearnConcepts"
+            >
+              <svg :class="{ 'animate-spin': conceptsLearning }" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              {{ conceptsLearning ? $t('geo.conceptsLearning') : (hasConcepts ? $t('geo.conceptsRelearn') : $t('geo.conceptsLearn')) }}
+            </button>
+          </div>
         </div>
         <p v-if="analyzeError" class="mt-2 text-sm text-red-500">{{ analyzeError }}</p>
         <p v-if="!settings.isConfigured" class="mt-2 text-xs text-gray-500 dark:text-gray-400">

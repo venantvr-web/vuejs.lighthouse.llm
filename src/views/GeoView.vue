@@ -239,7 +239,8 @@ const reportMarkdown = computed(() => buildGeoReportMarkdown({
   domain: site.activeDomain ? canonicalUrl(site.activeDomain) : '',
   score: geoScore.value,
   items: items.value,
-  statsById: statsById.value
+  statsById: statsById.value,
+  concepts: concepts.value
 }))
 
 function reportFilename(ext) {

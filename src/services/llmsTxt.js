@@ -151,15 +151,64 @@ export function buildSiteContext({origin = '', html = '', sitemapUrls = []} = {}
     }
 }
 
+// Rôle système pour llms.txt (index/résumé)
 export const LLMS_TXT_SYSTEM =
-    'Tu es un expert en GEO (optimisation pour les moteurs de réponse IA) et tu maîtrises ' +
-    'le format llms.txt (https://llmstxt.org). Tu rédiges des fichiers llms.txt clairs, ' +
-    'structurés et fidèles au contenu réel du site. Tu réponds dans la langue du site. ' +
-    'Tu renvoies UNIQUEMENT le contenu Markdown du fichier, sans bloc de code englobant ' +
-    'ni commentaire avant ou après.'
+    'Tu es un ingénieur spécialisé en documentation technique et en optimisation de données ' +
+    'pour l\'intelligence artificielle (LLM/RAG). Tu maîtrises le format llms.txt ' +
+    '(https://llmstxt.org). Tu réponds dans la langue dominante du site, en Markdown propre, ' +
+    'et tu renvoies UNIQUEMENT le contenu du fichier (sans phrase avant ni après, ' +
+    'sans bloc de code englobant).'
+
+// Rôle système pour llms-full.txt (corpus complet structuré)
+export const LLMS_FULL_SYSTEM =
+    'Tu es un extracteur et formateur de données expert, spécialisé dans la préparation de ' +
+    'corpus de textes massifs pour le contexte des LLM. Tu réponds dans la langue dominante ' +
+    'du site, en Markdown pur, et tu renvoies UNIQUEMENT le contenu du fichier ' +
+    '(sans phrase avant ni après, sans bloc de code englobant).'
 
 /**
- * Construit le prompt de génération du fichier llms.txt (ou llms-full.txt).
+ * Ajoute la section « Données d'entrée » (contexte du domaine) au prompt.
+ * @param {string[]} lines
+ * @param {object} c - contexte
+ * @param {string} keywords
+ */
+function pushInputData(lines, c, keywords) {
+    lines.push('## Données d\'entrée')
+    lines.push('Voici la description et l\'arborescence du site pour baser ton travail :')
+    lines.push('')
+    lines.push(`- Site : ${c.origin || '(inconnu)'}`)
+    lines.push(`- Titre de la page d'accueil : ${c.title || '(inconnu)'}`)
+    lines.push(`- Description : ${c.description || '(absente)'}`)
+
+    if (c.headerLinks?.length) {
+        lines.push('')
+        lines.push('### Navigation principale (en-tête)')
+        c.headerLinks.forEach((l) => lines.push(`- [${l.text}](${l.url})`))
+    }
+    if (c.footerLinks?.length) {
+        lines.push('')
+        lines.push('### Liens de pied de page (secondaires / légaux)')
+        c.footerLinks.forEach((l) => lines.push(`- [${l.text}](${l.url})`))
+    }
+    if (c.sitemap?.sections?.length) {
+        lines.push('')
+        lines.push(`### Arborescence du sitemap (${c.sitemap.total} URL au total)`)
+        c.sitemap.sections.forEach((s) => {
+            lines.push(`- Section « ${s.section} » : ${s.count} page(s)`)
+            s.samples.forEach((u) => lines.push(`  - ${u}`))
+        })
+    }
+    if (keywords && keywords.trim()) {
+        lines.push('')
+        lines.push('### Mots-clés et domaine métier fournis par l\'utilisateur')
+        lines.push(keywords.trim())
+    }
+}
+
+/**
+ * Construit le prompt de génération du fichier llms.txt (index/résumé) ou
+ * llms-full.txt (corpus complet structuré). Inspiré des bonnes pratiques de
+ * rédaction de prompts pour ce format.
  * @param {object} context - sortie de buildSiteContext
  * @param {{keywords?: string, full?: boolean}} options
  * @returns {string}
@@ -168,67 +217,38 @@ export function buildLlmsTxtPrompt(context, {keywords = '', full = false} = {}) 
     const c = context || {}
     const lines = []
 
-    lines.push(
-        full
-            ? 'Rédige un fichier **llms-full.txt** pour le site ci-dessous.'
-            : 'Rédige un fichier **llms.txt** pour le site ci-dessous.'
-    )
-    lines.push('')
-    lines.push('## Contexte du domaine')
-    lines.push(`- Site : ${c.origin || '(inconnu)'}`)
-    lines.push(`- Titre de la page d'accueil : ${c.title || '(inconnu)'}`)
-    lines.push(`- Description : ${c.description || '(absente)'}`)
-
-    if (c.headerLinks?.length) {
-        lines.push('')
-        lines.push('### Navigation principale (en-tête)')
-        c.headerLinks.forEach((l) => lines.push(`- ${l.text} → ${l.url}`))
-    }
-    if (c.footerLinks?.length) {
-        lines.push('')
-        lines.push('### Liens de pied de page (secondaires / légaux)')
-        c.footerLinks.forEach((l) => lines.push(`- ${l.text} → ${l.url}`))
-    }
-    if (c.sitemap?.sections?.length) {
-        lines.push('')
-        lines.push(`### Structure du sitemap (${c.sitemap.total} URL au total)`)
-        c.sitemap.sections.forEach((s) => {
-            lines.push(`- Section « ${s.section} » : ${s.count} page(s)`)
-            s.samples.forEach((u) => lines.push(`  - ${u}`))
-        })
-    }
-    if (keywords && keywords.trim()) {
-        lines.push('')
-        lines.push(`### Mots-clés et domaine métier fournis par l'utilisateur`)
-        lines.push(keywords.trim())
-    }
-
-    lines.push('')
-    lines.push('## Format Markdown STRICT (obligatoire)')
-    lines.push('Le fichier doit être du **Markdown valide et structuré**, pas du texte au fil de l\'eau. Respecte exactement ce squelette :')
-    lines.push('')
-    lines.push('```')
-    lines.push('# Nom du site')
-    lines.push('> Résumé en une phrase : ce que fait le site et pour qui.')
-    lines.push('')
-    lines.push('## Nom de la section')
-    lines.push('- [Titre du lien](https://url-absolue) : description en une ligne.')
-    lines.push('- [Autre lien](https://url-absolue) : description en une ligne.')
-    lines.push('')
-    lines.push('## Optional')
-    lines.push('- [Mentions légales](https://url-absolue)')
-    lines.push('```')
-    lines.push('')
-    lines.push('Règles :')
-    lines.push('- Chaque section commence par un titre `## ...` ; son contenu est une **liste à puces de liens Markdown** `- [Texte](URL) : description`. N\'écris jamais une section sous forme de paragraphe en prose.')
-    lines.push('- URLs absolues, langue dominante du site, aucune URL inventée (uniquement celles du contexte).')
     if (full) {
-        lines.push('- Comme il s\'agit de **llms-full.txt**, sois **exhaustif mais structuré** : couvre chaque section et enrichis les descriptions. Évite les listes interminables : regroupe et résume plutôt que d\'aligner toutes les URL.')
+        lines.push(`**Tâche :** À partir du contenu et de l'arborescence du site ${c.origin || '(inconnu)'}, fusionne, nettoie et structure tout le contenu pertinent pour créer le fichier **llms-full.txt** définitif (corpus complet, lisible en une seule fois par un LLM).`)
+        lines.push('')
+        lines.push('**Règles et format exigés :**')
+        lines.push('1. **Markdown pur** : tout le texte est formaté en Markdown standard.')
+        lines.push('2. **Nettoyage du bruit** : supprime tous les éléments d\'interface (menus de navigation, en-têtes de site, pieds de page, bannières « cookies », formulaires de newsletter, blocs « Lire aussi »). Ne garde QUE le contenu utile et informatif.')
+        lines.push('3. **Structure hiérarchique** : `#` (H1) pour le titre du site/projet, `##` (H2) pour chaque page ou grande section, `###` (H3) pour les sous-sections.')
+        lines.push('4. **Préservation du code et des données** : conserve intacts code source, requêtes API et tableaux, via des blocs de code Markdown avec coloration syntaxique (```python …```) ou des tableaux Markdown.')
+        lines.push('5. **Clarté contextuelle** : avant chaque section `##` correspondant à une page, ajoute `> Source : <URL de la page>` lorsque l\'URL est connue.')
+        lines.push('6. **Fluidité** : enchaîne logiquement les sections, sans répéter les mêmes introductions.')
+        lines.push('')
+        lines.push('Couvre chaque section identifiée dans l\'arborescence ci-dessous ; n\'invente jamais d\'URL ni de contenu factuel absent des données fournies.')
     } else {
-        lines.push('- Reste **condensé** : 3 à 6 sections maximum, uniquement les liens essentiels (pas tout le sitemap), descriptions courtes. Privilégie la clarté à l\'exhaustivité, évite les énumérations longues.')
+        lines.push(`**Tâche :** À partir des informations et de l'arborescence du site ${c.origin || '(inconnu)'}, génère le meilleur fichier **llms.txt** possible (point d'entrée clair, concis et standardisé pour les autres LLM), en respectant les standards émergents de ce format.`)
+        lines.push('')
+        lines.push('**Règles et format exigés :**')
+        lines.push('1. **Format strict** : Markdown propre.')
+        lines.push('2. **Titre (H1)** : le nom du projet ou du site.')
+        lines.push('3. **Description** : un résumé clair et concis (1 à 3 paragraphes maximum) — ce qu\'est ce site/projet, à quoi il sert, et quel est son public cible.')
+        lines.push('4. **Notes pour l\'IA** (recommandé) : une courte section « Notes » donnant du contexte à un LLM sur la meilleure façon d\'utiliser ces informations.')
+        lines.push('5. **Index des ressources (H2)** : une liste à puces des pages les plus importantes, chaque puce au format `- [Titre de la page](URL) : brève description d\'une phrase`.')
+        lines.push('6. **Exclusions** : n\'inclus pas les pages inutiles pour une IA (mentions légales, politique de confidentialité, page de contact générique, etc.).')
     }
+
     lines.push('')
-    lines.push('Renvoie UNIQUEMENT le contenu Markdown du fichier, sans bloc de code englobant (pas de ```), sans phrase avant ni après.')
+    pushInputData(lines, c, keywords)
+
+    lines.push('')
+    lines.push('Génère maintenant le contenu complet du fichier. Renvoie UNIQUEMENT le Markdown du fichier, sans phrase avant ni après, sans bloc de code englobant.')
+    if (full) {
+        lines.push('Si le document est trop long pour une seule réponse, commence par le début et arrête-toi proprement (je te demanderai de « continuer »).')
+    }
 
     return lines.join('\n')
 }

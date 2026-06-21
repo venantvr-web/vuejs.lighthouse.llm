@@ -81,19 +81,22 @@ describe('buildLlmsTxtPrompt', () => {
         sitemapUrls: [`${ORIGIN}/`, `${ORIGIN}/services/x`]
     })
 
-    it('inclut le contexte et les mots-clés', () => {
+    it('mode llms.txt : index/résumé avec le contexte et les mots-clés', () => {
         const prompt = buildLlmsTxtPrompt(context, {keywords: 'audit seo, performance'})
         expect(prompt).toContain('llms.txt')
         expect(prompt).toContain(ORIGIN)
         expect(prompt).toContain('Concilio — Audit SEO')
         expect(prompt).toContain('audit seo, performance')
-        expect(prompt).toContain('## Optional')
+        expect(prompt).toContain('Index des ressources')
+        expect(prompt).toContain('Données d\'entrée')
     })
 
-    it('le mode full demande un document exhaustif', () => {
+    it('mode full : corpus complet, nettoyage du bruit et reprise', () => {
         const prompt = buildLlmsTxtPrompt(context, {full: true})
         expect(prompt).toContain('llms-full.txt')
-        expect(prompt.toLowerCase()).toContain('exhaustif')
+        expect(prompt.toLowerCase()).toContain('nettoyage du bruit')
+        expect(prompt).toContain('Source :')
+        expect(prompt.toLowerCase()).toContain('continuer')
     })
 })
 

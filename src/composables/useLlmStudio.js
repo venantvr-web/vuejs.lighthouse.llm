@@ -5,7 +5,7 @@ import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
-import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
+import {buildLlmsTxtPrompt, LLMS_FULL_SYSTEM, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
@@ -57,6 +57,7 @@ export function useLlmStudio() {
 
     let activeProvider = null
     let lastPrompt = ''
+    let lastSystem = LLMS_TXT_SYSTEM
     let lastArtifactId = null
 
     /**
@@ -116,7 +117,7 @@ export function useLlmStudio() {
         }
     }
 
-    async function streamInto(prompt, {append = false} = {}) {
+    async function streamInto(prompt, {append = false, system = LLMS_TXT_SYSTEM} = {}) {
         if (!settings.isConfigured) {
             genError.value = t('llmStudio.errorNoProvider')
             return
@@ -132,7 +133,7 @@ export function useLlmStudio() {
 
         try {
             activeProvider = buildLLMProvider(settings, settings.currentProvider, settings.currentModel)
-            for await (const chunk of activeProvider.stream(prompt, {systemMessage: LLMS_TXT_SYSTEM})) {
+            for await (const chunk of activeProvider.stream(prompt, {systemMessage: system})) {
                 if (!generating.value) break // annulé
                 output.value += chunk
                 tokenCount.value += chunk.split(/\s+/).filter(Boolean).length
@@ -159,7 +160,8 @@ export function useLlmStudio() {
         lastArtifactId = null
         outputKind.value = full ? 'full' : 'llms'
         lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords})
-        await streamInto(lastPrompt)
+        lastSystem = full ? LLMS_FULL_SYSTEM : LLMS_TXT_SYSTEM
+        await streamInto(lastPrompt, {system: lastSystem})
         // Filet de sécurité : retire un éventuel bloc de code englobant
         if (!generating.value) output.value = stripCodeFence(output.value)
         await persist(outputKind.value)
@@ -169,7 +171,7 @@ export function useLlmStudio() {
     async function continueGeneration() {
         if (!lastPrompt || !output.value || generating.value) return
         output.value += '\n'
-        await streamInto(buildContinuationPrompt(lastPrompt, output.value), {append: true})
+        await streamInto(buildContinuationPrompt(lastPrompt, output.value), {append: true, system: lastSystem})
         await persist(outputKind.value)
     }
 

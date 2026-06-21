@@ -243,23 +243,23 @@
    on style donc explicitement le rendu Markdown, sinon le reset Tailwind
    ramène les titres à la taille du texte courant. */
 .prose h1 {
-    @apply text-2xl font-bold mt-6 mb-3 first:mt-0;
+    @apply text-2xl font-bold mt-6 mb-3 first:mt-0 text-gray-900 dark:text-white;
 }
 
 .prose h2 {
-    @apply text-xl font-bold mt-6 mb-3;
+    @apply text-xl font-bold mt-6 mb-3 text-gray-900 dark:text-white;
 }
 
 .prose h3 {
-    @apply text-lg font-semibold mt-4 mb-2;
+    @apply text-lg font-semibold mt-4 mb-2 text-gray-900 dark:text-white;
 }
 
 .prose h4 {
-    @apply text-base font-semibold mt-4 mb-2;
+    @apply text-base font-semibold mt-4 mb-2 text-gray-900 dark:text-white;
 }
 
 .prose p {
-    @apply my-3 leading-relaxed;
+    @apply my-3 leading-relaxed text-gray-700 dark:text-gray-300;
 }
 
 .prose ul {
@@ -271,7 +271,7 @@
 }
 
 .prose li {
-    @apply leading-relaxed;
+    @apply leading-relaxed text-gray-700 dark:text-gray-300;
 }
 
 .prose a {

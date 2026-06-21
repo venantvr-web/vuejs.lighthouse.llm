@@ -10,6 +10,7 @@ import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
 import {getProxyBase, isDirectFetch, proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import UrlInput from '@/components/input/UrlInput.vue'
 import CrawlGuideModal from '@/components/crawl/CrawlGuideModal.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -48,6 +49,8 @@ const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)
 const urlsListRef = ref(null)
+// Liste des URL découvertes (sitemap) repliée par défaut ; choix mémorisé
+const showDiscoveredUrls = usePersistentRef('crawl.showDiscoveredUrls', false)
 const currentUrlRef = ref(null)
 
 // LocalStorage key for preferences
@@ -402,12 +405,25 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Discovered URLs list -->
+          <!-- Discovered URLs list (repliée par défaut) -->
           <div v-if="discoveredUrls.length > 0" class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 mb-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              {{ $t('crawl.discoveredUrls', { count: discoveredUrls.length }) }}
-            </h3>
-            <div ref="urlsListRef" class="max-h-40 overflow-y-auto space-y-1">
+            <button
+                class="flex items-center justify-between w-full text-left"
+                type="button"
+                @click="showDiscoveredUrls = !showDiscoveredUrls"
+            >
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {{ $t('crawl.discoveredUrls', { count: discoveredUrls.length }) }}
+              </span>
+              <svg
+                  :class="showDiscoveredUrls ? 'rotate-180' : ''"
+                  class="w-4 h-4 text-gray-400 transition-transform"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+            </button>
+            <div v-if="showDiscoveredUrls" ref="urlsListRef" class="mt-3 max-h-40 overflow-y-auto space-y-1">
               <div
                   v-for="(url, index) in discoveredUrls"
                   :key="url"

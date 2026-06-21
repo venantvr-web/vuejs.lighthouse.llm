@@ -225,6 +225,7 @@ onMounted(async () => {
             {{ $t('common.cancel') }}
           </button>
           <router-link
+              v-if="!isEmpty"
               class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
               to="/crawl"
           >

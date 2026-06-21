@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest'
 import {createPinia, setActivePinia} from 'pinia'
 import {parseTerms, useGeoStore} from '@/stores/geoStore'
-import {useSiteStore} from '@/stores/siteStore'
+import {entityKey, useSiteStore} from '@/stores/siteStore'
 
 describe('geoStore', () => {
     beforeEach(() => {
@@ -66,27 +66,22 @@ describe('geoStore', () => {
     describe('portée par marque/domaine', () => {
         it('ne montre que les prompts du couple actif et restaure au changement', () => {
             const site = useSiteStore()
-            site.addBrand('Acme')
-            site.addDomain('acme.com')
-            site.addBrand('Globex')
-            site.addDomain('globex.io')
+            const acme = site.addEntity({brand: 'Acme', domain: 'acme.com'})
+            const globex = site.addEntity({brand: 'Globex', domain: 'globex.io'})
             const store = useGeoStore()
 
-            site.setActiveBrand('Acme')
-            site.setActiveDomain('acme.com')
+            site.setActiveEntity(entityKey(acme))
             store.addItem({prompt: 'p-acme', brand: 'Acme'})
             expect(store.count).toBe(1)
 
             // Autre contexte → liste vide
-            site.setActiveBrand('Globex')
-            site.setActiveDomain('globex.io')
+            site.setActiveEntity(entityKey(globex))
             expect(store.count).toBe(0)
             store.addItem({prompt: 'p-globex', brand: 'Globex'})
             expect(store.count).toBe(1)
 
             // Retour au premier contexte → son prompt réapparaît
-            site.setActiveBrand('Acme')
-            site.setActiveDomain('acme.com')
+            site.setActiveEntity(entityKey(acme))
             expect(store.count).toBe(1)
             expect(store.sortedItems[0].prompt).toBe('p-acme')
         })

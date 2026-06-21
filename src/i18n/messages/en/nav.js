@@ -14,6 +14,7 @@ export default {
         home: 'Home',
         activeBrand: 'Active brand',
         activeDomain: 'Active domain',
+        activeSite: 'Active site',
         activeSector: 'Line of business',
         activeSectorPlaceholder: 'E.g.: medical concierge'
     }

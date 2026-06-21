@@ -29,14 +29,17 @@ describe('shared active site — silent prefill', () => {
         expect(w.findComponent(UrlInput).props('modelValue')).toBe('https://example.com/')
     })
 
-    it('captures the domain when a URL is submitted on one screen', async () => {
+    it('remembers a submitted URL without altering the active site identity', async () => {
         const r = router()
         await r.isReady()
         const w = mount(LighthouseView, {global: {plugins: [r]}})
-        // Soumission d'une URL d'un autre domaine → met à jour le site actif partagé
-        await w.findComponent(UrlInput).vm.$emit('submit', 'https://newsite.io/page')
         const site = useSiteStore()
-        expect(site.activeDomain).toBe('newsite.io')
-        expect(JSON.parse(localStorage.getItem(KEY)).activeDomain).toBe('newsite.io')
+        // Soumission d'une URL d'un domaine inconnu : on mémorise l'URL pour le
+        // préremplissage, mais l'identité (le site actif) reste inchangée — une
+        // entité = un tuple marque/domaine/secteur délibéré, pas un domaine au hasard.
+        await w.findComponent(UrlInput).vm.$emit('submit', 'https://newsite.io/page')
+        expect(site.activeDomain).toBe('example.com')      // identité inchangée
+        expect(site.lastUrl).toBe('https://newsite.io/page')
+        expect(JSON.parse(localStorage.getItem(KEY)).lastUrl).toBe('https://newsite.io/page')
     })
 })

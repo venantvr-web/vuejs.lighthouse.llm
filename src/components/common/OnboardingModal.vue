@@ -17,9 +17,8 @@ const error = ref('')
 
 function submit() {
   error.value = ''
-  const b = site.addBrand(brand.value, sector.value)
-  const d = site.addDomain(domain.value)
-  if (!b || !d) {
+  const entity = site.addEntity({brand: brand.value, domain: domain.value, sector: sector.value})
+  if (!entity) {
     error.value = 'invalid'
     return
   }

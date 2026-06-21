@@ -8,18 +8,18 @@ export default {
         headerSubtitle: 'LLM providers, API keys and preferences',
         headerTitle: 'Settings',
 
-        // Identity (brands and domains)
-        identityTitle: 'Brands and domains',
-        identityIntro: 'Manage your brands and domains. The active brand shows in the header and is used for GEO tracking; the active domain pre-fills the screens.',
-        brandsLabel: 'Brands:',
-        brandPlaceholder: 'Add a brand…',
-        sectorLabel: 'Line of business for "{brand}":',
+        // Identity (sites = brand + domain + sector)
+        identityTitle: 'Tracked sites',
+        identityIntro: 'A site bundles a brand, its domain and its line of business — one inseparable whole. The active site shows in the header and is used for GEO tracking; its domain pre-fills the screens.',
+        sitesLabel: 'Your sites:',
+        activeBadge: 'Active',
+        brandPlaceholder: 'Brand (e.g.: Concilio)',
+        sectorLabel: 'Line of business:',
         sectorPlaceholder: 'E.g.: medical concierge',
-        sectorHint: 'Specifies the brand\'s field to remove any name ambiguity in AI analyses (stored per brand).',
-        domainsLabel: 'Domains:',
         domainPlaceholder: 'https://example.com',
-        addBtn: 'Add',
-        identityHint: 'Click a chip to make it active, ✕ to remove it.',
+        addSiteLabel: 'Add a site:',
+        addSiteBtn: 'Add site',
+        identityHint: 'Click a site to make it active, ✕ to remove it. The line of business removes name ambiguity in AI analyses.',
 
         // LLM configuration
         llmTitle: 'LLM configuration',

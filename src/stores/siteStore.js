@@ -6,37 +6,67 @@ import {Domain} from '@/utils/Domain'
 const STORAGE_KEY = 'lighthouse-active-site'
 
 /**
- * Identité du compte : plusieurs marques et plusieurs domaines, avec une marque
- * et un domaine actifs. Saisis une fois (onboarding ou Paramètres) puis réutilisés
- * partout pour le préremplissage. La marque active est affichée dans l'en-tête.
+ * Clé stable d'une entité : couple marque/domaine (sert aussi de scopeKey
+ * pour la persistance des saisies par contexte).
+ * @param {{brand: string, domain: string}} e
+ * @returns {string}
+ */
+export function entityKey(e) {
+    return `${e?.brand || '_'}::${e?.domain || '_'}`
+}
+
+/**
+ * Identité du compte : une liste d'« entités » (sites). Une entité est un tuple
+ * indissociable **marque + domaine + secteur d'activité** — par exemple
+ * « Concilio + www.concilio.com + conciergerie médicale ». Une seule entité est
+ * active à la fois ; sa marque et son domaine s'affichent dans l'en-tête et
+ * préremplissent l'application.
  *
- * Stockage (localStorage) : { domains: string[], brands: string[],
- *   sectors: { [marque]: secteur }, activeDomain, activeBrand, lastUrl }.
+ * Stockage (localStorage) : { entities: [{brand, domain, sector}], activeKey, lastUrl }.
  */
 export const useSiteStore = defineStore('site', () => {
-    const domains = ref([])      // hôtes normalisés, ex. "example.com"
-    const brands = ref([])       // noms de marque libres
-    const sectors = ref({})      // secteur d'activité par marque, ex. { Concilio: "conciergerie médicale" }
-    const activeDomain = ref('')
-    const activeBrand = ref('')
-    const lastUrl = ref('')      // dernière URL complète saisie
+    const entities = ref([])     // [{ brand, domain (hôte normalisé), sector }]
+    const activeKey = ref('')    // clé de l'entité active (`marque::domaine`)
+    const lastUrl = ref('')      // dernière URL complète saisie (préremplissage)
 
-    // Chargement initial + migration depuis l'ancien format { domain, lastUrl }
+    // Chargement initial + migrations (ancien multi-listes, très ancien mono-domaine)
     try {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) {
             const data = JSON.parse(raw)
-            if (Array.isArray(data.domains)) {
-                domains.value = data.domains
-                brands.value = Array.isArray(data.brands) ? data.brands : []
-                sectors.value = (data.sectors && typeof data.sectors === 'object') ? data.sectors : {}
-                activeDomain.value = data.activeDomain || data.domains[0] || ''
-                activeBrand.value = data.activeBrand || data.brands?.[0] || ''
+            if (Array.isArray(data.entities)) {
+                // Format courant : entités déjà constituées
+                entities.value = data.entities
+                    .filter(e => e && (e.brand || e.domain))
+                    .map(e => ({brand: e.brand || '', domain: e.domain || '', sector: e.sector || ''}))
+                activeKey.value = data.activeKey || (entities.value[0] ? entityKey(entities.value[0]) : '')
+                lastUrl.value = data.lastUrl || ''
+            } else if (Array.isArray(data.domains)) {
+                // Ancien format : listes marques/domaines indépendantes + secteurs par marque
+                const brands = Array.isArray(data.brands) ? data.brands : []
+                const domains = data.domains
+                const sectors = (data.sectors && typeof data.sectors === 'object') ? data.sectors : {}
+                const count = Math.max(brands.length, domains.length)
+                const migrated = []
+                for (let i = 0; i < count; i++) {
+                    const brand = brands[i] || ''
+                    const domain = domains[i] || ''
+                    if (!brand && !domain) continue
+                    migrated.push({brand, domain, sector: sectors[brand] || ''})
+                }
+                entities.value = migrated
+                const ab = data.activeBrand || brands[0] || ''
+                const ad = data.activeDomain || domains[0] || ''
+                activeKey.value = migrated.length ? entityKey({brand: ab, domain: ad}) : ''
+                // Si le couple actif n'existe pas tel quel, retombe sur la première entité
+                if (!migrated.some(e => entityKey(e) === activeKey.value) && migrated[0]) {
+                    activeKey.value = entityKey(migrated[0])
+                }
                 lastUrl.value = data.lastUrl || ''
             } else if (data.domain) {
-                // Ancien format mono-domaine
-                domains.value = [data.domain]
-                activeDomain.value = data.domain
+                // Très ancien format mono-domaine
+                entities.value = [{brand: '', domain: data.domain, sector: ''}]
+                activeKey.value = entityKey(entities.value[0])
                 lastUrl.value = data.lastUrl || ''
             }
         }
@@ -44,14 +74,29 @@ export const useSiteStore = defineStore('site', () => {
         // localStorage indisponible ou JSON invalide : on démarre vide
     }
 
-    // URL racine canonique du domaine actif, terminée par « / » (ex. https://example.com/)
+    // --- Entité active ---
+    const activeEntity = computed(() =>
+        entities.value.find(e => entityKey(e) === activeKey.value) || entities.value[0] || null
+    )
+    const activeBrand = computed(() => activeEntity.value?.brand || '')
+    const activeDomain = computed(() => activeEntity.value?.domain || '')
+    const activeSector = computed({
+        get: () => activeEntity.value?.sector || '',
+        set: (v) => {
+            if (activeEntity.value) setEntitySector(entityKey(activeEntity.value), v)
+        }
+    })
+
+    // Listes dérivées (lecture seule) pour les sélecteurs/affichages
+    const brands = computed(() => entities.value.map(e => e.brand))
+    const domains = computed(() => entities.value.map(e => e.domain))
+
+    // URL racine canonique du domaine actif (ex. https://example.com/)
     const origin = computed(() => new Domain(activeDomain.value).origin)
     const hasSite = computed(() => !!activeDomain.value)
-    // Identifiant du contexte courant (couple marque/domaine) pour scoper les
-    // saisies ET les collections (prompts GEO, watchlist…).
-    const scopeKey = computed(() => `${activeBrand.value || '_'}::${activeDomain.value || '_'}`)
-    // L'onboarding est requis tant qu'on n'a ni domaine ni marque
-    const needsOnboarding = computed(() => domains.value.length === 0 && brands.value.length === 0)
+    // Le scope (saisies/collections par contexte) reste le couple marque/domaine
+    const scopeKey = computed(() => activeEntity.value ? entityKey(activeEntity.value) : '_::_')
+    const needsOnboarding = computed(() => entities.value.length === 0)
 
     // Suggestion de marque dérivée du domaine actif, ex. "example.co.uk" -> "example"
     const brandGuess = computed(() => {
@@ -60,21 +105,11 @@ export const useSiteStore = defineStore('site', () => {
         return host.split('.')[0] || ''
     })
 
-    // Secteur d'activité de la marque active (lève l'ambiguïté du nom dans les
-    // analyses IA, ex. « Concilio » = conciergerie médicale, pas gestion de patrimoine).
-    const activeSector = computed({
-        get: () => sectors.value[activeBrand.value] || '',
-        set: (v) => setBrandSector(activeBrand.value, v)
-    })
-
     function persist() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                domains: domains.value,
-                brands: brands.value,
-                sectors: sectors.value,
-                activeDomain: activeDomain.value,
-                activeBrand: activeBrand.value,
+                entities: entities.value,
+                activeKey: activeKey.value,
                 lastUrl: lastUrl.value
             }))
         } catch {
@@ -82,115 +117,108 @@ export const useSiteStore = defineStore('site', () => {
         }
     }
 
-    // --- Domaines ---
-    function addDomain(input) {
-        const host = Domain.normalize(input)
-        if (!host) return ''
-        if (!domains.value.includes(host)) domains.value = [...domains.value, host]
-        if (!activeDomain.value) activeDomain.value = host
+    // --- Entités (marque + domaine + secteur) ---
+    /**
+     * Ajoute une entité (ou met à jour le secteur si le couple existe déjà) et
+     * la rend active si aucune ne l'est encore. Marque et domaine sont requis.
+     * @param {{brand: string, domain: string, sector?: string}} input
+     * @returns {object|null} L'entité, ou null si marque ou domaine manquant/invalide
+     */
+    function addEntity({brand, domain, sector} = {}) {
+        const cleanBrand = (brand || '').trim()
+        const host = Domain.normalize(domain)
+        const cleanSector = (sector || '').trim()
+        if (!cleanBrand || !host) return null
+
+        const key = entityKey({brand: cleanBrand, domain: host})
+        let entity = entities.value.find(e => entityKey(e) === key)
+        if (entity) {
+            if (cleanSector) entity.sector = cleanSector
+        } else {
+            entity = {brand: cleanBrand, domain: host, sector: cleanSector}
+            entities.value = [...entities.value, entity]
+        }
+        if (!activeKey.value) activeKey.value = key
         persist()
-        return host
+        return entity
     }
 
-    function removeDomain(host) {
-        domains.value = domains.value.filter(d => d !== host)
-        if (activeDomain.value === host) activeDomain.value = domains.value[0] || ''
+    /**
+     * Supprime une entité par sa clé. Si c'était l'entité active, bascule sur
+     * la première restante.
+     * @param {string} key
+     */
+    function removeEntity(key) {
+        entities.value = entities.value.filter(e => entityKey(e) !== key)
+        if (activeKey.value === key) {
+            activeKey.value = entities.value[0] ? entityKey(entities.value[0]) : ''
+        }
         persist()
     }
 
-    function setActiveDomain(host) {
-        if (domains.value.includes(host)) {
-            activeDomain.value = host
+    /**
+     * Rend une entité active par sa clé.
+     * @param {string} key
+     */
+    function setActiveEntity(key) {
+        if (entities.value.some(e => entityKey(e) === key)) {
+            activeKey.value = key
             persist()
         }
     }
 
-    // --- Marques ---
-    function addBrand(name, sector) {
-        const clean = (name || '').trim()
-        if (!clean) return ''
-        if (!brands.value.includes(clean)) brands.value = [...brands.value, clean]
-        if (!activeBrand.value) activeBrand.value = clean
-        const cleanSector = (sector || '').trim()
-        if (cleanSector) sectors.value = {...sectors.value, [clean]: cleanSector}
-        persist()
-        return clean
-    }
-
-    function removeBrand(name) {
-        brands.value = brands.value.filter(b => b !== name)
-        if (name in sectors.value) {
-            const next = {...sectors.value}
-            delete next[name]
-            sectors.value = next
-        }
-        if (activeBrand.value === name) activeBrand.value = brands.value[0] || ''
-        persist()
-    }
-
     /**
-     * Définit (ou efface) le secteur d'activité d'une marque.
-     * @param {string} brand - Nom de la marque
-     * @param {string} sector - Secteur d'activité (chaîne libre)
+     * Définit (ou efface) le secteur d'activité d'une entité.
+     * @param {string} key
+     * @param {string} sector
      */
-    function setBrandSector(brand, sector) {
-        const b = (brand || '').trim()
-        if (!b) return
-        const clean = (sector || '').trim()
-        const next = {...sectors.value}
-        if (clean) next[b] = clean
-        else delete next[b]
-        sectors.value = next
+    function setEntitySector(key, sector) {
+        const entity = entities.value.find(e => entityKey(e) === key)
+        if (!entity) return
+        entity.sector = (sector || '').trim()
         persist()
     }
 
     /**
-     * Secteur d'activité d'une marque donnée (vide si non renseigné).
-     * @param {string} brand - Nom de la marque
+     * Secteur d'activité de la première entité portant cette marque (vide sinon).
+     * @param {string} brand
      * @returns {string}
      */
     function sectorFor(brand) {
-        return sectors.value[(brand || '').trim()] || ''
-    }
-
-    function setActiveBrand(name) {
-        if (brands.value.includes(name)) {
-            activeBrand.value = name
-            persist()
-        }
+        const b = (brand || '').trim()
+        return entities.value.find(e => e.brand === b)?.sector || ''
     }
 
     /**
-     * Mémorise le site actif à partir d'une URL/domaine saisi dans un écran :
-     * ajoute le domaine (s'il est nouveau) et le rend actif.
+     * Mémorise une URL/domaine saisi dans un écran : retient l'URL complète pour
+     * le préremplissage et, si elle correspond à une entité connue, l'active.
+     * N'invente jamais d'entité « orpheline » (la marque/secteur seraient inconnus).
      * @param {string} input - URL ou domaine brut
      */
     function setFromUrl(input) {
         const normalized = normalizeUrl(input)
         if (!normalized) return
-        const host = Domain.normalize(input)
-        if (!host) return
-        if (!domains.value.includes(host)) domains.value = [...domains.value, host]
-        activeDomain.value = host
         lastUrl.value = normalized
+        const host = Domain.normalize(input)
+        if (host) {
+            const match = entities.value.find(e => e.domain === host)
+            if (match) activeKey.value = entityKey(match)
+        }
         persist()
     }
 
     function clear() {
-        domains.value = []
-        brands.value = []
-        sectors.value = {}
-        activeDomain.value = ''
-        activeBrand.value = ''
+        entities.value = []
+        activeKey.value = ''
         lastUrl.value = ''
         persist()
     }
 
     return {
-        domains, brands, sectors, activeDomain, activeBrand, activeSector, lastUrl,
+        entities, activeKey, lastUrl,
+        activeEntity, activeBrand, activeDomain, activeSector, brands, domains,
         origin, hasSite, needsOnboarding, brandGuess, scopeKey,
-        addDomain, removeDomain, setActiveDomain,
-        addBrand, removeBrand, setActiveBrand, setBrandSector, sectorFor,
+        addEntity, removeEntity, setActiveEntity, setEntitySector, sectorFor,
         setFromUrl, clear
     }
 })

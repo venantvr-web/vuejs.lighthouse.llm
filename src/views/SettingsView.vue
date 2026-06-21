@@ -16,7 +16,7 @@ import {
 import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
-import {useSiteStore} from '@/stores/siteStore'
+import {entityKey, useSiteStore} from '@/stores/siteStore'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -25,24 +25,23 @@ const toast = useToast()
 const settings = useSettingsStore()
 const site = useSiteStore()
 
-// Identité : marques et domaines
+// Identité : entités (marque + domaine + secteur)
 const newBrandInput = ref('')
 const newDomainInput = ref('')
+const newSectorInput = ref('')
+const keyOf = entityKey
 
-// Secteur d'activité de la marque active (persisté par marque dans le siteStore)
-const activeSectorModel = computed({
-  get: () => site.activeSector,
-  set: (v) => {
-    site.activeSector = v
+function addEntity() {
+  const entity = site.addEntity({
+    brand: newBrandInput.value,
+    domain: newDomainInput.value,
+    sector: newSectorInput.value
+  })
+  if (entity) {
+    newBrandInput.value = ''
+    newDomainInput.value = ''
+    newSectorInput.value = ''
   }
-})
-
-function addBrand() {
-  if (site.addBrand(newBrandInput.value)) newBrandInput.value = ''
-}
-
-function addDomain() {
-  if (site.addDomain(newDomainInput.value)) newDomainInput.value = ''
 }
 const DEFAULT_UA = DEFAULT_USER_AGENT
 const defaultProxyBase = getDefaultProxyBase()
@@ -193,85 +192,79 @@ const testConnection = async () => {
     <PageIntro :text="$t('intro.settings')" width="2xl"/>
 
     <main class="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <!-- Identité : marques et domaines -->
+      <!-- Identité : sites suivis (marque + domaine + secteur = une entité) -->
       <div class="card p-6 space-y-5">
         <div>
           <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $t('settings.identityTitle') }}</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('settings.identityIntro') }}</p>
         </div>
 
-        <!-- Marques -->
+        <!-- Liste des entités -->
         <div>
-          <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.brandsLabel') }}</span>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <span
-                v-for="b in site.brands"
-                :key="b"
-                :class="b === site.activeBrand ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'"
-                class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm"
+          <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.sitesLabel') }}</span>
+          <div class="space-y-2">
+            <div
+                v-for="e in site.entities"
+                :key="keyOf(e)"
+                :class="keyOf(e) === site.activeKey
+                  ? 'border-primary-300 dark:border-primary-500/50 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-gray-200 dark:border-gray-700'"
+                class="border rounded-lg p-3"
             >
-              <button class="font-medium hover:underline" type="button" @click="site.setActiveBrand(b)">{{ b }}</button>
-              <button class="text-gray-400 hover:text-red-500" type="button" :title="$t('common.delete')" @click="site.removeBrand(b)">✕</button>
-            </span>
-            <span v-if="!site.brands.length" class="text-sm text-gray-400 dark:text-gray-500">—</span>
+              <div class="flex items-start justify-between gap-2">
+                <button class="min-w-0 text-left" type="button" @click="site.setActiveEntity(keyOf(e))">
+                  <span class="block text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {{ e.brand }}
+                    <span v-if="keyOf(e) === site.activeKey" class="ml-1 text-[10px] font-medium text-primary-600 dark:text-primary-400 uppercase">{{ $t('settings.activeBadge') }}</span>
+                  </span>
+                  <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">{{ canonicalUrl(e.domain) }}</span>
+                </button>
+                <button class="shrink-0 text-gray-400 hover:text-red-500" type="button" :title="$t('common.delete')" @click="site.removeEntity(keyOf(e))">✕</button>
+              </div>
+              <label class="block mt-2">
+                <span class="block mb-1 text-[11px] text-gray-500 dark:text-gray-400">{{ $t('settings.sectorLabel') }}</span>
+                <input
+                    :value="e.sector"
+                    class="w-full px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary-500"
+                    :placeholder="$t('settings.sectorPlaceholder')"
+                    type="text"
+                    @input="site.setEntitySector(keyOf(e), $event.target.value)"
+                />
+              </label>
+            </div>
+            <span v-if="!site.entities.length" class="text-sm text-gray-400 dark:text-gray-500">—</span>
           </div>
-          <div class="flex gap-2">
+        </div>
+
+        <!-- Ajout d'une entité (marque + domaine + secteur) -->
+        <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+          <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.addSiteLabel') }}</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
             <input
                 v-model="newBrandInput"
-                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 :placeholder="$t('settings.brandPlaceholder')"
                 type="text"
-                @keyup.enter="addBrand"
+                @keyup.enter="addEntity"
             />
-            <button class="shrink-0 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors" @click="addBrand">
-              {{ $t('settings.addBtn') }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Secteur d'activité de la marque active (désambiguïse le nom en analyse IA) -->
-        <div v-if="site.activeBrand">
-          <label class="block">
-            <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              {{ $t('settings.sectorLabel', {brand: site.activeBrand}) }}
-            </span>
-            <input
-                v-model="activeSectorModel"
-                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                :placeholder="$t('settings.sectorPlaceholder')"
-                type="text"
-            />
-          </label>
-          <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ $t('settings.sectorHint') }}</p>
-        </div>
-
-        <!-- Domaines -->
-        <div>
-          <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.domainsLabel') }}</span>
-          <div class="flex flex-wrap gap-2 mb-2">
-            <span
-                v-for="d in site.domains"
-                :key="d"
-                :class="d === site.activeDomain ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'"
-                class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm"
-            >
-              <button class="font-medium hover:underline" type="button" @click="site.setActiveDomain(d)">{{ d }}</button>
-              <button class="text-gray-400 hover:text-red-500" type="button" :title="$t('common.delete')" @click="site.removeDomain(d)">✕</button>
-            </span>
-            <span v-if="!site.domains.length" class="text-sm text-gray-400 dark:text-gray-500">—</span>
-          </div>
-          <div class="flex gap-2">
             <input
                 v-model="newDomainInput"
-                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 :placeholder="$t('settings.domainPlaceholder')"
                 type="text"
-                @keyup.enter="addDomain"
+                @keyup.enter="addEntity"
             />
-            <button class="shrink-0 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors" @click="addDomain">
-              {{ $t('settings.addBtn') }}
-            </button>
+            <input
+                v-model="newSectorInput"
+                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                :placeholder="$t('settings.sectorPlaceholder')"
+                type="text"
+                @keyup.enter="addEntity"
+            />
           </div>
+          <button class="px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors" @click="addEntity">
+            {{ $t('settings.addSiteBtn') }}
+          </button>
           <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ $t('settings.identityHint') }}</p>
         </div>
       </div>

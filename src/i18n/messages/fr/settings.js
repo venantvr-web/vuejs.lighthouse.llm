@@ -8,18 +8,18 @@ export default {
         headerSubtitle: "Fournisseurs LLM, clés API et préférences",
         headerTitle: 'Paramètres',
 
-        // Identité (marques et domaines)
-        identityTitle: 'Marques et domaines',
-        identityIntro: 'Gérez vos marques et vos domaines. La marque active est affichée dans l\'en-tête et utilisée pour le suivi GEO ; le domaine actif préremplit les écrans.',
-        brandsLabel: 'Marques :',
-        brandPlaceholder: 'Ajouter une marque…',
-        sectorLabel: 'Secteur d\'activité de « {brand} » :',
+        // Identité (sites = marque + domaine + secteur)
+        identityTitle: 'Sites suivis',
+        identityIntro: 'Un site regroupe une marque, son domaine et son secteur d\'activité — un tout indissociable. Le site actif est affiché dans l\'en-tête et utilisé pour le suivi GEO ; son domaine préremplit les écrans.',
+        sitesLabel: 'Vos sites :',
+        activeBadge: 'Actif',
+        brandPlaceholder: 'Marque (ex. : Concilio)',
+        sectorLabel: 'Secteur d\'activité :',
         sectorPlaceholder: 'Ex. : conciergerie médicale',
-        sectorHint: 'Précise le domaine de la marque pour lever toute ambiguïté de nom dans les analyses IA (mémorisé par marque).',
-        domainsLabel: 'Domaines :',
         domainPlaceholder: 'https://exemple.com',
-        addBtn: 'Ajouter',
-        identityHint: 'Cliquez sur une puce pour la rendre active, sur ✕ pour la supprimer.',
+        addSiteLabel: 'Ajouter un site :',
+        addSiteBtn: 'Ajouter le site',
+        identityHint: 'Cliquez sur un site pour le rendre actif, sur ✕ pour le supprimer. Le secteur lève l\'ambiguïté du nom dans les analyses IA.',
 
         // Configuration LLM
         llmTitle: 'Configuration LLM',

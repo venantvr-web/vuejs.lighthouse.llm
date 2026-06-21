@@ -17,6 +17,7 @@ import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
 import {entityKey, useSiteStore} from '@/stores/siteStore'
+import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 

@@ -17,6 +17,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {downloadText} from '@/utils/download'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
+import {extractDomain, sameHost} from '@/utils/url'
 import {useToast} from '@/composables/useToast'
 import {useI18n} from '@/i18n'
 
@@ -58,9 +59,12 @@ const liveModal = ref(null)   // { title, content }
 const LLMS_TYPES = [AI_ARTIFACT_TYPES.LLMS_TXT, AI_ARTIFACT_TYPES.LLMS_FULL]
 
 const filteredHistory = computed(() => {
+  let list = history.value
+  // Portée : générations du domaine actif
+  if (site.activeDomain) list = list.filter(i => !i.url || sameHost(extractDomain(i.url), site.activeDomain))
   const q = historySearch.value.trim().toLowerCase()
-  if (!q) return history.value
-  return history.value.filter(i => `${i.url} ${typeLabel(i.type)} ${i.model} ${i.content}`.toLowerCase().includes(q))
+  if (q) list = list.filter(i => `${i.url} ${typeLabel(i.type)} ${i.model} ${i.content}`.toLowerCase().includes(q))
+  return list
 })
 
 async function loadHistory() {

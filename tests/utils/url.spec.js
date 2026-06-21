@@ -1,7 +1,21 @@
 import {describe, expect, it} from 'vitest'
-import {extractDomain, normalizeUrl} from '@/utils/url'
+import {extractDomain, normalizeUrl, sameHost} from '@/utils/url'
 
 describe('utils/url', () => {
+    describe('sameHost', () => {
+        it('ignore la casse et le préfixe www', () => {
+            expect(sameHost('www.Example.com', 'example.com')).toBe(true)
+            expect(sameHost('example.com', 'example.com')).toBe(true)
+        })
+        it('distingue des hôtes différents', () => {
+            expect(sameHost('a.com', 'b.com')).toBe(false)
+        })
+        it('faux pour une entrée vide', () => {
+            expect(sameHost('', 'a.com')).toBe(false)
+            expect(sameHost('a.com', '')).toBe(false)
+        })
+    })
+
     describe('normalizeUrl', () => {
         it('adds https protocol when missing', () => {
             expect(normalizeUrl('example.com')).toBe('https://example.com')

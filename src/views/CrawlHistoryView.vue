@@ -3,6 +3,8 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
+import {useSiteStore} from '@/stores/siteStore'
+import {sameHost} from '@/utils/url'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
@@ -21,6 +23,7 @@ defineProps({embedded: {type: Boolean, default: false}})
 
 const router = useRouter()
 const crawlStore = useCrawlStore()
+const site = useSiteStore()
 const {saveToStorage} = useComparison()
 
 const loading = ref(true)
@@ -86,8 +89,11 @@ const filterConfig = [
   }
 ]
 
-// Computed
-const sessions = computed(() => crawlStore.sortedSessions)
+// Computed — portée : crawls du domaine actif
+const sessions = computed(() => {
+  const all = crawlStore.sortedSessions
+  return site.activeDomain ? all.filter(s => sameHost(s.domain, site.activeDomain)) : all
+})
 
 const filteredSessions = computed(() => {
   return filterItems(sessions.value, {

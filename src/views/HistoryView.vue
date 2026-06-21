@@ -2,6 +2,8 @@
 import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
+import {sameHost} from '@/utils/url'
 import {useExportPDF} from '@/composables/useExportPDF'
 import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
@@ -21,6 +23,7 @@ defineProps({embedded: {type: Boolean, default: false}})
 
 const router = useRouter()
 const historyStore = useScoreHistoryStore()
+const site = useSiteStore()
 const {generatePDF, loading: pdfLoading} = useExportPDF()
 const {saveToStorage} = useComparison()
 
@@ -61,9 +64,12 @@ const chartsRef = ref(null)
 // Recherche dans la liste des domaines
 const domainSearch = usePersistentRef('history.domainSearch', '')
 const filteredDomains = computed(() => {
+  // Portée : on ne montre que l'historique du domaine actif
+  let list = historyStore.domains
+  if (site.activeDomain) list = list.filter(d => sameHost(d.domain, site.activeDomain))
   const q = domainSearch.value.trim().toLowerCase()
-  if (!q) return historyStore.domains
-  return historyStore.domains.filter(d => d.domain.toLowerCase().includes(q))
+  if (q) list = list.filter(d => d.domain.toLowerCase().includes(q))
+  return list
 })
 
 // Slug filter for charts
@@ -111,9 +117,22 @@ const domainToDelete = ref(null)
 const scoreToDelete = ref(null)
 const exportLoading = ref(false)
 
+// Sélectionne automatiquement le domaine actif (ou le premier de la portée)
+async function selectScopedDomain() {
+  const inScope = filteredDomains.value
+  const current = historyStore.currentDomain
+  if (current && inScope.some(d => d.domain === current)) return
+  const target = inScope.find(d => sameHost(d.domain, site.activeDomain)) || inScope[0]
+  if (target) await handleSelectDomain(target.domain)
+}
+
 onMounted(async () => {
   await historyStore.initialize()
+  await selectScopedDomain()
 })
+
+// Au changement de domaine actif : bascule l'historique sur ce domaine
+watch(() => site.activeDomain, selectScopedDomain)
 
 const selectedDomainData = computed(() => {
   if (!historyStore.currentDomain) return null

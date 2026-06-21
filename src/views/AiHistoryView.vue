@@ -5,14 +5,17 @@ import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {downloadText} from '@/utils/download'
+import {extractDomain, sameHost} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
 const {t} = useI18n()
 const toast = useToast()
+const site = useSiteStore()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -41,6 +44,10 @@ const FILTERS = [
 
 const filtered = computed(() => {
   let list = activeFilter.value === 'all' ? items.value : items.value.filter(i => i.type === activeFilter.value)
+  // Portée : artefacts du domaine actif (ceux sans URL restent visibles partout)
+  if (site.activeDomain) {
+    list = list.filter(i => !i.url || sameHost(extractDomain(i.url), site.activeDomain))
+  }
   const q = search.value.trim().toLowerCase()
   if (q) {
     list = list.filter(i => `${i.title} ${i.url} ${i.provider} ${i.model} ${i.content}`.toLowerCase().includes(q))

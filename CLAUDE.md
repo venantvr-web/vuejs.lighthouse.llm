@@ -18,6 +18,7 @@ Application web **Vue 3 + Vite**, **local-first** (aucun backend applicatif) : a
 - **Saisies mémorisées.** Toutes les saisies et sélections utilisateur sont persistées afin d'être restaurées d'une session à l'autre.
 - **Mémorisation par marque/domaine.** Les saisies liées à un site (URL d'analyse, brouillons, mots-clés, contexte/sortie générés, sélection Search Console…) sont mémorisées **par couple marque/domaine actif** via `useScopedPersistentRef` : changer de marque ou de domaine restaure les saisies de ce contexte. Les préférences réellement globales (clés API et fournisseur LLM, thème, langue, intervalles, bascules d'affichage) restent en `usePersistentRef`.
 - **Réponses IA en Markdown.** Toute sortie d'IA s'affiche via `MarkdownViewer` (et est consultable en pop-up `Modal`).
+- **URL et domaines toujours en forme canonique.** Tout domaine ou URL **affiché** (historiques, listes de domaines, en-tête, comparaison, watchlist, sélecteurs…) passe par `canonicalUrl()` (`src/utils/url.js`) : schéma `https://` présent et **`/` final** sur le chemin. Ne jamais afficher un hôte brut (`example.com`) ni une URL sans slash. La normalisation est uniquement à l'**affichage** ; le stockage et la déduplication (`normalizeUrl`) restent inchangés.
 
 Exemple attendu :
 

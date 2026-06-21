@@ -3,6 +3,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
 import {computed, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
+import {canonicalUrl} from '@/utils/url'
 import CategoryTabs from '@/components/analysis/CategoryTabs.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
@@ -504,7 +505,7 @@ const exportAnalysis = () => {
                     <li v-for="(item, idx) in selectedAudit.details.items.slice(0, 10)" :key="idx" class="flex items-start gap-2">
                       <span class="text-gray-400">{{ idx + 1 }}.</span>
                       <div class="flex-1 min-w-0">
-                        <span v-if="item.url" class="text-primary-600 dark:text-primary-400 break-all">{{ item.url }}</span>
+                        <span v-if="item.url" class="text-primary-600 dark:text-primary-400 break-all">{{ canonicalUrl(item.url) }}</span>
                         <span v-else-if="item.node?.snippet" class="font-mono text-xs bg-gray-200 dark:bg-gray-700 px-1 rounded break-all">{{ item.node.snippet }}</span>
                         <span v-else-if="item.label" class="text-gray-700 dark:text-gray-300">{{ item.label }}</span>
                         <span v-else class="text-gray-500">{{ JSON.stringify(item).slice(0, 100) }}...</span>

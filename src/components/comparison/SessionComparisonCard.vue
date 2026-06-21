@@ -1,6 +1,7 @@
 <script setup>
 import {computed} from 'vue'
 import {formatDateTime, getScoreBgClass} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 
 const props = defineProps({
   session: {
@@ -62,7 +63,7 @@ const formattedAverage = computed(() => {
 
     <!-- Domain -->
     <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-      {{ session.domain || $t('comparison.unknownDomain') }}
+      {{ session.domain ? canonicalUrl(session.domain) : $t('comparison.unknownDomain') }}
     </h3>
 
     <!-- Date -->

@@ -1,6 +1,7 @@
 <script setup>
 import {computed} from 'vue'
 import {formatRelativeTime, formatScore, getScoreColorClass} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import Sparkline from '@/components/common/Sparkline.vue'
 import {useI18n} from '@/i18n'
@@ -54,7 +55,7 @@ function onBudgetInput(category, event) {
             class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary-500 truncate block"
             rel="noopener noreferrer"
             target="_blank"
-        >{{ item.url }}</a>
+        >{{ canonicalUrl(item.url) }}</a>
         <div class="flex items-center gap-1.5 mt-1.5">
           <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
             {{ item.strategy === 'desktop' ? $t('common.desktop') : $t('common.mobile') }}

@@ -1,6 +1,7 @@
 <script setup>
 import {computed} from 'vue'
 import {formatDate} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -60,7 +61,7 @@ function getScoreColor(score) {
           @click="emit('select', domain.domain)"
       >
         <div class="domain-info">
-          <span class="domain-name">{{ domain.domain }}</span>
+          <span class="domain-name">{{ canonicalUrl(domain.domain) }}</span>
           <span class="domain-meta">
             {{ domain.count > 1 ? $t('history.domainAnalysisPlural', {count: domain.count}) : $t('history.domainAnalysisSingular', {count: domain.count}) }}
             <span class="separator">-</span>

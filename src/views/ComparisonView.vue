@@ -10,6 +10,7 @@ import ScoreDiffIndicator from '@/components/comparison/ScoreDiffIndicator.vue'
 import TemplateComparisonTable from '@/components/comparison/TemplateComparisonTable.vue'
 import {useComparison, COMPARISON_CATEGORIES} from '@/composables/useComparison'
 import {formatDateTime} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -429,7 +430,7 @@ function getItemScore(item, category) {
                 {{ $t('comparison.reference') }}
               </div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-                {{ itemA?.url || itemA?.domain || $t('comparison.unknownUrl') }}
+                {{ (itemA?.url || itemA?.domain) ? canonicalUrl(itemA.url || itemA.domain) : $t('comparison.unknownUrl') }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ formatDateTime(itemA?.timestamp) }}
@@ -442,7 +443,7 @@ function getItemScore(item, category) {
                 {{ $t('comparison.comparisonLabel') }}
               </div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate mb-1">
-                {{ itemB?.url || itemB?.domain || $t('comparison.unknownUrl') }}
+                {{ (itemB?.url || itemB?.domain) ? canonicalUrl(itemB.url || itemB.domain) : $t('comparison.unknownUrl') }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ formatDateTime(itemB?.timestamp) }}

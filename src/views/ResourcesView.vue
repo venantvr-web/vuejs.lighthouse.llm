@@ -14,6 +14,7 @@ import {snapshotSeries} from '@/composables/useSearchConsole'
 import {buildBrokenUrlsCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import {formatDateISO, getScoreColorClass} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 import Sparkline from '@/components/common/Sparkline.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
@@ -266,7 +267,7 @@ function exportDiagnosis() {
 
       <!-- Resources -->
       <div v-if="resources.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-6">
-        <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">{{ origin }}</div>
+        <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">{{ canonicalUrl(origin) }}</div>
         <table class="w-full text-sm">
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
           <tr v-for="r in resources" :key="r.key">

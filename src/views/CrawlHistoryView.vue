@@ -4,7 +4,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {CRAWL_SERVICES, CRAWL_STATUS, useCrawlStore} from '@/stores/crawlStore'
 import {useSiteStore} from '@/stores/siteStore'
-import {sameHost} from '@/utils/url'
+import {canonicalUrl, sameHost} from '@/utils/url'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
@@ -313,7 +313,7 @@ onMounted(async () => {
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3 mb-2">
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">
-                    {{ session.domain }}
+                    {{ canonicalUrl(session.domain) }}
                   </h3>
                   <span :class="['px-2 py-0.5 rounded text-xs font-medium', getStatusClass(session.status)]">
                     {{ getStatusLabel(session.status) }}

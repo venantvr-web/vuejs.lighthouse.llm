@@ -3,7 +3,7 @@ import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
-import {sameHost} from '@/utils/url'
+import {canonicalUrl, sameHost} from '@/utils/url'
 import {useExportPDF} from '@/composables/useExportPDF'
 import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
@@ -336,7 +336,7 @@ function compareSelected() {
           <!-- Domain Header -->
           <div class="domain-header">
             <div class="domain-info">
-              <h2>{{ historyStore.currentDomain }}</h2>
+              <h2>{{ canonicalUrl(historyStore.currentDomain) }}</h2>
               <span class="analysis-count">
                 {{ (selectedDomainData?.count || 0) > 1
                     ? $t('history.analysisCountPlural', { count: selectedDomainData?.count || 0 })

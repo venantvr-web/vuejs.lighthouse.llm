@@ -3,6 +3,7 @@ import {computed, ref, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {useI18n} from '@/i18n'
 import {useSiteStore} from '@/stores/siteStore'
+import {canonicalUrl} from '@/utils/url'
 
 const {t, locale, setLocale, SUPPORTED_LOCALES} = useI18n()
 const site = useSiteStore()
@@ -102,9 +103,9 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
               <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             <select v-if="site.domains.length > 1" v-model="activeDomainModel" class="bg-transparent text-xs font-medium focus:outline-none cursor-pointer max-w-[10rem] truncate">
-              <option v-for="d in site.domains" :key="d" :value="d">{{ d }}</option>
+              <option v-for="d in site.domains" :key="d" :value="d">{{ canonicalUrl(d) }}</option>
             </select>
-            <span v-else class="text-xs font-medium">{{ site.activeDomain }}</span>
+            <span v-else class="text-xs font-medium">{{ canonicalUrl(site.activeDomain) }}</span>
           </div>
 
           <!-- Section navigation (desktop) -->
@@ -179,9 +180,9 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
               v-model="activeDomainModel"
               class="w-full px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
           >
-            <option v-for="d in site.domains" :key="d" :value="d">{{ d }}</option>
+            <option v-for="d in site.domains" :key="d" :value="d">{{ canonicalUrl(d) }}</option>
           </select>
-          <span v-else class="block text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{{ site.activeDomain }}</span>
+          <span v-else class="block text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{{ canonicalUrl(site.activeDomain) }}</span>
         </label>
         <nav class="grid grid-cols-2 gap-1">
           <router-link

@@ -7,10 +7,14 @@ import {useSiteStore} from '@/stores/siteStore'
 const {t, locale, setLocale, SUPPORTED_LOCALES} = useI18n()
 const site = useSiteStore()
 
-// Marque active (affichée dans l'en-tête, commutable si plusieurs marques)
+// Marque et domaine actifs (affichés dans l'en-tête, commutables si plusieurs)
 const activeBrandModel = computed({
   get: () => site.activeBrand,
   set: (v) => site.setActiveBrand(v)
+})
+const activeDomainModel = computed({
+  get: () => site.activeDomain,
+  set: (v) => site.setActiveDomain(v)
 })
 
 // Changer de langue recharge la page : la nouvelle locale (persistée) s'applique
@@ -88,6 +92,21 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
             <span v-else class="text-xs font-semibold">{{ site.activeBrand }}</span>
           </div>
 
+          <!-- Domaine actif -->
+          <div
+              v-if="site.activeDomain"
+              :title="$t('nav.activeDomain')"
+              class="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+          >
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            <select v-if="site.domains.length > 1" v-model="activeDomainModel" class="bg-transparent text-xs font-medium focus:outline-none cursor-pointer max-w-[10rem] truncate">
+              <option v-for="d in site.domains" :key="d" :value="d">{{ d }}</option>
+            </select>
+            <span v-else class="text-xs font-medium">{{ site.activeDomain }}</span>
+          </div>
+
           <!-- Section navigation (desktop) -->
           <nav class="hidden md:flex items-center gap-0.5">
             <router-link
@@ -142,8 +161,8 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
 
       <!-- Mobile menu -->
       <div v-if="menuOpen" class="md:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-        <label v-if="site.activeBrand" class="flex items-center gap-2 mb-3 text-sm">
-          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeBrand') }} :</span>
+        <label v-if="site.activeBrand" class="flex items-center gap-2 mb-2 text-sm">
+          <span class="w-20 shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeBrand') }} :</span>
           <select
               v-if="site.brands.length > 1"
               v-model="activeBrandModel"
@@ -152,6 +171,17 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
             <option v-for="b in site.brands" :key="b" :value="b">{{ b }}</option>
           </select>
           <span v-else class="font-semibold text-primary-600 dark:text-primary-400">{{ site.activeBrand }}</span>
+        </label>
+        <label v-if="site.activeDomain" class="flex items-center gap-2 mb-3 text-sm">
+          <span class="w-20 shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeDomain') }} :</span>
+          <select
+              v-if="site.domains.length > 1"
+              v-model="activeDomainModel"
+              class="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+          >
+            <option v-for="d in site.domains" :key="d" :value="d">{{ d }}</option>
+          </select>
+          <span v-else class="font-medium text-gray-700 dark:text-gray-200 truncate">{{ site.activeDomain }}</span>
         </label>
         <nav class="grid grid-cols-2 gap-1">
           <router-link

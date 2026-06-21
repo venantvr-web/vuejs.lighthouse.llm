@@ -12,6 +12,7 @@ export default {
         history: 'History',
         settings: 'Settings',
         home: 'Home',
-        activeBrand: 'Active brand'
+        activeBrand: 'Active brand',
+        activeDomain: 'Active domain'
     }
 }

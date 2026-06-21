@@ -26,7 +26,7 @@ describe('shared active site — silent prefill', () => {
         const r = router()
         await r.isReady()
         const w = mount(LighthouseView, {global: {plugins: [r]}})
-        expect(w.findComponent(UrlInput).props('modelValue')).toBe('https://example.com')
+        expect(w.findComponent(UrlInput).props('modelValue')).toBe('https://example.com/')
     })
 
     it('captures the domain when a URL is submitted on one screen', async () => {

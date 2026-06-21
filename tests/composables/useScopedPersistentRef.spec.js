@@ -47,6 +47,6 @@ describe('useScopedPersistentRef', () => {
         const site = useSiteStore()
         site.addDomain('example.com')
         const url = useScopedPersistentRef('test.url', () => site.origin)
-        expect(url.value).toBe('https://example.com')
+        expect(url.value).toBe('https://example.com/')
     })
 })

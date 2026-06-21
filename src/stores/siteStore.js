@@ -41,7 +41,8 @@ export const useSiteStore = defineStore('site', () => {
         // localStorage indisponible ou JSON invalide : on démarre vide
     }
 
-    const origin = computed(() => (activeDomain.value ? `https://${activeDomain.value}` : ''))
+    // URL racine canonique du domaine actif, terminée par « / » (ex. https://example.com/)
+    const origin = computed(() => (activeDomain.value ? `https://${activeDomain.value}/` : ''))
     const hasSite = computed(() => !!activeDomain.value)
     // Identifiant du contexte courant (couple marque/domaine) pour scoper les
     // saisies ET les collections (prompts GEO, watchlist…).

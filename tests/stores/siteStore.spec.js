@@ -26,7 +26,7 @@ describe('siteStore', () => {
         site.setFromUrl('https://www.Example.com/blog/article?x=1')
         expect(site.activeDomain).toBe('www.example.com')
         expect(site.domains).toContain('www.example.com')
-        expect(site.origin).toBe('https://www.example.com')
+        expect(site.origin).toBe('https://www.example.com/')
         expect(site.lastUrl).toBe('https://www.example.com/blog/article?x=1')
         expect(site.hasSite).toBe(true)
     })
@@ -35,7 +35,7 @@ describe('siteStore', () => {
         const site = useSiteStore()
         site.setFromUrl('example.org')
         expect(site.activeDomain).toBe('example.org')
-        expect(site.origin).toBe('https://example.org')
+        expect(site.origin).toBe('https://example.org/')
     })
 
     it('manages multiple brands and domains with active selection', () => {
@@ -77,7 +77,7 @@ describe('siteStore', () => {
         setActivePinia(createPinia())
         const reloaded = useSiteStore()
         expect(reloaded.activeDomain).toBe('shop.example.com')
-        expect(reloaded.origin).toBe('https://shop.example.com')
+        expect(reloaded.origin).toBe('https://shop.example.com/')
     })
 
     it('clears the active site', () => {

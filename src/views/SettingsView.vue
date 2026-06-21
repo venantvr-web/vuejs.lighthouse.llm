@@ -29,6 +29,14 @@ const site = useSiteStore()
 const newBrandInput = ref('')
 const newDomainInput = ref('')
 
+// Secteur d'activité de la marque active (persisté par marque dans le siteStore)
+const activeSectorModel = computed({
+  get: () => site.activeSector,
+  set: (v) => {
+    site.activeSector = v
+  }
+})
+
 function addBrand() {
   if (site.addBrand(newBrandInput.value)) newBrandInput.value = ''
 }
@@ -219,6 +227,22 @@ const testConnection = async () => {
               {{ $t('settings.addBtn') }}
             </button>
           </div>
+        </div>
+
+        <!-- Secteur d'activité de la marque active (désambiguïse le nom en analyse IA) -->
+        <div v-if="site.activeBrand">
+          <label class="block">
+            <span class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ $t('settings.sectorLabel', {brand: site.activeBrand}) }}
+            </span>
+            <input
+                v-model="activeSectorModel"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                :placeholder="$t('settings.sectorPlaceholder')"
+                type="text"
+            />
+          </label>
+          <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ $t('settings.sectorHint') }}</p>
         </div>
 
         <!-- Domaines -->

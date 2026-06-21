@@ -18,6 +18,19 @@ const activeDomainModel = computed({
   set: (v) => site.setActiveDomain(v)
 })
 
+// Infobulle de la marque enrichie du secteur d'activité (contexte de l'analyse IA)
+const brandTitle = computed(() => site.activeSector
+    ? `${t('nav.activeBrand')} · ${site.activeSector}`
+    : t('nav.activeBrand'))
+
+// Secteur d'activité de la marque active, éditable depuis le menu mobile
+const activeSectorModel = computed({
+  get: () => site.activeSector,
+  set: (v) => {
+    site.activeSector = v
+  }
+})
+
 // Changer de langue recharge la page : la nouvelle locale (persistée) s'applique
 // partout, y compris aux libellés évalués une seule fois au montage.
 function switchLocale(next) {
@@ -81,7 +94,7 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
           <!-- Marque active -->
           <div
               v-if="site.activeBrand"
-              :title="$t('nav.activeBrand')"
+              :title="brandTitle"
               class="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
           >
             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,6 +185,15 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
             <option v-for="b in site.brands" :key="b" :value="b">{{ b }}</option>
           </select>
           <span v-else class="block text-sm font-semibold text-primary-600 dark:text-primary-400">{{ site.activeBrand }}</span>
+        </label>
+        <label v-if="site.activeBrand" class="block mb-2">
+          <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeSector') }} :</span>
+          <input
+              v-model="activeSectorModel"
+              class="w-full px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+              :placeholder="$t('nav.activeSectorPlaceholder')"
+              type="text"
+          />
         </label>
         <label v-if="site.activeDomain" class="block mb-3">
           <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeDomain') }} :</span>

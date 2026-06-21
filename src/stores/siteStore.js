@@ -11,11 +11,12 @@ const STORAGE_KEY = 'lighthouse-active-site'
  * partout pour le préremplissage. La marque active est affichée dans l'en-tête.
  *
  * Stockage (localStorage) : { domains: string[], brands: string[],
- *   activeDomain, activeBrand, lastUrl }.
+ *   sectors: { [marque]: secteur }, activeDomain, activeBrand, lastUrl }.
  */
 export const useSiteStore = defineStore('site', () => {
     const domains = ref([])      // hôtes normalisés, ex. "example.com"
     const brands = ref([])       // noms de marque libres
+    const sectors = ref({})      // secteur d'activité par marque, ex. { Concilio: "conciergerie médicale" }
     const activeDomain = ref('')
     const activeBrand = ref('')
     const lastUrl = ref('')      // dernière URL complète saisie
@@ -28,6 +29,7 @@ export const useSiteStore = defineStore('site', () => {
             if (Array.isArray(data.domains)) {
                 domains.value = data.domains
                 brands.value = Array.isArray(data.brands) ? data.brands : []
+                sectors.value = (data.sectors && typeof data.sectors === 'object') ? data.sectors : {}
                 activeDomain.value = data.activeDomain || data.domains[0] || ''
                 activeBrand.value = data.activeBrand || data.brands?.[0] || ''
                 lastUrl.value = data.lastUrl || ''
@@ -58,11 +60,19 @@ export const useSiteStore = defineStore('site', () => {
         return host.split('.')[0] || ''
     })
 
+    // Secteur d'activité de la marque active (lève l'ambiguïté du nom dans les
+    // analyses IA, ex. « Concilio » = conciergerie médicale, pas gestion de patrimoine).
+    const activeSector = computed({
+        get: () => sectors.value[activeBrand.value] || '',
+        set: (v) => setBrandSector(activeBrand.value, v)
+    })
+
     function persist() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 domains: domains.value,
                 brands: brands.value,
+                sectors: sectors.value,
                 activeDomain: activeDomain.value,
                 activeBrand: activeBrand.value,
                 lastUrl: lastUrl.value
@@ -96,19 +106,51 @@ export const useSiteStore = defineStore('site', () => {
     }
 
     // --- Marques ---
-    function addBrand(name) {
+    function addBrand(name, sector) {
         const clean = (name || '').trim()
         if (!clean) return ''
         if (!brands.value.includes(clean)) brands.value = [...brands.value, clean]
         if (!activeBrand.value) activeBrand.value = clean
+        const cleanSector = (sector || '').trim()
+        if (cleanSector) sectors.value = {...sectors.value, [clean]: cleanSector}
         persist()
         return clean
     }
 
     function removeBrand(name) {
         brands.value = brands.value.filter(b => b !== name)
+        if (name in sectors.value) {
+            const next = {...sectors.value}
+            delete next[name]
+            sectors.value = next
+        }
         if (activeBrand.value === name) activeBrand.value = brands.value[0] || ''
         persist()
+    }
+
+    /**
+     * Définit (ou efface) le secteur d'activité d'une marque.
+     * @param {string} brand - Nom de la marque
+     * @param {string} sector - Secteur d'activité (chaîne libre)
+     */
+    function setBrandSector(brand, sector) {
+        const b = (brand || '').trim()
+        if (!b) return
+        const clean = (sector || '').trim()
+        const next = {...sectors.value}
+        if (clean) next[b] = clean
+        else delete next[b]
+        sectors.value = next
+        persist()
+    }
+
+    /**
+     * Secteur d'activité d'une marque donnée (vide si non renseigné).
+     * @param {string} brand - Nom de la marque
+     * @returns {string}
+     */
+    function sectorFor(brand) {
+        return sectors.value[(brand || '').trim()] || ''
     }
 
     function setActiveBrand(name) {
@@ -137,6 +179,7 @@ export const useSiteStore = defineStore('site', () => {
     function clear() {
         domains.value = []
         brands.value = []
+        sectors.value = {}
         activeDomain.value = ''
         activeBrand.value = ''
         lastUrl.value = ''
@@ -144,10 +187,10 @@ export const useSiteStore = defineStore('site', () => {
     }
 
     return {
-        domains, brands, activeDomain, activeBrand, lastUrl,
+        domains, brands, sectors, activeDomain, activeBrand, activeSector, lastUrl,
         origin, hasSite, needsOnboarding, brandGuess, scopeKey,
         addDomain, removeDomain, setActiveDomain,
-        addBrand, removeBrand, setActiveBrand,
+        addBrand, removeBrand, setActiveBrand, setBrandSector, sectorFor,
         setFromUrl, clear
     }
 })

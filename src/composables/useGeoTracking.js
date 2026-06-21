@@ -2,6 +2,7 @@ import {ref} from 'vue'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSettingsStore} from '@/stores/settingsStore'
+import {useSiteStore} from '@/stores/siteStore'
 import {toSeries} from '@/utils/series'
 import {extractDomain} from '@/utils/url'
 
@@ -133,10 +134,14 @@ export function detectChanges(item, latest, previous) {
  * sentiment toward the tracked brand, as a single JSON object.
  * @param {string} answer - The AI engine's answer
  * @param {string} brand - The tracked brand
+ * @param {string} [sector] - Brand's line of business (disambiguates the name)
  * @returns {string} Extraction prompt
  */
-export function buildExtractionPrompt(answer, brand) {
-    return `Analyse la réponse d'un assistant ci-dessous, à propos de « ${brand} ». ` +
+export function buildExtractionPrompt(answer, brand, sector = '') {
+    const sectorHint = (sector || '').trim()
+        ? `, acteur du secteur : ${sector.trim()} (ne le confonds pas avec une marque homonyme d'un autre secteur)`
+        : ''
+    return `Analyse la réponse d'un assistant ci-dessous, à propos de « ${brand} »${sectorHint}. ` +
         `Renvoie UNIQUEMENT un objet JSON, sans autre texte, de la forme ` +
         `{"brands": ["..."], "sentiment": "positive|neutral|negative|absent"} où :\n` +
         `- "brands" liste UNIQUEMENT les marques, produits ou entreprises qui sont de véritables ` +
@@ -385,6 +390,7 @@ export function computeGeoScore(statsList = []) {
 export function useGeoTracking() {
     const geoHistory = useGeoHistoryStore()
     const settings = useSettingsStore()
+    const site = useSiteStore()
 
     const statsById = ref({})
     const runningById = ref({})
@@ -442,7 +448,8 @@ export function useGeoTracking() {
             let sentiment = null
             if (options.advancedAnalysis) {
                 try {
-                    const extraction = await provider.send(buildExtractionPrompt(answer, item.brand))
+                    const sector = site.sectorFor(item.brand)
+                    const extraction = await provider.send(buildExtractionPrompt(answer, item.brand, sector))
                     const {brands, sentiment: s} = parseExtraction(extraction)
                     emergingCompetitors = extractEmerging(brands, item.brand, item.competitors)
                     sentiment = analysis.brandMentioned ? s : 'absent'

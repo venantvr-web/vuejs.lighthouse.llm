@@ -87,4 +87,37 @@ describe('siteStore', () => {
         expect(site.hasSite).toBe(false)
         expect(JSON.parse(localStorage.getItem(KEY)).activeDomain).toBe('')
     })
+
+    it('stores a line of business per brand, tracking the active one', () => {
+        const site = useSiteStore()
+        site.addBrand('Concilio', 'conciergerie médicale')
+        site.addBrand('Acme')
+        expect(site.activeSector).toBe('conciergerie médicale')   // Concilio is active
+        expect(site.sectorFor('Concilio')).toBe('conciergerie médicale')
+        expect(site.sectorFor('Acme')).toBe('')
+
+        site.setActiveBrand('Acme')
+        expect(site.activeSector).toBe('')
+        site.activeSector = 'logiciel B2B'                         // setter targets active brand
+        expect(site.sectorFor('Acme')).toBe('logiciel B2B')
+    })
+
+    it('persists sectors and reloads them', () => {
+        const site = useSiteStore()
+        site.addBrand('Concilio', 'conciergerie médicale')
+        expect(JSON.parse(localStorage.getItem(KEY)).sectors.Concilio).toBe('conciergerie médicale')
+
+        setActivePinia(createPinia())
+        const reloaded = useSiteStore()
+        expect(reloaded.sectorFor('Concilio')).toBe('conciergerie médicale')
+    })
+
+    it('drops a brand sector when the brand is removed', () => {
+        const site = useSiteStore()
+        site.addBrand('Concilio', 'conciergerie médicale')
+        site.addBrand('Acme', 'logiciel')
+        site.removeBrand('Concilio')
+        expect(site.sectorFor('Concilio')).toBe('')
+        expect(site.sectorFor('Acme')).toBe('logiciel')
+    })
 })

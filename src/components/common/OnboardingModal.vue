@@ -11,12 +11,13 @@ import {useSiteStore} from '@/stores/siteStore'
 const site = useSiteStore()
 
 const brand = ref('')
+const sector = ref('')
 const domain = ref('')
 const error = ref('')
 
 function submit() {
   error.value = ''
-  const b = site.addBrand(brand.value)
+  const b = site.addBrand(brand.value, sector.value)
   const d = site.addDomain(domain.value)
   if (!b || !d) {
     error.value = 'invalid'
@@ -35,6 +36,16 @@ function submit() {
             v-model="brand"
             class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             :placeholder="$t('onboarding.brandPlaceholder')"
+            type="text"
+            @keyup.enter="submit"
+        />
+      </label>
+      <label class="block">
+        <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('onboarding.sectorLabel') }}</span>
+        <input
+            v-model="sector"
+            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            :placeholder="$t('onboarding.sectorPlaceholder')"
             type="text"
             @keyup.enter="submit"
         />

@@ -13,6 +13,8 @@ export default {
         settings: 'Paramètres',
         home: 'Accueil',
         activeBrand: 'Marque active',
-        activeDomain: 'Domaine actif'
+        activeDomain: 'Domaine actif',
+        activeSector: 'Secteur d\'activité',
+        activeSectorPlaceholder: 'Ex. : conciergerie médicale'
     }
 }

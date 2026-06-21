@@ -180,6 +180,7 @@ function geoRecommendations(score, ownCited) {
  * actionable recommendations. Pure and deterministic.
  * @param {object} args
  * @param {string} args.brand - Tracked brand
+ * @param {string} [args.sector] - Brand's line of business (shown in the header)
  * @param {string} [args.domain] - Tracked domain (canonical), highlighted in sources
  * @param {number|Date} [args.date] - Report date
  * @param {object} args.score - computeGeoScore() result
@@ -187,13 +188,14 @@ function geoRecommendations(score, ownCited) {
  * @param {Object} args.statsById - Per-prompt stats
  * @returns {string} Markdown report
  */
-export function buildGeoReportMarkdown({brand = '', domain = '', date = Date.now(), score = {}, items = [], statsById = {}} = {}) {
+export function buildGeoReportMarkdown({brand = '', sector = '', domain = '', date = Date.now(), score = {}, items = [], statsById = {}} = {}) {
     const day = new Date(date).toLocaleDateString('fr-FR', {day: '2-digit', month: 'long', year: 'numeric'})
     const fmtPct = (v) => (typeof v === 'number' ? `${v}%` : '—')
     const lines = []
 
     lines.push(`# Rapport de visibilité GEO — ${brand || '—'}`, '')
     const subtitleParts = []
+    if (sector) subtitleParts.push(sector)
     if (domain) subtitleParts.push(domain)
     subtitleParts.push(`généré le ${day}`)
     lines.push(`*${subtitleParts.join(' · ')}*`, '')

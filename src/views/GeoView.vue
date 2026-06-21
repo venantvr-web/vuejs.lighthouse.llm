@@ -64,8 +64,11 @@ const promptTokens = computed(() => {
 
 function applyPreset(preset) {
   promptTemplate.value = preset
-  tokenValues.value = {}
+  // Pré-remplit le jeton [secteur] avec le secteur d'activité mémorisé pour la
+  // marque active : cohérence du contexte d'une marque à l'autre.
+  tokenValues.value = site.activeSector ? {secteur: site.activeSector} : {}
   newPrompt.value = preset
+  assemblePrompt()
 }
 
 // Reconstruit le prompt en remplaçant chaque jeton renseigné par sa valeur.
@@ -180,6 +183,7 @@ function exportMarkdown() {
 const reportModal = ref(false)
 const reportMarkdown = computed(() => buildGeoReportMarkdown({
   brand: site.activeBrand,
+  sector: site.activeSector,
   domain: site.activeDomain ? canonicalUrl(site.activeDomain) : '',
   score: geoScore.value,
   items: items.value,

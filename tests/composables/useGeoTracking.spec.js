@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest'
 import {
     analyzeResponse,
+    buildExtractionPrompt,
     countOccurrences,
     detectChanges,
     computeGeoScore,
@@ -173,6 +174,25 @@ describe('useGeoTracking - pure logic', () => {
         it('strips trailing punctuation from URLs', () => {
             const sources = extractSources('Source : https://example.com/page).')
             expect(sources).toEqual([{host: 'example.com', count: 1}])
+        })
+    })
+
+    describe('buildExtractionPrompt', () => {
+        it('mentions the brand and includes the answer', () => {
+            const p = buildExtractionPrompt('Réponse...', 'Concilio')
+            expect(p).toContain('« Concilio »')
+            expect(p).toContain('Réponse...')
+        })
+
+        it('injects the sector to disambiguate the brand name', () => {
+            const p = buildExtractionPrompt('x', 'Concilio', 'conciergerie médicale')
+            expect(p).toContain('conciergerie médicale')
+            expect(p).toMatch(/homonyme/)
+        })
+
+        it('omits the sector hint when none is given', () => {
+            const p = buildExtractionPrompt('x', 'Concilio', '')
+            expect(p).not.toMatch(/secteur :/)
         })
     })
 

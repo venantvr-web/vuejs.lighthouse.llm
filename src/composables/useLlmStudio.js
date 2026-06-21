@@ -6,7 +6,7 @@ import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
 import {buildLlmsTxtPrompt, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
-import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
 import {useI18n} from '@/i18n'
@@ -25,18 +25,18 @@ export function useLlmStudio() {
     // Analyse du domaine — mémorisée pour restaurer l'écran au rechargement
     const analyzing = ref(false)
     const analyzeError = ref(null)
-    const context = usePersistentRef('llmStudio.context', null)
+    const context = useScopedPersistentRef('llmStudio.context', null)
     // Fichiers actuellement publiés (veille)
-    const liveLlms = usePersistentRef('llmStudio.liveLlms', null)      // { present, content }
-    const liveLlmsFull = usePersistentRef('llmStudio.liveLlmsFull', null)
+    const liveLlms = useScopedPersistentRef('llmStudio.liveLlms', null)      // { present, content }
+    const liveLlmsFull = useScopedPersistentRef('llmStudio.liveLlmsFull', null)
 
     // Génération (la sortie en cours est affichée en direct ; sa version finale
     // est mémorisée pour réapparaître au rechargement — sans réécrire à chaque jeton)
     const generating = ref(false)
     const output = ref('')
     const outputKind = ref('llms')  // 'llms' | 'full'
-    const savedOutput = usePersistentRef('llmStudio.lastOutput', '')
-    const savedKind = usePersistentRef('llmStudio.lastOutputKind', 'llms')
+    const savedOutput = useScopedPersistentRef('llmStudio.lastOutput', '')
+    const savedKind = useScopedPersistentRef('llmStudio.lastOutputKind', 'llms')
     const genError = ref(null)
     const tokenCount = ref(0)
     const truncated = ref(false)

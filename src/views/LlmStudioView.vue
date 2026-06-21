@@ -10,6 +10,7 @@ import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
 import {useNotifications} from '@/composables/useNotifications'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useSiteStore} from '@/stores/siteStore'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
@@ -37,8 +38,8 @@ const {
 const {items: watchItems, checking: watchChecking, isWatched, watchDomain, unwatch, checkAll, checkDue} = useLlmWatch()
 const {permission: notifPermission, requestPermission, isSupported: notifSupported} = useNotifications()
 
-const url = usePersistentRef('llmStudio.url', site.origin)
-const keywords = usePersistentRef('llmStudio.keywords', '')
+const url = useScopedPersistentRef('llmStudio.url', () => site.origin)
+const keywords = useScopedPersistentRef('llmStudio.keywords', '')
 const interval = usePersistentRef('llmStudio.interval', 24)
 
 function toggleWatch() {

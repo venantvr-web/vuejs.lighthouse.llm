@@ -15,7 +15,8 @@ Application web **Vue 3 + Vite**, **local-first** (aucun backend applicatif) : a
 
 - **Libellés avec deux-points, partout.** Tout libellé de champ, de groupe de contrôles ou de donnée (`label`/`<span>` au-dessus ou avant un input, un select, une liste de boutons, un badge…) se termine par un deux-points : `' :'` (espace + deux-points) en français, `':'` (sans espace) en anglais. Convention homogène sur toute l'application.
 - **Tout champ doit avoir un libellé visible.** Un placeholder ne suffit pas : un champ pré-rempli masque son placeholder, et un select n'explique pas son rôle par son seul contenu. Toujours un `<label>` au-dessus.
-- **Saisies mémorisées.** Toutes les saisies et sélections utilisateur sont persistées (`usePersistentRef` / store) afin d'être restaurées d'une session à l'autre.
+- **Saisies mémorisées.** Toutes les saisies et sélections utilisateur sont persistées afin d'être restaurées d'une session à l'autre.
+- **Mémorisation par marque/domaine.** Les saisies liées à un site (URL d'analyse, brouillons, mots-clés, contexte/sortie générés, sélection Search Console…) sont mémorisées **par couple marque/domaine actif** via `useScopedPersistentRef` : changer de marque ou de domaine restaure les saisies de ce contexte. Les préférences réellement globales (clés API et fournisseur LLM, thème, langue, intervalles, bascules d'affichage) restent en `usePersistentRef`.
 - **Réponses IA en Markdown.** Toute sortie d'IA s'affiche via `MarkdownViewer` (et est consultable en pop-up `Modal`).
 
 Exemple attendu :

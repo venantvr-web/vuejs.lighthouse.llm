@@ -4,6 +4,7 @@ import {useWatchlistStore} from '@/stores/watchlistStore'
 import {useScoreHistoryStore} from '@/stores/scoreHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useWatchlist} from '@/composables/useWatchlist'
 import {useNotifications} from '@/composables/useNotifications'
 import {formatDateISO, formatScore, getScoreColorClass} from '@/utils/formatters'
@@ -49,8 +50,8 @@ function breachedCategories(item) {
 }
 
 // Add form state (mémorisé : la saisie en cours survit aux rechargements)
-const newUrl = usePersistentRef('watchlist.newUrl', site.origin)
-const newLabel = usePersistentRef('watchlist.newLabel', '')
+const newUrl = useScopedPersistentRef('watchlist.newUrl', () => site.origin)
+const newLabel = useScopedPersistentRef('watchlist.newLabel', '')
 const newStrategy = usePersistentRef('watchlist.newStrategy', 'mobile')
 const newSource = usePersistentRef('watchlist.newSource', 'pagespeed')
 const addError = ref('')

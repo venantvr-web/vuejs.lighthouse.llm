@@ -4,6 +4,7 @@ import {useGeoStore} from '@/stores/geoStore'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
@@ -29,8 +30,8 @@ const {permission: notificationPermission, requestPermission, notify, isSupporte
 
 // Add form state (mémorisé : un brouillon non soumis survit aux rechargements).
 // La marque vient de l'identité active (en-tête / Paramètres), plus de champ ici.
-const newPrompt = usePersistentRef('geo.draftPrompt', '')
-const newCompetitors = usePersistentRef('geo.draftCompetitors', '')
+const newPrompt = useScopedPersistentRef('geo.draftPrompt', '')
+const newCompetitors = useScopedPersistentRef('geo.draftCompetitors', '')
 const addError = ref('')
 
 const runningAll = ref(false)

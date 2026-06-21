@@ -6,6 +6,7 @@ import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
@@ -22,7 +23,7 @@ function siteHost(s) {
   return s.startsWith('sc-domain:') ? s.slice('sc-domain:'.length) : extractDomain(s)
 }
 
-const selectedSite = usePersistentRef('searchconsole.selectedSite', '')
+const selectedSite = useScopedPersistentRef('searchconsole.selectedSite', '')
 const days = usePersistentRef('searchconsole.days', 28)
 const dimension = usePersistentRef('searchconsole.dimension', 'query')
 const rows = ref([])

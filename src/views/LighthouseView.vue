@@ -7,6 +7,7 @@ import {useLighthouseStore} from '@/stores/lighthouseStore'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -20,7 +21,7 @@ const settings = useSettingsStore()
 const site = useSiteStore()
 
 // Préremplissage silencieux à partir du site actif
-const url = usePersistentRef('lighthouse.url', site.lastUrl || site.origin)
+const url = useScopedPersistentRef('lighthouse.url', () => site.lastUrl || site.origin)
 const loading = ref(false)
 const error = ref('')
 const progress = ref(0)

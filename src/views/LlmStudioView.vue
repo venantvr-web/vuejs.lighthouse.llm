@@ -26,6 +26,8 @@ const toast = useToast()
 
 // Bonnes pratiques llms.txt (rappelées dans l'interface)
 const showTips = usePersistentRef('llmStudio.showTips', true)
+// Détails du domaine compris par l'IA : repliés par défaut (peut être long), mémorisé
+const showContext = usePersistentRef('llmStudio.showContext', false)
 const bestPractices = computed(() => messages[locale.value]?.llmStudio?.bestPractices || messages.fr.llmStudio.bestPractices || [])
 const site = useSiteStore()
 const settings = useSettingsStore()
@@ -181,8 +183,19 @@ onMounted(async () => {
 
       <!-- Contexte du domaine -->
       <div v-if="context" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">{{ $t('llmStudio.contextTitle') }}</h2>
-        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+        <button class="flex items-center justify-between w-full text-left" @click="showContext = !showContext">
+          <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $t('llmStudio.contextTitle') }}</span>
+          <svg
+              :class="showContext ? 'rotate-180' : ''"
+              class="w-4 h-4 text-gray-400 transition-transform"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+        </button>
+
+        <div v-if="showContext">
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mt-3">
           <div>
             <dt class="text-xs text-gray-500 dark:text-gray-400">{{ $t('llmStudio.ctxTitle') }}</dt>
             <dd class="text-gray-900 dark:text-white">{{ context.title || '—' }}</dd>
@@ -227,6 +240,7 @@ onMounted(async () => {
           <button v-if="liveLlmsFull?.present" class="text-primary-600 dark:text-primary-400 hover:underline" @click="openLive('full')">
             {{ $t('llmStudio.viewLive') }}
           </button>
+          </div>
         </div>
 
         <!-- Actions de génération -->

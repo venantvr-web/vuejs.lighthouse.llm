@@ -7,6 +7,7 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {computeGeoScore, useGeoTracking} from '@/composables/useGeoTracking'
+import {useBrandConcepts} from '@/composables/useBrandConcepts'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
@@ -20,7 +21,7 @@ import {buildGeoCsv, buildGeoMarkdown, buildGeoReportMarkdown} from '@/utils/exp
 import {downloadText} from '@/utils/download'
 import {printMarkdown} from '@/utils/print'
 import {canonicalUrl} from '@/utils/url'
-import {formatDateISO} from '@/utils/formatters'
+import {formatDateISO, formatRelativeTime} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -32,6 +33,7 @@ const geoHistory = useGeoHistoryStore()
 const settings = useSettingsStore()
 const site = useSiteStore()
 const {statsById, runningById, errorById, loadStats, loadItemStats, runPrompt} = useGeoTracking()
+const {concepts, learnedAt, learning, hasConcepts, learn, error: conceptError} = useBrandConcepts()
 const {permission: notificationPermission, requestPermission, notify, isSupported: notificationsSupported} = useNotifications()
 
 // Add form state (mémorisé : un brouillon non soumis survit aux rechargements).
@@ -62,13 +64,63 @@ const promptTokens = computed(() => {
   return tokens
 })
 
+// Jetons connus d'avance (valeur unique) : secteur et marque sont préremplis
+// automatiquement puisqu'ils font partie de l'identité du site.
+function autoFillValue(token) {
+  const t = token.toLowerCase()
+  if (/secteur|sector|march|market|industr/.test(t) && site.activeSector) return site.activeSector
+  if (/marque|brand/.test(t) && site.activeBrand) return site.activeBrand
+  return null
+}
+
 function applyPreset(preset) {
   promptTemplate.value = preset
-  // Pré-remplit le jeton [secteur] avec le secteur d'activité mémorisé pour la
-  // marque active : cohérence du contexte d'une marque à l'autre.
-  tokenValues.value = site.activeSector ? {secteur: site.activeSector} : {}
+  // Préremplissage auto des jetons connus (secteur, marque) ; les autres
+  // (produits, cible…) restent proposés en badges.
+  const values = {}
+  const tokens = (preset.match(/\[([^\]]+)\]/g) || []).map(s => s.slice(1, -1))
+  for (const token of tokens) {
+    const v = autoFillValue(token)
+    if (v) values[token] = v
+  }
+  tokenValues.value = values
   newPrompt.value = preset
   assemblePrompt()
+}
+
+// Badges proposés pour un jeton : valeurs apprises (produits, cibles, thèmes),
+// secteur/marque connus, ou concurrents saisis. Clic → préremplit le jeton.
+function badgesForToken(token) {
+  const t = token.toLowerCase()
+  const c = concepts.value || {}
+  if (/produit|product|service|offre|offer/.test(t)) return c.products || []
+  if (/cible|audience|client|persona|\bqui\b|who/.test(t)) return c.audiences || []
+  if (/besoin|need|usage|probl|th[eè]me|theme|sujet|topic/.test(t)) return c.keywords || []
+  if (/secteur|sector|march|market|industr|domaine/.test(t)) return site.activeSector ? [site.activeSector] : []
+  if (/marque|brand/.test(t)) return site.activeBrand ? [site.activeBrand] : []
+  if (/concurrent|competitor|rival/.test(t)) {
+    return (newCompetitors.value || '').split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+  }
+  return []
+}
+
+function setToken(token, value) {
+  tokenValues.value = {...tokenValues.value, [token]: value}
+  assemblePrompt()
+}
+
+async function handleLearn() {
+  const ok = await learn()
+  if (ok) {
+    toast.success(t('geo.conceptsLearned'))
+    return
+  }
+  const map = {
+    'no-llm': t('geo.conceptsErrLLM'),
+    'no-site': t('geo.conceptsErrSite'),
+    'unreachable': t('geo.conceptsErrFetch')
+  }
+  toast.error(map[conceptError.value] || t('geo.conceptsErrFailed'))
 }
 
 // Reconstruit le prompt en remplaçant chaque jeton renseigné par sa valeur.
@@ -351,25 +403,76 @@ async function handleRunAll() {
                 @keyup.enter="handleAdd"
             />
           </FieldLabel>
-          <!-- Champs des jetons du préset (ex. [secteur], [besoin]…) -->
+          <!-- Champs des jetons du préset (ex. [secteur], [produit]…) :
+               secteur/marque préremplis, badges proposés pour les autres -->
           <div
               v-if="promptTemplate && promptTokens.length"
-              class="flex flex-col gap-2 rounded-lg border border-primary-200 dark:border-primary-500/30 bg-primary-50/60 dark:bg-primary-900/10 p-3"
+              class="flex flex-col gap-3 rounded-lg border border-primary-200 dark:border-primary-500/30 bg-primary-50/60 dark:bg-primary-900/10 p-3"
           >
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.fillTokens') }}</span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                  v-for="token in promptTokens"
-                  :key="token"
-                  v-model="tokenValues[token]"
-                  :placeholder="token"
-                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  type="text"
-                  @input="assemblePrompt"
-                  @keyup.enter="handleAdd"
-              />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div v-for="token in promptTokens" :key="token" class="flex flex-col gap-1">
+                <input
+                    v-model="tokenValues[token]"
+                    :placeholder="token"
+                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    type="text"
+                    @input="assemblePrompt"
+                    @keyup.enter="handleAdd"
+                />
+                <div v-if="badgesForToken(token).length" class="flex flex-wrap gap-1">
+                  <button
+                      v-for="b in badgesForToken(token)"
+                      :key="b"
+                      class="px-1.5 py-0.5 rounded text-[10px] bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors"
+                      type="button"
+                      :title="$t('geo.badgeFill')"
+                      @click="setToken(token, b)"
+                  >
+                    {{ b }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Concepts du site : appris par l'IA pour enrichir les prompts -->
+          <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-medium text-gray-700 dark:text-gray-300 inline-flex items-center gap-1.5">
+                {{ $t('geo.conceptsTitle') }}
+                <HelpTip :text="$t('geo.conceptsHelp')"/>
+              </span>
+              <button
+                  :disabled="learning"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-medium transition-colors disabled:opacity-50"
+                  type="button"
+                  @click="handleLearn"
+              >
+                <svg :class="{ 'animate-spin': learning }" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
+                {{ learning ? $t('geo.conceptsLearning') : (hasConcepts ? $t('geo.conceptsRelearn') : $t('geo.conceptsLearn')) }}
+              </button>
+            </div>
+            <div v-if="hasConcepts" class="mt-2 space-y-1.5">
+              <div v-if="concepts.products.length" class="flex flex-wrap items-center gap-1">
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 mr-1">{{ $t('geo.conceptsProducts') }}</span>
+                <span v-for="p in concepts.products" :key="p" class="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">{{ p }}</span>
+              </div>
+              <div v-if="concepts.audiences.length" class="flex flex-wrap items-center gap-1">
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 mr-1">{{ $t('geo.conceptsAudiences') }}</span>
+                <span v-for="a in concepts.audiences" :key="a" class="px-1.5 py-0.5 rounded text-[10px] bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300">{{ a }}</span>
+              </div>
+              <div v-if="concepts.keywords.length" class="flex flex-wrap items-center gap-1">
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 mr-1">{{ $t('geo.conceptsKeywords') }}</span>
+                <span v-for="k in concepts.keywords" :key="k" class="px-1.5 py-0.5 rounded text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ k }}</span>
+              </div>
+              <p v-if="learnedAt" class="text-[10px] text-gray-400 dark:text-gray-500">{{ $t('geo.conceptsLearnedAt', { time: formatRelativeTime(learnedAt) }) }}</p>
+            </div>
+            <p v-else class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ $t('geo.conceptsEmpty') }}</p>
+          </div>
+
           <div class="flex flex-col gap-1.5">
             <span class="text-xs text-gray-400 dark:text-gray-500">{{ $t('geo.presetsLabel') }}</span>
             <button

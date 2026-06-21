@@ -110,8 +110,13 @@ async function handleAnalyze() {
   await analyze(url.value)
 }
 
+// Second mode : injecter les concepts appris dans le fichier généré.
+// Activé par défaut quand des concepts existent (« ce serait mieux »).
+const injectConcepts = usePersistentRef('llmStudio.injectConcepts', true)
+
 async function handleGenerate(full) {
-  await generate({full, keywords: keywords.value})
+  const useConcepts = injectConcepts.value && hasConcepts.value
+  await generate({full, keywords: keywords.value, concepts: useConcepts ? concepts.value : {}})
   await loadHistory()
 }
 
@@ -295,6 +300,18 @@ onMounted(async () => {
           </button>
           </div>
         </div>
+
+        <!-- Second mode : injecter les concepts appris dans le fichier -->
+        <label
+            v-if="hasConcepts"
+            class="mt-4 flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer"
+        >
+          <input v-model="injectConcepts" class="mt-0.5 rounded" type="checkbox"/>
+          <span>
+            {{ $t('llmStudio.injectConcepts') }}
+            <span class="text-gray-400 dark:text-gray-500">— {{ conceptChips.join(', ') }}</span>
+          </span>
+        </label>
 
         <!-- Actions de génération -->
         <div class="mt-4 flex flex-wrap gap-2">

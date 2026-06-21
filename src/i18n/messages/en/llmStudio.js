@@ -13,6 +13,7 @@ export default {
         keywordsLabel: 'Keywords / business domain (optional, improves results):',
         keywordsPlaceholder: 'E.g.: SEO audit, web performance, agency, fashion e-commerce…',
         conceptsHint: 'Site concepts (click to add):',
+        injectConcepts: 'Inject the site concepts into the generated file',
 
         configurePrefix: 'AI generation requires an LLM provider. ',
         configureLink: 'Configure',

@@ -185,16 +185,16 @@ export function useLlmStudio() {
 
     /**
      * Génère le fichier demandé.
-     * @param {{full?: boolean, keywords?: string}} options
+     * @param {{full?: boolean, keywords?: string, concepts?: object}} options
      */
-    async function generate({full = false, keywords = ''} = {}) {
+    async function generate({full = false, keywords = '', concepts = {}} = {}) {
         if (!context.value) return
         lastArtifactId = null
         outputKind.value = full ? 'full' : 'llms'
         // Pour llms-full.txt : on récupère le contenu réel des pages du header
         // (les plus utiles) pour bâtir un vrai corpus.
         const pages = full ? await fetchHeaderPages(context.value) : []
-        lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords, pages})
+        lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords, pages, concepts})
         lastSystem = full ? LLMS_FULL_SYSTEM : LLMS_TXT_SYSTEM
         await streamInto(lastPrompt, {system: lastSystem})
         // Filet de sécurité : retire un éventuel bloc de code englobant

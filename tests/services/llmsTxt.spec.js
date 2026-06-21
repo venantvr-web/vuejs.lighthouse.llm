@@ -107,6 +107,20 @@ describe('buildLlmsTxtPrompt', () => {
         expect(prompt).toContain('Texte réel de la page services.')
         expect(prompt).toContain(`> Source : ${ORIGIN}/services`)
     })
+
+    it('injecte les concepts appris et l\'instruction de prise en compte', () => {
+        const concepts = {products: ['Bilan santé'], audiences: ['Entreprises'], keywords: ['prévention']}
+        const prompt = buildLlmsTxtPrompt(context, {concepts})
+        expect(prompt).toContain('Concepts de la marque')
+        expect(prompt).toContain('Bilan santé')
+        expect(prompt).toContain('Public cible : Entreprises')
+        expect(prompt).toMatch(/intègre explicitement.*produits\/services/i)
+    })
+
+    it('n\'ajoute pas de section concepts quand aucun n\'est fourni', () => {
+        const prompt = buildLlmsTxtPrompt(context, {concepts: {products: [], audiences: [], keywords: []}})
+        expect(prompt).not.toContain('Concepts de la marque')
+    })
 })
 
 describe('extractMainText', () => {

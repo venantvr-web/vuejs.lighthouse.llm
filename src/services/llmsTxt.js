@@ -241,6 +241,26 @@ function pushPagesContent(lines, pages) {
 }
 
 /**
+ * Ajoute les concepts appris (produits, cible, thèmes) au brief. Renvoie true
+ * si au moins un concept a été injecté.
+ * @param {string[]} lines
+ * @param {object} concepts - { products, audiences, keywords }
+ * @returns {boolean}
+ */
+function pushConcepts(lines, concepts = {}) {
+    const products = Array.isArray(concepts.products) ? concepts.products : []
+    const audiences = Array.isArray(concepts.audiences) ? concepts.audiences : []
+    const keywords = Array.isArray(concepts.keywords) ? concepts.keywords : []
+    if (!products.length && !audiences.length && !keywords.length) return false
+    lines.push('')
+    lines.push('### Concepts de la marque (appris du site, à intégrer en priorité)')
+    if (products.length) lines.push(`- Produits / services : ${products.join(', ')}`)
+    if (audiences.length) lines.push(`- Public cible : ${audiences.join(', ')}`)
+    if (keywords.length) lines.push(`- Thèmes clés : ${keywords.join(', ')}`)
+    return true
+}
+
+/**
  * Construit le prompt de génération du fichier llms.txt (index/résumé) ou
  * llms-full.txt (corpus complet structuré). Inspiré des bonnes pratiques de
  * rédaction de prompts pour ce format.
@@ -248,7 +268,7 @@ function pushPagesContent(lines, pages) {
  * @param {{keywords?: string, full?: boolean, pages?: Array}} options
  * @returns {string}
  */
-export function buildLlmsTxtPrompt(context, {keywords = '', full = false, pages = []} = {}) {
+export function buildLlmsTxtPrompt(context, {keywords = '', full = false, pages = [], concepts = {}} = {}) {
     const c = context || {}
     const lines = []
 
@@ -278,11 +298,18 @@ export function buildLlmsTxtPrompt(context, {keywords = '', full = false, pages 
 
     lines.push('')
     pushInputData(lines, c, keywords)
+    const hasConcepts = pushConcepts(lines, concepts)
 
     // Pour llms-full.txt : le contenu réel des pages du header constitue le corpus
     if (full && pages.length) pushPagesContent(lines, pages)
 
     lines.push('')
+    if (hasConcepts) {
+        lines.push(full
+            ? 'Important : assure-toi que les **produits/services** et le **public cible** listés dans « Concepts de la marque » apparaissent explicitement et sont bien couverts dans le corpus.'
+            : 'Important : intègre explicitement les **produits/services** et le **public cible** listés dans « Concepts de la marque » dans la description et les notes.')
+        lines.push('')
+    }
     lines.push('Génère maintenant le contenu complet du fichier. Renvoie UNIQUEMENT le Markdown du fichier, sans phrase avant ni après, sans bloc de code englobant.')
     if (full) {
         lines.push('Si le document est trop long pour une seule réponse, commence par le début et arrête-toi proprement (je te demanderai de « continuer »).')

@@ -95,6 +95,23 @@ export function parseHomepage(html = '', origin = '') {
 }
 
 /**
+ * Extrait le texte lisible d'une page (sans le bruit d'interface) pour alimenter
+ * le corpus llms-full.txt. Retire scripts, styles, nav, en-tête, pied de page,
+ * etc. et privilégie le contenu de <main> s'il existe.
+ * @param {string} html
+ * @param {number} maxChars - longueur maximale conservée par page
+ * @returns {string}
+ */
+export function extractMainText(html = '', maxChars = 4000) {
+    const doc = new DOMParser().parseFromString(html || '', 'text/html')
+    doc.querySelectorAll('script, style, noscript, nav, header, footer, aside, form, svg, template')
+        .forEach((el) => el.remove())
+    const root = doc.querySelector('main') || doc.body || doc.documentElement
+    const text = (root?.textContent || '').replace(/\s+/g, ' ').trim()
+    return text.slice(0, maxChars)
+}
+
+/**
  * Premier segment de chemin d'une URL (la « section »).
  * @param {string} url
  * @returns {string}
@@ -206,14 +223,32 @@ function pushInputData(lines, c, keywords) {
 }
 
 /**
+ * Ajoute le contenu brut des pages (corpus) au prompt llms-full.txt.
+ * @param {string[]} lines
+ * @param {Array<{url: string, title: string, text: string}>} pages
+ */
+function pushPagesContent(lines, pages) {
+    lines.push('')
+    lines.push('## Contenu brut des pages (à fusionner et nettoyer)')
+    lines.push('Texte extrait des pages importantes du site (issues de la navigation d\'en-tête) :')
+    pages.forEach((p) => {
+        lines.push('')
+        lines.push(`### ${p.title || p.url}`)
+        lines.push(`> Source : ${p.url}`)
+        lines.push('')
+        lines.push(p.text)
+    })
+}
+
+/**
  * Construit le prompt de génération du fichier llms.txt (index/résumé) ou
  * llms-full.txt (corpus complet structuré). Inspiré des bonnes pratiques de
  * rédaction de prompts pour ce format.
  * @param {object} context - sortie de buildSiteContext
- * @param {{keywords?: string, full?: boolean}} options
+ * @param {{keywords?: string, full?: boolean, pages?: Array}} options
  * @returns {string}
  */
-export function buildLlmsTxtPrompt(context, {keywords = '', full = false} = {}) {
+export function buildLlmsTxtPrompt(context, {keywords = '', full = false, pages = []} = {}) {
     const c = context || {}
     const lines = []
 
@@ -243,6 +278,9 @@ export function buildLlmsTxtPrompt(context, {keywords = '', full = false} = {}) 
 
     lines.push('')
     pushInputData(lines, c, keywords)
+
+    // Pour llms-full.txt : le contenu réel des pages du header constitue le corpus
+    if (full && pages.length) pushPagesContent(lines, pages)
 
     lines.push('')
     lines.push('Génère maintenant le contenu complet du fichier. Renvoie UNIQUEMENT le Markdown du fichier, sans phrase avant ni après, sans bloc de code englobant.')

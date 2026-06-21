@@ -3,9 +3,9 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
-import {originFromUrl} from '@/services/resourceCheck'
+import {fetchResource, originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
-import {buildLlmsTxtPrompt, LLMS_FULL_SYSTEM, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
+import {buildLlmsTxtPrompt, extractMainText, LLMS_FULL_SYSTEM, LLMS_TXT_SYSTEM, stripCodeFence} from '@/services/llmsTxt'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useToast} from '@/composables/useToast'
 import {doneProgress, startProgress} from '@/composables/useProgress'
@@ -152,6 +152,28 @@ export function useLlmStudio() {
     }
 
     /**
+     * Récupère le contenu réel des pages de la navigation d'en-tête (corpus
+     * pour llms-full.txt). Borné en nombre de pages pour rester raisonnable.
+     * @param {object} ctx - contexte du domaine
+     * @param {number} max
+     * @returns {Promise<Array<{url: string, title: string, text: string}>>}
+     */
+    async function fetchHeaderPages(ctx, max = 12) {
+        const links = (ctx.headerLinks || []).slice(0, max)
+        const results = await Promise.all(links.map(async (l) => {
+            try {
+                const res = await fetchResource(l.url)
+                if (!res.available) return null
+                const text = extractMainText(res.content)
+                return text ? {url: l.url, title: l.text, text} : null
+            } catch {
+                return null
+            }
+        }))
+        return results.filter(Boolean)
+    }
+
+    /**
      * Génère le fichier demandé.
      * @param {{full?: boolean, keywords?: string}} options
      */
@@ -159,7 +181,10 @@ export function useLlmStudio() {
         if (!context.value) return
         lastArtifactId = null
         outputKind.value = full ? 'full' : 'llms'
-        lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords})
+        // Pour llms-full.txt : on récupère le contenu réel des pages du header
+        // (les plus utiles) pour bâtir un vrai corpus.
+        const pages = full ? await fetchHeaderPages(context.value) : []
+        lastPrompt = buildLlmsTxtPrompt(context.value, {full, keywords, pages})
         lastSystem = full ? LLMS_FULL_SYSTEM : LLMS_TXT_SYSTEM
         await streamInto(lastPrompt, {system: lastSystem})
         // Filet de sécurité : retire un éventuel bloc de code englobant

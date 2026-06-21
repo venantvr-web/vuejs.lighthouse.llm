@@ -3,6 +3,7 @@ import {
     buildLlmsTxtPrompt,
     buildSiteContext,
     detectContextChanges,
+    extractMainText,
     groupSitemapUrls,
     parseHomepage,
     stripCodeFence
@@ -97,6 +98,33 @@ describe('buildLlmsTxtPrompt', () => {
         expect(prompt.toLowerCase()).toContain('nettoyage du bruit')
         expect(prompt).toContain('Source :')
         expect(prompt.toLowerCase()).toContain('continuer')
+    })
+
+    it('mode full : injecte le contenu brut des pages fournies', () => {
+        const pages = [{url: `${ORIGIN}/services`, title: 'Services', text: 'Texte réel de la page services.'}]
+        const prompt = buildLlmsTxtPrompt(context, {full: true, pages})
+        expect(prompt).toContain('Contenu brut des pages')
+        expect(prompt).toContain('Texte réel de la page services.')
+        expect(prompt).toContain(`> Source : ${ORIGIN}/services`)
+    })
+})
+
+describe('extractMainText', () => {
+    it('retire le bruit (script, nav, footer) et garde le contenu', () => {
+        const html = '<html><body><nav>Menu</nav><header>Logo</header>' +
+            '<main><h1>Titre</h1><p>Contenu utile.</p></main>' +
+            '<footer>Pied</footer><script>alert(1)</script></body></html>'
+        const text = extractMainText(html)
+        expect(text).toContain('Titre')
+        expect(text).toContain('Contenu utile.')
+        expect(text).not.toContain('Menu')
+        expect(text).not.toContain('Pied')
+        expect(text).not.toContain('alert(1)')
+    })
+
+    it('borne la longueur', () => {
+        const html = '<body><main>' + 'a'.repeat(9000) + '</main></body>'
+        expect(extractMainText(html, 100).length).toBe(100)
     })
 })
 

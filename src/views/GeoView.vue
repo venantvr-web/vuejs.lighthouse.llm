@@ -279,14 +279,17 @@ async function handleRunAll() {
       <!-- Add form -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
         <div class="flex flex-col gap-3">
-          <input
-              v-model="newPrompt"
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              :placeholder="$t('geo.promptPlaceholder')"
-              type="text"
-              @input="onPromptInput"
-              @keyup.enter="handleAdd"
-          />
+          <label class="block">
+            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.promptLabel') }}</span>
+            <input
+                v-model="newPrompt"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                :placeholder="$t('geo.promptPlaceholder')"
+                type="text"
+                @input="onPromptInput"
+                @keyup.enter="handleAdd"
+            />
+          </label>
           <!-- Champs des jetons du préset (ex. [secteur], [besoin]…) -->
           <div
               v-if="promptTemplate && promptTokens.length"
@@ -319,23 +322,30 @@ async function handleRunAll() {
               {{ preset }}
             </button>
           </div>
-          <div class="flex flex-col md:flex-row gap-3">
-            <input
-                v-model="newBrand"
-                class="md:w-56 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                :placeholder="$t('geo.brandPlaceholder')"
-                type="text"
-                @keyup.enter="handleAdd"
-            />
-            <input
-                v-model="newCompetitors"
-                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                :placeholder="$t('geo.competitorsPlaceholder')"
-                type="text"
-                @keyup.enter="handleAdd"
-            />
+          <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.brandCompetitorsHelp') }}</p>
+          <div class="flex flex-col md:flex-row md:items-end gap-3">
+            <label class="md:w-56 block">
+              <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.brandLabel') }}</span>
+              <input
+                  v-model="newBrand"
+                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  :placeholder="$t('geo.brandPlaceholder')"
+                  type="text"
+                  @keyup.enter="handleAdd"
+              />
+            </label>
+            <label class="flex-1 block">
+              <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.competitorsLabel') }}</span>
+              <input
+                  v-model="newCompetitors"
+                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  :placeholder="$t('geo.competitorsPlaceholder')"
+                  type="text"
+                  @keyup.enter="handleAdd"
+              />
+            </label>
             <button
-                class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+                class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
                 @click="handleAdd"
             >
               {{ $t('geo.add') }}

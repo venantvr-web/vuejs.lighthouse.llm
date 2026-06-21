@@ -6,6 +6,7 @@ import {useRouter} from 'vue-router'
 import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import ActionPlanPanel from '@/components/dashboard/ActionPlanPanel.vue'
 import {useLighthouseParser} from '@/composables/useLighthouseParser'
+import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 
 const {t} = useI18n()
@@ -86,7 +87,7 @@ const clearReport = () => {
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Header -->
-    <AppHeader :subtitle="url || ''" :title="$t('dashboard.headerTitle')">
+    <AppHeader :subtitle="url ? canonicalUrl(url) : ''" :title="$t('dashboard.headerTitle')">
       <template #actions>
         <button class="btn btn-secondary text-sm" @click="clearReport">
           {{ $t('dashboard.newReport') }}

@@ -12,6 +12,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import {jsPDF} from 'jspdf'
 import {formatScore, getScoreColorClass, formatDateTimeMedium, formatDateISO} from '@/utils/formatters'
+import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -285,7 +286,7 @@ onMounted(async () => {
   <div class="min-h-screen flex flex-col">
     <!-- Header -->
     <AppHeader
-        :subtitle="session ? $t('crawlResults.headerSubtitle', { domain: session.domain, count: session.pagesAnalyzed }) : ''"
+        :subtitle="session ? $t('crawlResults.headerSubtitle', { domain: canonicalUrl(session.domain), count: session.pagesAnalyzed }) : ''"
         :title="$t('crawlResults.headerTitle')"
     >
       <template #actions>
@@ -366,8 +367,8 @@ onMounted(async () => {
                 {{ $t('crawlResults.strategy') }}: {{ session.strategy }}
               </span>
             </div>
-            <div class="text-lg font-medium text-gray-900 dark:text-white">
-              {{ session.baseUrl }}
+            <div class="text-lg font-medium text-gray-900 dark:text-white break-all">
+              {{ canonicalUrl(session.baseUrl) }}
             </div>
           </div>
 

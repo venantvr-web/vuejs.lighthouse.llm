@@ -6,6 +6,8 @@ export default {
         headerTitle: 'Studio LLM',
         headerSubtitle: 'llms.txt, llms-full.txt et veille IA',
         confirmRemove: 'Supprimer cet artefact de l\'historique ?',
+        confirmUnwatch: 'Retirer « {domain} » de la veille ?',
+        unwatchTooltip: 'Retirer de la veille',
 
         urlLabel: 'Domaine à analyser :',
         urlPlaceholder: 'https://votre-domaine.com',

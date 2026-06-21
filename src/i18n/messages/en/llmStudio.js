@@ -6,6 +6,8 @@ export default {
         headerTitle: 'LLM Studio',
         headerSubtitle: 'llms.txt, llms-full.txt and AI monitoring',
         confirmRemove: 'Delete this artifact from history?',
+        confirmUnwatch: 'Remove "{domain}" from monitoring?',
+        unwatchTooltip: 'Remove from monitoring',
 
         urlLabel: 'Domain to analyze:',
         urlPlaceholder: 'https://your-domain.com',

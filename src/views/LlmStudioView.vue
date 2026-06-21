@@ -109,6 +109,12 @@ async function removeHistory(item) {
   await loadHistory()
 }
 
+// Retrait d'un domaine de la veille (corbeille) : confirmation, comme les autres suppressions
+async function handleUnwatch(origin) {
+  if (!await confirm({message: t('llmStudio.confirmUnwatch', {domain: canonicalUrl(origin)}), confirmLabel: t('common.delete')})) return
+  unwatch(origin)
+}
+
 async function handleAnalyze() {
   await analyze(url.value)
 }
@@ -413,7 +419,7 @@ onMounted(async () => {
                   · llms-full.txt {{ item.snapshot.llmsFullPresent ? '✓' : '—' }}
                 </p>
               </div>
-              <DeleteButton @click="unwatch(item.origin)"/>
+              <DeleteButton :label="$t('llmStudio.unwatchTooltip')" @click="handleUnwatch(item.origin)"/>
             </div>
             <ul v-if="item.lastChanges?.length" class="mt-1 ml-1 list-disc list-inside text-[11px] text-amber-600 dark:text-amber-400">
               <li v-for="(c, i) in item.lastChanges" :key="i">{{ c }}</li>

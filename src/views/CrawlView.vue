@@ -9,7 +9,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
 import {getProxyBase, isDirectFetch, proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
-import {usePersistentRef} from '@/composables/usePersistentRef'
+import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -42,7 +42,7 @@ const maxPages = ref(20)
 const error = ref('')
 // Dernière session de crawl (mémorisée) : on offre toujours un lien vers ses résultats,
 // même quand le crawl a réussi (on y a navigué) puis qu'on revient sur cette page.
-const lastSessionId = usePersistentRef('crawl.lastSessionId', null)
+const lastSessionId = useScopedPersistentRef('crawl.lastSessionId', null)
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)

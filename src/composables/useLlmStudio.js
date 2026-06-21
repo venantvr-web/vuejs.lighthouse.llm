@@ -1,4 +1,4 @@
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildContinuationPrompt} from '@/services/llm/continuation'
@@ -46,6 +46,14 @@ export function useLlmStudio() {
         output.value = savedOutput.value
         outputKind.value = savedKind.value
     }
+
+    // Au changement de marque/domaine, savedOutput (scopé) est rechargé : on
+    // resynchronise l'affichage en cours sur la sortie du nouveau contexte.
+    watch(savedOutput, (val) => {
+        if (generating.value) return
+        output.value = val || ''
+        outputKind.value = savedKind.value || 'llms'
+    })
 
     let activeProvider = null
     let lastPrompt = ''

@@ -161,27 +161,27 @@ const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:h
 
       <!-- Mobile menu -->
       <div v-if="menuOpen" class="md:hidden mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-        <label v-if="site.activeBrand" class="flex items-center gap-2 mb-2 text-sm">
-          <span class="w-20 shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeBrand') }} :</span>
+        <label v-if="site.activeBrand" class="block mb-2">
+          <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeBrand') }} :</span>
           <select
               v-if="site.brands.length > 1"
               v-model="activeBrandModel"
-              class="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+              class="w-full px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
           >
             <option v-for="b in site.brands" :key="b" :value="b">{{ b }}</option>
           </select>
-          <span v-else class="font-semibold text-primary-600 dark:text-primary-400">{{ site.activeBrand }}</span>
+          <span v-else class="block text-sm font-semibold text-primary-600 dark:text-primary-400">{{ site.activeBrand }}</span>
         </label>
-        <label v-if="site.activeDomain" class="flex items-center gap-2 mb-3 text-sm">
-          <span class="w-20 shrink-0 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeDomain') }} :</span>
+        <label v-if="site.activeDomain" class="block mb-3">
+          <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('nav.activeDomain') }} :</span>
           <select
               v-if="site.domains.length > 1"
               v-model="activeDomainModel"
-              class="flex-1 px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
+              class="w-full px-2 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm"
           >
             <option v-for="d in site.domains" :key="d" :value="d">{{ d }}</option>
           </select>
-          <span v-else class="font-medium text-gray-700 dark:text-gray-200 truncate">{{ site.activeDomain }}</span>
+          <span v-else class="block text-sm font-medium text-gray-700 dark:text-gray-200 truncate">{{ site.activeDomain }}</span>
         </label>
         <nav class="grid grid-cols-2 gap-1">
           <router-link

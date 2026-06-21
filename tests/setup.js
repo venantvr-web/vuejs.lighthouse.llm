@@ -24,8 +24,7 @@ global.createMockLighthouseReport = (overrides = {}) => ({
         performance: {score: 0.85},
         seo: {score: 0.92},
         accessibility: {score: 0.78},
-        'best-practices': {score: 0.95},
-        pwa: {score: 0.45}
+        'best-practices': {score: 0.95}
     },
     audits: {
         'largest-contentful-paint': {

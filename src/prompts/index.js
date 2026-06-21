@@ -13,7 +13,6 @@ export {
     seoPrompts,
     accessibilityPrompts,
     bestPracticesPrompts,
-    pwaPrompts,
     categoryMeta
 } from './templates/index.j2.js'
 

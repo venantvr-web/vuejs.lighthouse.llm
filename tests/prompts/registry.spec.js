@@ -3,16 +3,15 @@ import {categoryMeta, templateRegistry} from '@/prompts/templates/j2/registry.js
 
 describe('templateRegistry', () => {
     describe('structure', () => {
-        it('should have all five categories', () => {
+        it('should have all analysis categories', () => {
             expect(templateRegistry).toHaveProperty('performance')
             expect(templateRegistry).toHaveProperty('seo')
             expect(templateRegistry).toHaveProperty('accessibility')
             expect(templateRegistry).toHaveProperty('best-practices')
-            expect(templateRegistry).toHaveProperty('pwa')
         })
 
         it('should have quickAnalysis template for each category', () => {
-            const categories = ['performance', 'seo', 'accessibility', 'best-practices', 'pwa']
+            const categories = ['performance', 'seo', 'accessibility', 'best-practices']
 
             categories.forEach(category => {
                 expect(templateRegistry[category]).toHaveProperty('quickAnalysis')
@@ -100,16 +99,6 @@ describe('templateRegistry', () => {
         })
     })
 
-    describe('pwa templates', () => {
-        it('should have quickAnalysis template', () => {
-            const template = templateRegistry.pwa.quickAnalysis
-
-            expect(template.file).toBe('pwa-quick.j2')
-            expect(template.tags).toContain('pwa')
-            expect(template.tags).toContain('installable')
-        })
-    })
-
     describe('template metadata validation', () => {
         it('all templates should have required fields', () => {
             const requiredFields = ['id', 'name', 'description', 'strategy', 'file', 'tags']
@@ -160,7 +149,6 @@ describe('categoryMeta', () => {
             expect(categoryMeta).toHaveProperty('seo')
             expect(categoryMeta).toHaveProperty('accessibility')
             expect(categoryMeta).toHaveProperty('best-practices')
-            expect(categoryMeta).toHaveProperty('pwa')
         })
 
         it('all categories should have required fields', () => {
@@ -221,18 +209,6 @@ describe('categoryMeta', () => {
             expect(meta.icon).toBe('🛡️')
             expect(meta.role).toContain('Sécurité')
             expect(meta.description).toContain('Sécurité')
-        })
-    })
-
-    describe('pwa category', () => {
-        it('should have correct metadata', () => {
-            const meta = categoryMeta.pwa
-
-            expect(meta.id).toBe('pwa')
-            expect(meta.name).toBe('PWA')
-            expect(meta.icon).toBe('📱')
-            expect(meta.role).toContain('Progressive Web Apps')
-            expect(meta.description).toContain('Service Workers')
         })
     })
 

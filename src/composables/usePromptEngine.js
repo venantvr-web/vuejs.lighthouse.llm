@@ -398,14 +398,6 @@ export function usePromptEngine() {
                 csp: report.audits?.['csp-xss']?.score === 1,
                 vulnerabilities: extractVulnerabilities(report),
                 deprecations: report.audits?.['deprecations']?.details?.items?.map(i => i.value) || []
-            },
-
-            pwa: {
-                score: report.categories?.pwa?.score,
-                installable: report.audits?.['installable-manifest']?.score === 1,
-                manifest: report.audits?.['installable-manifest']?.score === 1,
-                serviceWorker: report.audits?.['service-worker']?.score === 1,
-                offline: report.audits?.['works-offline']?.score === 1
             }
         }
 

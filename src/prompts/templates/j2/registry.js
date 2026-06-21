@@ -88,17 +88,6 @@ export const templateRegistry = {
         }
     },
 
-    pwa: {
-        quickAnalysis: {
-            id: 'quickAnalysis',
-            name: 'Analyse Rapide PWA',
-            description: 'Conformité PWA et installabilité',
-            strategy: 'quick',
-            file: 'pwa-quick.j2',
-            tags: ['pwa', 'quick', 'installable', 'offline']
-        }
-    },
-
     comparison: {
         évolution: {
             id: 'évolution',
@@ -155,13 +144,6 @@ export const categoryMeta = {
         icon: '🛡️',
         role: 'Expert Sécurité Web',
         description: 'Sécurité, CSP, OWASP, Standards'
-    },
-    pwa: {
-        id: 'pwa',
-        name: 'PWA',
-        icon: '📱',
-        role: 'Expert Progressive Web Apps',
-        description: 'Service Workers, Offline, Installation'
     },
     comparison: {
         id: 'comparison',

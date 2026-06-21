@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {computed, ref, watch} from 'vue'
 import {extractDomain, normalizeUrl} from '@/utils/url'
+import {useSiteStore} from '@/stores/siteStore'
 
 const STORAGE_KEY = 'lighthouse-watchlist'
 
@@ -9,16 +10,24 @@ const STORAGE_KEY = 'lighthouse-watchlist'
  * Persisted to localStorage (local-first, no backend).
  */
 export const useWatchlistStore = defineStore('watchlist', () => {
-    // State
+    const site = useSiteStore()
+
+    // State : toutes les entrées, tous contextes confondus
     const items = ref([])
 
-    // Getters
-    const count = computed(() => items.value.length)
+    // Vue restreinte au couple marque/domaine actif (les entrées sans scope
+    // restent visibles dans tout contexte).
+    const scopedItems = computed(() =>
+        items.value.filter(i => !i.scope || i.scope === site.scopeKey)
+    )
 
-    const isEmpty = computed(() => items.value.length === 0)
+    // Getters (portée = contexte actif)
+    const count = computed(() => scopedItems.value.length)
+
+    const isEmpty = computed(() => scopedItems.value.length === 0)
 
     const sortedItems = computed(() => {
-        return [...items.value].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+        return [...scopedItems.value].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
     })
 
     // Actions
@@ -30,7 +39,9 @@ export const useWatchlistStore = defineStore('watchlist', () => {
      */
     function hasUrl(url) {
         const normalized = normalizeUrl(url)
-        return items.value.some(item => normalizeUrl(item.url) === normalized)
+        // Doublon évalué dans le contexte courant : une même URL peut être suivie
+        // sous des couples marque/domaine différents.
+        return scopedItems.value.some(item => normalizeUrl(item.url) === normalized)
     }
 
     /**
@@ -54,6 +65,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
             label: (options.label || '').trim() || extractDomain(normalized),
             strategy: options.strategy === 'desktop' ? 'desktop' : 'mobile',
             source: options.source === 'local' ? 'local' : 'pagespeed',
+            scope: site.scopeKey,
             // Per-category performance budgets (0-100), null = no budget
             budgets: {
                 performance: null,
@@ -107,10 +119,10 @@ export const useWatchlistStore = defineStore('watchlist', () => {
     }
 
     /**
-     * Clear the entire watchlist
+     * Clear the watchlist of the active brand/domain context
      */
     function clearAll() {
-        items.value = []
+        items.value = items.value.filter(i => i.scope && i.scope !== site.scopeKey)
     }
 
     /**
@@ -153,6 +165,7 @@ export const useWatchlistStore = defineStore('watchlist', () => {
     return {
         // State
         items,
+        scopedItems,
         // Getters
         count,
         isEmpty,

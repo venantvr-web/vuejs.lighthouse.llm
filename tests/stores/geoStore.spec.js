@@ -1,6 +1,7 @@
 import {beforeEach, describe, expect, it} from 'vitest'
 import {createPinia, setActivePinia} from 'pinia'
 import {parseTerms, useGeoStore} from '@/stores/geoStore'
+import {useSiteStore} from '@/stores/siteStore'
 
 describe('geoStore', () => {
     beforeEach(() => {
@@ -59,6 +60,35 @@ describe('geoStore', () => {
             expect(store.count).toBe(1)
             store.clearAll()
             expect(store.isEmpty).toBe(true)
+        })
+    })
+
+    describe('portée par marque/domaine', () => {
+        it('ne montre que les prompts du couple actif et restaure au changement', () => {
+            const site = useSiteStore()
+            site.addBrand('Acme')
+            site.addDomain('acme.com')
+            site.addBrand('Globex')
+            site.addDomain('globex.io')
+            const store = useGeoStore()
+
+            site.setActiveBrand('Acme')
+            site.setActiveDomain('acme.com')
+            store.addItem({prompt: 'p-acme', brand: 'Acme'})
+            expect(store.count).toBe(1)
+
+            // Autre contexte → liste vide
+            site.setActiveBrand('Globex')
+            site.setActiveDomain('globex.io')
+            expect(store.count).toBe(0)
+            store.addItem({prompt: 'p-globex', brand: 'Globex'})
+            expect(store.count).toBe(1)
+
+            // Retour au premier contexte → son prompt réapparaît
+            site.setActiveBrand('Acme')
+            site.setActiveDomain('acme.com')
+            expect(store.count).toBe(1)
+            expect(store.sortedItems[0].prompt).toBe('p-acme')
         })
     })
 

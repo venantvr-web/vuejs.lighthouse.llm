@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useGeoStore} from '@/stores/geoStore'
 import {useGeoHistoryStore} from '@/stores/geoHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
@@ -120,6 +120,9 @@ onMounted(async () => {
   // Select every ready provider by default
   selectedProviderIds.value = readyProviders.value.map(p => p.id)
 })
+
+// Au changement de marque/domaine, la liste affichée change : on charge les stats du nouveau contexte
+watch(() => site.scopeKey, () => loadStats(items.value))
 
 async function handleAdd() {
   addError.value = ''

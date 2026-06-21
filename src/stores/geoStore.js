@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {computed, ref, watch} from 'vue'
+import {useSiteStore} from '@/stores/siteStore'
 
 const STORAGE_KEY = 'geo-prompts'
 
@@ -28,14 +29,22 @@ export function parseTerms(value) {
  * Persisted to localStorage (local-first, no backend).
  */
 export const useGeoStore = defineStore('geo', () => {
-    // State
+    const site = useSiteStore()
+
+    // State : tous les prompts, tous contextes confondus (persistés ensemble)
     const items = ref([])
 
-    // Getters
-    const count = computed(() => items.value.length)
-    const isEmpty = computed(() => items.value.length === 0)
+    // Vue restreinte au couple marque/domaine actif. Les entrées sans scope
+    // (anciennes) sont rattachées au contexte courant pour rester visibles.
+    const scopedItems = computed(() =>
+        items.value.filter(i => !i.scope || i.scope === site.scopeKey)
+    )
+
+    // Getters (portée = contexte actif)
+    const count = computed(() => scopedItems.value.length)
+    const isEmpty = computed(() => scopedItems.value.length === 0)
     const sortedItems = computed(() => {
-        return [...items.value].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+        return [...scopedItems.value].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
     })
 
     // Actions
@@ -58,6 +67,7 @@ export const useGeoStore = defineStore('geo', () => {
             prompt: cleanPrompt,
             brand: cleanBrand,
             competitors: parseTerms(competitors),
+            scope: site.scopeKey,
             createdAt: Date.now()
         }
         items.value.push(item)
@@ -86,10 +96,10 @@ export const useGeoStore = defineStore('geo', () => {
     }
 
     /**
-     * Clear all tracked prompts.
+     * Clear tracked prompts of the active brand/domain context.
      */
     function clearAll() {
-        items.value = []
+        items.value = items.value.filter(i => i.scope && i.scope !== site.scopeKey)
     }
 
     function saveToStorage() {
@@ -118,6 +128,7 @@ export const useGeoStore = defineStore('geo', () => {
 
     return {
         items,
+        scopedItems,
         count,
         isEmpty,
         sortedItems,

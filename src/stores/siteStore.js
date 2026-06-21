@@ -43,6 +43,9 @@ export const useSiteStore = defineStore('site', () => {
 
     const origin = computed(() => (activeDomain.value ? `https://${activeDomain.value}` : ''))
     const hasSite = computed(() => !!activeDomain.value)
+    // Identifiant du contexte courant (couple marque/domaine) pour scoper les
+    // saisies ET les collections (prompts GEO, watchlist…).
+    const scopeKey = computed(() => `${activeBrand.value || '_'}::${activeDomain.value || '_'}`)
     // L'onboarding est requis tant qu'on n'a ni domaine ni marque
     const needsOnboarding = computed(() => domains.value.length === 0 && brands.value.length === 0)
 
@@ -141,7 +144,7 @@ export const useSiteStore = defineStore('site', () => {
 
     return {
         domains, brands, activeDomain, activeBrand, lastUrl,
-        origin, hasSite, needsOnboarding, brandGuess,
+        origin, hasSite, needsOnboarding, brandGuess, scopeKey,
         addDomain, removeDomain, setActiveDomain,
         addBrand, removeBrand, setActiveBrand,
         setFromUrl, clear

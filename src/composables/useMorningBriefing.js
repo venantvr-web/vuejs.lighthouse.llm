@@ -126,8 +126,10 @@ export function useMorningBriefing() {
     // GEO runs cost LLM calls, so it is opt-in for the morning run.
     const includeGeo = usePersistentRef('briefing.includeGeo', false)
 
-    const items = computed(() => watchlistStore.sortedItems)
-    const geoItems = computed(() => geoStore.sortedItems)
+    // Le briefing est un digest global : il couvre toutes les marques/domaines,
+    // pas seulement le contexte actif (on lit donc les collections complètes).
+    const items = computed(() => watchlistStore.items)
+    const geoItems = computed(() => geoStore.items)
     const origins = computed(() => [...new Set(items.value.map(i => originFromUrl(i.url)).filter(Boolean))])
     const geoProviders = computed(() => settings.geoProviders.filter(p => p.ready))
     const geoAvailable = computed(() => geoItems.value.length > 0 && geoProviders.value.length > 0)

@@ -2,6 +2,7 @@ import GeminiProvider from './GeminiProvider.js';
 import OpenAIProvider from './OpenAIProvider.js';
 import AnthropicProvider from './AnthropicProvider.js';
 import OllamaProvider from './OllamaProvider.js';
+import PerplexityProvider from './PerplexityProvider.js';
 
 /**
  * Factory for creating LLM provider instances
@@ -17,7 +18,8 @@ export default class LLMProviderFactory {
         ['openai', OpenAIProvider],
         ['anthropic', AnthropicProvider],
         ['claude', AnthropicProvider], // Alias for Anthropic
-        ['ollama', OllamaProvider]
+        ['ollama', OllamaProvider],
+        ['perplexity', PerplexityProvider]
     ]);
 
     /**
@@ -159,7 +161,8 @@ export default class LLMProviderFactory {
             'openai': 'OpenAI API - GPT models including GPT-4',
             'anthropic': 'Anthropic Claude API - Advanced reasoning capabilities',
             'claude': 'Anthropic Claude API - Advanced reasoning capabilities',
-            'ollama': 'Ollama - Run models locally without API keys'
+            'ollama': 'Ollama - Run models locally without API keys',
+            'perplexity': 'Perplexity API - Web-grounded answers with source citations'
         };
 
         return descriptions[type] || 'Custom LLM provider';

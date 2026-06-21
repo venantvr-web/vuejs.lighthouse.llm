@@ -15,7 +15,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const maxTokens = ref(16384)
 
     // State - Per-provider API keys (enables multi-provider GEO tracking)
-    const providerKeys = ref({openai: '', anthropic: '', gemini: ''})
+    const providerKeys = ref({openai: '', anthropic: '', gemini: '', perplexity: ''})
 
     // State - Google Search Console OAuth client id (BYO, browser OAuth)
     const searchConsoleClientId = ref('')
@@ -65,14 +65,18 @@ export const useSettingsStore = defineStore('settings', () => {
     const GEO_PROVIDER_MODELS = {
         openai: 'gpt-4o-mini',
         anthropic: 'claude-3-5-haiku-20241022',
-        gemini: 'gemini-2.5-flash'
+        gemini: 'gemini-2.5-flash',
+        perplexity: 'sonar'
     }
 
-    // Providers available for GEO tracking, with readiness based on keys/config
+    // Providers available for GEO tracking, with readiness based on keys/config.
+    // Perplexity is a real answer engine (web-grounded + source citations) — its
+    // runs feed the "cited sources" analysis with actual URLs.
     const geoProviders = computed(() => [
         {id: 'openai', label: 'OpenAI', model: GEO_PROVIDER_MODELS.openai, ready: !!providerKeys.value.openai},
         {id: 'anthropic', label: 'Claude', model: GEO_PROVIDER_MODELS.anthropic, ready: !!providerKeys.value.anthropic},
         {id: 'gemini', label: 'Gemini', model: GEO_PROVIDER_MODELS.gemini, ready: !!providerKeys.value.gemini},
+        {id: 'perplexity', label: 'Perplexity', model: GEO_PROVIDER_MODELS.perplexity, ready: !!providerKeys.value.perplexity},
         {id: 'ollama', label: 'Ollama', model: ollamaModel.value, ready: !!ollamaBaseUrl.value && !!ollamaModel.value}
     ])
 
@@ -106,6 +110,13 @@ export const useSettingsStore = defineStore('settings', () => {
                     {value: 'mixtral', label: 'Mixtral'},
                     {value: 'qwen2.5', label: 'Qwen 2.5'}
                 ]
+            case 'perplexity':
+                return [
+                    {value: 'sonar', label: 'Sonar'},
+                    {value: 'sonar-pro', label: 'Sonar Pro'},
+                    {value: 'sonar-reasoning', label: 'Sonar Reasoning'},
+                    {value: 'sonar-reasoning-pro', label: 'Sonar Reasoning Pro'}
+                ]
             default:
                 return []
         }
@@ -117,7 +128,7 @@ export const useSettingsStore = defineStore('settings', () => {
      * @param {string} provider - 'openai' | 'anthropic' | 'ollama'
      */
     function setLLMProvider(provider) {
-        if (!['gemini', 'openai', 'anthropic', 'ollama'].includes(provider)) {
+        if (!['gemini', 'openai', 'anthropic', 'ollama', 'perplexity'].includes(provider)) {
             console.error('Invalid LLM provider:', provider)
             return
         }
@@ -144,6 +155,11 @@ export const useSettingsStore = defineStore('settings', () => {
             case 'ollama':
                 if (!ollamaModel.value) {
                     ollamaModel.value = 'llama3.2'
+                }
+                break
+            case 'perplexity':
+                if (!llmModel.value || !modelOptions.value.some(m => m.value === llmModel.value)) {
+                    llmModel.value = 'sonar'
                 }
                 break
         }
@@ -372,7 +388,7 @@ export const useSettingsStore = defineStore('settings', () => {
             const legacy = localStorage.getItem('llm-settings')
             if (legacy) {
                 const parsed = JSON.parse(legacy)
-                if (parsed.provider && ['gemini', 'openai', 'anthropic', 'ollama'].includes(parsed.provider)) {
+                if (parsed.provider && ['gemini', 'openai', 'anthropic', 'ollama', 'perplexity'].includes(parsed.provider)) {
                     llmProvider.value = parsed.provider
                 }
                 if (parsed.model) llmModel.value = parsed.model

@@ -31,7 +31,7 @@ const props = defineProps({
 
 const emit = defineEmits(['run', 'remove'])
 
-const PROVIDER_LABELS = {openai: 'OpenAI', anthropic: 'Claude', gemini: 'Gemini', ollama: 'Ollama'}
+const PROVIDER_LABELS = {openai: 'OpenAI', anthropic: 'Claude', gemini: 'Gemini', perplexity: 'Perplexity', ollama: 'Ollama'}
 
 // Clés ('positive'/'neutral'/'negative') = valeurs de données pour le lookup → inchangées.
 // Seul le libellé d'affichage est traduit via i18n (clé labelKey).

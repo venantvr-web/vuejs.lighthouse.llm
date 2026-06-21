@@ -55,6 +55,7 @@ const providers = [
   {id: 'gemini', name: 'Google Gemini', keyPlaceholder: 'AIza...'},
   {id: 'openai', name: 'OpenAI', keyPlaceholder: 'sk-...'},
   {id: 'anthropic', name: 'Anthropic Claude', keyPlaceholder: 'sk-ant-...'},
+  {id: 'perplexity', name: 'Perplexity', keyPlaceholder: 'pplx-...'},
   {id: 'ollama', name: 'Ollama (Local)', keyPlaceholder: ''}
 ]
 
@@ -519,6 +520,23 @@ const testConnection = async () => {
               {{ $t('settings.ollamaCardDesc') }}
               <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://ollama.ai" target="_blank">
                 {{ $t('settings.ollamaLink') }}
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div class="card p-4 flex items-start gap-3">
+          <div class="w-8 h-8 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-white">{{ $t('settings.perplexityCardTitle') }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {{ $t('settings.perplexityCardDesc') }}
+              <a class="text-primary-600 dark:text-primary-400 hover:underline" href="https://www.perplexity.ai/settings/api" target="_blank">
+                {{ $t('settings.perplexityLink') }}
               </a>
             </p>
           </div>

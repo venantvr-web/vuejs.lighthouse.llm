@@ -80,6 +80,9 @@ export default {
         geminiLink: 'Get an API key',
         ollamaCardTitle: 'Ollama (100% Local)',
         ollamaCardDesc: 'Run AI models locally without sending your data.',
-        ollamaLink: 'Install Ollama'
+        ollamaLink: 'Install Ollama',
+        perplexityCardTitle: 'Perplexity (GEO)',
+        perplexityCardDesc: 'Web-grounded answer engine: its answers cite real sources, ideal for GEO tracking.',
+        perplexityLink: 'Get an API key'
     }
 }

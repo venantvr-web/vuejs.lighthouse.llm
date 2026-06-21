@@ -87,4 +87,23 @@ describe('settingsStore - multi-provider keys', () => {
         store.setProviderKey('openai', 'sk-only-in-providerkeys')
         expect(store.isConfigured).toBe(true)
     })
+
+    it('exposes Perplexity as a GEO provider gated by its key', () => {
+        const store = useSettingsStore()
+        const before = store.geoProviders.find(p => p.id === 'perplexity')
+        expect(before).toBeTruthy()
+        expect(before.ready).toBe(false)
+        expect(before.model).toBe('sonar')
+
+        store.setProviderKey('perplexity', 'pplx-test')
+        expect(store.geoProviders.find(p => p.id === 'perplexity').ready).toBe(true)
+    })
+
+    it('supports perplexity as a selectable provider with model options', () => {
+        const store = useSettingsStore()
+        store.setLLMProvider('perplexity')
+        expect(store.llmProvider).toBe('perplexity')
+        expect(store.currentModel).toBe('sonar')
+        expect(store.modelOptions.some(m => m.value === 'sonar')).toBe(true)
+    })
 })

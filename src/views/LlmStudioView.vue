@@ -17,7 +17,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {downloadText} from '@/utils/download'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
-import {extractDomain, sameHost} from '@/utils/url'
+import {canonicalUrl, extractDomain, sameHost} from '@/utils/url'
 import {useToast} from '@/composables/useToast'
 import {useI18n} from '@/i18n'
 
@@ -318,7 +318,7 @@ onMounted(async () => {
           <li v-for="item in watchItems" :key="item.origin" class="py-2">
             <div class="flex items-center justify-between gap-3">
               <div class="min-w-0">
-                <p class="text-sm text-gray-900 dark:text-white truncate">{{ item.origin }}</p>
+                <p class="text-sm text-gray-900 dark:text-white truncate">{{ canonicalUrl(item.origin) }}</p>
                 <p class="text-[11px] text-gray-500 dark:text-gray-400">
                   {{ $t('llmStudio.lastChecked') }}
                   <span :title="formatDateTimeMedium(item.lastCheckedAt)">{{ formatRelativeTime(item.lastCheckedAt) }}</span>
@@ -348,7 +348,7 @@ onMounted(async () => {
         <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700">
           <li v-for="item in filteredHistory" :key="item.id" class="py-2 flex items-center justify-between gap-3">
             <div class="min-w-0">
-              <p class="text-sm text-gray-900 dark:text-white truncate">{{ item.url }}</p>
+              <p class="text-sm text-gray-900 dark:text-white truncate">{{ canonicalUrl(item.url) }}</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
                 <span class="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 mr-1.5">{{ typeLabel(item.type) }}</span>
                 <span :title="formatDateTimeMedium(item.timestamp)">{{ formatRelativeTime(item.timestamp) }}</span>
@@ -360,7 +360,7 @@ onMounted(async () => {
                   class="p-2 rounded-lg text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   :title="$t('common.expand')"
                   :aria-label="$t('common.expand')"
-                  @click="liveModal = {title: typeLabel(item.type) + ' — ' + item.url, content: item.content}"
+                  @click="liveModal = {title: typeLabel(item.type) + ' — ' + canonicalUrl(item.url), content: item.content}"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>

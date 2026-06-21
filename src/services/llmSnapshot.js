@@ -9,6 +9,7 @@
 
 import {fetchResource, originFromUrl} from './resourceCheck'
 import {discoverBySitemap} from './urlDiscovery'
+import {canonicalUrl} from '@/utils/url'
 import {buildSiteContext, detectContextChanges} from './llmsTxt'
 
 /**
@@ -32,7 +33,8 @@ export async function fetchSiteSnapshot(url) {
 
     return {
         origin,
-        context: buildSiteContext({origin, html: home.content, sitemapUrls}),
+        // Origine canonique (/ final) pour l'affichage et les artefacts générés
+        context: buildSiteContext({origin: canonicalUrl(origin), html: home.content, sitemapUrls}),
         liveLlms: {present: llms.available, content: llms.available ? llms.content : ''},
         liveLlmsFull: {present: llmsFull.available, content: llmsFull.available ? llmsFull.content : ''}
     }

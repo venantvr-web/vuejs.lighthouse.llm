@@ -9,7 +9,7 @@ import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {downloadText} from '@/utils/download'
-import {extractDomain, sameHost} from '@/utils/url'
+import {canonicalUrl, extractDomain, sameHost} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -163,7 +163,7 @@ onMounted(load)
                   {{ formatRelativeTime(item.timestamp) }}
                 </span>
               </div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.title || item.url || $t('aiHistory.artifact') }}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ item.title || canonicalUrl(item.url) || $t('aiHistory.artifact') }}</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                 {{ item.provider }}<span v-if="item.model"> · {{ item.model }}</span>
               </p>
@@ -193,7 +193,7 @@ onMounted(load)
       </ul>
 
       <!-- Contenu de l'artefact en plein écran (pop-up Markdown) -->
-      <Modal :open="!!selected" :title="selected?.title || selected?.url || $t('aiHistory.artifact')" @close="selected = null">
+      <Modal :open="!!selected" :title="selected?.title || canonicalUrl(selected?.url) || $t('aiHistory.artifact')" @close="selected = null">
         <pre
             v-if="selected?.format === 'jsonld'"
             class="text-[11px] leading-snug bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 overflow-x-auto text-gray-800 dark:text-gray-200"

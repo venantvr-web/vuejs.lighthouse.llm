@@ -1,7 +1,24 @@
 import {describe, expect, it} from 'vitest'
-import {extractDomain, normalizeUrl, sameHost} from '@/utils/url'
+import {canonicalUrl, extractDomain, normalizeUrl, sameHost} from '@/utils/url'
 
 describe('utils/url', () => {
+    describe('canonicalUrl', () => {
+        it('ajoute un / final à la racine et aux chemins', () => {
+            expect(canonicalUrl('https://example.com')).toBe('https://example.com/')
+            expect(canonicalUrl('https://example.com/services')).toBe('https://example.com/services/')
+        })
+        it('préserve un / déjà présent, ajoute le schéma si absent', () => {
+            expect(canonicalUrl('https://example.com/')).toBe('https://example.com/')
+            expect(canonicalUrl('example.com')).toBe('https://example.com/')
+        })
+        it('préserve la query après le slash de chemin', () => {
+            expect(canonicalUrl('https://example.com/p?q=1')).toBe('https://example.com/p/?q=1')
+        })
+        it('vide pour une entrée vide', () => {
+            expect(canonicalUrl('')).toBe('')
+        })
+    })
+
     describe('sameHost', () => {
         it('ignore la casse et le préfixe www', () => {
             expect(sameHost('www.Example.com', 'example.com')).toBe(true)

@@ -17,6 +17,27 @@ export function extractDomain(url) {
 }
 
 /**
+ * Forme canonique d'une URL pour l'affichage : garantit un « / » final sur le
+ * chemin (ex. https://x.com → https://x.com/, https://x.com/a → https://x.com/a/),
+ * en préservant la query et le fragment. N'altère pas le stockage : à utiliser
+ * uniquement pour présenter les URL (historiques, listes…).
+ * @param {string} url
+ * @returns {string}
+ */
+export function canonicalUrl(url) {
+    const raw = (url || '').trim()
+    if (!raw) return ''
+    const withScheme = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw
+    try {
+        const u = new URL(withScheme)
+        if (!u.pathname.endsWith('/')) u.pathname += '/'
+        return u.toString()
+    } catch {
+        return raw
+    }
+}
+
+/**
  * Compare deux hôtes/domaines en ignorant la casse et le préfixe « www. ».
  * Sert à scoper les historiques sur le domaine actif sans faux négatifs
  * (ex. « www.example.com » == « example.com »).

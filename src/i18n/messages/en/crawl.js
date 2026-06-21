@@ -35,6 +35,7 @@ export default {
         formTitle: 'Multi-page site crawler',
         formSubtitle: 'Analyze multiple pages and get aggregated scores by template',
         errorTitle: 'Crawl error',
+        lastCrawl: 'Last crawl:',
         viewResults: 'View detailed results',
         viewInHistory: 'View in history',
 

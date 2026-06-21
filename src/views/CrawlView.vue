@@ -9,6 +9,7 @@ import {useSettingsStore} from '@/stores/settingsStore'
 import {DISCOVERY_MODES, isSitemapUrl} from '@/services/urlDiscovery'
 import {getProxyBase, isDirectFetch, proxyUrl} from '@/services/requestConfig'
 import {checkServerHealth} from '@/services/localLighthouse'
+import {usePersistentRef} from '@/composables/usePersistentRef'
 import UrlInput from '@/components/input/UrlInput.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
@@ -39,8 +40,9 @@ const maxPages = ref(20)
 
 // UI state
 const error = ref('')
-// Session du dernier crawl resté sur place (échec) : on offre un lien vers ses résultats
-const lastSessionId = ref(null)
+// Dernière session de crawl (mémorisée) : on offre toujours un lien vers ses résultats,
+// même quand le crawl a réussi (on y a navigué) puis qu'on revient sur cette page.
+const lastSessionId = usePersistentRef('crawl.lastSessionId', null)
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)
@@ -239,11 +241,10 @@ async function handleSubmit() {
       notifyDone(t('toast.crawlDone', {count: session.pagesAnalyzed}), session.domain)
     }
 
+    // La session est enregistrée quel que soit le statut → on mémorise un lien
+    if (session) lastSessionId.value = session.id
     if (session && session.status !== CRAWL_STATUS.FAILED) {
       router.push(`/crawl/results/${session.id}`)
-    } else if (session) {
-      // Échec : on reste sur la page, mais la session est enregistrée → on offre un lien
-      lastSessionId.value = session.id
     }
   } catch (err) {
     error.value = err.message || t('crawl.errorGeneric')
@@ -465,8 +466,9 @@ onUnmounted(() => {
               @dismiss="handleDismissError"
           />
 
-          <!-- Lien vers les résultats même en cas d'échec (session enregistrée) -->
-          <div v-if="lastSessionId" class="mb-6 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <!-- Lien vers les derniers résultats (même après un crawl réussi) -->
+          <div v-if="lastSessionId" class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            <span class="text-gray-500 dark:text-gray-400">{{ $t('crawl.lastCrawl') }}</span>
             <router-link
                 :to="`/crawl/results/${lastSessionId}`"
                 class="font-medium text-primary-600 dark:text-primary-400 hover:underline"

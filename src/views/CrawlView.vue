@@ -39,6 +39,8 @@ const maxPages = ref(20)
 
 // UI state
 const error = ref('')
+// Session du dernier crawl resté sur place (échec) : on offre un lien vers ses résultats
+const lastSessionId = ref(null)
 const localServerAvailable = ref(false)
 const checkingServer = ref(true)
 const showOnboarding = ref(false)
@@ -203,6 +205,7 @@ async function handleSubmit() {
   // Mémorise le domaine pour les autres écrans
   site.setFromUrl(baseUrl.value)
   error.value = ''
+  lastSessionId.value = null
 
   // Le relais est requis pour Auto/Sitemap, et pour le mode Manuel si la liste
   // contient un sitemap à déplier. En mode direct, aucun relais nécessaire.
@@ -238,6 +241,9 @@ async function handleSubmit() {
 
     if (session && session.status !== CRAWL_STATUS.FAILED) {
       router.push(`/crawl/results/${session.id}`)
+    } else if (session) {
+      // Échec : on reste sur la page, mais la session est enregistrée → on offre un lien
+      lastSessionId.value = session.id
     }
   } catch (err) {
     error.value = err.message || t('crawl.errorGeneric')
@@ -458,6 +464,22 @@ onUnmounted(() => {
               type="error"
               @dismiss="handleDismissError"
           />
+
+          <!-- Lien vers les résultats même en cas d'échec (session enregistrée) -->
+          <div v-if="lastSessionId" class="mb-6 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <router-link
+                :to="`/crawl/results/${lastSessionId}`"
+                class="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              {{ $t('crawl.viewResults') }} →
+            </router-link>
+            <router-link
+                :to="{ path: '/history', query: { tab: 'crawls' } }"
+                class="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              {{ $t('crawl.viewInHistory') }} →
+            </router-link>
+          </div>
 
           <div class="space-y-6">
             <!-- URL Input -->

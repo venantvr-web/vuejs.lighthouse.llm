@@ -113,9 +113,14 @@ export function detectChanges(item, latest, previous) {
  * @returns {string} Extraction prompt
  */
 export function buildExtractionPrompt(answer, brand) {
-    return `Analyse la réponse d'un assistant ci-dessous. Renvoie UNIQUEMENT un objet JSON, sans autre texte, ` +
-        `de la forme {"brands": ["..."], "sentiment": "positive|neutral|negative|absent"} où :\n` +
-        `- "brands" liste les marques, produits, outils ou entreprises cités ;\n` +
+    return `Analyse la réponse d'un assistant ci-dessous, à propos de « ${brand} ». ` +
+        `Renvoie UNIQUEMENT un objet JSON, sans autre texte, de la forme ` +
+        `{"brands": ["..."], "sentiment": "positive|neutral|negative|absent"} où :\n` +
+        `- "brands" liste UNIQUEMENT les marques, produits ou entreprises qui sont de véritables ` +
+        `**concurrents directs** de « ${brand} » (même secteur, alternatives possibles). ` +
+        `N'inclus PAS : « ${brand} » lui-même, ni les réglementations/normes/lois/certifications ` +
+        `(ex. RGPD, HIPAA, SOX, ISO 27001), ni les outils génériques non concurrents ` +
+        `(bureautique, gestion de projet, tableurs, messagerie…). Si aucun concurrent réel, renvoie une liste vide.\n` +
         `- "sentiment" décrit la tonalité envers « ${brand} » (positive, neutral, negative, ou absent si non cité).\n\n` +
         `Réponse :\n${answer}`
 }
@@ -249,9 +254,11 @@ export function groupRunsByProvider(runs) {
         ? Math.round(sovValues.reduce((a, b) => a + b, 0) / sovValues.length)
         : null
 
+    // Concurrents émergents : triés par nombre de moteurs, bornés pour éviter le bruit
     const emergingCompetitors = [...emergingMap.values()]
         .map(e => ({name: e.name, engines: e.engines.size}))
         .sort((a, b) => b.engines - a.engines)
+        .slice(0, 12)
 
     return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, lastRunAt}
 }

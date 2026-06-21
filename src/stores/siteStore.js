@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {computed, ref} from 'vue'
-import {extractDomain, normalizeUrl} from '@/utils/url'
+import {normalizeUrl} from '@/utils/url'
+import {Domain} from '@/utils/Domain'
 
 const STORAGE_KEY = 'lighthouse-active-site'
 
@@ -42,7 +43,7 @@ export const useSiteStore = defineStore('site', () => {
     }
 
     // URL racine canonique du domaine actif, terminée par « / » (ex. https://example.com/)
-    const origin = computed(() => (activeDomain.value ? `https://${activeDomain.value}/` : ''))
+    const origin = computed(() => new Domain(activeDomain.value).origin)
     const hasSite = computed(() => !!activeDomain.value)
     // Identifiant du contexte courant (couple marque/domaine) pour scoper les
     // saisies ET les collections (prompts GEO, watchlist…).
@@ -73,8 +74,7 @@ export const useSiteStore = defineStore('site', () => {
 
     // --- Domaines ---
     function addDomain(input) {
-        const normalized = normalizeUrl(input)
-        const host = normalized ? extractDomain(normalized) : ''
+        const host = Domain.normalize(input)
         if (!host) return ''
         if (!domains.value.includes(host)) domains.value = [...domains.value, host]
         if (!activeDomain.value) activeDomain.value = host
@@ -126,7 +126,7 @@ export const useSiteStore = defineStore('site', () => {
     function setFromUrl(input) {
         const normalized = normalizeUrl(input)
         if (!normalized) return
-        const host = extractDomain(normalized)
+        const host = Domain.normalize(input)
         if (!host) return
         if (!domains.value.includes(host)) domains.value = [...domains.value, host]
         activeDomain.value = host

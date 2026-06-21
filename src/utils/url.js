@@ -61,7 +61,7 @@ export function sameHost(a, b) {
 export function normalizeUrl(url) {
     let normalized = (url || '').trim()
     if (!normalized) return ''
-    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+    if (!/^https?:\/\//i.test(normalized)) {
         normalized = 'https://' + normalized
     }
     try {

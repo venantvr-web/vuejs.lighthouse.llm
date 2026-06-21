@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {computed, ref, watch} from 'vue'
-import {extractDomain, normalizeUrl} from '@/utils/url'
+import {normalizeUrl} from '@/utils/url'
+import {Domain} from '@/utils/Domain'
 import {useSiteStore} from '@/stores/siteStore'
 
 const STORAGE_KEY = 'lighthouse-watchlist'
@@ -58,11 +59,12 @@ export const useWatchlistStore = defineStore('watchlist', () => {
         if (!normalized) return null
         if (hasUrl(normalized)) return null
 
+        const host = Domain.normalize(normalized)
         const item = {
             id: crypto.randomUUID(),
             url: normalized,
-            domain: extractDomain(normalized),
-            label: (options.label || '').trim() || extractDomain(normalized),
+            domain: host,
+            label: (options.label || '').trim() || host,
             strategy: options.strategy === 'desktop' ? 'desktop' : 'mobile',
             source: options.source === 'local' ? 'local' : 'pagespeed',
             scope: site.scopeKey,

@@ -14,6 +14,11 @@ export default {
         refreshAll: 'Re-audit all',
         refreshingAll: 'Analyzing…',
         // Add form
+        fieldUrl: 'URL to monitor',
+        fieldLabel: 'Label (optional)',
+        fieldStrategy: 'Device',
+        fieldSource: 'Analysis engine',
+        addFormHelp: 'Add a page to track daily: choose the device (mobile/desktop) and the analysis engine.',
         urlPlaceholder: 'https://example.com/page',
         labelPlaceholder: 'Name (optional)',
         sourcePagespeed: 'PageSpeed',

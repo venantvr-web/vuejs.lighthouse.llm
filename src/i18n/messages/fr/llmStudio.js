@@ -6,6 +6,7 @@ export default {
         headerTitle: 'Studio LLM',
         headerSubtitle: 'llms.txt, llms-full.txt et veille IA',
 
+        urlLabel: 'Domaine à analyser',
         urlPlaceholder: 'https://votre-domaine.com',
         analyze: 'Analyser le domaine',
         analyzing: 'Analyse…',

@@ -6,6 +6,7 @@ export default {
         headerTitle: 'LLM Studio',
         headerSubtitle: 'llms.txt, llms-full.txt and AI monitoring',
 
+        urlLabel: 'Domain to analyze',
         urlPlaceholder: 'https://your-domain.com',
         analyze: 'Analyze domain',
         analyzing: 'Analyzing…',

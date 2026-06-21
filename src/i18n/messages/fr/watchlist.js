@@ -14,6 +14,11 @@ export default {
         refreshAll: 'Tout ré-auditer',
         refreshingAll: 'Analyse en cours…',
         // Formulaire d'ajout
+        fieldUrl: 'URL à surveiller',
+        fieldLabel: 'Libellé (optionnel)',
+        fieldStrategy: 'Appareil',
+        fieldSource: 'Moteur d\'analyse',
+        addFormHelp: 'Ajoutez une page à suivre quotidiennement : choisissez l\'appareil (mobile/desktop) et le moteur d\'analyse.',
         urlPlaceholder: 'https://exemple.com/page',
         labelPlaceholder: 'Nom (optionnel)',
         sourcePagespeed: 'PageSpeed',

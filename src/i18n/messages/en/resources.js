@@ -16,6 +16,7 @@ export default {
         localServerSuffix: 'if not already done.',
 
         // Input
+        urlLabel: 'Domain to analyze',
         urlPlaceholder: 'https://example.com',
         check: 'Check',
         checking: 'Checking…',

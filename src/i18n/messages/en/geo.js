@@ -27,11 +27,8 @@ export default {
         // Add form
         promptLabel: 'Prompt to track:',
         promptPlaceholder: 'Prompt to track (e.g.: What are the best SEO audit tools?)',
-        brandLabel: 'Your brand',
-        brandPlaceholder: 'Your brand',
         competitorsLabel: 'Competitors to compare (optional):',
         competitorsPlaceholder: 'Competitors (comma-separated)',
-        brandCompetitorsHelp: 'Enter the brand whose presence in AI answers you want to measure, and optionally competitors to compare their visibility.',
         add: 'Add',
         // Prompt presets (replace the brackets with your context)
         presetsLabel: 'Presets:',

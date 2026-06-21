@@ -11,6 +11,7 @@ import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
+import FieldLabel from '@/components/common/FieldLabel.vue'
 import HelpTip from '@/components/common/HelpTip.vue'
 import {buildGeoCsv, buildGeoMarkdown} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
@@ -282,8 +283,7 @@ async function handleRunAll() {
       <!-- Add form -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
         <div class="flex flex-col gap-3">
-          <label class="block">
-            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.promptLabel') }}</span>
+          <FieldLabel :label="$t('geo.promptLabel')">
             <input
                 v-model="newPrompt"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -292,7 +292,7 @@ async function handleRunAll() {
                 @input="onPromptInput"
                 @keyup.enter="handleAdd"
             />
-          </label>
+          </FieldLabel>
           <!-- Champs des jetons du préset (ex. [secteur], [besoin]…) -->
           <div
               v-if="promptTemplate && promptTokens.length"
@@ -331,8 +331,7 @@ async function handleRunAll() {
             <router-link class="ml-1 text-primary-600 dark:text-primary-400 hover:underline" to="/settings">{{ $t('geo.brandManage') }}</router-link>
           </p>
           <div class="flex flex-col md:flex-row md:items-end gap-3">
-            <label class="flex-1 block">
-              <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('geo.competitorsLabel') }}</span>
+            <FieldLabel :label="$t('geo.competitorsLabel')" class="flex-1">
               <input
                   v-model="newCompetitors"
                   class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -340,7 +339,7 @@ async function handleRunAll() {
                   type="text"
                   @keyup.enter="handleAdd"
               />
-            </label>
+            </FieldLabel>
             <button
                 class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
                 @click="handleAdd"

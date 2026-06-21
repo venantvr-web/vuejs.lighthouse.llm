@@ -6,6 +6,7 @@ import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
 import Modal from '@/components/common/Modal.vue'
 import SearchInput from '@/components/common/SearchInput.vue'
+import FieldLabel from '@/components/common/FieldLabel.vue'
 import {useLlmStudio} from '@/composables/useLlmStudio'
 import {useLlmWatch} from '@/composables/useLlmWatch'
 import {useNotifications} from '@/composables/useNotifications'
@@ -123,8 +124,7 @@ onMounted(async () => {
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
         <div class="flex flex-col gap-3">
           <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-            <label class="flex-1 block">
-              <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('llmStudio.urlLabel') }}</span>
+            <FieldLabel :label="$t('llmStudio.urlLabel')" class="flex-1">
               <input
                   v-model="url"
                   class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -132,7 +132,7 @@ onMounted(async () => {
                   type="text"
                   @keyup.enter="handleAnalyze"
               />
-            </label>
+            </FieldLabel>
             <button
                 :disabled="analyzing || !url"
                 class="shrink-0 whitespace-nowrap px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
@@ -141,15 +141,14 @@ onMounted(async () => {
               {{ analyzing ? $t('llmStudio.analyzing') : $t('llmStudio.analyze') }}
             </button>
           </div>
-          <label class="block">
-            <span class="block mb-1 text-xs text-gray-500 dark:text-gray-400">{{ $t('llmStudio.keywordsLabel') }}</span>
+          <FieldLabel :label="$t('llmStudio.keywordsLabel')">
             <textarea
                 v-model="keywords"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 :placeholder="$t('llmStudio.keywordsPlaceholder')"
                 rows="2"
             />
-          </label>
+          </FieldLabel>
         </div>
         <p v-if="analyzeError" class="mt-2 text-sm text-red-500">{{ analyzeError }}</p>
         <p v-if="!settings.isConfigured" class="mt-2 text-xs text-gray-500 dark:text-gray-400">

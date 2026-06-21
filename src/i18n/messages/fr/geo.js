@@ -27,11 +27,8 @@ export default {
         // Formulaire d'ajout
         promptLabel: 'Prompt à suivre :',
         promptPlaceholder: 'Prompt à suivre (ex. : Quels sont les meilleurs outils d\'audit SEO ?)',
-        brandLabel: 'Votre marque',
-        brandPlaceholder: 'Votre marque',
         competitorsLabel: 'Concurrents à comparer (optionnel) :',
         competitorsPlaceholder: 'Concurrents (séparés par des virgules)',
-        brandCompetitorsHelp: 'Indiquez la marque dont vous mesurez la présence dans les réponses IA, et éventuellement des concurrents pour comparer leur visibilité.',
         add: 'Ajouter',
         // Présets de prompts (remplacez les crochets par votre contexte)
         presetsLabel: 'Présets :',

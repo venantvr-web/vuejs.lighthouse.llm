@@ -18,6 +18,7 @@ import Sparkline from '@/components/common/Sparkline.vue'
 import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
+import FieldLabel from '@/components/common/FieldLabel.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -136,8 +137,7 @@ function exportDiagnosis() {
 
       <!-- Input -->
       <div class="flex flex-col md:flex-row md:items-end gap-3 mb-6">
-        <label class="flex-1 block">
-          <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('resources.urlLabel') }}</span>
+        <FieldLabel :label="$t('resources.urlLabel')" class="flex-1">
           <input
               v-model="url"
               class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -145,7 +145,7 @@ function exportDiagnosis() {
               type="url"
               @keyup.enter="handleCheck"
           />
-        </label>
+        </FieldLabel>
         <button
             :disabled="checking || !url"
             class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"

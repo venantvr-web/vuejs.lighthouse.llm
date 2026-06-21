@@ -13,6 +13,7 @@ import {buildWatchlistCsv} from '@/utils/exporters'
 import {downloadText} from '@/utils/download'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
+import FieldLabel from '@/components/common/FieldLabel.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
@@ -233,8 +234,7 @@ async function handleEnableNotifications() {
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('watchlist.addFormHelp') }}</p>
         <div class="flex flex-col md:flex-row md:items-end gap-3">
-          <label class="flex-1 block">
-            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('watchlist.fieldUrl') }}</span>
+          <FieldLabel :label="$t('watchlist.fieldUrl')" class="flex-1">
             <input
                 v-model="newUrl"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -242,9 +242,8 @@ async function handleEnableNotifications() {
                 type="url"
                 @keyup.enter="handleAdd"
             />
-          </label>
-          <label class="md:w-44 block">
-            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('watchlist.fieldLabel') }}</span>
+          </FieldLabel>
+          <FieldLabel :label="$t('watchlist.fieldLabel')" class="md:w-44">
             <input
                 v-model="newLabel"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -252,9 +251,8 @@ async function handleEnableNotifications() {
                 type="text"
                 @keyup.enter="handleAdd"
             />
-          </label>
-          <label class="block">
-            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('watchlist.fieldStrategy') }}</span>
+          </FieldLabel>
+          <FieldLabel :label="$t('watchlist.fieldStrategy')">
             <select
                 v-model="newStrategy"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -262,9 +260,8 @@ async function handleEnableNotifications() {
               <option value="mobile">{{ $t('common.mobile') }}</option>
               <option value="desktop">{{ $t('common.desktop') }}</option>
             </select>
-          </label>
-          <label class="block">
-            <span class="block mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('watchlist.fieldSource') }}</span>
+          </FieldLabel>
+          <FieldLabel :label="$t('watchlist.fieldSource')">
             <select
                 v-model="newSource"
                 class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -272,7 +269,7 @@ async function handleEnableNotifications() {
               <option value="pagespeed">{{ $t('watchlist.sourcePagespeed') }}</option>
               <option value="local">{{ $t('watchlist.sourceLocal') }}</option>
             </select>
-          </label>
+          </FieldLabel>
           <button
               class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
               @click="handleAdd"

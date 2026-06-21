@@ -6,6 +6,42 @@ Aucun backend applicatif : les données vivent dans votre navigateur (**IndexedD
 
 ---
 
+## 📋 Sommaire
+
+- [Concepts clés](#-concepts-clés)
+- [Carte des écrans](#️-carte-des-écrans)
+- [Scénarios d'usage](#-scénarios-dusage)
+  - [0 — Premier lancement (onboarding)](#scénario-0--premier-lancement-onboarding)
+  - [1 — Auditer une page (trois sources)](#scénario-1--auditer-une-page-trois-sources-au-choix)
+  - [2 — Tableau de bord et plan d'action](#scénario-2--lire-le-tableau-de-bord-et-le-plan-daction)
+  - [3 — Analyse détaillée par l'IA](#scénario-3--analyse-détaillée-dune-catégorie-par-lia)
+  - [4 — Crawl multi-pages](#scénario-4--crawl-multi-pages-dun-site)
+  - [5 — Historique, filtres et comparaison](#scénario-5--historique-filtres-et-comparaison)
+  - [6 — Watchlist (suivi quotidien)](#scénario-6--watchlist-suivi-quotidien-des-url)
+  - [7 — GEO Tracking](#scénario-7--geo-tracking-visibilité-de-la-marque-dans-les-ia)
+  - [8 — Ressources et GEO-readiness](#scénario-8--ressources-et-score-de-geo-readiness)
+  - [9 — Studio LLM (llms.txt)](#scénario-9--studio-llm-générer-llmstxt--llms-fulltxt)
+  - [10 — Search Console](#scénario-10--search-console-données-de-recherche-réelles)
+  - [11 — Briefing du matin](#scénario-11--briefing-du-matin-tout-en-un-coup-dœil)
+  - [12 — Paramètres](#scénario-12--paramètres-identité-ia-réseau-données)
+  - [13 — Installer en PWA et hors-ligne](#scénario-13--installer-en-pwa-et-travailler-hors-ligne)
+- [Matrice scénarios → préconditions](#-matrice-scénarios--préconditions)
+- [Architecture](#️-architecture)
+- [Stockage des données](#️-stockage-des-données)
+- [Stack technique](#-stack-technique)
+- [Installation et démarrage](#-installation-et-démarrage)
+- [Déploiement (Cloudflare Pages)](#️-déploiement-cloudflare-pages)
+- [Scripts disponibles](#-scripts-disponibles)
+- [PWA (Progressive Web App)](#-pwa-progressive-web-app)
+- [Internationalisation](#-internationalisation)
+- [Structure du projet](#️-structure-du-projet)
+- [Search Console (configuration)](#-search-console-configuration)
+- [Tests](#-tests)
+- [Confidentialité](#-confidentialité)
+- [Configuration IDE recommandée](#-configuration-ide-recommandée)
+
+---
+
 ## 🧩 Concepts clés
 
 Avant les scénarios, trois notions structurent toute l'application :

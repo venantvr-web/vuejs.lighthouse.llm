@@ -21,7 +21,7 @@ export default {
         noProviderBefore: 'No engine configured. Click ',
         noProviderAfter: ' to enter at least one key (OpenAI, Claude or Gemini).',
         // Engine selection
-        engines: 'Engines:',
+        engines: 'Engines',
         advancedTitle: 'One additional LLM call per engine: cited competitors + sentiment of the mention',
         advancedAnalysis: 'Advanced analysis (competitors + sentiment)',
         // Add form
@@ -34,8 +34,8 @@ export default {
         brandCompetitorsHelp: 'Enter the brand whose presence in AI answers you want to measure, and optionally competitors to compare their visibility.',
         add: 'Add',
         // Prompt presets (replace the brackets with your context)
-        presetsLabel: 'Presets:',
-        fillTokens: 'Fill in the preset fields:',
+        presetsLabel: 'Presets',
+        fillTokens: 'Fill in the preset fields',
         presets: [
             'What are the best [industry] solutions in 2026?',
             'What tool do you recommend for [need]?',

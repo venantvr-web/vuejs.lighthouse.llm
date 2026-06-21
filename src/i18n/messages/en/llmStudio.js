@@ -36,7 +36,7 @@ export default {
         ctxFooterLinks: 'Footer links',
         ctxSitemap: 'Sitemap sections ({count} URLs)',
 
-        liveStatus: 'Published files:',
+        liveStatus: 'Published files',
         present: 'present',
         absent: 'absent',
         viewLive: 'View',

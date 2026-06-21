@@ -36,7 +36,7 @@ export default {
         ctxFooterLinks: 'Liens de pied de page',
         ctxSitemap: 'Sections du sitemap ({count} URL)',
 
-        liveStatus: 'Fichiers publiés :',
+        liveStatus: 'Fichiers publiés',
         present: 'présent',
         absent: 'absent',
         viewLive: 'Voir',

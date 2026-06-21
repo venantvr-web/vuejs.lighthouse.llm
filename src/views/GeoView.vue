@@ -303,17 +303,16 @@ async function handleRunAll() {
           >
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.fillTokens') }}</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label v-for="token in promptTokens" :key="token" class="block">
-                <span class="block mb-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ token }}</span>
-                <input
-                    v-model="tokenValues[token]"
-                    :placeholder="token"
-                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    type="text"
-                    @input="assemblePrompt"
-                    @keyup.enter="handleAdd"
-                />
-              </label>
+              <input
+                  v-for="token in promptTokens"
+                  :key="token"
+                  v-model="tokenValues[token]"
+                  :placeholder="token"
+                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  type="text"
+                  @input="assemblePrompt"
+                  @keyup.enter="handleAdd"
+              />
             </div>
           </div>
           <div class="flex flex-col gap-1.5">

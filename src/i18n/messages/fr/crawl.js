@@ -35,12 +35,12 @@ export default {
         formTitle: 'Crawler de site multi-pages',
         formSubtitle: 'Analysez plusieurs pages et obtenez des scores agrégés par template',
         errorTitle: 'Erreur de crawl',
-        lastCrawl: 'Dernier crawl',
+        lastCrawl: 'Dernier crawl :',
         viewResults: 'Voir le détail des résultats',
         viewInHistory: 'Voir dans l\'historique',
 
-        baseUrlLabel: 'URL de base',
-        discoveryModeLabel: 'Mode de découverte des URLs',
+        baseUrlLabel: 'URL de base :',
+        discoveryModeLabel: 'Mode de découverte des URLs :',
         modeAuto: 'Auto',
         modeAutoDesc: 'Suit les liens internes',
         modeSitemap: 'Sitemap',
@@ -48,7 +48,7 @@ export default {
         modeManual: 'Manuel',
         modeManualDesc: "Liste d'URLs",
 
-        manualUrlsLabel: 'Liste des URLs (une par ligne)',
+        manualUrlsLabel: 'Liste des URLs (une par ligne) :',
         manualUrlsHint: 'Maximum {count} URLs. Une URL de sitemap (.xml) est dépliée en pages (serveur local requis). Les lignes commençant par # sont ignorées.',
 
         serviceLabel: "Service d'analyse",
@@ -61,9 +61,9 @@ export default {
         serverUnavailable: 'Serveur non disponible',
         serverOnline: 'En ligne',
 
-        strategyLabel: 'Stratégie',
+        strategyLabel: 'Stratégie :',
 
-        maxPagesLabel: 'Nombre maximum de pages',
+        maxPagesLabel: 'Nombre maximum de pages :',
         onePage: '1 page',
         twentyPages: '20 pages',
 

@@ -6,11 +6,11 @@ export default {
         headerTitle: 'Studio LLM',
         headerSubtitle: 'llms.txt, llms-full.txt et veille IA',
 
-        urlLabel: 'Domaine à analyser',
+        urlLabel: 'Domaine à analyser :',
         urlPlaceholder: 'https://votre-domaine.com',
         analyze: 'Analyser le domaine',
         analyzing: 'Analyse…',
-        keywordsLabel: 'Mots-clés / domaine métier (optionnel, améliore le résultat)',
+        keywordsLabel: 'Mots-clés / domaine métier (optionnel, améliore le résultat) :',
         keywordsPlaceholder: 'Ex. : audit SEO, performance web, agence, e-commerce mode…',
 
         configurePrefix: 'La génération par IA nécessite un fournisseur LLM. ',
@@ -36,7 +36,7 @@ export default {
         ctxFooterLinks: 'Liens de pied de page',
         ctxSitemap: 'Sections du sitemap ({count} URL)',
 
-        liveStatus: 'Fichiers publiés',
+        liveStatus: 'Fichiers publiés :',
         present: 'présent',
         absent: 'absent',
         viewLive: 'Voir',
@@ -52,13 +52,13 @@ export default {
 
         watchTitle: 'Veille automatique',
         watchHint: 'Les domaines surveillés sont revérifiés à l\'ouverture de l\'app quand l\'intervalle est écoulé. En cas de changement (structure du domaine, fichier llms.txt retiré ou publié), vous recevez une alerte.',
-        watchInterval: 'Intervalle',
+        watchInterval: 'Intervalle :',
         watchThis: 'Surveiller ce domaine',
         unwatch: 'Ne plus surveiller',
         checkNow: 'Vérifier maintenant',
         checking: 'Vérification…',
         enableAlerts: 'Activer les notifications',
-        lastChecked: 'Vérifié',
+        lastChecked: 'Vérifié :',
         watchAlert: 'Veille LLM',
 
         errorInvalidUrl: 'URL invalide.',

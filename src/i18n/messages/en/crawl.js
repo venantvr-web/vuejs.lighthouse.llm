@@ -35,12 +35,12 @@ export default {
         formTitle: 'Multi-page site crawler',
         formSubtitle: 'Analyze multiple pages and get aggregated scores by template',
         errorTitle: 'Crawl error',
-        lastCrawl: 'Last crawl',
+        lastCrawl: 'Last crawl:',
         viewResults: 'View detailed results',
         viewInHistory: 'View in history',
 
-        baseUrlLabel: 'Base URL',
-        discoveryModeLabel: 'URL discovery mode',
+        baseUrlLabel: 'Base URL:',
+        discoveryModeLabel: 'URL discovery mode:',
         modeAuto: 'Auto',
         modeAutoDesc: 'Follows internal links',
         modeSitemap: 'Sitemap',
@@ -48,10 +48,10 @@ export default {
         modeManual: 'Manual',
         modeManualDesc: 'List of URLs',
 
-        manualUrlsLabel: 'List of URLs (one per line)',
+        manualUrlsLabel: 'List of URLs (one per line):',
         manualUrlsHint: 'Maximum {count} URLs. A sitemap URL (.xml) is expanded into pages (local server required). Lines starting with # are ignored.',
 
-        serviceLabel: 'Analysis service',
+        serviceLabel: 'Analysis service:',
         pageSpeedName: 'PageSpeed Insights',
         pageSpeedDesc: 'Google API, no local server required',
         noKeyWarning: 'Without a PageSpeed API key, requests use Google\'s shared anonymous quota, which is often exhausted: analysis fails (error 429). Add your free key.',
@@ -61,9 +61,9 @@ export default {
         serverUnavailable: 'Server unavailable',
         serverOnline: 'Online',
 
-        strategyLabel: 'Strategy',
+        strategyLabel: 'Strategy:',
 
-        maxPagesLabel: 'Maximum number of pages',
+        maxPagesLabel: 'Maximum number of pages:',
         onePage: '1 page',
         twentyPages: '20 pages',
 

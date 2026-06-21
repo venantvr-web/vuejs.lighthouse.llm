@@ -21,21 +21,21 @@ export default {
         noProviderBefore: 'Aucun moteur configuré. Cliquez sur ',
         noProviderAfter: ' pour renseigner au moins une clé (OpenAI, Claude ou Gemini).',
         // Sélection des moteurs
-        engines: 'Moteurs',
+        engines: 'Moteurs :',
         advancedTitle: 'Un appel LLM supplémentaire par moteur : concurrents cités + sentiment de la mention',
         advancedAnalysis: 'Analyse avancée (concurrents + sentiment)',
         // Formulaire d'ajout
-        promptLabel: 'Prompt à suivre',
+        promptLabel: 'Prompt à suivre :',
         promptPlaceholder: 'Prompt à suivre (ex. : Quels sont les meilleurs outils d\'audit SEO ?)',
         brandLabel: 'Votre marque',
         brandPlaceholder: 'Votre marque',
-        competitorsLabel: 'Concurrents à comparer (optionnel)',
+        competitorsLabel: 'Concurrents à comparer (optionnel) :',
         competitorsPlaceholder: 'Concurrents (séparés par des virgules)',
         brandCompetitorsHelp: 'Indiquez la marque dont vous mesurez la présence dans les réponses IA, et éventuellement des concurrents pour comparer leur visibilité.',
         add: 'Ajouter',
         // Présets de prompts (remplacez les crochets par votre contexte)
-        presetsLabel: 'Présets',
-        fillTokens: 'Renseignez les champs du préset',
+        presetsLabel: 'Présets :',
+        fillTokens: 'Renseignez les champs du préset :',
         presets: [
             'Quelles sont les meilleures solutions de [secteur] en 2026 ?',
             'Quel outil recommandez-vous pour [besoin] ?',

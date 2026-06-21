@@ -6,11 +6,11 @@ export default {
         headerTitle: 'LLM Studio',
         headerSubtitle: 'llms.txt, llms-full.txt and AI monitoring',
 
-        urlLabel: 'Domain to analyze',
+        urlLabel: 'Domain to analyze:',
         urlPlaceholder: 'https://your-domain.com',
         analyze: 'Analyze domain',
         analyzing: 'Analyzing…',
-        keywordsLabel: 'Keywords / business domain (optional, improves results)',
+        keywordsLabel: 'Keywords / business domain (optional, improves results):',
         keywordsPlaceholder: 'E.g.: SEO audit, web performance, agency, fashion e-commerce…',
 
         configurePrefix: 'AI generation requires an LLM provider. ',
@@ -36,7 +36,7 @@ export default {
         ctxFooterLinks: 'Footer links',
         ctxSitemap: 'Sitemap sections ({count} URLs)',
 
-        liveStatus: 'Published files',
+        liveStatus: 'Published files:',
         present: 'present',
         absent: 'absent',
         viewLive: 'View',
@@ -52,13 +52,13 @@ export default {
 
         watchTitle: 'Automatic monitoring',
         watchHint: 'Watched domains are re-checked when you open the app once the interval has elapsed. On any change (domain structure, llms.txt removed or published) you get an alert.',
-        watchInterval: 'Interval',
+        watchInterval: 'Interval:',
         watchThis: 'Watch this domain',
         unwatch: 'Stop watching',
         checkNow: 'Check now',
         checking: 'Checking…',
         enableAlerts: 'Enable notifications',
-        lastChecked: 'Checked',
+        lastChecked: 'Checked:',
         watchAlert: 'LLM monitoring',
 
         errorInvalidUrl: 'Invalid URL.',

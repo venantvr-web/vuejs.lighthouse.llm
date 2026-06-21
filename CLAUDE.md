@@ -11,6 +11,13 @@ Application web **Vue 3 + Vite**, **local-first** (aucun backend applicatif) : a
 - **Langue : français, avec les accents.** Toute la documentation destinée à l'utilisateur (README, docs fonctionnelles, messages d'interface) est rédigée en français correctement accentué (é, è, à, ç, ô…). Ne jamais produire de français « désaccentué ».
 - **Diagrammes : Mermaid uniquement, jamais d'ASCII.** Les schémas (architecture, flux, arborescences, hiérarchies) doivent utiliser des blocs ` ```mermaid `. Ne pas utiliser d'art ASCII ni de caractères de dessin de boîte / d'arborescence (box-drawing Unicode tels que les traits et coins de tableaux), y compris pour les arborescences de fichiers.
 
+## Conventions d'interface (IMPORTANT)
+
+- **Libellés avec deux-points, partout.** Tout libellé de champ, de groupe de contrôles ou de donnée (`label`/`<span>` au-dessus ou avant un input, un select, une liste de boutons, un badge…) se termine par un deux-points : `' :'` (espace + deux-points) en français, `':'` (sans espace) en anglais. Convention homogène sur toute l'application.
+- **Tout champ doit avoir un libellé visible.** Un placeholder ne suffit pas : un champ pré-rempli masque son placeholder, et un select n'explique pas son rôle par son seul contenu. Toujours un `<label>` au-dessus.
+- **Saisies mémorisées.** Toutes les saisies et sélections utilisateur sont persistées (`usePersistentRef` / store) afin d'être restaurées d'une session à l'autre.
+- **Réponses IA en Markdown.** Toute sortie d'IA s'affiche via `MarkdownViewer` (et est consultable en pop-up `Modal`).
+
 Exemple attendu :
 
 ```mermaid

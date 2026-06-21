@@ -950,6 +950,28 @@ function compareSelected() {
   .header-actions {
     justify-content: flex-end;
   }
+
+  /* En-tête du domaine : empilé pour éviter le débordement des boutons (JSON/PDF) */
+  .domain-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .domain-info h2 {
+    font-size: 1.125rem;
+    word-break: break-word;
+  }
+
+  .domain-actions {
+    flex-wrap: wrap;
+  }
+
+  .charts-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
 }
 
 /* Info button */

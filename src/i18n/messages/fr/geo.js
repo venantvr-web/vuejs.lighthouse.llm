@@ -48,6 +48,13 @@ export default {
         avgShareOfVoice: 'Part de voix moy.',
         brandAbsent: 'Marque absente partout',
         neverRun: 'Jamais exécuté',
+        scoreTitle: 'Score GEO de la marque',
+        scoreLabel: 'Score GEO',
+        scoreMethodology: 'Score global de visibilité dans les réponses IA, de 0 à 100. Il combine le taux de citation (part des réponses où la marque est citée, pondéré à 60 %) et la part de voix moyenne (poids de la marque face aux concurrents, pondérée à 40 %), sur le dernier run de chaque prompt et de chaque moteur.',
+        scoreCitationRate: 'Taux de citation :',
+        scoreTrendUnit: 'pts',
+        scoreTrendStable: 'Stable',
+        scoreBasis: 'Calculé sur {prompts} prompt(s) et {runs} réponse(s) de moteurs.',
         // État vide
         emptyTitle: 'Aucun prompt suivi',
         emptyText: 'Ajoutez des prompts représentatifs des recherches de vos clients, indiquez votre marque et vos concurrents, puis comparez votre visibilité selon les moteurs IA.',

@@ -6,9 +6,10 @@ import {useSiteStore} from '@/stores/siteStore'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {useGeoTracking} from '@/composables/useGeoTracking'
+import {computeGeoScore, useGeoTracking} from '@/composables/useGeoTracking'
 import {useNotifications} from '@/composables/useNotifications'
 import GeoCard from '@/components/geo/GeoCard.vue'
+import ScoreGauge from '@/components/dashboard/ScoreGauge.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
 import FieldLabel from '@/components/common/FieldLabel.vue'
@@ -103,6 +104,9 @@ const summary = computed(() => {
     neverRun: stats.filter(s => !s.providers?.length).length
   }
 })
+
+// Score GEO global de la marque active (0-100) + tendance vs runs précédents.
+const geoScore = computed(() => computeGeoScore(Object.values(statsById.value)))
 
 function toggleProvider(id) {
   selectedProviderIds.value = selectedProviderIds.value.includes(id)
@@ -351,6 +355,41 @@ async function handleRunAll() {
           </div>
         </div>
         <p v-if="addError" class="mt-2 text-sm text-red-500">{{ addError }}</p>
+      </div>
+
+      <!-- Score GEO de la marque (cockpit) -->
+      <div
+          v-if="!geoStore.isEmpty && geoScore.score !== null"
+          class="mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex items-center gap-5"
+      >
+        <ScoreGauge :label="site.activeBrand || $t('geo.scoreLabel')" :score="geoScore.score" size="md"/>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-semibold text-gray-900 dark:text-white inline-flex items-center gap-2">
+            {{ $t('geo.scoreTitle') }}
+            <HelpTip :text="$t('geo.scoreMethodology')"/>
+          </h3>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-1 mt-2 text-sm">
+            <span class="text-gray-600 dark:text-gray-300">
+              {{ $t('geo.scoreCitationRate') }}
+              <strong class="text-gray-900 dark:text-white">{{ geoScore.citationRate !== null ? geoScore.citationRate + '%' : '—' }}</strong>
+            </span>
+            <span class="text-gray-600 dark:text-gray-300">
+              {{ $t('geo.avgShareOfVoice') }} :
+              <strong class="text-gray-900 dark:text-white">{{ geoScore.avgShareOfVoice !== null ? geoScore.avgShareOfVoice + '%' : '—' }}</strong>
+            </span>
+            <span
+                v-if="geoScore.trend !== null && geoScore.trend !== 0"
+                :class="geoScore.trend > 0 ? 'text-emerald-500' : 'text-red-500'"
+                class="font-medium"
+            >
+              {{ geoScore.trend > 0 ? '▲' : '▼' }} {{ Math.abs(geoScore.trend) }} {{ $t('geo.scoreTrendUnit') }}
+            </span>
+            <span v-else-if="geoScore.trend === 0" class="text-gray-400 dark:text-gray-500">{{ $t('geo.scoreTrendStable') }}</span>
+          </div>
+          <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            {{ $t('geo.scoreBasis', { prompts: geoScore.promptCount, runs: geoScore.engineRuns }) }}
+          </p>
+        </div>
       </div>
 
       <!-- Summary -->

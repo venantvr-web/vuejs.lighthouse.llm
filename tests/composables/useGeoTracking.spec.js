@@ -3,6 +3,7 @@ import {
     analyzeResponse,
     countOccurrences,
     detectChanges,
+    computeGeoScore,
     escapeRegExp,
     extractEmerging,
     extractSources,
@@ -172,6 +173,67 @@ describe('useGeoTracking - pure logic', () => {
         it('strips trailing punctuation from URLs', () => {
             const sources = extractSources('Source : https://example.com/page).')
             expect(sources).toEqual([{host: 'example.com', count: 1}])
+        })
+    })
+
+    describe('computeGeoScore', () => {
+        it('returns a null score and trend with no data', () => {
+            const r = computeGeoScore([])
+            expect(r.score).toBeNull()
+            expect(r.trend).toBeNull()
+            expect(r.promptCount).toBe(0)
+        })
+
+        it('blends citation rate (60%) and share of voice (40%)', () => {
+            // Two engines, both cite the brand, SoV 50 and 50 -> rate 100, sov 50
+            // score = 0.6*100 + 0.4*50 = 80
+            const stats = [{
+                byProvider: {
+                    openai: {latest: {brandMentioned: true, shareOfVoice: 50}},
+                    gemini: {latest: {brandMentioned: true, shareOfVoice: 50}}
+                }
+            }]
+            const r = computeGeoScore(stats)
+            expect(r.citationRate).toBe(100)
+            expect(r.avgShareOfVoice).toBe(50)
+            expect(r.score).toBe(80)
+            expect(r.engineRuns).toBe(2)
+            expect(r.enginesCited).toBe(2)
+            expect(r.promptCount).toBe(1)
+        })
+
+        it('counts an un-cited engine in the rate but not the SoV average', () => {
+            // one cited (sov 40), one not cited (sov null)
+            // rate = 50, avgSov = 40 -> score = 0.6*50 + 0.4*40 = 46
+            const stats = [{
+                byProvider: {
+                    openai: {latest: {brandMentioned: true, shareOfVoice: 40}},
+                    gemini: {latest: {brandMentioned: false, shareOfVoice: null}}
+                }
+            }]
+            const r = computeGeoScore(stats)
+            expect(r.citationRate).toBe(50)
+            expect(r.avgShareOfVoice).toBe(40)
+            expect(r.score).toBe(46)
+        })
+
+        it('computes the trend from latest vs previous runs', () => {
+            const stats = [{
+                byProvider: {
+                    openai: {
+                        latest: {brandMentioned: true, shareOfVoice: 50},   // current score 80
+                        previous: {brandMentioned: false, shareOfVoice: null} // previous score 0
+                    }
+                }
+            }]
+            const r = computeGeoScore(stats)
+            expect(r.score).toBe(80)
+            expect(r.trend).toBe(80)
+        })
+
+        it('leaves the trend null when no previous run exists', () => {
+            const stats = [{byProvider: {openai: {latest: {brandMentioned: true, shareOfVoice: 50}}}}]
+            expect(computeGeoScore(stats).trend).toBeNull()
         })
     })
 

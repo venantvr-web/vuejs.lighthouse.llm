@@ -48,6 +48,13 @@ export default {
         avgShareOfVoice: 'Avg. share of voice',
         brandAbsent: 'Brand absent everywhere',
         neverRun: 'Never run',
+        scoreTitle: 'Brand GEO score',
+        scoreLabel: 'GEO score',
+        scoreMethodology: 'Overall visibility score in AI answers, from 0 to 100. It blends the citation rate (share of answers where the brand is cited, weighted 60%) and the average share of voice (the brand\'s weight against competitors, weighted 40%), over the latest run of each prompt and each engine.',
+        scoreCitationRate: 'Citation rate:',
+        scoreTrendUnit: 'pts',
+        scoreTrendStable: 'Stable',
+        scoreBasis: 'Computed over {prompts} prompt(s) and {runs} engine answer(s).',
         // Empty state
         emptyTitle: 'No prompt tracked',
         emptyText: 'Add prompts representative of your customers\' searches, enter your brand and your competitors, then compare your visibility across AI engines.',

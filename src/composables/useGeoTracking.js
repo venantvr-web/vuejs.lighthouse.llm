@@ -301,6 +301,82 @@ export function groupRunsByProvider(runs) {
     return {providers, byProvider, engineCount: providers.length, enginesCited, avgShareOfVoice, emergingCompetitors, citedSources, lastRunAt}
 }
 
+// Weighting of the composite GEO score: how often the brand is cited matters
+// a bit more than how loud it is when present.
+const GEO_CITATION_WEIGHT = 0.6
+const GEO_SOV_WEIGHT = 0.4
+
+/**
+ * Composite GEO score (0-100) from a list of (mention, share-of-voice) pairs.
+ * Blends citation rate (% of engine answers citing the brand) and average
+ * share of voice. Returns null when there is no data.
+ * @param {Array<{mentioned: boolean, sov: number|null}>} pairs
+ * @returns {number|null}
+ */
+function scoreFromPairs(pairs) {
+    if (!pairs.length) return null
+    const cited = pairs.filter(p => p.mentioned).length
+    const citationRate = (cited / pairs.length) * 100
+    const sovValues = pairs.map(p => p.sov).filter(v => typeof v === 'number')
+    const avgSov = sovValues.length ? sovValues.reduce((a, b) => a + b, 0) / sovValues.length : 0
+    return Math.round(GEO_CITATION_WEIGHT * citationRate + GEO_SOV_WEIGHT * avgSov)
+}
+
+/**
+ * Aggregate a brand's overall GEO visibility from its per-prompt stats
+ * (the output of groupRunsByProvider). Each prompt × engine latest run is one
+ * data point. The trend compares the latest runs against the previous ones.
+ * Pure and deterministic — safe to unit-test directly.
+ * @param {Array<object>} statsList - Per-prompt stats (with byProvider)
+ * @returns {{
+ *   score: number|null,
+ *   citationRate: number|null,
+ *   avgShareOfVoice: number|null,
+ *   enginesCited: number,
+ *   engineRuns: number,
+ *   promptCount: number,
+ *   trend: number|null
+ * }}
+ */
+export function computeGeoScore(statsList = []) {
+    const current = []
+    const previous = []
+    for (const stats of statsList) {
+        const byProvider = stats?.byProvider || {}
+        for (const provider of Object.keys(byProvider)) {
+            const latest = byProvider[provider]?.latest
+            if (latest) {
+                current.push({
+                    mentioned: !!latest.brandMentioned,
+                    sov: typeof latest.shareOfVoice === 'number' ? latest.shareOfVoice : null
+                })
+            }
+            const prev = byProvider[provider]?.previous
+            if (prev) {
+                previous.push({
+                    mentioned: !!prev.brandMentioned,
+                    sov: typeof prev.shareOfVoice === 'number' ? prev.shareOfVoice : null
+                })
+            }
+        }
+    }
+
+    const score = scoreFromPairs(current)
+    const prevScore = scoreFromPairs(previous)
+    const cited = current.filter(p => p.mentioned).length
+    const sovValues = current.map(p => p.sov).filter(v => typeof v === 'number')
+
+    return {
+        score,
+        citationRate: current.length ? Math.round((cited / current.length) * 100) : null,
+        avgShareOfVoice: sovValues.length ? Math.round(sovValues.reduce((a, b) => a + b, 0) / sovValues.length) : null,
+        enginesCited: cited,
+        engineRuns: current.length,
+        promptCount: statsList.length,
+        trend: (score !== null && prevScore !== null) ? score - prevScore : null
+    }
+}
+
 
 /**
  * Composable for GEO tracking: run tracked prompts against the configured LLM

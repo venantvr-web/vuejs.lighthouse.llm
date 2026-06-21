@@ -152,14 +152,24 @@ export function useLlmStudio() {
     }
 
     /**
-     * Récupère le contenu réel des pages de la navigation d'en-tête (corpus
-     * pour llms-full.txt). Borné en nombre de pages pour rester raisonnable.
+     * Récupère le contenu réel de la page d'accueil + des pages de la navigation
+     * d'en-tête (corpus pour llms-full.txt). Dédupliqué et borné en nombre.
      * @param {object} ctx - contexte du domaine
      * @param {number} max
      * @returns {Promise<Array<{url: string, title: string, text: string}>>}
      */
     async function fetchHeaderPages(ctx, max = 12) {
-        const links = (ctx.headerLinks || []).slice(0, max)
+        // Accueil en tête, puis les liens d'en-tête, sans doublon (slash final ignoré)
+        const candidates = [{url: ctx.origin, title: ctx.title || 'Accueil'}, ...(ctx.headerLinks || [])]
+        const seen = new Set()
+        const links = []
+        for (const l of candidates) {
+            const key = (l.url || '').replace(/\/$/, '')
+            if (!key || seen.has(key)) continue
+            seen.add(key)
+            links.push(l)
+            if (links.length >= max) break
+        }
         const results = await Promise.all(links.map(async (l) => {
             try {
                 const res = await fetchResource(l.url)

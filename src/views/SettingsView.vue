@@ -16,13 +16,16 @@ import {
 import {deleteAllDatabases} from '@/utils/localData'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
+import DeleteButton from '@/components/common/DeleteButton.vue'
 import {entityKey, useSiteStore} from '@/stores/siteStore'
 import {canonicalUrl} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 const settings = useSettingsStore()
 const site = useSiteStore()
 
@@ -42,6 +45,12 @@ function addEntity() {
     newBrandInput.value = ''
     newDomainInput.value = ''
     newSectorInput.value = ''
+  }
+}
+
+async function removeEntity(e) {
+  if (await confirm({message: t('settings.confirmRemoveSite', {brand: e.brand}), confirmLabel: t('common.delete')})) {
+    site.removeEntity(keyOf(e))
   }
 }
 const DEFAULT_UA = DEFAULT_USER_AGENT
@@ -168,7 +177,7 @@ const resetProxyBase = () => {
 }
 
 const resetDatabases = async () => {
-  if (!confirm(t('settings.confirmResetDb'))) return
+  if (!await confirm({message: t('settings.confirmResetDb'), confirmLabel: t('common.reset')})) return
   resettingDb.value = true
   try {
     await deleteAllDatabases()
@@ -220,7 +229,7 @@ const testConnection = async () => {
                   </span>
                   <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">{{ canonicalUrl(e.domain) }}</span>
                 </button>
-                <button class="shrink-0 text-gray-400 hover:text-red-500" type="button" :title="$t('common.delete')" @click="site.removeEntity(keyOf(e))">✕</button>
+                <DeleteButton :label="$t('common.delete')" @click="removeEntity(e)"/>
               </div>
               <label class="block mt-2">
                 <span class="block mb-1 text-[11px] text-gray-500 dark:text-gray-400">{{ $t('settings.sectorLabel') }}</span>
@@ -263,7 +272,7 @@ const testConnection = async () => {
                 @keyup.enter="addEntity"
             />
           </div>
-          <button class="px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors" @click="addEntity">
+          <button class="btn btn-primary text-sm" @click="addEntity">
             {{ $t('settings.addSiteBtn') }}
           </button>
           <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ $t('settings.identityHint') }}</p>

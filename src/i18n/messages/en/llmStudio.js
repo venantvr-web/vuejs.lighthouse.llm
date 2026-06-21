@@ -5,6 +5,7 @@ export default {
     llmStudio: {
         headerTitle: 'LLM Studio',
         headerSubtitle: 'llms.txt, llms-full.txt and AI monitoring',
+        confirmRemove: 'Delete this artifact from history?',
 
         urlLabel: 'Domain to analyze:',
         urlPlaceholder: 'https://your-domain.com',

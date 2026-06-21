@@ -15,9 +15,11 @@ import SearchInput from '@/components/common/SearchInput.vue'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -112,9 +114,6 @@ const filteredChartScores = computed(() => {
   return scores
 })
 
-const showDeleteConfirm = ref(false)
-const domainToDelete = ref(null)
-const scoreToDelete = ref(null)
 const exportLoading = ref(false)
 
 // Sélectionne automatiquement le domaine actif (ou le premier de la portée)
@@ -143,33 +142,16 @@ async function handleSelectDomain(domain) {
   await historyStore.loadScoresForDomain(domain, historyStore.includeCrawl)
 }
 
-function confirmDeleteDomain(domain) {
-  domainToDelete.value = domain
-  scoreToDelete.value = null
-  showDeleteConfirm.value = true
-}
-
-function confirmDeleteScore(id) {
-  scoreToDelete.value = id
-  domainToDelete.value = null
-  showDeleteConfirm.value = true
-}
-
-async function handleDelete() {
-  if (domainToDelete.value) {
-    await historyStore.deleteDomain(domainToDelete.value)
-  } else if (scoreToDelete.value) {
-    await historyStore.deleteScore(scoreToDelete.value)
+async function confirmDeleteDomain(domain) {
+  if (await confirm({message: t('history.confirmDeleteDomain', {domain}), confirmLabel: t('common.delete')})) {
+    await historyStore.deleteDomain(domain)
   }
-  showDeleteConfirm.value = false
-  domainToDelete.value = null
-  scoreToDelete.value = null
 }
 
-function cancelDelete() {
-  showDeleteConfirm.value = false
-  domainToDelete.value = null
-  scoreToDelete.value = null
+async function confirmDeleteScore(id) {
+  if (await confirm({message: t('history.confirmDeleteScore'), confirmLabel: t('common.delete')})) {
+    await historyStore.deleteScore(id)
+  }
 }
 
 async function exportJSON() {
@@ -226,7 +208,7 @@ async function exportPDF() {
 }
 
 async function confirmClearAll() {
-  if (confirm(t('history.confirmClearAll'))) {
+  if (await confirm({message: t('history.confirmClearAll'), confirmLabel: t('common.clearAll')})) {
     await historyStore.clearAll()
   }
 }
@@ -464,28 +446,7 @@ function compareSelected() {
       </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <Teleport to="body">
-      <div v-if="showDeleteConfirm" class="modal-overlay" @click="cancelDelete">
-        <div class="modal" @click.stop>
-          <h3>{{ $t('history.confirmDeleteTitle') }}</h3>
-          <p v-if="domainToDelete">
-            {{ $t('history.confirmDeleteDomainPrefix') }} <strong>{{ domainToDelete }}</strong> ?
-          </p>
-          <p v-else>
-            {{ $t('history.confirmDeleteScore') }}
-          </p>
-          <div class="modal-actions">
-            <button class="btn btn-secondary" @click="cancelDelete">
-              {{ $t('common.cancel') }}
-            </button>
-            <button class="btn btn-danger" @click="handleDelete">
-              {{ $t('common.delete') }}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Floating comparison bar -->
       <Transition
           enter-active-class="transition ease-out duration-200"

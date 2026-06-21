@@ -17,8 +17,10 @@ import {useSelection} from '@/composables/useSelection'
 import {useComparison} from '@/composables/useComparison'
 import {formatScore, formatRelativeTime, getScoreBgClass} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t} = useI18n()
+const {confirm} = useConfirm()
 
 defineProps({embedded: {type: Boolean, default: false}})
 
@@ -29,7 +31,6 @@ const {saveToStorage} = useComparison()
 
 const loading = ref(true)
 const error = ref('')
-const deleteConfirm = ref(null)
 
 // Selection mode
 const {
@@ -155,22 +156,14 @@ function viewSession(sessionId) {
   router.push(`/crawl/results/${sessionId}`)
 }
 
-// Delete session
-async function confirmDelete(sessionId) {
-  deleteConfirm.value = sessionId
-}
-
-async function deleteSession(sessionId) {
+// Delete session (dialogue de confirmation partagé)
+async function handleDelete(sessionId) {
+  if (!await confirm({message: t('crawlHistory.deleteText'), confirmLabel: t('common.delete')})) return
   try {
     await crawlStore.deleteSession(sessionId)
-    deleteConfirm.value = null
   } catch (err) {
     error.value = err.message
   }
-}
-
-function cancelDelete() {
-  deleteConfirm.value = null
 }
 
 // Compare selected sessions
@@ -343,7 +336,7 @@ onMounted(async () => {
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2" @click.stop>
-                  <DeleteButton :label="$t('crawlHistory.deleteTooltip')" @click="confirmDelete(session.id)"/>
+                  <DeleteButton :label="$t('crawlHistory.deleteTooltip')" @click="handleDelete(session.id)"/>
                 </div>
               </div>
             </div>
@@ -413,37 +406,7 @@ onMounted(async () => {
       </div>
     </main>
 
-    <!-- Delete confirmation modal -->
     <Teleport to="body">
-      <div
-          v-if="deleteConfirm"
-          class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          @click.self="cancelDelete"
-      >
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            {{ $t('crawlHistory.deleteTitle') }}
-          </h3>
-          <p class="text-gray-500 dark:text-gray-400 mb-6">
-            {{ $t('crawlHistory.deleteText') }}
-          </p>
-          <div class="flex justify-end gap-3">
-            <button
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors"
-                @click="cancelDelete"
-            >
-              {{ $t('common.cancel') }}
-            </button>
-            <button
-                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                @click="deleteSession(deleteConfirm)"
-            >
-              {{ $t('common.delete') }}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- Floating comparison bar -->
       <Transition
           enter-active-class="transition ease-out duration-200"

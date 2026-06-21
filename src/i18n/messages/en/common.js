@@ -5,6 +5,8 @@
 export default {
     common: {
         cancel: 'Cancel',
+        confirm: 'Confirm',
+        confirmTitle: 'Confirmation',
         select: 'Select',
         save: 'Save',
         saved: 'Saved',

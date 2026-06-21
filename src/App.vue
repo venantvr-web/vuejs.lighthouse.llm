@@ -5,6 +5,7 @@ import ToastHost from '@/components/common/ToastHost.vue'
 import ProgressBar from '@/components/common/ProgressBar.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import OnboardingModal from '@/components/common/OnboardingModal.vue'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const route = useRoute()
 const isDark = ref(false)
@@ -39,6 +40,9 @@ const toggleTheme = () => {
 
     <!-- Onboarding initial (marque + domaine) si rien n'est configuré -->
     <OnboardingModal/>
+
+    <!-- Dialogue de confirmation global (suppressions, réinitialisations…) -->
+    <ConfirmDialog/>
 
     <!-- Theme toggle (floating) -->
     <button

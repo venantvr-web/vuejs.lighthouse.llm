@@ -48,6 +48,7 @@ export default {
 
         // Réinitialisation des données locales
         confirmResetDb: 'Réinitialiser toutes les données locales (historiques, crawls, artefacts IA…) ? Cette action est irréversible et la page sera rechargée.',
+        confirmRemoveSite: 'Supprimer le site « {brand} » ? Ses prompts GEO, sa watchlist et ses saisies resteront mais ne seront plus rattachés à un site actif.',
 
         // PageSpeed
         pageSpeedTitle: 'Analyse PageSpeed',

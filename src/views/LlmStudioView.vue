@@ -21,10 +21,12 @@ import {downloadText} from '@/utils/download'
 import {formatDateTimeMedium, formatRelativeTime} from '@/utils/formatters'
 import {canonicalUrl, extractDomain, sameHost} from '@/utils/url'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 import {useI18n} from '@/i18n'
 
 const {t, messages, locale} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 
 // Bonnes pratiques llms.txt (rappelées dans l'interface)
 const showTips = usePersistentRef('llmStudio.showTips', true)
@@ -102,6 +104,7 @@ async function loadHistory() {
 }
 
 async function removeHistory(item) {
+  if (!await confirm({message: t('llmStudio.confirmRemove'), confirmLabel: t('common.delete')})) return
   await aiHistory.remove(item.id)
   await loadHistory()
 }

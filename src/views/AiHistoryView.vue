@@ -13,9 +13,11 @@ import {downloadText} from '@/utils/download'
 import {canonicalUrl, extractDomain, sameHost} from '@/utils/url'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 const site = useSiteStore()
 
 defineProps({embedded: {type: Boolean, default: false}})
@@ -88,13 +90,13 @@ async function copy(item) {
 }
 
 async function remove(item) {
-  if (!confirm(t('aiHistory.confirmRemove'))) return
+  if (!await confirm({message: t('aiHistory.confirmRemove'), confirmLabel: t('common.delete')})) return
   await aiHistory.remove(item.id)
   await load()
 }
 
 async function clearAll() {
-  if (!confirm(t('aiHistory.confirmClearAll'))) return
+  if (!await confirm({message: t('aiHistory.confirmClearAll'), confirmLabel: t('common.clearAll')})) return
   await aiHistory.clearAll()
   await load()
 }

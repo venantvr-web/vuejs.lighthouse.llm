@@ -24,9 +24,11 @@ import {canonicalUrl} from '@/utils/url'
 import {formatDateISO, formatRelativeTime} from '@/utils/formatters'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t, messages, locale} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 
 const geoStore = useGeoStore()
 const geoHistory = useGeoHistoryStore()
@@ -207,8 +209,8 @@ async function handleAdd() {
   await loadItemStats(item)
 }
 
-function handleRemove(item) {
-  if (confirm(t('geo.confirmRemove'))) {
+async function handleRemove(item) {
+  if (await confirm({message: t('geo.confirmRemove'), confirmLabel: t('common.delete')})) {
     geoStore.removeItem(item.id)
     geoHistory.deleteRunsForPrompt(item.id)
   }
@@ -501,10 +503,7 @@ async function handleRunAll() {
                   @keyup.enter="handleAdd"
               />
             </FieldLabel>
-            <button
-                class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
-                @click="handleAdd"
-            >
+            <button class="btn btn-primary text-sm shrink-0" @click="handleAdd">
               {{ $t('geo.add') }}
             </button>
           </div>

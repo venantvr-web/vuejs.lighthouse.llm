@@ -22,6 +22,7 @@ export default {
         selectPageHint: 'Select a page to compare its evolution',
         confirmDeleteTitle: 'Confirm deletion',
         confirmDeleteDomainPrefix: 'Delete all analyses for',
+        confirmDeleteDomain: 'Delete all analyses for "{domain}"?',
         confirmDeleteScore: 'Delete this analysis?',
         confirmClearAll: 'Delete all history? This action cannot be undone.',
         // ScoreChart

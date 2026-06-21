@@ -17,9 +17,11 @@ import FieldLabel from '@/components/common/FieldLabel.vue'
 import {breachedCategories as computeBreached} from '@/utils/budgets'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
+import {useConfirm} from '@/composables/useConfirm'
 
 const {t} = useI18n()
 const toast = useToast()
+const {confirm} = useConfirm()
 
 const watchlistStore = useWatchlistStore()
 const scoreHistory = useScoreHistoryStore()
@@ -124,8 +126,8 @@ async function handleAdd() {
   await loadItemStats(item)
 }
 
-function handleRemove(item) {
-  if (confirm(t('watchlist.confirmRemove', {label: item.label}))) {
+async function handleRemove(item) {
+  if (await confirm({message: t('watchlist.confirmRemove', {label: item.label}), confirmLabel: t('common.delete')})) {
     watchlistStore.removeItem(item.id)
   }
 }
@@ -270,10 +272,7 @@ async function handleEnableNotifications() {
               <option value="local">{{ $t('watchlist.sourceLocal') }}</option>
             </select>
           </FieldLabel>
-          <button
-              class="shrink-0 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
-              @click="handleAdd"
-          >
+          <button class="btn btn-primary text-sm shrink-0" @click="handleAdd">
             {{ $t('watchlist.add') }}
           </button>
         </div>

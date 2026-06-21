@@ -5,6 +5,7 @@ export default {
     llmStudio: {
         headerTitle: 'Studio LLM',
         headerSubtitle: 'llms.txt, llms-full.txt et veille IA',
+        confirmRemove: 'Supprimer cet artefact de l\'historique ?',
 
         urlLabel: 'Domaine à analyser :',
         urlPlaceholder: 'https://votre-domaine.com',

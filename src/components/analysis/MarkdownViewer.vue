@@ -1,6 +1,7 @@
 <script setup>
 import {computed} from 'vue'
 import {marked} from 'marked'
+import DOMPurify from 'dompurify'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import typescript from 'highlight.js/lib/languages/typescript'
@@ -45,7 +46,9 @@ marked.setOptions({
 const renderedContent = computed(() => {
   if (!props.content) return ''
   try {
-    return marked(props.content)
+    // Le HTML est issu de réponses LLM : on le nettoie (anti-XSS) avant v-html.
+    // On autorise target/rel sur les liens pour l'ouverture en nouvel onglet.
+    return DOMPurify.sanitize(marked(props.content), {ADD_ATTR: ['target', 'rel']})
   } catch (e) {
     console.error('Markdown parse error:', e)
     return props.content

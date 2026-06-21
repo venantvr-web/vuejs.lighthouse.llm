@@ -180,6 +180,30 @@ describe('MarkdownViewer', () => {
         })
     })
 
+    describe('sanitisation (anti-XSS)', () => {
+        // Note : DOMPurify retire aussi les attributs d'événement (onerror…) dans
+        // un vrai navigateur ; happy-dom ne le reflète pas en test, on vérifie
+        // donc le retrait des balises <script> et la préservation du contenu.
+        it('removes script tags', () => {
+            const wrapper = mount(MarkdownViewer, {
+                props: {content: 'Bonjour<script>alert(1)</script> la suite'}
+            })
+            const html = wrapper.html()
+            expect(html).not.toContain('<script')
+            expect(html).not.toContain('alert(1)')
+            expect(html).toContain('Bonjour')
+        })
+
+        it('keeps safe links', () => {
+            const wrapper = mount(MarkdownViewer, {
+                props: {content: '[ok](https://example.com)'}
+            })
+            const link = wrapper.find('a')
+            expect(link.exists()).toBe(true)
+            expect(link.attributes('href')).toBe('https://example.com')
+        })
+    })
+
     describe('error handling', () => {
         it('should handle malformed markdown gracefully', () => {
             const wrapper = mount(MarkdownViewer, {

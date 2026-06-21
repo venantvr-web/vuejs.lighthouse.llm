@@ -21,6 +21,7 @@ export default {
         keysTitle: 'Clés API par moteur',
         keysHelp: 'Stockées localement dans votre navigateur. Renseignez les moteurs que vous voulez interroger.',
         keyPlaceholder: 'clé API…',
+        keyRequired: 'Clé requise — cliquez pour la renseigner',
         ollamaHint: 'Ollama se configure dans les Paramètres.',
         // Aucun moteur prêt (deux fragments, le bouton « Clés API » s'insère entre les deux)
         noProviderBefore: 'Aucun moteur configuré. Cliquez sur ',

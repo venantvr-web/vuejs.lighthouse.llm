@@ -21,6 +21,7 @@ export default {
         keysTitle: 'API keys per engine',
         keysHelp: 'Stored locally in your browser. Fill in the engines you want to query.',
         keyPlaceholder: 'API key…',
+        keyRequired: 'Key required — click to enter it',
         ollamaHint: 'Ollama is configured in the Settings.',
         // No engine ready (two fragments, the "API keys" button is inserted between them)
         noProviderBefore: 'No engine configured. Click ',

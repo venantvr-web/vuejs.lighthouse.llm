@@ -311,19 +311,26 @@ async function handleRunAll() {
         {{ $t('geo.noProviderBefore') }}<strong>{{ $t('geo.apiKeys') }}</strong>{{ $t('geo.noProviderAfter') }}
       </div>
 
-      <!-- Provider selection -->
-      <div v-else class="flex flex-wrap items-center gap-2 mb-6">
+      <!-- Provider selection : tous les moteurs sont visibles ; ceux sans clé
+           sont grisés et ouvrent l'éditeur de clés au clic (ils ne disparaissent pas). -->
+      <div class="flex flex-wrap items-center gap-2 mb-6">
         <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('geo.engines') }}</span>
         <button
-            v-for="p in readyProviders"
+            v-for="p in settings.geoProviders"
             :key="p.id"
-            :class="selectedProviderIds.includes(p.id)
-              ? 'bg-primary-600 text-white border-primary-600'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'"
-            class="px-3 py-1 rounded-full border text-xs font-medium transition-colors"
-            @click="toggleProvider(p.id)"
+            :class="!p.ready
+              ? 'bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500 border-dashed border-gray-300 dark:border-gray-600'
+              : selectedProviderIds.includes(p.id)
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'"
+            :title="p.ready ? p.model : $t('geo.keyRequired')"
+            class="inline-flex items-center gap-1 px-3 py-1 rounded-full border text-xs font-medium transition-colors"
+            @click="p.ready ? toggleProvider(p.id) : (showKeyEditor = true)"
         >
           {{ p.label }}
+          <svg v-if="!p.ready" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
         </button>
         <label class="ml-auto flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 cursor-pointer" :title="$t('geo.advancedTitle')">
           <input v-model="advancedAnalysis" class="rounded" type="checkbox"/>

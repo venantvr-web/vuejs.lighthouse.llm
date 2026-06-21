@@ -355,15 +355,26 @@ onMounted(async () => {
                 <span v-if="item.model"> · {{ item.model }}</span>
               </p>
             </div>
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-1 shrink-0">
               <button
-                  class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                  class="p-2 rounded-lg text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  :title="$t('common.expand')"
+                  :aria-label="$t('common.expand')"
                   @click="liveModal = {title: typeLabel(item.type) + ' — ' + item.url, content: item.content}"
               >
-                {{ $t('common.expand') }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
               </button>
-              <button class="text-xs text-red-500 hover:underline" @click="removeHistory(item)">
-                {{ $t('common.delete') }}
+              <button
+                  class="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  :title="$t('common.delete')"
+                  :aria-label="$t('common.delete')"
+                  @click="removeHistory(item)"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                </svg>
               </button>
             </div>
           </li>

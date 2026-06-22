@@ -138,6 +138,8 @@ Au-delà des 4 métriques, l'écran expose tout ce que l'API permet de découper
 - **Dimension « Apparence »** (`searchAppearance`) : répartition par type d'affichage dans les résultats (résultats enrichis, AMP, FAQ…).
 - **Comparaison de périodes** : cochez **Comparer à la période précédente** avant d'analyser. Un encart affiche les **totaux** de la période courante et la **variation** (en %) face à la période contiguë précédente, métrique par métrique. Les totaux sont calculés via une requête **sans dimension** (agrégat exact), plus fiable que la somme des lignes — les requêtes anonymisées ne sont pas toutes attribuées.
 - **Inspection d'URL** (API URL Inspection) : pour une URL précise, l'app affiche le **verdict d'indexation**, l'état de **couverture**, la **dernière exploration**, la **canonique Google**, l'état **robots.txt**, l'**ergonomie mobile** et les **résultats enrichis**, avec un lien direct vers Search Console.
+- **Fenêtres longues et saisonnalité** : la période monte jusqu'à **6, 12 ou 16 mois** (Search Console conserve ~16 mois). Combinée à la dimension **Dates** et au **filtre URL**, l'app trace une **courbe de saisonnalité** (clics par date) pour la page ciblée.
+- **Filtre URL (page)** : un champ restreint toute l'analyse (lignes, totaux, comparaison, rapport) à une **page** dont l'URL **contient** le texte saisi (chemin ou URL complète). Idéal pour étudier une page précise dans le temps.
 
 #### Ce qui reste hors d'atteinte de l'API
 

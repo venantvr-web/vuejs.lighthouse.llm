@@ -1,5 +1,5 @@
 <script setup>
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
 import {useI18n} from '@/i18n'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildPageFilter, deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
@@ -46,6 +46,27 @@ const inspectionUrl = useScopedPersistentRef('searchconsole.inspectionUrl', '')
 
 // Groupe de filtres actif (restreint à une URL), ou null.
 const activeFilters = computed(() => buildPageFilter(pageFilter.value.trim()))
+
+// Liste des pages (pour l'autocomplétion) — chargée à la demande, mise en cache.
+const pageList = ref([])
+const pagesLoaded = ref(false)
+
+async function reloadPages() {
+  if (!selectedSite.value) return
+  const pages = await query(selectedSite.value, {days: days.value, dimensions: ['page'], all: true, type: searchType.value})
+  pageList.value = pages.map(p => p.key)
+  pagesLoaded.value = true
+}
+
+async function ensurePages() {
+  if (!pagesLoaded.value) await reloadPages()
+}
+
+// Recharger les suggestions si l'on change de propriété.
+watch(selectedSite, () => {
+  pagesLoaded.value = false
+  pageList.value = []
+})
 
 // Série de clics par date (triée), pour la courbe de saisonnalité.
 const dateSeries = computed(() => {
@@ -357,14 +378,31 @@ function formatPosition(p) {
             <input v-model="compare" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"/>
             {{ $t('searchConsole.compare') }}
           </label>
-          <label class="text-xs text-gray-600 dark:text-gray-300 grow min-w-[16rem]">
+          <label class="text-xs text-gray-600 dark:text-gray-300 grow min-w-[18rem]">
             <span class="block mb-1">{{ $t('searchConsole.pageFilter') }}</span>
-            <input
-                v-model="pageFilter"
-                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="/blog/mon-article/"
-                type="text"
-            />
+            <div class="flex gap-2">
+              <input
+                  v-model="pageFilter"
+                  :placeholder="$t('searchConsole.pageFilterPlaceholder')"
+                  class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  list="sc-pages"
+                  type="text"
+                  @focus="ensurePages"
+              />
+              <button
+                  :disabled="loading || !selectedSite"
+                  :title="$t('searchConsole.loadPages')"
+                  class="shrink-0 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm disabled:opacity-50"
+                  type="button"
+                  @click="reloadPages"
+              >
+                ↻
+              </button>
+            </div>
+            <datalist id="sc-pages">
+              <option v-for="p in pageList" :key="p" :value="p"/>
+            </datalist>
+            <span v-if="pagesLoaded" class="block mt-1 text-[11px] text-gray-400">{{ formatNumber(pageList.length) }} {{ $t('searchConsole.pagesAvailable') }}</span>
           </label>
           <button
               :disabled="loading || !selectedSite"

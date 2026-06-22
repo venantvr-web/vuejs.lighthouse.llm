@@ -15,7 +15,10 @@ import PageIntro from '@/components/common/PageIntro.vue'
 const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
 const site = useSiteStore()
-const {connected, loading, error, sites, connect, disconnect, query} = useSearchConsole()
+const {connected, loading, error, sites, connect, connectWithKey, disconnect, query} = useSearchConsole()
+
+// Méthode d'authentification : OAuth (popup) ou compte de service (clé JSON)
+const authMethod = usePersistentRef('searchconsole.authMethod', 'oauth')
 
 // Nom d'hôte d'une propriété Search Console ("https://ex.com/" ou "sc-domain:ex.com")
 function siteHost(s) {
@@ -35,14 +38,26 @@ function onClientIdInput(event) {
   settings.setSearchConsoleClientId(event.target.value)
 }
 
-async function handleConnect() {
-  await connect(settings.searchConsoleClientId)
-  // Conserve la propriété mémorisée si elle existe toujours, sinon présélectionne
+function onServiceAccountInput(event) {
+  settings.setSearchConsoleServiceAccount(event.target.value)
+}
+
+// Présélectionne une propriété après connexion (celle du site actif, sinon la 1re)
+function preselectSite() {
   if (sites.value.length && !sites.value.includes(selectedSite.value)) {
-    // Propriété correspondant au site actif, sinon la première
     const match = site.activeDomain ? sites.value.find(s => siteHost(s) === site.activeDomain) : null
     selectedSite.value = match || sites.value[0]
   }
+}
+
+async function handleConnect() {
+  await connect(settings.searchConsoleClientId)
+  preselectSite()
+}
+
+async function handleConnectKey() {
+  await connectWithKey(settings.searchConsoleServiceAccount)
+  preselectSite()
 }
 
 async function handleQuery() {
@@ -91,25 +106,73 @@ function formatPosition(p) {
       <!-- Connection -->
       <div v-if="!connected" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
         <p class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ $t('searchConsole.connectTitle') }}</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          {{ $t('searchConsole.connectIntro') }}
-        </p>
-        <div class="flex flex-col md:flex-row gap-3">
-          <input
-              :value="settings.searchConsoleClientId"
-              class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="xxxxxxxx.apps.googleusercontent.com"
-              type="text"
-              @input="onClientIdInput"
-          />
+
+        <!-- Choix de la méthode d'authentification -->
+        <div class="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 my-3">
           <button
-              :disabled="loading || !settings.searchConsoleClientId"
-              class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors disabled:opacity-50"
-              @click="handleConnect"
+              :class="authMethod === 'oauth' ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300'"
+              class="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+              type="button"
+              @click="authMethod = 'oauth'"
+          >
+            {{ $t('searchConsole.methodOAuth') }}
+          </button>
+          <button
+              :class="authMethod === 'service' ? 'bg-primary-600 text-white' : 'text-gray-600 dark:text-gray-300'"
+              class="px-3 py-1 rounded-md text-xs font-medium transition-colors"
+              type="button"
+              @click="authMethod = 'service'"
+          >
+            {{ $t('searchConsole.methodServiceAccount') }}
+          </button>
+        </div>
+
+        <!-- Méthode OAuth (Client ID) -->
+        <template v-if="authMethod === 'oauth'">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('searchConsole.connectIntro') }}</p>
+          <div class="flex flex-col md:flex-row gap-3">
+            <input
+                :value="settings.searchConsoleClientId"
+                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="xxxxxxxx.apps.googleusercontent.com"
+                type="text"
+                @input="onClientIdInput"
+            />
+            <button
+                :disabled="loading || !settings.searchConsoleClientId"
+                class="btn btn-primary text-sm shrink-0"
+                @click="handleConnect"
+            >
+              {{ loading ? $t('searchConsole.connecting') : $t('searchConsole.connect') }}
+            </button>
+          </div>
+        </template>
+
+        <!-- Méthode compte de service (clé JSON) -->
+        <template v-else>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ $t('searchConsole.serviceAccountIntro') }}</p>
+          <ol class="text-xs text-gray-500 dark:text-gray-400 list-decimal list-inside space-y-0.5 mb-3">
+            <li>{{ $t('searchConsole.serviceStep1') }}</li>
+            <li>{{ $t('searchConsole.serviceStep2') }}</li>
+            <li>{{ $t('searchConsole.serviceStep3') }}</li>
+          </ol>
+          <textarea
+              :value="settings.searchConsoleServiceAccount"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
+              :placeholder="'{\n  &quot;type&quot;: &quot;service_account&quot;,\n  &quot;client_email&quot;: &quot;…iam.gserviceaccount.com&quot;,\n  &quot;private_key&quot;: &quot;-----BEGIN PRIVATE KEY-----…&quot;\n}'"
+              rows="5"
+              @input="onServiceAccountInput"
+          />
+          <p class="mt-2 text-[11px] text-amber-600 dark:text-amber-400">⚠️ {{ $t('searchConsole.serviceAccountWarning') }}</p>
+          <button
+              :disabled="loading || !settings.searchConsoleServiceAccount"
+              class="btn btn-primary text-sm mt-3"
+              @click="handleConnectKey"
           >
             {{ loading ? $t('searchConsole.connecting') : $t('searchConsole.connect') }}
           </button>
-        </div>
+        </template>
+
         <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
       </div>
 

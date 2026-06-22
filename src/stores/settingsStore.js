@@ -19,6 +19,9 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // State - Google Search Console OAuth client id (BYO, browser OAuth)
     const searchConsoleClientId = ref('')
+    // Clé JSON de compte de service (alternative à l'OAuth, sans popup). Stockée
+    // localement (BYO-key) ; contient une clé privée → à manier avec précaution.
+    const searchConsoleServiceAccount = ref('')
 
     // State - PageSpeed Insights API key (optional; raises the request quota)
     const pageSpeedApiKey = ref('')
@@ -209,6 +212,15 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     /**
+     * Set the Search Console service-account JSON key (alternative to OAuth).
+     * @param {string} json - Raw service-account JSON
+     */
+    function setSearchConsoleServiceAccount(json) {
+        searchConsoleServiceAccount.value = (json || '').trim()
+        saveSettings()
+    }
+
+    /**
      * Set the PageSpeed Insights API key (optional, raises the quota).
      * @param {string} key - API key
      */
@@ -324,6 +336,7 @@ export const useSettingsStore = defineStore('settings', () => {
                 apiKey: apiKey.value,
                 providerKeys: providerKeys.value,
                 searchConsoleClientId: searchConsoleClientId.value,
+                searchConsoleServiceAccount: searchConsoleServiceAccount.value,
                 pageSpeedApiKey: pageSpeedApiKey.value,
                 temperature: temperature.value,
                 maxTokens: maxTokens.value,
@@ -355,6 +368,7 @@ export const useSettingsStore = defineStore('settings', () => {
             if (settings.apiKey !== undefined) apiKey.value = settings.apiKey
             if (settings.providerKeys) providerKeys.value = {...providerKeys.value, ...settings.providerKeys}
             if (settings.searchConsoleClientId) searchConsoleClientId.value = settings.searchConsoleClientId
+            if (settings.searchConsoleServiceAccount) searchConsoleServiceAccount.value = settings.searchConsoleServiceAccount
             if (settings.pageSpeedApiKey) pageSpeedApiKey.value = settings.pageSpeedApiKey
             if (settings.temperature !== undefined) temperature.value = settings.temperature
             // Migration : l'ancien défaut 8192 (jamais choisi, faute d'UI) est
@@ -436,7 +450,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // Auto-save on changes
     watch(
-        [llmProvider, llmModel, apiKey, providerKeys, searchConsoleClientId, pageSpeedApiKey, temperature, maxTokens,
+        [llmProvider, llmModel, apiKey, providerKeys, searchConsoleClientId, searchConsoleServiceAccount, pageSpeedApiKey, temperature, maxTokens,
             ollamaBaseUrl, ollamaModel, theme, showLineNumbers,
             autoAnalyze, saveHistory],
         () => {
@@ -456,6 +470,7 @@ export const useSettingsStore = defineStore('settings', () => {
         apiKey,
         providerKeys,
         searchConsoleClientId,
+        searchConsoleServiceAccount,
         pageSpeedApiKey,
         temperature,
         maxTokens,
@@ -480,6 +495,7 @@ export const useSettingsStore = defineStore('settings', () => {
         setAPIKey,
         setProviderKey,
         setSearchConsoleClientId,
+        setSearchConsoleServiceAccount,
         setPageSpeedApiKey,
         setTemperature,
         setMaxTokens,

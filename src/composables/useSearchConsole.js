@@ -1,5 +1,6 @@
 import {ref} from 'vue'
 import {toSeries} from '@/utils/series'
+import {getServiceAccountToken} from '@/services/googleServiceAccount'
 
 const SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
@@ -145,6 +146,30 @@ export function useSearchConsole() {
         }
     }
 
+    /**
+     * Se connecte via une clé de **compte de service** (sans popup) : signe un
+     * JWT, l'échange contre un jeton, puis récupère les propriétés vérifiées.
+     * @param {string|object} serviceAccountKey - Clé JSON du compte de service
+     */
+    async function connectWithKey(serviceAccountKey) {
+        if (!serviceAccountKey) {
+            error.value = 'Clé de compte de service manquante.'
+            return
+        }
+        loading.value = true
+        error.value = null
+        try {
+            accessToken = await getServiceAccountToken(serviceAccountKey, SCOPE)
+            connected.value = true
+            await fetchSites()
+        } catch (err) {
+            connected.value = false
+            error.value = err.message || 'Échec de la connexion par compte de service'
+        } finally {
+            loading.value = false
+        }
+    }
+
     function disconnect() {
         accessToken = null
         connected.value = false
@@ -196,7 +221,7 @@ export function useSearchConsole() {
         }
     }
 
-    return {connected, loading, error, sites, connect, disconnect, fetchSites, query}
+    return {connected, loading, error, sites, connect, connectWithKey, disconnect, fetchSites, query}
 }
 
 export default useSearchConsole

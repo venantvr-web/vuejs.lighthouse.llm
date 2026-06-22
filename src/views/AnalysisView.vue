@@ -12,7 +12,7 @@ import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
-import {buildContinuationPrompt} from '@/services/llm/continuation'
+import {buildContinuationPrompt, consolidateContinuation, trimToLastCompleteLine} from '@/services/llm/continuation'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 import {useNotifications} from '@/composables/useNotifications'
@@ -269,8 +269,12 @@ const startAnalysis = async () => {
 
 const continueAnalysis = async () => {
   if (!lastPrompt || !analysisResult.value || isStreaming.value) return
-  analysisResult.value += '\n'
-  await streamInto(buildContinuationPrompt(lastPrompt, analysisResult.value), {append: true})
+  // Reprise propre : on repart de la dernière ligne complète + consolidation
+  const head = trimToLastCompleteLine(analysisResult.value)
+  const boundary = head.length
+  analysisResult.value = head
+  await streamInto(buildContinuationPrompt(lastPrompt, head), {append: true})
+  if (!isStreaming.value) analysisResult.value = consolidateContinuation(analysisResult.value, boundary)
   await persistAnalysis()
 }
 

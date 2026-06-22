@@ -2,7 +2,7 @@ import {ref} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
 import {buildIndexabilityPrompt, buildIndexabilitySignals, INDEXABILITY_SYSTEM} from '@/services/indexabilityDiagnosis'
-import {buildContinuationPrompt} from '@/services/llm/continuation'
+import {buildContinuationPrompt, consolidateContinuation, trimToLastCompleteLine} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {useToast} from '@/composables/useToast'
 import {useNotifications} from '@/composables/useNotifications'
@@ -101,11 +101,14 @@ export function useIndexabilityDiagnosis() {
         await persist()
     }
 
-    /** Reprend une réponse tronquée là où elle s'est arrêtée. */
+    /** Reprend une réponse tronquée : reprise sur ligne complète + consolidation. */
     async function continueDiagnosis() {
         if (!lastPrompt || !diagnosis.value || diagnosing.value) return
-        diagnosis.value += '\n'
-        await streamInto(buildContinuationPrompt(lastPrompt, diagnosis.value), {append: true})
+        const head = trimToLastCompleteLine(diagnosis.value)
+        const boundary = head.length
+        diagnosis.value = head
+        await streamInto(buildContinuationPrompt(lastPrompt, head), {append: true})
+        if (!diagnosing.value) diagnosis.value = consolidateContinuation(diagnosis.value, boundary)
         await persist()
     }
 

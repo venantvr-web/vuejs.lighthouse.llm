@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {dateRangeISO, normalizeRow, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
+import {dateRangeISO, normalizeRow, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
 
 describe('useSearchConsole - pure helpers', () => {
     describe('dateRangeISO', () => {
@@ -58,6 +58,42 @@ describe('useSearchConsole - pure helpers', () => {
         it('caps to the most recent points and ignores non-numerics', () => {
             const snapshots = Array.from({length: 15}, (_, i) => ({clicks: i}))
             expect(snapshotSeries(snapshots, 'clicks', 12)).toHaveLength(12)
+        })
+    })
+
+    describe('rowsToCsv', () => {
+        it('emits a header plus one line per row', () => {
+            const csv = rowsToCsv([
+                {key: 'vue seo', clicks: 5, impressions: 100, ctr: 0.05, position: 3.2}
+            ], 'query')
+            expect(csv).toBe('query,clicks,impressions,ctr,position\nvue seo,5,100,0.05,3.2')
+        })
+
+        it('escapes values containing commas, quotes or newlines', () => {
+            const csv = rowsToCsv([{key: 'a,"b"', clicks: 1, impressions: 2, ctr: 0, position: 0}], 'page')
+            expect(csv.split('\n')[1]).toBe('"a,""b""",1,2,0,0')
+        })
+
+        it('returns just the header for no rows', () => {
+            expect(rowsToCsv([], 'query')).toBe('query,clicks,impressions,ctr,position')
+        })
+    })
+
+    describe('reportToCsv', () => {
+        it('prefixes every row with its dimension', () => {
+            const csv = reportToCsv({
+                query: [{key: 'a', clicks: 1, impressions: 10, ctr: 0.1, position: 2}],
+                device: [{key: 'MOBILE', clicks: 3, impressions: 30, ctr: 0.1, position: 5}]
+            })
+            expect(csv).toBe(
+                'dimension,key,clicks,impressions,ctr,position\n' +
+                'query,a,1,10,0.1,2\n' +
+                'device,MOBILE,3,30,0.1,5'
+            )
+        })
+
+        it('handles an empty report', () => {
+            expect(reportToCsv({})).toBe('dimension,key,clicks,impressions,ctr,position')
         })
     })
 })

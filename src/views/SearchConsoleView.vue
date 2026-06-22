@@ -93,6 +93,15 @@ const dateSeriesMeta = computed(() => {
   const staleDays = lastData
       ? Math.round((Date.now() - new Date(`${lastData}T00:00:00Z`).getTime()) / 86400000)
       : null
+  // Plus grand trou interne : jours manquants entre deux jours consécutifs avec données.
+  const dayDiff = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86400000)
+  let gap = null
+  for (let i = 1; i < dates.length; i++) {
+    const missing = dayDiff(dates[i - 1], dates[i]) - 1
+    if (missing > 0 && (!gap || missing > gap.days)) {
+      gap = {days: missing, from: dates[i - 1], to: dates[i]}
+    }
+  }
   return {
     start: analyzedRange.value.startDate,
     end: analyzedRange.value.endDate,
@@ -101,12 +110,14 @@ const dateSeriesMeta = computed(() => {
     daysWithData: dates.length,
     totalDays: dateSeries.value.length,
     lastData,
-    staleDays
+    staleDays,
+    gap
   }
 })
 
-// Seuil au-delà duquel l'absence de donnée récente est suspecte (lag normal ~3 j).
+// Seuils d'alerte (le lag normal de Search Console est ~3 jours).
 const STALE_THRESHOLD = 5
+const GAP_THRESHOLD = 7
 
 // Formate une date ('YYYY-MM-DD' ou timestamp) en date locale courte.
 function fmtDate(v) {
@@ -624,6 +635,12 @@ function formatPosition(p) {
               class="mt-2 text-xs text-red-600 dark:text-red-400 font-medium"
           >
             ⚠️ {{ $t('searchConsole.trackingStale', {n: formatNumber(dateSeriesMeta.staleDays)}) }}
+          </p>
+          <p
+              v-if="dateSeriesMeta.gap && dateSeriesMeta.gap.days >= GAP_THRESHOLD"
+              class="mt-2 text-xs text-amber-600 dark:text-amber-400 font-medium"
+          >
+            ⚠️ {{ $t('searchConsole.dataGap', {n: formatNumber(dateSeriesMeta.gap.days), from: fmtDate(dateSeriesMeta.gap.from), to: fmtDate(dateSeriesMeta.gap.to)}) }}
           </p>
         </div>
 

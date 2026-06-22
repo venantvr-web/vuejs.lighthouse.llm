@@ -61,6 +61,18 @@ export function deltaRatio(current, previous) {
 }
 
 /**
+ * Construit un groupe de filtres Search Console sur la dimension `page`,
+ * pour restreindre une requête à une URL donnée (analyse de saisonnalité, etc.).
+ * @param {string} url - URL ou fragment d'URL
+ * @param {string} operator - 'contains' (défaut), 'equals', 'includingRegex'…
+ * @returns {Array|null} dimensionFilterGroups, ou null si pas d'URL
+ */
+export function buildPageFilter(url, operator = 'contains') {
+    if (!url) return null
+    return [{filters: [{dimension: 'page', operator, expression: url}]}]
+}
+
+/**
  * Normalize a Search Console analytics row to a flat shape.
  * @param {object} row - API row ({ keys, clicks, impressions, ctr, position })
  * @returns {{key: string, clicks: number, impressions: number, ctr: number, position: number}}
@@ -276,7 +288,7 @@ export function useSearchConsole() {
      * @param {{days:number,dimensions:string[],rowLimit:number,all:boolean}} opts
      * @returns {Promise<Array>} lignes normalisées
      */
-    async function runQuery(siteUrl, {days = 28, dimensions = ['query'], rowLimit = 25, all = false, type = '', range = null} = {}) {
+    async function runQuery(siteUrl, {days = 28, dimensions = ['query'], rowLimit = 25, all = false, type = '', range = null, filters = null} = {}) {
         const {startDate, endDate} = range || dateRangeISO(days)
         const pageSize = all ? MAX_PAGE : rowLimit
         const out = []
@@ -285,6 +297,7 @@ export function useSearchConsole() {
             const body = {startDate, endDate, rowLimit: pageSize, startRow}
             if (dimensions && dimensions.length) body.dimensions = dimensions
             if (type) body.type = type
+            if (filters) body.dimensionFilterGroups = filters
             const data = await authedFetch(`${API_BASE}/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -324,13 +337,13 @@ export function useSearchConsole() {
      * @returns {Promise<Object>} { [dimension]: lignes }
      */
     async function fetchReport(siteUrl, opts = {}) {
-        const {days = 28, dimensions = REPORT_DIMENSIONS, type = ''} = opts
+        const {days = 28, dimensions = REPORT_DIMENSIONS, type = '', filters = null} = opts
         loading.value = true
         error.value = null
         const report = {}
         try {
             for (const dimension of dimensions) {
-                report[dimension] = await runQuery(siteUrl, {days, dimensions: [dimension], all: true, type})
+                report[dimension] = await runQuery(siteUrl, {days, dimensions: [dimension], all: true, type, filters})
             }
             return report
         } catch (err) {

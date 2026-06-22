@@ -2,7 +2,7 @@
 import {computed, ref} from 'vue'
 import {useI18n} from '@/i18n'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {buildPageFilter, deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
@@ -41,7 +41,17 @@ const days = usePersistentRef('searchconsole.days', 28)
 const dimension = usePersistentRef('searchconsole.dimension', 'query')
 const searchType = usePersistentRef('searchconsole.type', 'web')
 const compare = usePersistentRef('searchconsole.compare', false)
+const pageFilter = useScopedPersistentRef('searchconsole.pageFilter', '')
 const inspectionUrl = useScopedPersistentRef('searchconsole.inspectionUrl', '')
+
+// Groupe de filtres actif (restreint à une URL), ou null.
+const activeFilters = computed(() => buildPageFilter(pageFilter.value.trim()))
+
+// Série de clics par date (triée), pour la courbe de saisonnalité.
+const dateSeries = computed(() => {
+  if (dimension.value !== 'date' || rows.value.length < 2) return []
+  return [...rows.value].sort((a, b) => (a.key < b.key ? -1 : 1)).map(r => r.clicks)
+})
 const rows = ref([])
 const clicksTrend = ref([])
 const report = ref(null)
@@ -121,7 +131,7 @@ async function handleReport() {
   if (!selectedSite.value) return
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
-  report.value = await fetchReport(selectedSite.value, {days: days.value, type: searchType.value})
+  report.value = await fetchReport(selectedSite.value, {days: days.value, type: searchType.value, filters: activeFilters.value})
 }
 
 async function handleInspect() {
@@ -172,10 +182,11 @@ async function handleQuery() {
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
   compareTotals.value = null
-  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true, type: searchType.value})
+  const filters = activeFilters.value
+  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true, type: searchType.value, filters})
   if (compare.value) {
-    const current = await fetchTotals(selectedSite.value, {days: days.value, type: searchType.value})
-    const previous = await fetchTotals(selectedSite.value, {range: previousDateRangeISO(days.value), type: searchType.value})
+    const current = await fetchTotals(selectedSite.value, {days: days.value, type: searchType.value, filters})
+    const previous = await fetchTotals(selectedSite.value, {range: previousDateRangeISO(days.value), type: searchType.value, filters})
     compareTotals.value = {current, previous}
   }
   if (rows.value.length) {
@@ -316,6 +327,9 @@ function formatPosition(p) {
               <option :value="7">{{ $t('searchConsole.days7') }}</option>
               <option :value="28">{{ $t('searchConsole.days28') }}</option>
               <option :value="90">{{ $t('searchConsole.days90') }}</option>
+              <option :value="180">{{ $t('searchConsole.months6') }}</option>
+              <option :value="365">{{ $t('searchConsole.months12') }}</option>
+              <option :value="480">{{ $t('searchConsole.months16') }}</option>
             </select>
           </label>
           <label class="text-xs text-gray-600 dark:text-gray-300">
@@ -342,6 +356,15 @@ function formatPosition(p) {
           <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 pb-2">
             <input v-model="compare" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"/>
             {{ $t('searchConsole.compare') }}
+          </label>
+          <label class="text-xs text-gray-600 dark:text-gray-300 grow min-w-[16rem]">
+            <span class="block mb-1">{{ $t('searchConsole.pageFilter') }}</span>
+            <input
+                v-model="pageFilter"
+                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="/blog/mon-article/"
+                type="text"
+            />
           </label>
           <button
               :disabled="loading || !selectedSite"
@@ -461,6 +484,12 @@ function formatPosition(p) {
             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.avgPosition') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatPosition(summary.position) }}</p>
           </div>
+        </div>
+
+        <!-- Saisonnalité : clics par date sur la fenêtre choisie -->
+        <div v-if="dateSeries.length > 1" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ $t('searchConsole.seasonality') }}</p>
+          <Sparkline :auto-scale="true" :values="dateSeries" :width="640" color="#10b981"/>
         </div>
 
         <!-- Clicks trend across saved snapshots -->

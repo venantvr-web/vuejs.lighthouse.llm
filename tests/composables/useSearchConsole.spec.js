@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {dateRangeISO, deltaRatio, normalizeRow, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
+import {buildPageFilter, dateRangeISO, deltaRatio, normalizeRow, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
 
 describe('useSearchConsole - pure helpers', () => {
     describe('dateRangeISO', () => {
@@ -33,6 +33,22 @@ describe('useSearchConsole - pure helpers', () => {
 
         it('returns null when there is no baseline', () => {
             expect(deltaRatio(10, 0)).toBeNull()
+        })
+    })
+
+    describe('buildPageFilter', () => {
+        it('builds a page dimension filter group', () => {
+            expect(buildPageFilter('/blog/x/')).toEqual([
+                {filters: [{dimension: 'page', operator: 'contains', expression: '/blog/x/'}]}
+            ])
+        })
+
+        it('honours a custom operator', () => {
+            expect(buildPageFilter('https://x.tld/p', 'equals')[0].filters[0].operator).toBe('equals')
+        })
+
+        it('returns null without a url', () => {
+            expect(buildPageFilter('')).toBeNull()
         })
     })
 

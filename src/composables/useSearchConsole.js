@@ -6,6 +6,7 @@ const SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
 const SITES_URL = 'https://www.googleapis.com/webmasters/v3/sites'
 const API_BASE = 'https://searchconsole.googleapis.com/webmasters/v3/sites'
+const INSPECT_URL = 'https://searchconsole.googleapis.com/v1/urlInspection/index:inspect'
 
 // Taille de lot maximale acceptée par l'API searchAnalytics.query.
 const MAX_PAGE = 25000
@@ -29,6 +30,34 @@ export function dateRangeISO(days, ref = new Date()) {
     const start = new Date(end)
     start.setDate(start.getDate() - (days - 1))
     return {startDate: iso(start), endDate: iso(end)}
+}
+
+/**
+ * Build the *previous* comparable window of `days`, ending the day before the
+ * current window's start (for period-over-period comparison).
+ * @param {number} days - Window size in days
+ * @param {Date} ref - Reference "today" (defaults to now)
+ * @returns {{startDate: string, endDate: string}}
+ */
+export function previousDateRangeISO(days, ref = new Date()) {
+    const iso = (d) => d.toISOString().slice(0, 10)
+    const end = new Date(ref)
+    end.setDate(end.getDate() - 2 - days) // = current window start − 1 day
+    const start = new Date(end)
+    start.setDate(start.getDate() - (days - 1))
+    return {startDate: iso(start), endDate: iso(end)}
+}
+
+/**
+ * Relative variation between two values, as a ratio (e.g. 0.25 = +25%).
+ * Returns null when there is no baseline to compare against.
+ * @param {number} current
+ * @param {number} previous
+ * @returns {number|null}
+ */
+export function deltaRatio(current, previous) {
+    if (!previous) return null
+    return (current - previous) / previous
 }
 
 /**
@@ -247,16 +276,19 @@ export function useSearchConsole() {
      * @param {{days:number,dimensions:string[],rowLimit:number,all:boolean}} opts
      * @returns {Promise<Array>} lignes normalisées
      */
-    async function runQuery(siteUrl, {days = 28, dimensions = ['query'], rowLimit = 25, all = false} = {}) {
-        const {startDate, endDate} = dateRangeISO(days)
+    async function runQuery(siteUrl, {days = 28, dimensions = ['query'], rowLimit = 25, all = false, type = '', range = null} = {}) {
+        const {startDate, endDate} = range || dateRangeISO(days)
         const pageSize = all ? MAX_PAGE : rowLimit
         const out = []
         let startRow = 0
         for (; ;) {
+            const body = {startDate, endDate, rowLimit: pageSize, startRow}
+            if (dimensions && dimensions.length) body.dimensions = dimensions
+            if (type) body.type = type
             const data = await authedFetch(`${API_BASE}/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({startDate, endDate, dimensions, rowLimit: pageSize, startRow})
+                body: JSON.stringify(body)
             })
             const batch = (data.rows || []).map(normalizeRow)
             out.push(...batch)
@@ -292,13 +324,13 @@ export function useSearchConsole() {
      * @returns {Promise<Object>} { [dimension]: lignes }
      */
     async function fetchReport(siteUrl, opts = {}) {
-        const {days = 28, dimensions = REPORT_DIMENSIONS} = opts
+        const {days = 28, dimensions = REPORT_DIMENSIONS, type = ''} = opts
         loading.value = true
         error.value = null
         const report = {}
         try {
             for (const dimension of dimensions) {
-                report[dimension] = await runQuery(siteUrl, {days, dimensions: [dimension], all: true})
+                report[dimension] = await runQuery(siteUrl, {days, dimensions: [dimension], all: true, type})
             }
             return report
         } catch (err) {
@@ -309,7 +341,45 @@ export function useSearchConsole() {
         }
     }
 
-    return {connected, loading, error, sites, connect, connectWithKey, disconnect, fetchSites, query, fetchReport}
+    /**
+     * Totaux de période (une requête sans dimension → un seul agrégat exact).
+     * Plus fiable que la somme des lignes (les requêtes anonymisées ne sont pas
+     * toutes attribuées). Utilisé pour la comparaison de périodes.
+     * @param {string} siteUrl
+     * @param {object} opts - { days, range, type }
+     * @returns {Promise<{clicks:number,impressions:number,ctr:number,position:number}>}
+     */
+    async function fetchTotals(siteUrl, opts = {}) {
+        const rows = await runQuery(siteUrl, {...opts, dimensions: [], rowLimit: 1})
+        return summarizeRows(rows)
+    }
+
+    /**
+     * Inspecte une URL (API URL Inspection) : statut d'indexation, dernière
+     * exploration, canoniques, ergonomie mobile, résultats enrichis.
+     * @param {string} siteUrl - Propriété vérifiée (préfixe ou sc-domain:)
+     * @param {string} inspectionUrl - URL exacte à inspecter
+     * @returns {Promise<object|null>} inspectionResult, ou null
+     */
+    async function inspectUrl(siteUrl, inspectionUrl) {
+        loading.value = true
+        error.value = null
+        try {
+            const data = await authedFetch(INSPECT_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({siteUrl, inspectionUrl})
+            })
+            return data.inspectionResult || null
+        } catch (err) {
+            error.value = err.message || 'Échec de l\'inspection d\'URL'
+            return null
+        } finally {
+            loading.value = false
+        }
+    }
+
+    return {connected, loading, error, sites, connect, connectWithKey, disconnect, fetchSites, query, fetchReport, fetchTotals, inspectUrl}
 }
 
 export default useSearchConsole

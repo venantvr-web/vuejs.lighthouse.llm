@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {dateRangeISO, normalizeRow, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
+import {dateRangeISO, deltaRatio, normalizeRow, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows} from '@/composables/useSearchConsole'
 
 describe('useSearchConsole - pure helpers', () => {
     describe('dateRangeISO', () => {
@@ -12,6 +12,27 @@ describe('useSearchConsole - pure helpers', () => {
             const {startDate, endDate} = dateRangeISO(7, new Date('2026-01-31T00:00:00Z'))
             expect(endDate).toBe('2026-01-29')
             expect(startDate).toBe('2026-01-23') // 7-day window: 23 → 29
+        })
+    })
+
+    describe('previousDateRangeISO', () => {
+        it('is the contiguous window immediately before the current one', () => {
+            const ref = new Date('2026-01-31T00:00:00Z')
+            const cur = dateRangeISO(7, ref)       // 2026-01-23 → 2026-01-29
+            const prev = previousDateRangeISO(7, ref)
+            expect(prev.endDate).toBe('2026-01-22') // day before current start
+            expect(prev.startDate).toBe('2026-01-16') // 7-day window
+        })
+    })
+
+    describe('deltaRatio', () => {
+        it('computes a relative variation', () => {
+            expect(deltaRatio(150, 100)).toBeCloseTo(0.5)
+            expect(deltaRatio(80, 100)).toBeCloseTo(-0.2)
+        })
+
+        it('returns null when there is no baseline', () => {
+            expect(deltaRatio(10, 0)).toBeNull()
         })
     })
 

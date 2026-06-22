@@ -119,7 +119,18 @@ Résultats affichés :
 - Un **tableau** des 50 premières lignes (requête/page, clics, impressions, CTR, position).
 - Une **tendance des clics** (sparkline) construite à partir des analyses précédemment enregistrées pour cette propriété.
 
-### 3.3 Effets de bord utiles
+### 3.3 Récupérer toutes les mesures (export et rapport complet)
+
+L'écran ne se limite pas au top 50 : il rapatrie **toutes les lignes** et permet d'exporter.
+
+- **Toutes les dimensions** : le sélecteur propose **Requêtes**, **Pages**, **Pays**, **Appareils** et **Dates**.
+- **Toutes les lignes** : **Analyser** pagine automatiquement (lots de 25 000, limite de l'API) jusqu'à épuisement des résultats. Le tableau n'affiche que les **200 premières** lignes pour rester lisible ; le nombre total récupéré est indiqué, et l'export contient **l'intégralité**.
+- **Export** : sous le tableau, **CSV** et **JSON** téléchargent le jeu complet de la dimension courante (le JSON inclut aussi le résumé agrégé).
+- **Rapport complet** : le bouton **Rapport complet** récupère **toutes les lignes de toutes les dimensions** en une fois, affiche le décompte par dimension, puis propose un téléchargement **JSON** (structuré par dimension) ou **CSV** (avec une colonne `dimension` en tête).
+
+Le bouton **Guide** (en haut de l'écran) ouvre ce document directement dans l'application.
+
+### 3.4 Effets de bord utiles
 
 - Chaque analyse non vide enregistre un **snapshot** (résumé) en IndexedDB → c'est ce qui alimente la courbe de tendance d'une fois sur l'autre.
 - Le **domaine interrogé est mémorisé** et partagé avec les autres écrans (audit Lighthouse, watchlist…) : vous pouvez enchaîner directement sur un audit du même site.

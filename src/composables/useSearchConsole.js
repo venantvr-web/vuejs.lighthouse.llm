@@ -7,6 +7,12 @@ const GIS_SRC = 'https://accounts.google.com/gsi/client'
 const SITES_URL = 'https://www.googleapis.com/webmasters/v3/sites'
 const API_BASE = 'https://searchconsole.googleapis.com/webmasters/v3/sites'
 
+// Taille de lot maximale acceptée par l'API searchAnalytics.query.
+const MAX_PAGE = 25000
+
+// Dimensions couvertes par un « rapport complet ».
+export const REPORT_DIMENSIONS = ['query', 'page', 'country', 'device', 'date']
+
 // ── Pure helpers (unit-tested) ───────────────────────────────────────────────
 
 /**
@@ -73,6 +79,44 @@ export function summarizeRows(rows = []) {
  */
 export function snapshotSeries(snapshots = [], metric = 'clicks', limit = 12) {
     return toSeries(snapshots, s => (typeof s[metric] === 'number' ? Math.round(s[metric]) : null), {limit})
+}
+
+/**
+ * Échappe une valeur pour un champ CSV (RFC 4180).
+ * @param {*} value
+ * @returns {string}
+ */
+function csvEscape(value) {
+    const s = String(value ?? '')
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+/**
+ * Sérialise des lignes normalisées en CSV (clé + 4 métriques).
+ * @param {Array} rows - Lignes ({ key, clicks, impressions, ctr, position })
+ * @param {string} keyHeader - Intitulé de la 1re colonne (ex. 'query', 'page')
+ * @returns {string}
+ */
+export function rowsToCsv(rows = [], keyHeader = 'key') {
+    const header = [keyHeader, 'clicks', 'impressions', 'ctr', 'position'].join(',')
+    const lines = rows.map(r => [r.key, r.clicks, r.impressions, r.ctr, r.position].map(csvEscape).join(','))
+    return [header, ...lines].join('\n')
+}
+
+/**
+ * Sérialise un rapport multi-dimensions en CSV, avec une colonne `dimension`.
+ * @param {Object} report - { [dimension]: rows }
+ * @returns {string}
+ */
+export function reportToCsv(report = {}) {
+    const header = ['dimension', 'key', 'clicks', 'impressions', 'ctr', 'position'].join(',')
+    const lines = []
+    for (const [dimension, rows] of Object.entries(report)) {
+        for (const r of (rows || [])) {
+            lines.push([dimension, r.key, r.clicks, r.impressions, r.ctr, r.position].map(csvEscape).join(','))
+        }
+    }
+    return [header, ...lines].join('\n')
 }
 
 // ── Browser OAuth + API (not unit-testable; needs a real browser + Google) ────
@@ -196,23 +240,43 @@ export function useSearchConsole() {
     }
 
     /**
-     * Query Search Analytics for a site.
-     * @param {string} siteUrl - Verified site URL
-     * @param {object} opts - { days, dimensions, rowLimit }
-     * @returns {Promise<Array>} Normalized rows
+     * Exécute une requête Search Analytics. Avec `all`, pagine par lots de
+     * 25 000 lignes (limite de l'API) pour rapatrier l'intégralité des résultats.
+     * Ne touche pas à `loading`/`error` (géré par les fonctions publiques).
+     * @param {string} siteUrl - URL de la propriété vérifiée
+     * @param {{days:number,dimensions:string[],rowLimit:number,all:boolean}} opts
+     * @returns {Promise<Array>} lignes normalisées
      */
-    async function query(siteUrl, opts = {}) {
-        const {days = 28, dimensions = ['query'], rowLimit = 25} = opts
-        loading.value = true
-        error.value = null
-        try {
-            const {startDate, endDate} = dateRangeISO(days)
+    async function runQuery(siteUrl, {days = 28, dimensions = ['query'], rowLimit = 25, all = false} = {}) {
+        const {startDate, endDate} = dateRangeISO(days)
+        const pageSize = all ? MAX_PAGE : rowLimit
+        const out = []
+        let startRow = 0
+        for (; ;) {
             const data = await authedFetch(`${API_BASE}/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({startDate, endDate, dimensions, rowLimit})
+                body: JSON.stringify({startDate, endDate, dimensions, rowLimit: pageSize, startRow})
             })
-            return (data.rows || []).map(normalizeRow)
+            const batch = (data.rows || []).map(normalizeRow)
+            out.push(...batch)
+            if (!all || batch.length < pageSize) break
+            startRow += pageSize
+        }
+        return out
+    }
+
+    /**
+     * Query Search Analytics for a site (single dimension).
+     * @param {string} siteUrl - Verified site URL
+     * @param {object} opts - { days, dimensions, rowLimit, all }
+     * @returns {Promise<Array>} Normalized rows
+     */
+    async function query(siteUrl, opts = {}) {
+        loading.value = true
+        error.value = null
+        try {
+            return await runQuery(siteUrl, opts)
         } catch (err) {
             error.value = err.message || 'Échec de la requête'
             return []
@@ -221,7 +285,31 @@ export function useSearchConsole() {
         }
     }
 
-    return {connected, loading, error, sites, connect, connectWithKey, disconnect, fetchSites, query}
+    /**
+     * Rapport consolidé : récupère *toutes* les lignes pour *chaque* dimension.
+     * @param {string} siteUrl - URL de la propriété vérifiée
+     * @param {object} opts - { days, dimensions }
+     * @returns {Promise<Object>} { [dimension]: lignes }
+     */
+    async function fetchReport(siteUrl, opts = {}) {
+        const {days = 28, dimensions = REPORT_DIMENSIONS} = opts
+        loading.value = true
+        error.value = null
+        const report = {}
+        try {
+            for (const dimension of dimensions) {
+                report[dimension] = await runQuery(siteUrl, {days, dimensions: [dimension], all: true})
+            }
+            return report
+        } catch (err) {
+            error.value = err.message || 'Échec du rapport'
+            return report
+        } finally {
+            loading.value = false
+        }
+    }
+
+    return {connected, loading, error, sites, connect, connectWithKey, disconnect, fetchSites, query, fetchReport}
 }
 
 export default useSearchConsole

@@ -1,21 +1,31 @@
 <script setup>
 import {computed, ref} from 'vue'
+import {useI18n} from '@/i18n'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useScopedPersistentRef} from '@/composables/useScopedPersistentRef'
+import {useExport} from '@/composables/useExport'
 import {formatNumber} from '@/utils/formatters'
 import Sparkline from '@/components/common/Sparkline.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
+import Modal from '@/components/common/Modal.vue'
+import MarkdownViewer from '@/components/analysis/MarkdownViewer.vue'
+import scGuide from '../../docs/SEARCH_CONSOLE.md?raw'
 
+const {t} = useI18n()
 const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
 const site = useSiteStore()
-const {connected, loading, error, sites, connect, connectWithKey, disconnect, query} = useSearchConsole()
+const {downloadFile} = useExport()
+const {connected, loading, error, sites, connect, connectWithKey, disconnect, query, fetchReport} = useSearchConsole()
+
+// Nombre maximal de lignes affichées dans le tableau (l'export contient tout).
+const DISPLAY_CAP = 200
 
 // Méthode d'authentification : OAuth (popup) ou compte de service (clé JSON)
 const authMethod = usePersistentRef('searchconsole.authMethod', 'oauth')
@@ -31,8 +41,59 @@ const days = usePersistentRef('searchconsole.days', 28)
 const dimension = usePersistentRef('searchconsole.dimension', 'query')
 const rows = ref([])
 const clicksTrend = ref([])
+const report = ref(null)
+const showGuide = ref(false)
 
 const summary = computed(() => summarizeRows(rows.value))
+const displayedRows = computed(() => rows.value.slice(0, DISPLAY_CAP))
+
+// Libellé traduit d'une dimension Search Console.
+const DIMENSION_LABELS = {query: 'queries', page: 'pages', country: 'countries', device: 'devices', date: 'dates'}
+
+function dimensionLabel(dim) {
+  return t(`searchConsole.${DIMENSION_LABELS[dim] || dim}`)
+}
+
+// Slug d'hôte pour les noms de fichiers exportés.
+function hostSlug() {
+  return (siteHost(selectedSite.value) || 'search-console').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '')
+}
+
+const reportCounts = computed(() =>
+    report.value ? Object.entries(report.value).map(([dim, r]) => ({dim, count: r.length})) : []
+)
+
+function exportCsv() {
+  if (!rows.value.length) return
+  downloadFile(rowsToCsv(rows.value, dimension.value), `search-console-${hostSlug()}-${dimension.value}.csv`, 'text/csv')
+}
+
+function exportJson() {
+  if (!rows.value.length) return
+  const payload = {
+    site: selectedSite.value, days: days.value, dimension: dimension.value,
+    generatedAt: new Date().toISOString(), summary: summary.value, rows: rows.value
+  }
+  downloadFile(JSON.stringify(payload, null, 2), `search-console-${hostSlug()}-${dimension.value}.json`, 'application/json')
+}
+
+async function handleReport() {
+  if (!selectedSite.value) return
+  const host = siteHost(selectedSite.value)
+  if (host) site.setFromUrl(`https://${host}`)
+  report.value = await fetchReport(selectedSite.value, {days: days.value})
+}
+
+function downloadReportJson() {
+  if (!report.value) return
+  const payload = {site: selectedSite.value, days: days.value, generatedAt: new Date().toISOString(), byDimension: report.value}
+  downloadFile(JSON.stringify(payload, null, 2), `search-console-${hostSlug()}-rapport.json`, 'application/json')
+}
+
+function downloadReportCsv() {
+  if (!report.value) return
+  downloadFile(reportToCsv(report.value), `search-console-${hostSlug()}-rapport.csv`, 'text/csv')
+}
 
 function onClientIdInput(event) {
   settings.setSearchConsoleClientId(event.target.value)
@@ -65,7 +126,7 @@ async function handleQuery() {
   // Mémorise le domaine de la propriété interrogée pour les autres écrans
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
-  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], rowLimit: 50})
+  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true})
   if (rows.value.length) {
     const s = summarizeRows(rows.value)
     await history.addSnapshot({
@@ -101,6 +162,19 @@ function formatPosition(p) {
     <AppHeader :subtitle="$t('searchConsole.headerSubtitle')" :title="$t('searchConsole.headerTitle')"/>
 
     <PageIntro :text="$t('intro.searchConsole')" width="6xl"/>
+
+    <div class="max-w-6xl w-full mx-auto px-4 pt-2 flex justify-end">
+      <button
+          class="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
+          type="button"
+          @click="showGuide = true"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+        </svg>
+        {{ $t('searchConsole.guide') }}
+      </button>
+    </div>
 
     <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
       <!-- Connection -->
@@ -198,6 +272,9 @@ function formatPosition(p) {
             <select v-model="dimension" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
               <option value="query">{{ $t('searchConsole.queries') }}</option>
               <option value="page">{{ $t('searchConsole.pages') }}</option>
+              <option value="country">{{ $t('searchConsole.countries') }}</option>
+              <option value="device">{{ $t('searchConsole.devices') }}</option>
+              <option value="date">{{ $t('searchConsole.dates') }}</option>
             </select>
           </label>
           <button
@@ -207,12 +284,40 @@ function formatPosition(p) {
           >
             {{ loading ? $t('common.loading') : $t('searchConsole.analyze') }}
           </button>
+          <button
+              :disabled="loading || !selectedSite"
+              class="px-4 py-2 rounded-lg border border-primary-600 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-sm font-medium transition-colors disabled:opacity-50"
+              @click="handleReport"
+          >
+            {{ loading ? $t('common.loading') : $t('searchConsole.fullReport') }}
+          </button>
           <button class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-sm" @click="disconnect">
             {{ $t('searchConsole.disconnect') }}
           </button>
         </div>
 
         <p v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</p>
+
+        <!-- Rapport complet (toutes dimensions, toutes lignes) -->
+        <div v-if="report" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t('searchConsole.reportTitle') }}</p>
+            <div class="flex gap-2">
+              <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700" @click="downloadReportCsv">
+                {{ $t('searchConsole.downloadCsv') }}
+              </button>
+              <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700" @click="downloadReportJson">
+                {{ $t('searchConsole.downloadJson') }}
+              </button>
+            </div>
+          </div>
+          <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            <li v-for="rc in reportCounts" :key="rc.dim" class="flex items-center justify-between gap-2 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm">
+              <span class="text-gray-600 dark:text-gray-300">{{ dimensionLabel(rc.dim) }}</span>
+              <span class="font-semibold text-gray-900 dark:text-white">{{ formatNumber(rc.count) }}</span>
+            </li>
+          </ul>
+        </div>
 
         <!-- Summary -->
         <div v-if="rows.length" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -240,12 +345,28 @@ function formatPosition(p) {
           <Sparkline :auto-scale="true" :values="clicksTrend" :width="320" color="#6366f1"/>
         </div>
 
+        <!-- Export toolbar -->
+        <div v-if="rows.length" class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{ formatNumber(rows.length) }} {{ $t('searchConsole.rowsUnit') }}
+            <span v-if="rows.length > DISPLAY_CAP"> — {{ $t('searchConsole.displayCapNote', {n: DISPLAY_CAP}) }}</span>
+          </p>
+          <div class="flex gap-2">
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700" @click="exportCsv">
+              {{ $t('searchConsole.exportCsv') }}
+            </button>
+            <button class="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700" @click="exportJson">
+              {{ $t('searchConsole.exportJson') }}
+            </button>
+          </div>
+        </div>
+
         <!-- Rows table -->
         <div v-if="rows.length" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
           <table class="w-full text-sm">
             <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400">
             <tr>
-              <th class="text-left font-medium px-4 py-2">{{ dimension === 'page' ? $t('searchConsole.page') : $t('searchConsole.query') }}</th>
+              <th class="text-left font-medium px-4 py-2">{{ dimensionLabel(dimension) }}</th>
               <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.clicks') }}</th>
               <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.impr') }}</th>
               <th class="text-right font-medium px-4 py-2">{{ $t('searchConsole.ctr') }}</th>
@@ -253,7 +374,7 @@ function formatPosition(p) {
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-            <tr v-for="row in rows" :key="row.key">
+            <tr v-for="row in displayedRows" :key="row.key">
               <td class="px-4 py-2 text-gray-900 dark:text-white truncate max-w-xs" :title="row.key">{{ row.key }}</td>
               <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatNumber(row.clicks) }}</td>
               <td class="px-4 py-2 text-right text-gray-700 dark:text-gray-300">{{ formatNumber(row.impressions) }}</td>
@@ -264,10 +385,15 @@ function formatPosition(p) {
           </table>
         </div>
 
-        <div v-else-if="!loading" class="text-center py-16 text-sm text-gray-500 dark:text-gray-400">
+        <div v-else-if="!loading && !report" class="text-center py-16 text-sm text-gray-500 dark:text-gray-400">
           {{ $t('searchConsole.emptyHint') }}
         </div>
       </template>
     </main>
+
+    <!-- Guide (documentation embarquée) -->
+    <Modal :open="showGuide" :title="$t('searchConsole.guideTitle')" @close="showGuide = false">
+      <MarkdownViewer :content="scGuide"/>
+    </Modal>
   </div>
 </template>

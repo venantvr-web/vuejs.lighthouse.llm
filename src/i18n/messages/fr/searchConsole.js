@@ -24,8 +24,14 @@ export default {
         dimension: 'Dimension :',
         queries: 'Requêtes',
         pages: 'Pages',
+        countries: 'Pays',
+        devices: 'Appareils',
+        dates: 'Dates',
         analyze: 'Analyser',
+        fullReport: 'Rapport complet',
         disconnect: 'Déconnexion',
+        guide: 'Guide',
+        guideTitle: 'Search Console : guide complet',
         clicks: 'Clics',
         impressions: 'Impressions',
         avgCtr: 'CTR moyen',
@@ -36,6 +42,13 @@ export default {
         impr: 'Impr.',
         ctr: 'CTR',
         position: 'Position',
+        rowsUnit: 'lignes récupérées',
+        displayCapNote: '{n} premières affichées — exportez pour tout obtenir',
+        exportCsv: 'CSV',
+        exportJson: 'JSON',
+        reportTitle: 'Rapport complet (toutes dimensions, toutes lignes)',
+        downloadCsv: 'Télécharger CSV',
+        downloadJson: 'Télécharger JSON',
         emptyHint: 'Choisissez un site et cliquez sur « Analyser ».'
     }
 }

@@ -312,7 +312,9 @@ export async function fetchResource(url) {
     // Mode direct : requête navigateur sans relais (même origine / CORS autorisé)
     if (isDirectFetch()) {
         try {
-            const r = await fetch(url, {redirect: 'follow'})
+            // no-store : la détection doit toujours refléter l'état courant du site
+            // (sitemap/robots souvent mis en cache par le navigateur ou un CDN).
+            const r = await fetch(url, {redirect: 'follow', cache: 'no-store', headers: {'Cache-Control': 'no-cache'}})
             if (!r.ok) return {available: false, status: r.status, content: '', contentType: ''}
             return {
                 available: true,

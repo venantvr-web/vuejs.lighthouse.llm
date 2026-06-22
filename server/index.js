@@ -97,9 +97,13 @@ app.post('/api/fetch-page', async (req, res) => {
     }
 
     try {
+        // Détection toujours fraîche : on demande à l'amont de revalider et on
+        // marque la réponse du proxy comme non mise en cache.
+        res.set('Cache-Control', 'no-store')
         const response = await fetch(url, {
-            headers: {...FETCH_HEADERS, 'User-Agent': resolveUserAgent(userAgent)},
-            redirect: 'follow'
+            headers: {...FETCH_HEADERS, 'User-Agent': resolveUserAgent(userAgent), 'Cache-Control': 'no-cache', 'Pragma': 'no-cache'},
+            redirect: 'follow',
+            cache: 'no-store'
         })
 
         if (!response.ok) {

@@ -214,7 +214,7 @@ export function parseManualUrls(text, options = {}) {
 async function fetchPage(url, proxyEndpoint, signal) {
     // Mode direct : requête navigateur sans relais (même origine / CORS autorisé)
     if (isDirectFetch()) {
-        const r = await fetch(url, {redirect: 'follow', signal})
+        const r = await fetch(url, {redirect: 'follow', signal, cache: 'no-store', headers: {'Cache-Control': 'no-cache'}})
         if (!r.ok) throw new Error(`Failed to fetch: ${r.status}`)
         return r.text()
     }

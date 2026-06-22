@@ -1,7 +1,7 @@
 import {ref, watch} from 'vue'
 import {useSettingsStore} from '@/stores/settingsStore'
 import {buildLLMProvider} from '@/services/llm/buildProvider'
-import {buildContinuationPrompt} from '@/services/llm/continuation'
+import {buildContinuationPrompt, consolidateContinuation, trimToLastCompleteLine} from '@/services/llm/continuation'
 import {AI_ARTIFACT_TYPES, useAiHistoryStore} from '@/stores/aiHistoryStore'
 import {fetchResource, originFromUrl} from '@/services/resourceCheck'
 import {fetchSiteSnapshot} from '@/services/llmSnapshot'
@@ -202,11 +202,22 @@ export function useLlmStudio() {
         await persist(outputKind.value)
     }
 
-    /** Reprend une réponse tronquée. */
+    /**
+     * Reprend une réponse tronquée. On repart de la dernière ligne complète
+     * (la ligne coupée, parfois en plein milieu d'une URL, est régénérée), on
+     * mémorise le point de jointure, puis on consolide la couture une fois la
+     * génération terminée — pour ne jamais casser le Markdown.
+     */
     async function continueGeneration() {
         if (!lastPrompt || !output.value || generating.value) return
-        output.value += '\n'
-        await streamInto(buildContinuationPrompt(lastPrompt, output.value), {append: true, system: lastSystem})
+        const head = trimToLastCompleteLine(output.value)
+        const boundary = head.length  // marqueur de reprise
+        output.value = head
+        await streamInto(buildContinuationPrompt(lastPrompt, head), {append: true, system: lastSystem})
+        if (!generating.value) {
+            output.value = consolidateContinuation(output.value, boundary)
+            output.value = stripCodeFence(output.value)
+        }
         await persist(outputKind.value)
     }
 

@@ -73,8 +73,27 @@ const dateSeries = computed(() => {
   if (dimension.value !== 'date' || rows.value.length < 2) return []
   return [...rows.value].sort((a, b) => (a.key < b.key ? -1 : 1)).map(r => r.clicks)
 })
+
+// Repères d'axes de la saisonnalité : dates (X) et plage de clics/jour (Y).
+const dateSeriesMeta = computed(() => {
+  if (!dateSeries.value.length) return null
+  const sorted = [...rows.value].sort((a, b) => (a.key < b.key ? -1 : 1))
+  return {
+    start: sorted[0].key,
+    end: sorted[sorted.length - 1].key,
+    min: Math.min(...dateSeries.value),
+    max: Math.max(...dateSeries.value)
+  }
+})
+
+// Formate une date ('YYYY-MM-DD' ou timestamp) en date locale courte.
+function fmtDate(v) {
+  const d = typeof v === 'number' ? new Date(v) : new Date(`${v}T00:00:00`)
+  return d.toLocaleDateString()
+}
 const rows = ref([])
 const clicksTrend = ref([])
+const trendMeta = ref(null)
 const report = ref(null)
 const compareTotals = ref(null)
 const inspection = ref(null)
@@ -236,6 +255,17 @@ async function handleQuery() {
 async function loadTrend() {
   const snapshots = await history.getSnapshots(selectedSite.value)
   clicksTrend.value = snapshotSeries(snapshots, 'clicks')
+  if (snapshots.length) {
+    const byTime = [...snapshots].sort((a, b) => a.timestamp - b.timestamp)
+    trendMeta.value = {
+      first: byTime[0].timestamp,
+      last: byTime[byTime.length - 1].timestamp,
+      min: Math.min(...clicksTrend.value),
+      max: Math.max(...clicksTrend.value)
+    }
+  } else {
+    trendMeta.value = null
+  }
 }
 
 function formatPercent(ctr) {
@@ -551,15 +581,25 @@ function formatPosition(p) {
         </div>
 
         <!-- Saisonnalité : clics par date sur la fenêtre choisie -->
-        <div v-if="dateSeries.length > 1" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+        <div v-if="dateSeriesMeta" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
           <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ $t('searchConsole.seasonality') }}</p>
           <Sparkline :auto-scale="true" :values="dateSeries" :width="640" color="#10b981"/>
+          <div class="flex justify-between text-[11px] text-gray-400 mt-1">
+            <span>{{ fmtDate(dateSeriesMeta.start) }}</span>
+            <span>{{ formatNumber(dateSeriesMeta.min) }}–{{ formatNumber(dateSeriesMeta.max) }} {{ $t('searchConsole.clicksPerDay') }}</span>
+            <span>{{ fmtDate(dateSeriesMeta.end) }}</span>
+          </div>
         </div>
 
         <!-- Clicks trend across saved snapshots -->
-        <div v-if="clicksTrend.length > 1" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+        <div v-if="clicksTrend.length > 1 && trendMeta" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
           <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{{ $t('searchConsole.clicksTrend') }}</p>
-          <Sparkline :auto-scale="true" :values="clicksTrend" :width="320" color="#6366f1"/>
+          <Sparkline :auto-scale="true" :values="clicksTrend" :width="640" color="#6366f1"/>
+          <div class="flex justify-between text-[11px] text-gray-400 mt-1">
+            <span>{{ fmtDate(trendMeta.first) }}</span>
+            <span>{{ formatNumber(trendMeta.min) }}–{{ formatNumber(trendMeta.max) }} {{ $t('searchConsole.clicksPerAnalysis') }}</span>
+            <span>{{ fmtDate(trendMeta.last) }}</span>
+          </div>
         </div>
 
         <!-- Export toolbar -->

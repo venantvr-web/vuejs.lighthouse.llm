@@ -31,6 +31,8 @@ export default {
         filteredOn: 'Résultats filtrés — la page contient :',
         clearFilter: 'Effacer le filtre',
         seasonality: 'Saisonnalité des clics (par date)',
+        clicksPerDay: 'clics/jour',
+        clicksPerAnalysis: 'clics/analyse',
         dimension: 'Dimension :',
         queries: 'Requêtes',
         pages: 'Pages',

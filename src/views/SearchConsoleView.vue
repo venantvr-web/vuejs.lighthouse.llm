@@ -88,6 +88,11 @@ const dateSeries = computed(() => {
 const dateSeriesMeta = computed(() => {
   if (dateSeries.value.length < 2 || !analyzedRange.value) return null
   const dates = rows.value.map(r => r.key).filter(Boolean).sort()
+  const lastData = dates.length ? dates[dates.length - 1] : null
+  // Ancienneté de la dernière donnée (le lag normal de Search Console est ~2-3 j).
+  const staleDays = lastData
+      ? Math.round((Date.now() - new Date(`${lastData}T00:00:00Z`).getTime()) / 86400000)
+      : null
   return {
     start: analyzedRange.value.startDate,
     end: analyzedRange.value.endDate,
@@ -95,9 +100,13 @@ const dateSeriesMeta = computed(() => {
     max: Math.max(...dateSeries.value),
     daysWithData: dates.length,
     totalDays: dateSeries.value.length,
-    lastData: dates.length ? dates[dates.length - 1] : null
+    lastData,
+    staleDays
   }
 })
+
+// Seuil au-delà duquel l'absence de donnée récente est suspecte (lag normal ~3 j).
+const STALE_THRESHOLD = 5
 
 // Formate une date ('YYYY-MM-DD' ou timestamp) en date locale courte.
 function fmtDate(v) {
@@ -609,6 +618,12 @@ function formatPosition(p) {
           <p class="text-[11px] text-gray-400 mt-1">
             {{ $t('searchConsole.coverage', {withData: formatNumber(dateSeriesMeta.daysWithData), total: formatNumber(dateSeriesMeta.totalDays)}) }}
             <span v-if="dateSeriesMeta.lastData"> · {{ $t('searchConsole.lastData') }} {{ fmtDate(dateSeriesMeta.lastData) }}</span>
+          </p>
+          <p
+              v-if="dateSeriesMeta.staleDays != null && dateSeriesMeta.staleDays > STALE_THRESHOLD"
+              class="mt-2 text-xs text-red-600 dark:text-red-400 font-medium"
+          >
+            ⚠️ {{ $t('searchConsole.trackingStale', {n: formatNumber(dateSeriesMeta.staleDays)}) }}
           </p>
         </div>
 

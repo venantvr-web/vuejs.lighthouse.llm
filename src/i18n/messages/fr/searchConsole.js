@@ -35,6 +35,7 @@ export default {
         clicksPerAnalysis: 'clics/analyse',
         coverage: '{withData}/{total} jours avec données',
         lastData: 'dernière donnée :',
+        trackingStale: 'Aucune donnée depuis {n} jours (le délai normal est de ~3 jours). La collecte semble interrompue : vérifiez que Googlebot n\'est pas bloqué (WAF / anti-bot), ni un noindex ou un robots.txt restrictif. Utilisez l\'inspection d\'URL ci-dessus.',
         dimension: 'Dimension :',
         queries: 'Requêtes',
         pages: 'Pages',

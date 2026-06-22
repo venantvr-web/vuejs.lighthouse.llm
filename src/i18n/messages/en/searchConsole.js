@@ -35,6 +35,7 @@ export default {
         clicksPerAnalysis: 'clicks/analysis',
         coverage: '{withData}/{total} days with data',
         lastData: 'last data:',
+        trackingStale: 'No data for {n} days (the normal lag is ~3 days). Collection looks interrupted: check that Googlebot is not blocked (WAF / anti-bot), and that there is no noindex or restrictive robots.txt. Use the URL inspection above.',
         dimension: 'Dimension:',
         queries: 'Queries',
         pages: 'Pages',

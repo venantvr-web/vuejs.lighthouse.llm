@@ -78,6 +78,7 @@ const clicksTrend = ref([])
 const report = ref(null)
 const compareTotals = ref(null)
 const inspection = ref(null)
+const appliedFilter = ref('')
 const showGuide = ref(false)
 
 const summary = computed(() => summarizeRows(rows.value))
@@ -152,7 +153,13 @@ async function handleReport() {
   if (!selectedSite.value) return
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
+  appliedFilter.value = pageFilter.value.trim()
   report.value = await fetchReport(selectedSite.value, {days: days.value, type: searchType.value, filters: activeFilters.value})
+}
+
+function clearFilter() {
+  pageFilter.value = ''
+  handleQuery()
 }
 
 async function handleInspect() {
@@ -204,6 +211,7 @@ async function handleQuery() {
   if (host) site.setFromUrl(`https://${host}`)
   compareTotals.value = null
   const filters = activeFilters.value
+  appliedFilter.value = pageFilter.value.trim()
   rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true, type: searchType.value, filters})
   if (compare.value) {
     const current = await fetchTotals(selectedSite.value, {days: days.value, type: searchType.value, filters})
@@ -462,6 +470,24 @@ function formatPosition(p) {
               {{ $t('searchConsole.inspectOpen') }} →
             </a>
           </div>
+        </div>
+
+        <!-- Bandeau : périmètre filtré sur une page -->
+        <div v-if="appliedFilter" class="flex items-center gap-3 mb-6 px-4 py-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+          <svg class="w-5 h-5 text-primary-600 dark:text-primary-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M3 4h18M6 8h12M10 12h4M9 16h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+          <p class="text-sm text-primary-900 dark:text-primary-100 min-w-0">
+            {{ $t('searchConsole.filteredOn') }}
+            <strong class="break-all">{{ appliedFilter }}</strong>
+          </p>
+          <button
+              class="ml-auto shrink-0 text-xs font-medium text-primary-700 dark:text-primary-300 hover:underline"
+              type="button"
+              @click="clearFilter"
+          >
+            {{ $t('searchConsole.clearFilter') }}
+          </button>
         </div>
 
         <!-- Comparaison de périodes (totaux) -->

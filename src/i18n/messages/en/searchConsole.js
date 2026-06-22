@@ -28,6 +28,8 @@ export default {
         pageFilterPlaceholder: 'Type to search a page…',
         loadPages: 'Load / refresh the page list',
         pagesAvailable: 'pages available',
+        filteredOn: 'Results filtered — page contains:',
+        clearFilter: 'Clear filter',
         seasonality: 'Clicks seasonality (by date)',
         dimension: 'Dimension:',
         queries: 'Queries',

@@ -28,6 +28,8 @@ export default {
         pageFilterPlaceholder: 'Tapez pour rechercher une page…',
         loadPages: 'Charger / rafraîchir la liste des pages',
         pagesAvailable: 'pages disponibles',
+        filteredOn: 'Résultats filtrés — la page contient :',
+        clearFilter: 'Effacer le filtre',
         seasonality: 'Saisonnalité des clics (par date)',
         dimension: 'Dimension :',
         queries: 'Requêtes',

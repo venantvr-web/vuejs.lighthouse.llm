@@ -130,7 +130,20 @@ L'écran ne se limite pas au top 50 : il rapatrie **toutes les lignes** et perme
 
 Le bouton **Guide** (en haut de l'écran) ouvre ce document directement dans l'application.
 
-### 3.4 Effets de bord utiles
+### 3.4 Type de recherche, apparence, comparaison et inspection d'URL
+
+Au-delà des 4 métriques, l'écran expose tout ce que l'API permet de découper :
+
+- **Type de recherche** : filtre **Web / Image / Vidéo / Actualités / Discover** (paramètre `type`). Les 4 métriques sont alors restreintes à ce canal. Note : certains types (Discover, Actualités) ne supportent pas toutes les dimensions (ex. pas de « Requêtes » pour Discover) — l'API renvoie une erreur explicite le cas échéant.
+- **Dimension « Apparence »** (`searchAppearance`) : répartition par type d'affichage dans les résultats (résultats enrichis, AMP, FAQ…).
+- **Comparaison de périodes** : cochez **Comparer à la période précédente** avant d'analyser. Un encart affiche les **totaux** de la période courante et la **variation** (en %) face à la période contiguë précédente, métrique par métrique. Les totaux sont calculés via une requête **sans dimension** (agrégat exact), plus fiable que la somme des lignes — les requêtes anonymisées ne sont pas toutes attribuées.
+- **Inspection d'URL** (API URL Inspection) : pour une URL précise, l'app affiche le **verdict d'indexation**, l'état de **couverture**, la **dernière exploration**, la **canonique Google**, l'état **robots.txt**, l'**ergonomie mobile** et les **résultats enrichis**, avec un lien direct vers Search Console.
+
+#### Ce qui reste hors d'atteinte de l'API
+
+Aucune API publique n'expose les agrégats des rapports **Liens**, **Améliorations / données structurées**, **Core Web Vitals**, **Actions manuelles** ou **Sécurité**. Ces vues restent propres à l'interface Google. L'inspection par URL ci-dessus est le seul accès programmatique à l'état d'indexation et à l'ergonomie mobile (une URL à la fois, avec quota).
+
+### 3.5 Effets de bord utiles
 
 - Chaque analyse non vide enregistre un **snapshot** (résumé) en IndexedDB → c'est ce qui alimente la courbe de tendance d'une fois sur l'autre.
 - Le **domaine interrogé est mémorisé** et partagé avec les autres écrans (audit Lighthouse, watchlist…) : vous pouvez enchaîner directement sur un audit du même site.

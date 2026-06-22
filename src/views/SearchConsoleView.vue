@@ -2,7 +2,7 @@
 import {computed, ref} from 'vue'
 import {useI18n} from '@/i18n'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
@@ -22,7 +22,7 @@ const settings = useSettingsStore()
 const history = useSearchConsoleHistoryStore()
 const site = useSiteStore()
 const {downloadFile} = useExport()
-const {connected, loading, error, sites, connect, connectWithKey, disconnect, query, fetchReport} = useSearchConsole()
+const {connected, loading, error, sites, connect, connectWithKey, disconnect, query, fetchReport, fetchTotals, inspectUrl} = useSearchConsole()
 
 // Nombre maximal de lignes affichées dans le tableau (l'export contient tout).
 const DISPLAY_CAP = 200
@@ -39,16 +39,56 @@ function siteHost(s) {
 const selectedSite = useScopedPersistentRef('searchconsole.selectedSite', '')
 const days = usePersistentRef('searchconsole.days', 28)
 const dimension = usePersistentRef('searchconsole.dimension', 'query')
+const searchType = usePersistentRef('searchconsole.type', 'web')
+const compare = usePersistentRef('searchconsole.compare', false)
+const inspectionUrl = useScopedPersistentRef('searchconsole.inspectionUrl', '')
 const rows = ref([])
 const clicksTrend = ref([])
 const report = ref(null)
+const compareTotals = ref(null)
+const inspection = ref(null)
 const showGuide = ref(false)
 
 const summary = computed(() => summarizeRows(rows.value))
 const displayedRows = computed(() => rows.value.slice(0, DISPLAY_CAP))
 
+const METRICS = ['clicks', 'impressions', 'ctr', 'position']
+
+function deltaForMetric(metric) {
+  if (!compareTotals.value) return null
+  return deltaRatio(compareTotals.value.current[metric], compareTotals.value.previous[metric])
+}
+
+function formatDelta(ratio) {
+  if (ratio === null || ratio === undefined) return '—'
+  const pct = ratio * 100
+  return `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%`
+}
+
+// Variation favorable : à la hausse, sauf la position (plus bas = mieux).
+function deltaClass(metric, ratio) {
+  if (ratio === null || ratio === undefined) return 'text-gray-400'
+  const good = metric === 'position' ? ratio < 0 : ratio > 0
+  return good ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+}
+
+const inspectionRows = computed(() => {
+  const r = inspection.value
+  if (!r) return []
+  const idx = r.indexStatusResult || {}
+  return [
+    {label: t('searchConsole.inspectVerdict'), value: idx.verdict},
+    {label: t('searchConsole.inspectCoverage'), value: idx.coverageState},
+    {label: t('searchConsole.inspectLastCrawl'), value: idx.lastCrawlTime ? new Date(idx.lastCrawlTime).toLocaleString() : null},
+    {label: t('searchConsole.inspectCanonical'), value: idx.googleCanonical},
+    {label: t('searchConsole.inspectRobots'), value: idx.robotsTxtState},
+    {label: t('searchConsole.inspectMobile'), value: r.mobileUsabilityResult?.verdict},
+    {label: t('searchConsole.inspectRich'), value: r.richResultsResult?.verdict}
+  ].filter(x => x.value)
+})
+
 // Libellé traduit d'une dimension Search Console.
-const DIMENSION_LABELS = {query: 'queries', page: 'pages', country: 'countries', device: 'devices', date: 'dates'}
+const DIMENSION_LABELS = {query: 'queries', page: 'pages', country: 'countries', device: 'devices', date: 'dates', searchAppearance: 'appearance'}
 
 function dimensionLabel(dim) {
   return t(`searchConsole.${DIMENSION_LABELS[dim] || dim}`)
@@ -81,7 +121,12 @@ async function handleReport() {
   if (!selectedSite.value) return
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
-  report.value = await fetchReport(selectedSite.value, {days: days.value})
+  report.value = await fetchReport(selectedSite.value, {days: days.value, type: searchType.value})
+}
+
+async function handleInspect() {
+  if (!selectedSite.value || !inspectionUrl.value) return
+  inspection.value = await inspectUrl(selectedSite.value, inspectionUrl.value)
 }
 
 function downloadReportJson() {
@@ -126,7 +171,13 @@ async function handleQuery() {
   // Mémorise le domaine de la propriété interrogée pour les autres écrans
   const host = siteHost(selectedSite.value)
   if (host) site.setFromUrl(`https://${host}`)
-  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true})
+  compareTotals.value = null
+  rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true, type: searchType.value})
+  if (compare.value) {
+    const current = await fetchTotals(selectedSite.value, {days: days.value, type: searchType.value})
+    const previous = await fetchTotals(selectedSite.value, {range: previousDateRangeISO(days.value), type: searchType.value})
+    compareTotals.value = {current, previous}
+  }
   if (rows.value.length) {
     const s = summarizeRows(rows.value)
     await history.addSnapshot({
@@ -268,6 +319,16 @@ function formatPosition(p) {
             </select>
           </label>
           <label class="text-xs text-gray-600 dark:text-gray-300">
+            <span class="block mb-1">{{ $t('searchConsole.searchType') }}</span>
+            <select v-model="searchType" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
+              <option value="web">{{ $t('searchConsole.typeWeb') }}</option>
+              <option value="image">{{ $t('searchConsole.typeImage') }}</option>
+              <option value="video">{{ $t('searchConsole.typeVideo') }}</option>
+              <option value="news">{{ $t('searchConsole.typeNews') }}</option>
+              <option value="discover">{{ $t('searchConsole.typeDiscover') }}</option>
+            </select>
+          </label>
+          <label class="text-xs text-gray-600 dark:text-gray-300">
             <span class="block mb-1">{{ $t('searchConsole.dimension') }}</span>
             <select v-model="dimension" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm">
               <option value="query">{{ $t('searchConsole.queries') }}</option>
@@ -275,7 +336,12 @@ function formatPosition(p) {
               <option value="country">{{ $t('searchConsole.countries') }}</option>
               <option value="device">{{ $t('searchConsole.devices') }}</option>
               <option value="date">{{ $t('searchConsole.dates') }}</option>
+              <option value="searchAppearance">{{ $t('searchConsole.appearance') }}</option>
             </select>
+          </label>
+          <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 pb-2">
+            <input v-model="compare" type="checkbox" class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"/>
+            {{ $t('searchConsole.compare') }}
           </label>
           <button
               :disabled="loading || !selectedSite"
@@ -297,6 +363,64 @@ function formatPosition(p) {
         </div>
 
         <p v-if="error" class="text-sm text-red-500 mb-4">{{ error }}</p>
+
+        <!-- Inspection d'URL -->
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{{ $t('searchConsole.inspectTitle') }}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ $t('searchConsole.inspectHint') }}</p>
+          <label class="block text-xs text-gray-600 dark:text-gray-300 mb-1">{{ $t('searchConsole.inspectUrlLabel') }}</label>
+          <div class="flex flex-col md:flex-row gap-3">
+            <input
+                v-model="inspectionUrl"
+                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="https://www.exemple.tld/page/"
+                type="text"
+            />
+            <button
+                :disabled="loading || !inspectionUrl"
+                class="btn btn-primary text-sm shrink-0"
+                @click="handleInspect"
+            >
+              {{ loading ? $t('common.loading') : $t('searchConsole.inspect') }}
+            </button>
+          </div>
+          <div v-if="inspectionRows.length" class="mt-4">
+            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <li v-for="f in inspectionRows" :key="f.label" class="flex items-center justify-between gap-2 border border-gray-100 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm">
+                <span class="text-gray-500 dark:text-gray-400">{{ f.label }}</span>
+                <span class="font-medium text-gray-900 dark:text-white text-right truncate" :title="f.value">{{ f.value }}</span>
+              </li>
+            </ul>
+            <a
+                v-if="inspection && inspection.inspectionResultLink"
+                :href="inspection.inspectionResultLink"
+                class="inline-block mt-3 text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                rel="noopener noreferrer"
+                target="_blank"
+            >
+              {{ $t('searchConsole.inspectOpen') }} →
+            </a>
+          </div>
+        </div>
+
+        <!-- Comparaison de périodes (totaux) -->
+        <div v-if="compareTotals" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">
+          <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{{ $t('searchConsole.compareTitle') }}</p>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div v-for="m in METRICS" :key="m" class="border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $t(`searchConsole.${m === 'clicks' ? 'clicks' : m === 'impressions' ? 'impressions' : m === 'ctr' ? 'avgCtr' : 'avgPosition'}`) }}</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                {{ m === 'ctr' ? formatPercent(compareTotals.current[m]) : m === 'position' ? formatPosition(compareTotals.current[m]) : formatNumber(compareTotals.current[m]) }}
+              </p>
+              <p class="text-xs mt-0.5" :class="deltaClass(m, deltaForMetric(m))">
+                {{ formatDelta(deltaForMetric(m)) }}
+                <span class="text-gray-400">
+                  ({{ m === 'ctr' ? formatPercent(compareTotals.previous[m]) : m === 'position' ? formatPosition(compareTotals.previous[m]) : formatNumber(compareTotals.previous[m]) }})
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
 
         <!-- Rapport complet (toutes dimensions, toutes lignes) -->
         <div v-if="report" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6">

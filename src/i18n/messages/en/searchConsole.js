@@ -33,6 +33,8 @@ export default {
         seasonality: 'Clicks seasonality (by date)',
         clicksPerDay: 'clicks/day',
         clicksPerAnalysis: 'clicks/analysis',
+        coverage: '{withData}/{total} days with data',
+        lastData: 'last data:',
         dimension: 'Dimension:',
         queries: 'Queries',
         pages: 'Pages',

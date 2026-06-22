@@ -33,6 +33,8 @@ export default {
         seasonality: 'Saisonnalité des clics (par date)',
         clicksPerDay: 'clics/jour',
         clicksPerAnalysis: 'clics/analyse',
+        coverage: '{withData}/{total} jours avec données',
+        lastData: 'dernière donnée :',
         dimension: 'Dimension :',
         queries: 'Requêtes',
         pages: 'Pages',

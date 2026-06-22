@@ -2,7 +2,7 @@
 import {computed, ref, watch} from 'vue'
 import {useI18n} from '@/i18n'
 import {useSettingsStore} from '@/stores/settingsStore'
-import {buildPageFilter, deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
+import {buildPageFilter, dateRangeISO, deltaRatio, previousDateRangeISO, reportToCsv, rowsToCsv, snapshotSeries, summarizeRows, useSearchConsole} from '@/composables/useSearchConsole'
 import {useSearchConsoleHistoryStore} from '@/stores/searchConsoleHistoryStore'
 import {useSiteStore} from '@/stores/siteStore'
 import {extractDomain} from '@/utils/url'
@@ -68,21 +68,34 @@ watch(selectedSite, () => {
   pageList.value = []
 })
 
-// Série de clics par date (triée), pour la courbe de saisonnalité.
+// Série de clics par jour, densifiée sur TOUTE la fenêtre demandée (0 si pas
+// de données ce jour-là) : l'axe X couvre la vraie période, et l'on voit les
+// jours sans trafic. Itération en UTC pour rester aligné sur les clés Google.
 const dateSeries = computed(() => {
-  if (dimension.value !== 'date' || rows.value.length < 2) return []
-  return [...rows.value].sort((a, b) => (a.key < b.key ? -1 : 1)).map(r => r.clicks)
+  if (analyzedDimension.value !== 'date' || !analyzedRange.value) return []
+  const byDay = new Map(rows.value.map(r => [r.key, r.clicks]))
+  const out = []
+  const cursor = new Date(`${analyzedRange.value.startDate}T00:00:00Z`)
+  const end = new Date(`${analyzedRange.value.endDate}T00:00:00Z`)
+  while (cursor <= end) {
+    out.push(byDay.get(cursor.toISOString().slice(0, 10)) ?? 0)
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
+  }
+  return out
 })
 
-// Repères d'axes de la saisonnalité : dates (X) et plage de clics/jour (Y).
+// Repères d'axes : la fenêtre demandée (X) et la couverture réelle des données.
 const dateSeriesMeta = computed(() => {
-  if (!dateSeries.value.length) return null
-  const sorted = [...rows.value].sort((a, b) => (a.key < b.key ? -1 : 1))
+  if (dateSeries.value.length < 2 || !analyzedRange.value) return null
+  const dates = rows.value.map(r => r.key).filter(Boolean).sort()
   return {
-    start: sorted[0].key,
-    end: sorted[sorted.length - 1].key,
+    start: analyzedRange.value.startDate,
+    end: analyzedRange.value.endDate,
     min: Math.min(...dateSeries.value),
-    max: Math.max(...dateSeries.value)
+    max: Math.max(...dateSeries.value),
+    daysWithData: dates.length,
+    totalDays: dateSeries.value.length,
+    lastData: dates.length ? dates[dates.length - 1] : null
   }
 })
 
@@ -98,6 +111,8 @@ const report = ref(null)
 const compareTotals = ref(null)
 const inspection = ref(null)
 const appliedFilter = ref('')
+const analyzedRange = ref(null)
+const analyzedDimension = ref('')
 const showGuide = ref(false)
 
 const summary = computed(() => summarizeRows(rows.value))
@@ -231,6 +246,8 @@ async function handleQuery() {
   compareTotals.value = null
   const filters = activeFilters.value
   appliedFilter.value = pageFilter.value.trim()
+  analyzedRange.value = dateRangeISO(days.value)
+  analyzedDimension.value = dimension.value
   rows.value = await query(selectedSite.value, {days: days.value, dimensions: [dimension.value], all: true, type: searchType.value, filters})
   if (compare.value) {
     const current = await fetchTotals(selectedSite.value, {days: days.value, type: searchType.value, filters})
@@ -589,6 +606,10 @@ function formatPosition(p) {
             <span>{{ formatNumber(dateSeriesMeta.min) }}–{{ formatNumber(dateSeriesMeta.max) }} {{ $t('searchConsole.clicksPerDay') }}</span>
             <span>{{ fmtDate(dateSeriesMeta.end) }}</span>
           </div>
+          <p class="text-[11px] text-gray-400 mt-1">
+            {{ $t('searchConsole.coverage', {withData: formatNumber(dateSeriesMeta.daysWithData), total: formatNumber(dateSeriesMeta.totalDays)}) }}
+            <span v-if="dateSeriesMeta.lastData"> · {{ $t('searchConsole.lastData') }} {{ fmtDate(dateSeriesMeta.lastData) }}</span>
+          </p>
         </div>
 
         <!-- Clicks trend across saved snapshots -->

@@ -20,6 +20,7 @@ import StreamingOutput from '@/components/analysis/StreamingOutput.vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import PageIntro from '@/components/common/PageIntro.vue'
 import FieldLabel from '@/components/common/FieldLabel.vue'
+import CriticalCssHelper from '@/components/tools/CriticalCssHelper.vue'
 import {useI18n} from '@/i18n'
 import {useToast} from '@/composables/useToast'
 
@@ -373,6 +374,11 @@ function exportDiagnosis() {
           </div>
           <p v-else class="text-sm text-emerald-600 dark:text-emerald-400">{{ $t('resources.noBrokenUrls') }}</p>
         </template>
+      </div>
+
+      <!-- Helper CSS critique (génère des commandes, pas de backend) -->
+      <div class="mt-6">
+        <CriticalCssHelper/>
       </div>
     </main>
   </div>

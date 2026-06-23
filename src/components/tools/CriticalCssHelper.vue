@@ -4,7 +4,7 @@
  * script Node à lancer localement (outil `critical`). Aucune génération côté
  * navigateur — donc pas de backend ni de souci CORS : on fabrique le mode d'emploi.
  */
-import {computed} from 'vue'
+import {computed, ref} from 'vue'
 import {useI18n} from '@/i18n'
 import {usePersistentRef} from '@/composables/usePersistentRef'
 import {useExport} from '@/composables/useExport'
@@ -20,6 +20,9 @@ const viewport = usePersistentRef('criticalCss.viewport', 'desktop')
 const customWidth = usePersistentRef('criticalCss.width', 1300)
 const customHeight = usePersistentRef('criticalCss.height', 900)
 const inline = usePersistentRef('criticalCss.inline', false)
+// User-Agent mémorisé ; cookie volontairement NON persisté (donnée sensible).
+const userAgent = usePersistentRef('criticalCss.userAgent', '')
+const cookie = ref('')
 
 const dimensions = computed(() => {
   if (viewport.value === 'mobile') return {width: 360, height: 640}
@@ -28,7 +31,12 @@ const dimensions = computed(() => {
 })
 
 const urls = computed(() => parseUrls(urlsText.value))
-const plan = computed(() => buildCriticalCssPlan(urls.value, {...dimensions.value, inline: inline.value}))
+const plan = computed(() => buildCriticalCssPlan(urls.value, {
+  ...dimensions.value,
+  inline: inline.value,
+  userAgent: userAgent.value.trim(),
+  cookie: cookie.value.trim()
+}))
 
 async function copy(text) {
   const ok = await copyToClipboard(text)
@@ -75,6 +83,32 @@ async function copy(text) {
         {{ $t('criticalCss.inline') }}
       </label>
     </div>
+
+    <!-- Options avancées : site protégé (WAF / authentification) -->
+    <details class="mt-3">
+      <summary class="text-xs text-gray-600 dark:text-gray-300 cursor-pointer select-none">{{ $t('criticalCss.advanced') }}</summary>
+      <div class="mt-2 space-y-2">
+        <label class="block text-xs text-gray-600 dark:text-gray-300">
+          <span class="block mb-1">{{ $t('criticalCss.userAgent') }}</span>
+          <input
+              v-model="userAgent"
+              :placeholder="$t('criticalCss.userAgentPlaceholder')"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
+              type="text"
+          />
+        </label>
+        <label class="block text-xs text-gray-600 dark:text-gray-300">
+          <span class="block mb-1">{{ $t('criticalCss.cookie') }}</span>
+          <input
+              v-model="cookie"
+              :placeholder="$t('criticalCss.cookiePlaceholder')"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary-500"
+              type="text"
+          />
+          <span class="block mt-1 text-[11px] text-amber-600 dark:text-amber-400">{{ $t('criticalCss.cookieNote') }}</span>
+        </label>
+      </div>
+    </details>
 
     <p v-if="!urls.length" class="mt-4 text-xs text-gray-400">{{ $t('criticalCss.emptyHint') }}</p>
 

@@ -40,5 +40,18 @@ describe('criticalCss', () => {
             expect(plan.script).toContain('inline: true')
             expect(plan.script).toContain('.critical.html')
         })
+
+        it('injects User-Agent and Cookie into request and penthouse headers', () => {
+            const plan = buildCriticalCssPlan(['https://a.tld/'], {userAgent: 'UA-X', cookie: 'sid=42'})
+            expect(plan.script).toContain('request: {headers: {\'User-Agent\': "UA-X", \'Cookie\': "sid=42"}}')
+            expect(plan.script).toContain('userAgent: "UA-X"')
+            expect(plan.script).toContain('customPageHeaders: {\'User-Agent\': "UA-X", \'Cookie\': "sid=42"}')
+        })
+
+        it('omits header options when none are provided', () => {
+            const plan = buildCriticalCssPlan(['https://a.tld/'])
+            expect(plan.script).not.toContain('request:')
+            expect(plan.script).not.toContain('customPageHeaders')
+        })
     })
 })

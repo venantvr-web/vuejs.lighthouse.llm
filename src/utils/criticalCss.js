@@ -39,11 +39,11 @@ export function slugifyUrl(url) {
  * Construit le plan de génération : commande d'installation, script Node à
  * créer, et commande d'exécution.
  * @param {string[]} urls - URLs à traiter
- * @param {object} [opts] - { width, height, inline }
+ * @param {object} [opts] - { width, height, inline, userAgent, cookie }
  * @returns {{install: string, scriptName: string, script: string, run: string, count: number}}
  */
 export function buildCriticalCssPlan(urls = [], opts = {}) {
-    const {width = 1300, height = 900, inline = false} = opts
+    const {width = 1300, height = 900, inline = false, userAgent = '', cookie = ''} = opts
     const scriptName = 'generate-critical.mjs'
 
     const pages = urls.map(url => {
@@ -54,6 +54,27 @@ export function buildCriticalCssPlan(urls = [], opts = {}) {
     const pagesLiteral = pages
         .map(p => `  {url: ${JSON.stringify(p.url)}, out: ${JSON.stringify(p.out)}},`)
         .join('\n')
+
+    // En-têtes optionnels (site protégé par un WAF / authentification).
+    const headerEntries = []
+    if (userAgent) headerEntries.push(`'User-Agent': ${JSON.stringify(userAgent)}`)
+    if (cookie) headerEntries.push(`'Cookie': ${JSON.stringify(cookie)}`)
+    const headers = headerEntries.length ? `{${headerEntries.join(', ')}}` : ''
+
+    const genOpts = [
+        'src: url',
+        'target: out',
+        `inline: ${inline}`,
+        `width: ${width}`,
+        `height: ${height}`
+    ]
+    const penthouseOpts = ['timeout: 60000']
+    if (userAgent) penthouseOpts.push(`userAgent: ${JSON.stringify(userAgent)}`)
+    if (headers) {
+        genOpts.push(`request: {headers: ${headers}}`)
+        penthouseOpts.push(`customPageHeaders: ${headers}`)
+    }
+    genOpts.push(`penthouse: {${penthouseOpts.join(', ')}}`)
 
     const script = `import {generate} from 'critical'
 
@@ -66,12 +87,7 @@ for (const {url, out} of pages) {
   console.log('→', url)
   try {
     await generate({
-      src: url,
-      target: out,
-      inline: ${inline},
-      width: ${width},
-      height: ${height},
-      penthouse: {timeout: 60000}
+      ${genOpts.join(',\n      ')}
     })
     console.log('  ✓', out)
   } catch (err) {
